@@ -1,0 +1,23 @@
+{
+    "name": "@aperture_finance/uniswap-v3-automation-sdk",
+    "description": "SDK for Aperture's Uniswap V3 automation platform",
+    "version": "0.0.1",
+    "files": [
+        "*.ts"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Aperture-Finance/uniswap-v3-automation-sdk.git"
+    },
+    "keywords": [
+        "ethereum",
+        "uniswap",
+        "aperture"
+    ],
+    "author": "Aperture Finance <engineering@aperture.finance>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Aperture-Finance/uniswap-v3-automation-sdk/issues"
+    },
+    "homepage": "https://aperture.finance/"
+}
