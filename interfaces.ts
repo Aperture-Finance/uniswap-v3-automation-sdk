@@ -14,6 +14,10 @@ export interface TokenAmountCondition {
     zeroAmountToken: number;
 }
 
+// The price condition compares token0's price denominated in token1 against a specified threshold.
+// We follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value.
+// "Raw" means the raw uint256 integer amount used in the token contract.
+// For example, if token A uses 8 decimals, then 1 raw token A represents 10^(-8) tokens in human-readable form. 
 export interface PriceCondition {
     type: 'Price';
     // Exactly one of `gte` and `lte` should be defined; the other must be `undefined`.
