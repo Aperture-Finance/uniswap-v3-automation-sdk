@@ -1,10 +1,7 @@
 {
     "name": "@aperture_finance/uniswap-v3-automation-sdk",
     "description": "SDK for Aperture's Uniswap V3 automation platform",
-    "version": "0.0.3",
-    "files": [
-        "*.ts"
-    ],
+    "version": "0.0.4",
     "type": "module",
     "repository": {
         "type": "git",
