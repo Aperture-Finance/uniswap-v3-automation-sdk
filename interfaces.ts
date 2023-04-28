@@ -75,7 +75,7 @@ export interface RebalanceAction {
   maxGasProportion: number;
 }
 
-type Action =
+export type Action =
   | CloseAction
   | LimitOrderCloseAction
   | ReinvestAction
