@@ -1,8 +1,11 @@
 {
     "name": "@aperture_finance/uniswap-v3-automation-sdk",
     "description": "SDK for Aperture's Uniswap V3 automation platform",
-    "version": "0.0.5",
-    "type": "module",
+    "version": "0.0.6",
+    "scripts": {
+        "build": "tsc --build",
+        "clean": "tsc --build --clean"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/Aperture-Finance/uniswap-v3-automation-sdk.git"
@@ -20,5 +23,8 @@
     "homepage": "https://aperture.finance/",
     "devDependencies": {
         "prettier": "^2.8.8"
+    },
+    "dependencies": {
+        "ethers": "^5.7.2"
     }
 }
