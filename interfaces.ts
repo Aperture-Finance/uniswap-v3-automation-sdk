@@ -135,8 +135,10 @@ export interface ListTriggerResponse {
 }
 
 export interface DeleteTriggerRequest {
-  ownerAddr: string;
-  chainId: number;
-  taskId: number;
+  payload: {
+    ownerAddr: string;
+    chainId: number;
+    taskId: number;
+  };
   payloadSignature: string;
 }
