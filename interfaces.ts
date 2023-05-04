@@ -1,6 +1,9 @@
-export interface TokenInfo {
+export interface TokenAmount {
+  // The address to the ERC20 token.
   address: string;
-  amount?: number;
+  // The raw amount, which is the human readable format multiplied by the token
+  // decimal.
+  rawAmount?: string;
 }
 
 export interface TimeCondition {
@@ -55,8 +58,8 @@ export interface CloseAction {
 // No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.
 export interface LimitOrderCloseAction {
   type: 'LimitOrderClose';
-  inputToken: TokenInfo;
-  outputToken: TokenInfo;
+  inputToken: TokenAmount;
+  outputToken: TokenAmount;
   feeTier: number;
   // See above.
   maxGasProportion: number;
@@ -130,9 +133,8 @@ export enum Status {
 }
 
 export interface LimitOrderInfo {
-  isLimitOrder: boolean;
-  inputToken: TokenInfo;
-  outputToken: TokenInfo;
+  inputToken: TokenAmount;
+  outputToken: TokenAmount;
   earnedFeeInputToken: number;
   earnedFeeOutputToken: number;
   feeTier: number;
