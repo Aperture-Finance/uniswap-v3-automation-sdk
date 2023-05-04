@@ -1,3 +1,11 @@
+export interface TokenAmount {
+  // The address to the ERC20 token.
+  address: string;
+  // The raw amount, which is the human readable format multiplied by the token
+  // decimal.
+  rawAmount: string;
+}
+
 export interface TimeCondition {
   type: 'Time';
   // The condition is considered met if the current time meets or exceeds `timeAfterEpochSec`.
@@ -50,6 +58,9 @@ export interface CloseAction {
 // No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.
 export interface LimitOrderCloseAction {
   type: 'LimitOrderClose';
+  inputTokenAmount: TokenAmount;
+  outputTokenAddr: string;
+  feeTier: number;
   // See above.
   maxGasProportion: number;
 }
@@ -121,13 +132,22 @@ export enum Status {
   INVALID = 'INVALID',
 }
 
+export interface LimitOrderInfo {
+  inputTokenAmount: TokenAmount;
+  outputTokenAmount: TokenAmount;
+  // The amount of fees in input token.
+  earnedFeeInputToken: string;
+  // The amount of fees in output token.
+  earnedFeeOutputToken: string;
+  feeTier: number;
+}
+
 export interface TriggerItem {
   taskId: number;
   nftId: number;
   status: Status;
   lastFailedMessage?: string;
-  earnedFeeAmount?: number;
-  earnedFeeTokenAddr?: string;
+  limitOrderInfo?: LimitOrderInfo;
 }
 
 export interface ListTriggerResponse {
