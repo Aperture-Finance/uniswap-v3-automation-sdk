@@ -3,7 +3,7 @@ export interface TokenAmount {
   address: string;
   // The raw amount, which is the human readable format multiplied by the token
   // decimal.
-  rawAmount?: string;
+  rawAmount: string;
 }
 
 export interface TimeCondition {
@@ -59,7 +59,7 @@ export interface CloseAction {
 export interface LimitOrderCloseAction {
   type: 'LimitOrderClose';
   inputToken: TokenAmount;
-  outputToken: TokenAmount;
+  outputTokenAddr: string;
   feeTier: number;
   // See above.
   maxGasProportion: number;
