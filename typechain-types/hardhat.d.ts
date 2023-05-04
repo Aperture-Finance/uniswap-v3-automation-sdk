@@ -17,6 +17,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV3SwapCallback__factory>;
     getContractFactory(
+      name: "IUniswapV3Factory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV3Factory__factory>;
+    getContractFactory(
       name: "IUniswapV3Pool",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV3Pool__factory>;
@@ -134,6 +138,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV3SwapCallback>;
+    getContractAt(
+      name: "IUniswapV3Factory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV3Factory>;
     getContractAt(
       name: "IUniswapV3Pool",
       address: string,
