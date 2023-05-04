@@ -1,3 +1,8 @@
+export interface TokenInfo {
+  address: string;
+  amount?: number;
+}
+
 export interface TimeCondition {
   type: 'Time';
   // The condition is considered met if the current time meets or exceeds `timeAfterEpochSec`.
@@ -50,6 +55,9 @@ export interface CloseAction {
 // No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.
 export interface LimitOrderCloseAction {
   type: 'LimitOrderClose';
+  inputToken: TokenInfo;
+  outputToken: TokenInfo;
+  feeTier: number;
   // See above.
   maxGasProportion: number;
 }
@@ -121,13 +129,21 @@ export enum Status {
   INVALID = 'INVALID',
 }
 
+export interface LimitOrderInfo {
+  isLimitOrder: boolean;
+  inputToken: TokenInfo;
+  outputToken: TokenInfo;
+  earnedFeeInputToken: number;
+  earnedFeeOutputToken: number;
+  feeTier: number;
+}
+
 export interface TriggerItem {
   taskId: number;
   nftId: number;
   status: Status;
   lastFailedMessage?: string;
-  earnedFeeAmount?: number;
-  earnedFeeTokenAddr?: string;
+  limitOrderInfo?: LimitOrderInfo;
 }
 
 export interface ListTriggerResponse {
