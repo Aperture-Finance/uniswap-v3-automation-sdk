@@ -135,8 +135,10 @@ export enum Status {
 export interface LimitOrderInfo {
   inputToken: TokenAmount;
   outputToken: TokenAmount;
-  earnedFeeInputToken: number;
-  earnedFeeOutputToken: number;
+  // The amount of fees in input token.
+  earnedFeeInputToken: string;
+  // The amount of fees in output token.
+  earnedFeeOutputToken: string;
   feeTier: number;
 }
 
