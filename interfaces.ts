@@ -58,7 +58,7 @@ export interface CloseAction {
 // No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.
 export interface LimitOrderCloseAction {
   type: 'LimitOrderClose';
-  inputToken: TokenAmount;
+  inputTokenAmount: TokenAmount;
   outputTokenAddr: string;
   feeTier: number;
   // See above.
