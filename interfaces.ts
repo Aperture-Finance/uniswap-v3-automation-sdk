@@ -115,8 +115,21 @@ export interface CreateTriggerRequest {
   permitInfo?: PermitInfo;
 }
 
+/**
+ * Interface for structured response with `statusCode` and`headers`
+ * Works with HTTP API integration Payload Format version 2.0
+ * @see - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
+ */
 export interface GenericResponse {
-  body: JSON;
+  statusCode?: number | undefined;
+  headers?:
+    | {
+        [header: string]: boolean | number | string;
+      }
+    | undefined;
+  body?: string | undefined;
+  isBase64Encoded?: boolean | undefined;
+  cookies?: string[] | undefined;
 }
 
 export interface ListTriggerRequest {
