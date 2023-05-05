@@ -1,1 +1,25 @@
+# Dependency directories
 node_modules/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Cache
+cache/
+
+# Test coverage reports
+coverage/
+
+# Others
+.DS_Store
+.vscode
+.idea
