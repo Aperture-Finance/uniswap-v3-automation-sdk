@@ -143,6 +143,7 @@ export enum Status {
   STARTED = 'STARTED',
   COMPLETED = 'COMPLETED',
   INVALID = 'INVALID',
+  DELETED = 'DELETED',
 }
 
 export interface LimitOrderInfo {
