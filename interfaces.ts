@@ -108,6 +108,17 @@ export interface PermitInfo {
   deadline: number;
 }
 
+export interface CheckPositionPermitRequest {
+  chainId: number;
+  tokenId: number;
+}
+
+export interface UpdatePositionPermitRequest {
+  chainId: number;
+  tokenId: number;
+  permitInfo: PermitInfo;
+}
+
 export interface CreateTriggerRequest {
   payload: Payload;
   payloadSignature: string;
