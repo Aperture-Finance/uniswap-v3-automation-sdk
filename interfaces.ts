@@ -92,13 +92,21 @@ export type Action =
   | ReinvestAction
   | RebalanceAction;
 
-export interface Payload {
+export interface CreateTriggerPayload {
   ownerAddr: string;
   chainId: number;
-  nftId: number;
+  nftId: string;
   condition: Condition;
   action: Action;
 }
+
+export interface DeleteTriggerPayload {
+  ownerAddr: string;
+  chainId: number;
+  taskId: number;
+}
+
+export type Payload = CreateTriggerPayload | DeleteTriggerPayload;
 
 // See https://eips.ethereum.org/EIPS/eip-4494 for information on the "permit" approval flow.
 export interface PermitInfo {
@@ -110,17 +118,17 @@ export interface PermitInfo {
 
 export interface CheckPositionPermitRequest {
   chainId: number;
-  tokenId: number;
+  tokenId: string;
 }
 
 export interface UpdatePositionPermitRequest {
   chainId: number;
-  tokenId: number;
+  tokenId: string;
   permitInfo: PermitInfo;
 }
 
 export interface CreateTriggerRequest {
-  payload: Payload;
+  payload: CreateTriggerPayload;
   payloadSignature: string;
   // If Aperture doesn't already have authority over the position specified in `payload`, then `permitInfo` should be obtained from the user and populated here.
   permitInfo?: PermitInfo;
@@ -169,7 +177,7 @@ export interface LimitOrderInfo {
 
 export interface TriggerItem {
   taskId: number;
-  nftId: number;
+  nftId: string;
   status: Status;
   lastFailedMessage?: string;
   limitOrderInfo?: LimitOrderInfo;
@@ -180,10 +188,6 @@ export interface ListTriggerResponse {
 }
 
 export interface DeleteTriggerRequest {
-  payload: {
-    ownerAddr: string;
-    chainId: number;
-    taskId: number;
-  };
+  payload: DeleteTriggerPayload;
   payloadSignature: string;
 }
