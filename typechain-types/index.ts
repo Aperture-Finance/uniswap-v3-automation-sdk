@@ -10,6 +10,8 @@ export type { src };
 export * as factories from "./factories";
 export type { IUniswapV3SwapCallback } from "./@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback";
 export { IUniswapV3SwapCallback__factory } from "./factories/@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback__factory";
+export type { IUniswapV3Factory } from "./@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory";
+export { IUniswapV3Factory__factory } from "./factories/@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory__factory";
 export type { IUniswapV3Pool } from "./@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool";
 export { IUniswapV3Pool__factory } from "./factories/@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool__factory";
 export type { IUniswapV3PoolActions } from "./@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolActions";
