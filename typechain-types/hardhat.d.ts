@@ -17,10 +17,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV3SwapCallback__factory>;
     getContractFactory(
-      name: "IUniswapV3Factory",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV3Factory__factory>;
-    getContractFactory(
       name: "IUniswapV3Pool",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV3Pool__factory>;
@@ -89,6 +85,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
+      name: "FixedPointMathLib",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FixedPointMathLib__factory>;
+    getContractFactory(
+      name: "SafeTransferLib",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SafeTransferLib__factory>;
+    getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20__factory>;
@@ -125,6 +129,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Errors__factory>;
     getContractFactory(
+      name: "LiquidityAmounts",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LiquidityAmounts__factory>;
+    getContractFactory(
       name: "OptimalSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
@@ -138,11 +146,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV3SwapCallback>;
-    getContractAt(
-      name: "IUniswapV3Factory",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV3Factory>;
     getContractAt(
       name: "IUniswapV3Pool",
       address: string,
@@ -229,6 +232,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
     getContractAt(
+      name: "FixedPointMathLib",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FixedPointMathLib>;
+    getContractAt(
+      name: "SafeTransferLib",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SafeTransferLib>;
+    getContractAt(
       name: "ERC20",
       address: string,
       signer?: ethers.Signer
@@ -273,6 +286,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Errors>;
+    getContractAt(
+      name: "LiquidityAmounts",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LiquidityAmounts>;
     getContractAt(
       name: "OptimalSwap",
       address: string,

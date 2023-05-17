@@ -9,7 +9,7 @@ import type { Payments, PaymentsInterface } from "../../../src/base/Payments";
 const _abi = [
   {
     inputs: [],
-    name: "InsufficientETH",
+    name: "MismatchETH",
     type: "error",
   },
   {
