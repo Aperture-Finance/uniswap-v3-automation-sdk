@@ -12,7 +12,7 @@ import type {
 const _abi = [
   {
     inputs: [],
-    name: "InsufficientETH",
+    name: "MismatchETH",
     type: "error",
   },
   {

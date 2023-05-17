@@ -673,10 +673,11 @@ export interface UniV3Automan extends BaseContract {
       amount1Desired: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, boolean] & {
+      [BigNumber, BigNumber, boolean, BigNumber] & {
         amountIn: BigNumber;
         amountOut: BigNumber;
         zeroForOne: boolean;
+        sqrtPriceX96: BigNumber;
       }
     >;
 
@@ -881,10 +882,11 @@ export interface UniV3Automan extends BaseContract {
     amount1Desired: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber, boolean] & {
+    [BigNumber, BigNumber, boolean, BigNumber] & {
       amountIn: BigNumber;
       amountOut: BigNumber;
       zeroForOne: boolean;
+      sqrtPriceX96: BigNumber;
     }
   >;
 
@@ -1093,10 +1095,11 @@ export interface UniV3Automan extends BaseContract {
       amount1Desired: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, boolean] & {
+      [BigNumber, BigNumber, boolean, BigNumber] & {
         amountIn: BigNumber;
         amountOut: BigNumber;
         zeroForOne: boolean;
+        sqrtPriceX96: BigNumber;
       }
     >;
 

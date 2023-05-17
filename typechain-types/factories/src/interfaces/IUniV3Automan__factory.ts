@@ -462,6 +462,11 @@ const _abi = [
         name: "zeroForOne",
         type: "bool",
       },
+      {
+        internalType: "uint160",
+        name: "sqrtPriceX96",
+        type: "uint160",
+      },
     ],
     stateMutability: "view",
     type: "function",
