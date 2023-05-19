@@ -1,8 +1,7 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import {
   CreateTriggerRequest,
   DeleteTriggerRequest,
-  GenericResponse,
   ListTriggerRequest,
   ListTriggerResponse,
 } from './interfaces';
