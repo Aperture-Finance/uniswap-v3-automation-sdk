@@ -210,20 +210,6 @@ export const CreateTriggerRequestSchema = z.object({
 });
 export type CreateTriggerRequest = z.infer<typeof CreateTriggerRequestSchema>;
 
-/**
- * Interface for structured response with `statusCode` and`headers`
- * Works with HTTP API integration Payload Format version 2.0
- * @see - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html
- */
-export const GenericResponseSchema = z.object({
-  statusCode: z.number().optional(),
-  headers: z.record(z.union([z.boolean(), z.number(), z.string()])).optional(),
-  body: z.string().optional(),
-  isBase64Encoded: z.boolean().optional(),
-  cookies: z.array(z.string()).optional(),
-});
-export type GenericResponse = z.infer<typeof GenericResponseSchema>;
-
 export const ListTriggerRequestSchema = z.object({
   ownerAddr: z.string(),
   chainId: ApertureSupportedChainIdEnum,
