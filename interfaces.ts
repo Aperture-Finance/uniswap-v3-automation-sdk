@@ -246,6 +246,13 @@ export type ListTriggerResponse = z.infer<typeof ListTriggerResponseSchema>;
 
 export const DeleteTriggerRequestSchema = z.object({
   payload: DeleteTriggerPayloadSchema,
-  payloadSignature: z.string().nonempty()
+  payloadSignature: z.string().nonempty(),
 });
 export type DeleteTriggerRequest = z.infer<typeof DeleteTriggerRequestSchema>;
+
+export const APIEventSchema = z.object({
+  queryStringParameters: z.object({
+    params: z.string().nonempty(),
+  }),
+});
+export type APIEvent = z.infer<typeof APIEventSchema>;
