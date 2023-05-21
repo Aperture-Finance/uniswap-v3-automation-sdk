@@ -16,7 +16,7 @@ export class AutomanClient {
       params: request,
     });
 
-    return await axios({
+    return axios({
       method: method,
       url: url.toString(),
       params: queryParams,
