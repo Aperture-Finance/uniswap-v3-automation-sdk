@@ -10,22 +10,20 @@ export enum ApertureSupportedChainId {
 
 const ApertureSupportedChainIdEnum = z.nativeEnum(ApertureSupportedChainId);
 
-export const ConditionTypeString = {
-  Time: 'Time',
-  TokenAmount: 'TokenAmount',
-  Price: 'Price',
-  AccruedFees: 'AccruedFees',
-} as const;
-const ConditionTypeEnum = z.nativeEnum(ConditionTypeString);
+export const ConditionTypeEnum = z.enum([
+  'Time',
+  'TokenAmount',
+  'Price',
+  'AccruedFees',
+]);
 export type ConditionTypeEnum = z.infer<typeof ConditionTypeEnum>;
 
-export const ActionTypeString = {
-  Close: 'Close',
-  LimitOrderClose: 'LimitOrderClose',
-  Reinvest: 'Reinvest',
-  Rebalance: 'Rebalance',
-} as const;
-const ActionTypeEnum = z.nativeEnum(ActionTypeString);
+export const ActionTypeEnum = z.enum([
+  'Close',
+  'LimitOrderClose',
+  'Reinvest',
+  'Rebalance',
+]);
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
 
 // TODO: Create a constant for the maximum allowed `maxGasProportion` that matches Automan setting and use it here.
@@ -33,14 +31,13 @@ const MaxGasProportionSchema = z.number().positive().lte(0.5);
 
 const SlippageSchema = z.number().nonnegative().lte(1);
 
-export const TriggerStatusString = {
-  CREATED: 'CREATED',
-  STARTED: 'STARTED',
-  COMPLETED: 'COMPLETED',
-  INVALID: 'INVALID',
-  DELETED: 'DELETED',
-} as const;
-const TriggerStatusEnum = z.nativeEnum(TriggerStatusString);
+export const TriggerStatusEnum = z.enum([
+  'CREATED',
+  'STARTED',
+  'COMPLETED',
+  'INVALID',
+  'DELETED',
+]);
 export type TriggerStatusEnum = z.infer<typeof TriggerStatusEnum>;
 
 export const TokenAmountSchema = z.object({
@@ -53,7 +50,7 @@ export const TokenAmountSchema = z.object({
 export type TokenAmount = z.infer<typeof TokenAmountSchema>;
 
 export const TimeConditionSchema = z.object({
-  type: z.literal(ConditionTypeString.Time),
+  type: z.literal(ConditionTypeEnum.enum.Time),
   // The condition is considered met if the current time meets or exceeds `timeAfterEpochSec`.
   // This timestamp threshold is specified as the number of seconds since UNIX epoch.
   timeAfterEpochSec: z.number().int().positive(),
@@ -61,7 +58,7 @@ export const TimeConditionSchema = z.object({
 export type TimeCondition = z.infer<typeof TimeConditionSchema>;
 
 export const TokenAmountConditionSchema = z.object({
-  type: z.literal(ConditionTypeString.TokenAmount),
+  type: z.literal(ConditionTypeEnum.enum.TokenAmount),
   // The condition is considered met if the specified token has a zero (principal) amount in the position.
   // `zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, respectively.
   // For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the position is exactly zero.
@@ -75,7 +72,7 @@ export type TokenAmountCondition = z.infer<typeof TokenAmountConditionSchema>;
 // "Raw" means the raw uint256 integer amount used in the token contract.
 // For example, if token A uses 8 decimals, then 1 raw token A represents 10^(-8) tokens in human-readable form.
 export const PriceConditionSchema = z.object({
-  type: z.literal(ConditionTypeString.Price),
+  type: z.literal(ConditionTypeEnum.enum.Price),
   // Exactly one of `gte` and `lte` should be defined; the other must be `undefined`.
   // The defined float value represents the price threshold to compare against.
   // If `gte` is set, the condition is considered met if the current price >= `gte`.
@@ -92,12 +89,12 @@ export type PriceCondition = z.infer<typeof PriceConditionSchema>;
 // The accrued-fees condition specifies a threshold in the form of the ratio between the value of accrued fees and that of principal tokens in a specific liquidity position.
 // This condition serves "auto-compound" which triggers a "reinvest" action whenever the accrued fees meet the threshold specified in this condition.
 export const AccruedFeesConditionSchema = z.object({
-  type: z.literal(ConditionTypeString.AccruedFees),
+  type: z.literal(ConditionTypeEnum.enum.AccruedFees),
   feeToPrincipalRatioThreshold: z.number().positive(),
 });
 export type AccruedFeesCondition = z.infer<typeof AccruedFeesConditionSchema>;
 
-export const ConditionSchema = z.union([
+export const ConditionSchema = z.discriminatedUnion('type', [
   TimeConditionSchema,
   TokenAmountConditionSchema,
   PriceConditionSchema,
@@ -107,7 +104,7 @@ export type Condition = z.infer<typeof ConditionSchema>;
 
 // Close a position, and send both tokens (principal and collected fees) to the position owner.
 export const CloseActionSchema = z.object({
-  type: z.literal(ActionTypeString.Close),
+  type: z.literal(ActionTypeEnum.enum.Close),
   // A number between 0 and 1, inclusive. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.
   slippage: SlippageSchema,
   // Aperture deducts tokens from the position to cover the cost of performing this action (gas).
@@ -121,7 +118,7 @@ export type CloseAction = z.infer<typeof CloseActionSchema>;
 // Same as 'Close' but the position serves a limit order placed on Aperture.
 // No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.
 export const LimitOrderCloseActionSchema = z.object({
-  type: z.literal(ActionTypeString.LimitOrderClose),
+  type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
   inputTokenAmount: TokenAmountSchema,
   outputTokenAddr: z.string().nonempty(),
   feeTier: z.nativeEnum(FeeAmount),
@@ -131,7 +128,7 @@ export type LimitOrderCloseAction = z.infer<typeof LimitOrderCloseActionSchema>;
 
 // Claims accrued fees, swap them to the same ratio as the principal amounts, and add liquidity.
 export const ReinvestActionSchema = z.object({
-  type: z.literal(ActionTypeString.Reinvest),
+  type: z.literal(ActionTypeEnum.enum.Reinvest),
   slippage: SlippageSchema,
   maxGasProportion: MaxGasProportionSchema,
 });
@@ -139,7 +136,7 @@ export type ReinvestAction = z.infer<typeof ReinvestActionSchema>;
 
 // Close a position, and swap tokens (principal and collected fees) to the ratio required by the specified new price range, and open a position with that price range.
 export const RebalanceActionSchema = z.object({
-  type: z.literal(ActionTypeString.Rebalance),
+  type: z.literal(ActionTypeEnum.enum.Rebalance),
   tickLower: z.number().int(),
   tickUpper: z.number().int(),
   slippage: SlippageSchema,
@@ -147,7 +144,7 @@ export const RebalanceActionSchema = z.object({
 });
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 
-export const ActionSchema = z.union([
+export const ActionSchema = z.discriminatedUnion('type', [
   CloseActionSchema,
   LimitOrderCloseActionSchema,
   ReinvestActionSchema,
