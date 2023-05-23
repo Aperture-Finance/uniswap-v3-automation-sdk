@@ -1,0 +1,58 @@
+name: CI
+
+on: [pull_request] # we want the workflow to trigger on commits to PRs only
+
+jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
+  lint: # Lint codebase.
+    runs-on: ubuntu-latest # host's operating system
+    steps: # each job consists of 1+ steps
+      - name: Checkout commit # download the code from triggering commit
+        uses: actions/checkout@v3
+
+      - name: Set Node.js 16.x # Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+
+      - name: Install dependencies 📦
+        run: yarn install
+
+      - name: Run linter
+        run: yarn lint
+
+  prettier: # Prettify codebase.
+    runs-on: ubuntu-latest # host's operating system
+    steps: # each job consists of 1+ steps
+      - name: Checkout commit # download the code from triggering commit
+        uses: actions/checkout@v3
+
+      - name: Set Node.js 16.x # Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+
+      - name: Install dependencies 📦
+        run: yarn install
+
+      - name: Run prettier check
+        run: yarn prettier
+
+  test: # Run tests.
+    runs-on: ubuntu-latest # host's operating system
+    steps: # each job consists of 1+ steps
+      - name: Checkout commit # download the code from triggering commit
+        uses: actions/checkout@v3
+
+      - name: Set Node.js 16.x # Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+
+      - name: Install dependencies 📦
+        run: yarn install
+
+      - name: Run tests
+        run: yarn test
