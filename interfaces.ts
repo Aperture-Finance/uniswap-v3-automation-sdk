@@ -41,57 +41,94 @@ export const TriggerStatusEnum = z.enum([
 export type TriggerStatusEnum = z.infer<typeof TriggerStatusEnum>;
 
 export const TokenAmountSchema = z.object({
-  // The ERC-20 token contract address.
-  address: z.string().nonempty(),
-  // The raw amount, which is the human readable format multiplied by the token
-  // decimal.
-  rawAmount: z.string().nonempty(),
+  address: z.string().nonempty().describe('The ERC-20 token contract address.'),
+  rawAmount: z
+    .string()
+    .nonempty()
+    .describe(
+      'The raw amount, which is the human-readable format multiplied by the token decimal.',
+    ),
 });
 export type TokenAmount = z.infer<typeof TokenAmountSchema>;
 
 export const TimeConditionSchema = z.object({
   type: z.literal(ConditionTypeEnum.enum.Time),
-  // The condition is considered met if the current time meets or exceeds `timeAfterEpochSec`.
-  // This timestamp threshold is specified as the number of seconds since UNIX epoch.
-  timeAfterEpochSec: z.number().int().positive(),
+  timeAfterEpochSec: z
+    .number()
+    .int()
+    .positive()
+    .describe(
+      'This timestamp threshold is specified as the number of seconds since UNIX epoch. ' +
+        'The condition is considered met if the current time meets or exceeds `timeAfterEpochSec`.',
+    ),
 });
 export type TimeCondition = z.infer<typeof TimeConditionSchema>;
 
 export const TokenAmountConditionSchema = z.object({
   type: z.literal(ConditionTypeEnum.enum.TokenAmount),
-  // The condition is considered met if the specified token has a zero (principal) amount in the position.
-  // `zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, respectively.
-  // For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the position is exactly zero.
-  // Note that only the principal amount is considered; accrued fees are not.
-  zeroAmountToken: z.union([z.literal(0), z.literal(1)]),
+  zeroAmountToken: z
+    .union([z.literal(0), z.literal(1)])
+    .describe(
+      'The condition is considered met if the specified token has a zero (principal) amount in the position. ' +
+        '`zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, respectively. ' +
+        'For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the position is exactly zero. ' +
+        'Note that only the principal amount is considered; accrued fees are not.',
+    ),
 });
 export type TokenAmountCondition = z.infer<typeof TokenAmountConditionSchema>;
 
-// The price condition compares token0's price denominated in token1 against a specified threshold.
-// We follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value.
-// "Raw" means the raw uint256 integer amount used in the token contract.
-// For example, if token A uses 8 decimals, then 1 raw token A represents 10^(-8) tokens in human-readable form.
-export const PriceConditionSchema = z.object({
-  type: z.literal(ConditionTypeEnum.enum.Price),
-  // Exactly one of `gte` and `lte` should be defined; the other must be `undefined`.
-  // The defined float value represents the price threshold to compare against.
-  // If `gte` is set, the condition is considered met if the current price >= `gte`.
-  // Otherwise, the condition is considered met if the current price <= `lte`.
-  gte: z.number().positive().optional(),
-  lte: z.number().positive().optional(),
-  // If set, the condition is only considered met if the price remains satisfaction the threshold requirement for at least the past `durationSec` seconds.
-  // For example, if `gte` is 10 and `durationSec` is set to 3600, then the condition is only considered met if the price remains >= 10 for the entire past hour.
-  // The historical price feed used is Coingecko.
-  durationSec: z.number().int().positive().optional(),
-});
+export const PriceConditionSchema = z
+  .object({
+    type: z
+      .literal(ConditionTypeEnum.enum.Price)
+      .describe(
+        'Exactly one of `gte` and `lte` should be defined; the other must be `undefined`. ' +
+          'The defined float value represents the price threshold to compare against.',
+      ),
+    gte: z
+      .number()
+      .positive()
+      .optional()
+      .describe(
+        'If `gte` is set, the condition is considered met if the current price >= `gte`.',
+      ),
+    lte: z
+      .number()
+      .positive()
+      .optional()
+      .describe(
+        'If `lte` is set, the condition is considered met if the current price <= `lte`.',
+      ),
+    durationSec: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe(
+        'If set, the condition is only considered met if the price remains satisfaction the threshold requirement' +
+          ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
+          'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
+          'price feed used is Coingecko.',
+      ),
+  })
+  .describe(
+    "The price condition compares token0's price denominated in token1 against a specified threshold. " +
+      'We follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
+      '"Raw" means the raw uint256 integer amount used in the token contract. For example, if token A uses 8 decimals, ' +
+      'then 1 raw token A represents 10^(-8) tokens in human-readable form.',
+  );
 export type PriceCondition = z.infer<typeof PriceConditionSchema>;
 
-// The accrued-fees condition specifies a threshold in the form of the ratio between the value of accrued fees and that of principal tokens in a specific liquidity position.
-// This condition serves "auto-compound" which triggers a "reinvest" action whenever the accrued fees meet the threshold specified in this condition.
-export const AccruedFeesConditionSchema = z.object({
-  type: z.literal(ConditionTypeEnum.enum.AccruedFees),
-  feeToPrincipalRatioThreshold: z.number().positive(),
-});
+export const AccruedFeesConditionSchema = z
+  .object({
+    type: z.literal(ConditionTypeEnum.enum.AccruedFees),
+    feeToPrincipalRatioThreshold: z.number().positive(),
+  })
+  .describe(
+    'The accrued-fees condition specifies a threshold in the form of the ratio between the value of accrued ' +
+      'fees and that of principal tokens in a specific liquidity position. This condition serves "auto-compound" which ' +
+      'triggers a "reinvest" action whenever the accrued fees meet the threshold specified in this condition.',
+  );
 export type AccruedFeesCondition = z.infer<typeof AccruedFeesConditionSchema>;
 
 export const ConditionSchema = z.discriminatedUnion('type', [
@@ -102,46 +139,62 @@ export const ConditionSchema = z.discriminatedUnion('type', [
 ]);
 export type Condition = z.infer<typeof ConditionSchema>;
 
-// Close a position, and send both tokens (principal and collected fees) to the position owner.
-export const CloseActionSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.Close),
-  // A number between 0 and 1, inclusive. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.
-  slippage: SlippageSchema,
-  // Aperture deducts tokens from the position to cover the cost of performing this action (gas).
-  // The `maxGasProportion` value represents the largest allowed proportion of the position value to be deducted.
-  // For example, a `maxGasProportion` of 0.10 represents 10% of the position, i.e. no more than 10% of the position's tokens (principal and accrued fees) may be deducted.
-  // If network gas price is high and the deduction would exceed the specified ceiling, then the action will not be triggered.
-  maxGasProportion: MaxGasProportionSchema,
-});
+export const CloseActionSchema = z
+  .object({
+    type: z.literal(ActionTypeEnum.enum.Close),
+    slippage: SlippageSchema.describe(
+      'A number between 0 and 1, inclusive. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.',
+    ),
+    maxGasProportion: MaxGasProportionSchema.describe(
+      'Aperture deducts tokens from the position to cover the cost of performing this action (gas). ' +
+        'The `maxGasProportion` value represents the largest allowed proportion of the position value to be deducted. ' +
+        'For example, a `maxGasProportion` of 0.10 represents 10% of the position, i.e. no more than 10% of the ' +
+        "position's tokens (principal and accrued fees) may be deducted. If network gas price is high and the deduction " +
+        'would exceed the specified ceiling, then the action will not be triggered.',
+    ),
+  })
+  .describe(
+    'Close a position, and send both tokens (principal and collected fees) to the position owner.',
+  );
 export type CloseAction = z.infer<typeof CloseActionSchema>;
 
-// Same as 'Close' but the position serves a limit order placed on Aperture.
-// No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.
-export const LimitOrderCloseActionSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
-  inputTokenAmount: TokenAmountSchema,
-  outputTokenAddr: z.string().nonempty(),
-  feeTier: z.nativeEnum(FeeAmount),
-  maxGasProportion: MaxGasProportionSchema,
-});
+export const LimitOrderCloseActionSchema = z
+  .object({
+    type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
+    inputTokenAmount: TokenAmountSchema,
+    outputTokenAddr: z.string().nonempty(),
+    feeTier: z.nativeEnum(FeeAmount),
+    maxGasProportion: MaxGasProportionSchema,
+  })
+  .describe(
+    "Same as 'Close' but the position serves a limit order placed on Aperture. " +
+      'No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.',
+  );
 export type LimitOrderCloseAction = z.infer<typeof LimitOrderCloseActionSchema>;
 
-// Claims accrued fees, swap them to the same ratio as the principal amounts, and add liquidity.
-export const ReinvestActionSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.Reinvest),
-  slippage: SlippageSchema,
-  maxGasProportion: MaxGasProportionSchema,
-});
+export const ReinvestActionSchema = z
+  .object({
+    type: z.literal(ActionTypeEnum.enum.Reinvest),
+    slippage: SlippageSchema,
+    maxGasProportion: MaxGasProportionSchema,
+  })
+  .describe(
+    'Claims accrued fees, swap them to the same ratio as the principal amounts, and add liquidity.',
+  );
 export type ReinvestAction = z.infer<typeof ReinvestActionSchema>;
 
-// Close a position, and swap tokens (principal and collected fees) to the ratio required by the specified new price range, and open a position with that price range.
-export const RebalanceActionSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.Rebalance),
-  tickLower: z.number().int(),
-  tickUpper: z.number().int(),
-  slippage: SlippageSchema,
-  maxGasProportion: MaxGasProportionSchema,
-});
+export const RebalanceActionSchema = z
+  .object({
+    type: z.literal(ActionTypeEnum.enum.Rebalance),
+    tickLower: z.number().int(),
+    tickUpper: z.number().int(),
+    slippage: SlippageSchema,
+    maxGasProportion: MaxGasProportionSchema,
+  })
+  .describe(
+    'Close a position, and swap tokens (principal and collected fees) to the ratio required by the ' +
+      'specified new price range, and open a position with that price range.',
+  );
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 
 export const ActionSchema = z.discriminatedUnion('type', [
@@ -174,13 +227,19 @@ export const PayloadSchema = z.union([
 ]);
 export type Payload = z.infer<typeof PayloadSchema>;
 
-// See https://eips.ethereum.org/EIPS/eip-4494 for information on the "permit" approval flow.
-export const PermitInfoSchema = z.object({
-  // A raw signature that can be generated by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.
-  signature: z.string().nonempty(),
-  // Unix timestamp in seconds.
-  deadline: z.number().int().positive(),
-});
+export const PermitInfoSchema = z
+  .object({
+    signature: z
+      .string()
+      .nonempty()
+      .describe(
+        'A raw signature that can be generated by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
+      ),
+    deadline: z.string().nonempty().describe('Unix timestamp in seconds.'),
+  })
+  .describe(
+    'See https://eips.ethereum.org/EIPS/eip-4494 for information on the "permit" approval flow.',
+  );
 export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
 export const CheckPositionPermitRequestSchema = z.object({
@@ -203,8 +262,10 @@ export type UpdatePositionPermitRequest = z.infer<
 export const CreateTriggerRequestSchema = z.object({
   payload: CreateTriggerPayloadSchema,
   payloadSignature: z.string().nonempty(),
-  // If Aperture doesn't already have authority over the position specified in `payload`, then `permitInfo` should be obtained from the user and populated here.
-  permitInfo: PermitInfoSchema.optional(),
+  permitInfo: PermitInfoSchema.optional().describe(
+    "If Aperture doesn't already have authority over the position, " +
+      'then `permitInfo` should be obtained from the user and populated here.',
+  ),
 });
 export type CreateTriggerRequest = z.infer<typeof CreateTriggerRequestSchema>;
 
@@ -218,10 +279,12 @@ export type ListTriggerRequest = z.infer<typeof ListTriggerRequestSchema>;
 export const LimitOrderInfoSchema = z.object({
   inputTokenAmount: TokenAmountSchema,
   outputTokenAmount: TokenAmountSchema,
-  // The amount of fees in input token.
-  earnedFeeInputToken: z.string(),
-  // The amount of fees in output token.
-  earnedFeeOutputToken: z.string(),
+  earnedFeeInputToken: z
+    .string()
+    .describe('The amount of fees in input token.'),
+  earnedFeeOutputToken: z
+    .string()
+    .describe('The amount of fees in output token.'),
   feeTier: z.number(),
 });
 export type LimitOrderInfo = z.infer<typeof LimitOrderInfoSchema>;
