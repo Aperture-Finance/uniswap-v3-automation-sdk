@@ -222,39 +222,48 @@ export const DeleteTriggerPayloadSchema = z.object({
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
 export const UpdateTriggerClosePayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.Close),
   slippage: SlippageSchema.optional(),
   maxGasProportion: MaxGasProportionSchema.optional(),
 });
+export type UpdateTriggerClosePayload = z.infer<
+  typeof UpdateTriggerClosePayloadSchema
+>;
 
 export const UpdateTriggerLimitOrderClosePayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
   maxGasProportion: MaxGasProportionSchema,
 });
+export type UpdateTriggerLimitOrderClosePayload = z.infer<
+  typeof UpdateTriggerLimitOrderClosePayloadSchema
+>;
 
 export const UpdateTriggerReinvestPayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.Reinvest),
   slippage: SlippageSchema.optional(),
   maxGasProportion: MaxGasProportionSchema.optional(),
 });
+export type UpdateTriggerReinvestPayload = z.infer<
+  typeof UpdateTriggerReinvestPayloadSchema
+>;
 
 export const UpdateTriggerRebalancePayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.Rebalance),
   tickLower: z.number().int().optional(),
   tickUpper: z.number().int().optional(),
   slippage: SlippageSchema.optional(),
   maxGasProportion: MaxGasProportionSchema.optional(),
 });
+export type UpdateTriggerRebalancePayload = z.infer<
+  typeof UpdateTriggerRebalancePayloadSchema
+>;
 
-export const UpdateTriggerPayloadSchema = z.union([
+export const UpdateTriggerPayloadSchema = z.discriminatedUnion('type', [
   UpdateTriggerClosePayloadSchema,
   UpdateTriggerLimitOrderClosePayloadSchema,
   UpdateTriggerReinvestPayloadSchema,
   UpdateTriggerRebalancePayloadSchema,
 ]);
-
-export const PayloadSchema = z.union([
-  CreateTriggerPayloadSchema,
-  DeleteTriggerPayloadSchema,
-  UpdateTriggerPayloadSchema,
-]);
-export type Payload = z.infer<typeof PayloadSchema>;
 
 export const PermitInfoSchema = z
   .object({
