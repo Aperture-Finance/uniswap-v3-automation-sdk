@@ -221,11 +221,49 @@ export const DeleteTriggerPayloadSchema = z.object({
 });
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
-export const PayloadSchema = z.union([
-  CreateTriggerPayloadSchema,
-  DeleteTriggerPayloadSchema,
+export const UpdateTriggerClosePayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.Close),
+  slippage: SlippageSchema.optional(),
+  maxGasProportion: MaxGasProportionSchema.optional(),
+});
+export type UpdateTriggerClosePayload = z.infer<
+  typeof UpdateTriggerClosePayloadSchema
+>;
+
+export const UpdateTriggerLimitOrderClosePayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
+  maxGasProportion: MaxGasProportionSchema,
+});
+export type UpdateTriggerLimitOrderClosePayload = z.infer<
+  typeof UpdateTriggerLimitOrderClosePayloadSchema
+>;
+
+export const UpdateTriggerReinvestPayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.Reinvest),
+  slippage: SlippageSchema.optional(),
+  maxGasProportion: MaxGasProportionSchema.optional(),
+});
+export type UpdateTriggerReinvestPayload = z.infer<
+  typeof UpdateTriggerReinvestPayloadSchema
+>;
+
+export const UpdateTriggerRebalancePayloadSchema = z.object({
+  type: z.literal(ActionTypeEnum.enum.Rebalance),
+  tickLower: z.number().int().optional(),
+  tickUpper: z.number().int().optional(),
+  slippage: SlippageSchema.optional(),
+  maxGasProportion: MaxGasProportionSchema.optional(),
+});
+export type UpdateTriggerRebalancePayload = z.infer<
+  typeof UpdateTriggerRebalancePayloadSchema
+>;
+
+export const UpdateTriggerPayloadSchema = z.discriminatedUnion('type', [
+  UpdateTriggerClosePayloadSchema,
+  UpdateTriggerLimitOrderClosePayloadSchema,
+  UpdateTriggerReinvestPayloadSchema,
+  UpdateTriggerRebalancePayloadSchema,
 ]);
-export type Payload = z.infer<typeof PayloadSchema>;
 
 export const PermitInfoSchema = z
   .object({
@@ -316,3 +354,11 @@ export const APIEventSchema = z.object({
   }),
 });
 export type APIEvent = z.infer<typeof APIEventSchema>;
+
+export const UpdateTriggerRequestSchema = z.object({
+  taskId: z.number().nonnegative().describe('The ID of the trigger to update.'),
+  payload: UpdateTriggerPayloadSchema,
+  payloadSignature: z.string().nonempty().describe('Signature of the payload.'),
+});
+
+export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
