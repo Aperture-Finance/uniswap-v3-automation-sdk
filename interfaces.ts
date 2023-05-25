@@ -221,9 +221,38 @@ export const DeleteTriggerPayloadSchema = z.object({
 });
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
+export const UpdateTriggerClosePayloadSchema = z.object({
+  slippage: SlippageSchema.optional(),
+  maxGasProportion: MaxGasProportionSchema.optional(),
+});
+
+export const UpdateTriggerLimitOrderClosePayloadSchema = z.object({
+  maxGasProportion: MaxGasProportionSchema,
+});
+
+export const UpdateTriggerReinvestPayloadSchema = z.object({
+  slippage: SlippageSchema.optional(),
+  maxGasProportion: MaxGasProportionSchema.optional(),
+});
+
+export const UpdateTriggerRebalancePayloadSchema = z.object({
+  tickLower: z.number().int().optional(),
+  tickUpper: z.number().int().optional(),
+  slippage: SlippageSchema.optional(),
+  maxGasProportion: MaxGasProportionSchema.optional(),
+});
+
+export const UpdateTriggerPayloadSchema = z.union([
+  UpdateTriggerClosePayloadSchema,
+  UpdateTriggerLimitOrderClosePayloadSchema,
+  UpdateTriggerReinvestPayloadSchema,
+  UpdateTriggerRebalancePayloadSchema,
+]);
+
 export const PayloadSchema = z.union([
   CreateTriggerPayloadSchema,
   DeleteTriggerPayloadSchema,
+  UpdateTriggerPayloadSchema,
 ]);
 export type Payload = z.infer<typeof PayloadSchema>;
 
@@ -316,3 +345,11 @@ export const APIEventSchema = z.object({
   }),
 });
 export type APIEvent = z.infer<typeof APIEventSchema>;
+
+export const UpdateTriggerRequestSchema = z.object({
+  taskId: z.number().nonnegative().describe('The ID of the trigger to update.'),
+  payload: UpdateTriggerPayloadSchema,
+  payloadSignature: z.string().nonempty().describe('Signature of the payload.'),
+});
+
+export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
