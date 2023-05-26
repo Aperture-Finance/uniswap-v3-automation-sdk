@@ -277,6 +277,7 @@ export const UpdateTriggerPayloadSchema = z.discriminatedUnion('type', [
   UpdateTriggerReinvestPayloadSchema,
   UpdateTriggerRebalancePayloadSchema,
 ]);
+export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
 
 export const PermitInfoSchema = z
   .object({
