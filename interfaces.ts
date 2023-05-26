@@ -221,39 +221,60 @@ export const DeleteTriggerPayloadSchema = z.object({
 });
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
-export const UpdateTriggerClosePayloadSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.Close),
-  slippage: SlippageSchema.optional(),
-  maxGasProportion: MaxGasProportionSchema.optional(),
+const UpdateTriggerPayloadBaseSchema = z.object({
+  ownerAddr: z.string().nonempty(),
+  chainId: ApertureSupportedChainIdEnum,
+  taskId: z.number().nonnegative(),
 });
+
+export const UpdateTriggerClosePayloadSchema =
+  UpdateTriggerPayloadBaseSchema.merge(
+    z.object({
+      ownerAddr: z.string().nonempty().describe('The owner of the trigger.'),
+      chainId: ApertureSupportedChainIdEnum,
+
+      type: z.literal(ActionTypeEnum.enum.Close),
+      slippage: SlippageSchema.optional(),
+      maxGasProportion: MaxGasProportionSchema.optional(),
+    }),
+  );
 export type UpdateTriggerClosePayload = z.infer<
   typeof UpdateTriggerClosePayloadSchema
 >;
 
-export const UpdateTriggerLimitOrderClosePayloadSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
-  maxGasProportion: MaxGasProportionSchema,
-});
+export const UpdateTriggerLimitOrderClosePayloadSchema =
+  UpdateTriggerPayloadBaseSchema.merge(
+    z.object({
+      type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
+      maxGasProportion: MaxGasProportionSchema,
+    }),
+  );
 export type UpdateTriggerLimitOrderClosePayload = z.infer<
   typeof UpdateTriggerLimitOrderClosePayloadSchema
 >;
 
-export const UpdateTriggerReinvestPayloadSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.Reinvest),
-  slippage: SlippageSchema.optional(),
-  maxGasProportion: MaxGasProportionSchema.optional(),
-});
+export const UpdateTriggerReinvestPayloadSchema =
+  UpdateTriggerPayloadBaseSchema.merge(
+    z.object({
+      type: z.literal(ActionTypeEnum.enum.Reinvest),
+      slippage: SlippageSchema.optional(),
+      maxGasProportion: MaxGasProportionSchema.optional(),
+    }),
+  );
 export type UpdateTriggerReinvestPayload = z.infer<
   typeof UpdateTriggerReinvestPayloadSchema
 >;
 
-export const UpdateTriggerRebalancePayloadSchema = z.object({
-  type: z.literal(ActionTypeEnum.enum.Rebalance),
-  tickLower: z.number().int().optional(),
-  tickUpper: z.number().int().optional(),
-  slippage: SlippageSchema.optional(),
-  maxGasProportion: MaxGasProportionSchema.optional(),
-});
+export const UpdateTriggerRebalancePayloadSchema =
+  UpdateTriggerPayloadBaseSchema.merge(
+    z.object({
+      type: z.literal(ActionTypeEnum.enum.Rebalance),
+      tickLower: z.number().int().optional(),
+      tickUpper: z.number().int().optional(),
+      slippage: SlippageSchema.optional(),
+      maxGasProportion: MaxGasProportionSchema.optional(),
+    }),
+  );
 export type UpdateTriggerRebalancePayload = z.infer<
   typeof UpdateTriggerRebalancePayloadSchema
 >;
@@ -356,7 +377,6 @@ export const APIEventSchema = z.object({
 export type APIEvent = z.infer<typeof APIEventSchema>;
 
 export const UpdateTriggerRequestSchema = z.object({
-  taskId: z.number().nonnegative().describe('The ID of the trigger to update.'),
   payload: UpdateTriggerPayloadSchema,
   payloadSignature: z.string().nonempty().describe('Signature of the payload.'),
 });
