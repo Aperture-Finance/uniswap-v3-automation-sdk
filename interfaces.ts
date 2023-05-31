@@ -221,62 +221,16 @@ export const DeleteTriggerPayloadSchema = z.object({
 });
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
-const UpdateTriggerIdentifiersSchema = z.object({
+export const UpdateTriggerPayloadSchema = z.object({
   ownerAddr: z.string().nonempty(),
   chainId: ApertureSupportedChainIdEnum,
   taskId: z.number().nonnegative(),
+  // `action` and `condition` are marked as optional because we allow partial
+  // updates. For example, a user may want to update the slippage setting of a
+  // reinvest action without changing the condition.
+  action: ActionSchema.optional(),
+  condition: ConditionSchema.optional(),
 });
-export type UpdateTriggerIdentifiers = z.infer<
-  typeof UpdateTriggerIdentifiersSchema
->;
-
-export const UpdateTriggerClosePayloadSchema = z.object({
-  identifiers: UpdateTriggerIdentifiersSchema,
-  type: z.literal(ActionTypeEnum.enum.Close),
-  slippage: SlippageSchema.optional(),
-  maxGasProportion: MaxGasProportionSchema.optional(),
-});
-export type UpdateTriggerClosePayload = z.infer<
-  typeof UpdateTriggerClosePayloadSchema
->;
-
-export const UpdateTriggerLimitOrderClosePayloadSchema = z.object({
-  identifiers: UpdateTriggerIdentifiersSchema,
-  type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
-  maxGasProportion: MaxGasProportionSchema,
-});
-export type UpdateTriggerLimitOrderClosePayload = z.infer<
-  typeof UpdateTriggerLimitOrderClosePayloadSchema
->;
-
-export const UpdateTriggerReinvestPayloadSchema = z.object({
-  identifiers: UpdateTriggerIdentifiersSchema,
-  type: z.literal(ActionTypeEnum.enum.Reinvest),
-  slippage: SlippageSchema.optional(),
-  maxGasProportion: MaxGasProportionSchema.optional(),
-});
-export type UpdateTriggerReinvestPayload = z.infer<
-  typeof UpdateTriggerReinvestPayloadSchema
->;
-
-export const UpdateTriggerRebalancePayloadSchema = z.object({
-  identifiers: UpdateTriggerIdentifiersSchema,
-  type: z.literal(ActionTypeEnum.enum.Rebalance),
-  tickLower: z.number().int().optional(),
-  tickUpper: z.number().int().optional(),
-  slippage: SlippageSchema.optional(),
-  maxGasProportion: MaxGasProportionSchema.optional(),
-});
-export type UpdateTriggerRebalancePayload = z.infer<
-  typeof UpdateTriggerRebalancePayloadSchema
->;
-
-export const UpdateTriggerPayloadSchema = z.discriminatedUnion('type', [
-  UpdateTriggerClosePayloadSchema,
-  UpdateTriggerLimitOrderClosePayloadSchema,
-  UpdateTriggerReinvestPayloadSchema,
-  UpdateTriggerRebalancePayloadSchema,
-]);
 export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
 
 export const PermitInfoSchema = z
