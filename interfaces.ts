@@ -205,25 +205,24 @@ export const ActionSchema = z.discriminatedUnion('type', [
 ]);
 export type Action = z.infer<typeof ActionSchema>;
 
-export const CreateTriggerPayloadSchema = z.object({
+const BaseTriggerPayloadSchema = z.object({
   ownerAddr: z.string().nonempty(),
   chainId: ApertureSupportedChainIdEnum,
+});
+
+export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   nftId: z.string().nonempty(),
-  condition: ConditionSchema,
   action: ActionSchema,
+  condition: ConditionSchema,
 });
 export type CreateTriggerPayload = z.infer<typeof CreateTriggerPayloadSchema>;
 
-export const DeleteTriggerPayloadSchema = z.object({
-  ownerAddr: z.string().nonempty(),
-  chainId: ApertureSupportedChainIdEnum,
+export const DeleteTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   taskId: z.number().nonnegative(),
 });
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
-export const UpdateTriggerPayloadSchema = z.object({
-  ownerAddr: z.string().nonempty(),
-  chainId: ApertureSupportedChainIdEnum,
+export const UpdateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   taskId: z.number().nonnegative(),
   // `action` and `condition` are marked as optional because we allow partial
   // updates. For example, a user may want to update the slippage setting of a
@@ -256,18 +255,19 @@ export type CheckPositionPermitRequest = z.infer<
   typeof CheckPositionPermitRequestSchema
 >;
 
-export const UpdatePositionPermitRequestSchema = z.object({
-  chainId: ApertureSupportedChainIdEnum,
-  tokenId: z.string().nonempty(),
-  permitInfo: PermitInfoSchema,
-});
+export const UpdatePositionPermitRequestSchema =
+  CheckPositionPermitRequestSchema.extend({
+    permitInfo: PermitInfoSchema,
+  });
 export type UpdatePositionPermitRequest = z.infer<
   typeof UpdatePositionPermitRequestSchema
 >;
 
-export const CreateTriggerRequestSchema = z.object({
+const PayloadSignatureSchema = z.object({
+  payloadSignature: z.string().nonempty().describe('Signature of the payload.'),
+});
+export const CreateTriggerRequestSchema = PayloadSignatureSchema.extend({
   payload: CreateTriggerPayloadSchema,
-  payloadSignature: z.string().nonempty(),
   permitInfo: PermitInfoSchema.optional().describe(
     "If Aperture doesn't already have authority over the position, " +
       'then `permitInfo` should be obtained from the user and populated here.',
@@ -275,9 +275,17 @@ export const CreateTriggerRequestSchema = z.object({
 });
 export type CreateTriggerRequest = z.infer<typeof CreateTriggerRequestSchema>;
 
-export const ListTriggerRequestSchema = z.object({
-  ownerAddr: z.string().nonempty(),
-  chainId: ApertureSupportedChainIdEnum,
+export const DeleteTriggerRequestSchema = PayloadSignatureSchema.extend({
+  payload: DeleteTriggerPayloadSchema,
+});
+export type DeleteTriggerRequest = z.infer<typeof DeleteTriggerRequestSchema>;
+
+export const UpdateTriggerRequestSchema = PayloadSignatureSchema.extend({
+  payload: UpdateTriggerPayloadSchema,
+});
+export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
+
+export const ListTriggerRequestSchema = BaseTriggerPayloadSchema.extend({
   isLimitOrder: z.boolean(),
 });
 export type ListTriggerRequest = z.infer<typeof ListTriggerRequestSchema>;
@@ -310,22 +318,9 @@ export const ListTriggerResponseSchema = z.object({
 });
 export type ListTriggerResponse = z.infer<typeof ListTriggerResponseSchema>;
 
-export const DeleteTriggerRequestSchema = z.object({
-  payload: DeleteTriggerPayloadSchema,
-  payloadSignature: z.string().nonempty(),
-});
-export type DeleteTriggerRequest = z.infer<typeof DeleteTriggerRequestSchema>;
-
 export const APIEventSchema = z.object({
   queryStringParameters: z.object({
     params: z.string().nonempty(),
   }),
 });
 export type APIEvent = z.infer<typeof APIEventSchema>;
-
-export const UpdateTriggerRequestSchema = z.object({
-  payload: UpdateTriggerPayloadSchema,
-  payloadSignature: z.string().nonempty().describe('Signature of the payload.'),
-});
-
-export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
