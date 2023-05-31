@@ -214,6 +214,7 @@ export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   nftId: z.string().nonempty(),
   action: ActionSchema,
   condition: ConditionSchema,
+  expiration: z.number().int().positive(),
 });
 export type CreateTriggerPayload = z.infer<typeof CreateTriggerPayloadSchema>;
 
@@ -229,6 +230,7 @@ export const UpdateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   // reinvest action without changing the condition.
   action: ActionSchema.optional(),
   condition: ConditionSchema.optional(),
+  expiration: z.number().int().positive(),
 });
 export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
 
@@ -310,6 +312,7 @@ export const TriggerItemSchema = z.object({
   lastFailedMessage: z.string().optional(),
   limitOrderInfo: LimitOrderInfoSchema.optional(),
   actionType: ActionTypeEnum,
+  expiration: z.number().int().positive(),
 });
 export type TriggerItem = z.infer<typeof TriggerItemSchema>;
 
