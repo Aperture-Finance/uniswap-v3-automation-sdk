@@ -1,7 +1,7 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
   "description": "SDK for Aperture's Uniswap V3 automation platform",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
