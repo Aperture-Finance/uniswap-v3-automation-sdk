@@ -2,6 +2,12 @@ import { AutomanClient } from '../automan_client';
 import axios from 'axios';
 import stringify from 'json-stable-stringify';
 import MockAdapter from 'axios-mock-adapter';
+import {
+  ActionTypeEnum,
+  CheckPositionPermitRequest,
+  ConditionTypeEnum,
+  UpdatePositionPermitRequest,
+} from '../interfaces';
 
 describe('Automan client test', () => {
   const mock = new MockAdapter(axios);
@@ -16,16 +22,24 @@ describe('Automan client test', () => {
       payload: {
         ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
         chainId: 5,
-        nftId: 64448,
-        condition: { type: 'Time', timeAfterEpochSec: 1683258065 },
-        action: { type: 'Close', maxGasProportion: 1, slippage: 0.8 },
+        nftId: '64448',
+        condition: {
+          type: ConditionTypeEnum.enum.Time,
+          timeAfterEpochSec: 1683258065,
+        },
+        action: {
+          type: ActionTypeEnum.enum.Close,
+          maxGasProportion: 1,
+          slippage: 0.8,
+        },
+        expiration: 1983258065,
       },
       payloadSignature:
         '0xd924e9111f675eb8dab6ab2d615db517b6e84fbdecf09031784b50fe973bb0602c21bef0e46318ece56d013be00774dd8f33fa0d3195976b409f7b4d1b7ce93b1c',
       permitInfo: {
         signature:
           '0x932c7ffa49893a536a8bae5854afededf22c984e99475ca3a357daa9a4837fe469409540970f7eccb89c0f3f38230c299f9c1ac7fb236c8780c3f49fb75483501c',
-        deadline: 2546981066,
+        deadline: '2546981066',
       },
     };
     const responseData = 'Success';
@@ -82,6 +96,48 @@ describe('Automan client test', () => {
     mock.onPost(`${url}Prod/deleteTrigger`).reply(200, responseData);
 
     const response = await client.deleteTrigger(request);
+    expect(response).toEqual(responseData);
+    // Expect to call post once.
+    expect(mock.history.post.length).toEqual(1);
+    // Expect request params to match.
+    expect(mock.history.post[0].params.toString()).toEqual(
+      new URLSearchParams({ params: stringify(request) }).toString(),
+    );
+  });
+
+  it('Should call check position approval', async () => {
+    const request: CheckPositionPermitRequest = {
+      chainId: 1,
+      tokenId: '2',
+    };
+
+    const responseData = false;
+    mock.onGet(`${url}Prod/checkPositionApproval`).reply(200, responseData);
+
+    const response = await client.checkPositionApproval(request);
+    expect(response).toEqual(responseData);
+    // Expect to call get once.
+    expect(mock.history.get.length).toEqual(1);
+    // Expect request params to match.
+    expect(mock.history.get[0].params.toString()).toEqual(
+      new URLSearchParams({ params: stringify(request) }).toString(),
+    );
+  });
+
+  it('Should call update position permit', async () => {
+    const request: UpdatePositionPermitRequest = {
+      chainId: 1,
+      tokenId: '2',
+      permitInfo: {
+        signature: '0x111',
+        deadline: '123',
+      },
+    };
+
+    const responseData = 'Success';
+    mock.onPost(`${url}Prod/updatePositionPermit`).reply(200, responseData);
+
+    const response = await client.updatePositionPermit(request);
     expect(response).toEqual(responseData);
     // Expect to call post once.
     expect(mock.history.post.length).toEqual(1);
