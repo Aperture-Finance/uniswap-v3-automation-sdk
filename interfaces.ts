@@ -161,9 +161,7 @@ export type CloseAction = z.infer<typeof CloseActionSchema>;
 export const LimitOrderCloseActionSchema = z
   .object({
     type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
-    inputTokenAmount: TokenAmountSchema,
-    outputTokenAddr: z.string().nonempty(),
-    feeTier: z.nativeEnum(FeeAmount),
+    inputTokenAddr: z.string().nonempty(),
     maxGasProportion: MaxGasProportionSchema,
   })
   .describe(
@@ -293,15 +291,27 @@ export const ListTriggerRequestSchema = BaseTriggerPayloadSchema.extend({
 export type ListTriggerRequest = z.infer<typeof ListTriggerRequestSchema>;
 
 export const LimitOrderInfoSchema = z.object({
-  inputTokenAmount: TokenAmountSchema,
-  outputTokenAmount: TokenAmountSchema,
+  inputTokenAmountAtCreation: TokenAmountSchema.describe(
+    'The amount of input token at limit order creation.',
+  ),
+  outputTokenAmountAtClosure: TokenAmountSchema.describe(
+    'The calculated amount of output token at limit order closure. Note that the limit order may still be pending fulfillment.',
+  ),
   earnedFeeInputToken: z
     .string()
-    .describe('The amount of fees in input token.'),
+    .optional()
+    .describe(
+      'The amount of fees earned in input token. Only populated after the limit order is fulfilled.',
+    ),
   earnedFeeOutputToken: z
     .string()
-    .describe('The amount of fees in output token.'),
-  feeTier: z.number(),
+    .optional()
+    .describe(
+      'The amount of fees earned in output token. Only populated after the limit order is fulfilled.',
+    ),
+  feeTier: z.nativeEnum(FeeAmount),
+  tickLower: z.number().int(),
+  tickUpper: z.number().int(),
 });
 export type LimitOrderInfo = z.infer<typeof LimitOrderInfoSchema>;
 
@@ -311,7 +321,8 @@ export const TriggerItemSchema = z.object({
   status: TriggerStatusEnum,
   lastFailedMessage: z.string().optional(),
   limitOrderInfo: LimitOrderInfoSchema.optional(),
-  actionType: ActionTypeEnum,
+  condition: ConditionSchema,
+  action: ActionSchema,
   expiration: z.number().int().positive(),
 });
 export type TriggerItem = z.infer<typeof TriggerItemSchema>;

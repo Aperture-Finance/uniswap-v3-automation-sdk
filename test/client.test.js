@@ -1,5 +1,6 @@
 import { AutomanClient } from '../automan_client';
 import axios from 'axios';
+import stringify from 'json-stable-stringify';
 import MockAdapter from 'axios-mock-adapter';
 
 describe('Automan client test', () => {
@@ -36,7 +37,7 @@ describe('Automan client test', () => {
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
     expect(mock.history.post[0].params.toString()).toEqual(
-      new URLSearchParams({ params: JSON.stringify(request) }).toString(),
+      new URLSearchParams({ params: stringify(request) }).toString(),
     );
   });
 
@@ -62,7 +63,7 @@ describe('Automan client test', () => {
     expect(mock.history.get.length).toEqual(1);
     // Expect request params to match input request.
     expect(mock.history.get[0].params.toString()).toEqual(
-      new URLSearchParams({ params: JSON.stringify(request) }).toString(),
+      new URLSearchParams({ params: stringify(request) }).toString(),
     );
   });
 
@@ -86,7 +87,7 @@ describe('Automan client test', () => {
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
     expect(mock.history.post[0].params.toString()).toEqual(
-      new URLSearchParams({ params: JSON.stringify(request) }).toString(),
+      new URLSearchParams({ params: stringify(request) }).toString(),
     );
   });
 });
