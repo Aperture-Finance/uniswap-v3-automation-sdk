@@ -85,6 +85,13 @@ export const PriceConditionSchema = z
         'Exactly one of `gte` and `lte` should be defined; the other must be `undefined`. ' +
           'The defined float value represents the price threshold to compare against.',
       ),
+    singleToken: z
+      .union([z.literal(0), z.literal(1)])
+      .optional()
+      .describe(
+        'If `singleToken` is set, the condition is considered met if the current USD price of the specified token' +
+          ' (either token0 or token1) meets the specified threshold.',
+      ),
     gte: z
       .number()
       .positive()
@@ -112,8 +119,9 @@ export const PriceConditionSchema = z
       ),
   })
   .describe(
-    "The price condition compares token0's price denominated in token1 against a specified threshold. " +
-      'We follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
+    "If `singleToken` is set, the price condition compares the specified token's USD price against the specified threshold." +
+      "Otherwise, token0's price denominated in token1 is compared against the specified threshold, " +
+      'and we follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
       '"Raw" means the raw uint256 integer amount used in the token contract. For example, if token A uses 8 decimals, ' +
       'then 1 raw token A represents 10^(-8) tokens in human-readable form.',
   );
