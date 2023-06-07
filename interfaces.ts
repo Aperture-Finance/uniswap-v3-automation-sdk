@@ -13,6 +13,7 @@ const ApertureSupportedChainIdEnum = z.nativeEnum(ApertureSupportedChainId);
 export const ConditionTypeEnum = z.enum([
   'Time',
   'TokenAmount',
+  'TokenAmountRatio',
   'Price',
   'AccruedFees',
 ]);
@@ -83,21 +84,26 @@ export const PriceConditionSchema = z
       .literal(ConditionTypeEnum.enum.Price)
       .describe(
         'Exactly one of `gte` and `lte` should be defined; the other must be `undefined`. ' +
-          'The defined float value represents the price threshold to compare against.',
+          'The defined float value represents the usd price threshold to compare against.',
+      ),
+    tokenNumber: z
+      .union([z.literal(0), z.literal(1)])
+      .describe(
+        'Either 0 or 1, representing token0 or token1 in the liquidity pool behind the position.',
       ),
     gte: z
       .number()
       .positive()
       .optional()
       .describe(
-        'If `gte` is set, the condition is considered met if the current price >= `gte`.',
+        'If `gte` is set, the condition is considered met if the current usd price of token `tokenNumber` is at least `gte`.',
       ),
     lte: z
       .number()
       .positive()
       .optional()
       .describe(
-        'If `lte` is set, the condition is considered met if the current price <= `lte`.',
+        'If `lte` is set, the condition is considered met if the current usd price of token `tokenNumber` is at most `lte`.',
       ),
     durationSec: z
       .number()
@@ -112,12 +118,36 @@ export const PriceConditionSchema = z
       ),
   })
   .describe(
-    "The price condition compares token0's price denominated in token1 against a specified threshold. " +
-      'We follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
-      '"Raw" means the raw uint256 integer amount used in the token contract. For example, if token A uses 8 decimals, ' +
-      'then 1 raw token A represents 10^(-8) tokens in human-readable form.',
+    "The price condition compares either token0 or token1's usd price against a specified threshold.",
   );
 export type PriceCondition = z.infer<typeof PriceConditionSchema>;
+
+export const TokenAmountRatioConditionSchema = z
+  .object({
+    type: z
+      .literal(ConditionTypeEnum.enum.TokenAmountRatio)
+      .describe(
+        'Exactly one of `gte` and `lte` should be defined; the other must be `undefined`. ' +
+          'The defined float value represents the ratio threshold to compare the ratio between token0HumanAmount and token1HumanAmount against.',
+      ),
+    gte: z
+      .number()
+      .positive()
+      .optional()
+      .describe(
+        'If `gte` is set, the condition is considered met if (token0HumanAmount / token1HumanAmount) >= `gte`.',
+      ),
+    lte: z
+      .number()
+      .positive()
+      .optional()
+      .describe(
+        'If `lte` is set, the condition is considered met if if (token0HumanAmount / token1HumanAmount) <= `lte`.',
+      ),
+  })
+  .describe(
+    'The token amount ratio condition compare the ratio between token0HumanAmount and token1HumanAmount against a specified threshold.',
+  );
 
 export const AccruedFeesConditionSchema = z
   .object({
