@@ -93,15 +93,13 @@ export const PriceConditionSchema = z
           ' (either token0 or token1) meets the specified threshold.',
       ),
     gte: z
-      .number()
-      .positive()
+      .string()
       .optional()
       .describe(
         'If `gte` is set, the condition is considered met if the current price >= `gte`.',
       ),
     lte: z
-      .number()
-      .positive()
+      .string()
       .optional()
       .describe(
         'If `lte` is set, the condition is considered met if the current price <= `lte`.',
