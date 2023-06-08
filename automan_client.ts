@@ -7,6 +7,7 @@ import {
   ListTriggerRequest,
   ListTriggerResponse,
   UpdatePositionPermitRequest,
+  UpdateTriggerRequest,
 } from './interfaces';
 
 export class AutomanClient {
@@ -38,6 +39,13 @@ export class AutomanClient {
   ): Promise<ListTriggerResponse> {
     const url = new URL('/Prod/listTrigger', this.endpoint);
     return (await this.query(url, 'get', stringify(request))).data;
+  }
+
+  async updateTrigger(
+    request: Readonly<UpdateTriggerRequest>,
+  ): Promise<string> {
+    const url = new URL('/Prod/updateTrigger', this.endpoint);
+    return (await this.query(url, 'post', stringify(request))).data;
   }
 
   async deleteTrigger(

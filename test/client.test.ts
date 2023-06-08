@@ -81,6 +81,31 @@ describe('Automan client test', () => {
     );
   });
 
+  it('Should call update trigger', async () => {
+    const request = {
+      payload: {
+        ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
+        chainId: 5,
+        taskId: 0,
+        expiration: 123,
+      },
+      payloadSignature:
+        '0x62b2152b10e570cbe68069584a62f274103d3bb0ec5dc75ad803ba84221e464008b657b831bf1b040a66f5f0247aae0cedb26db4cdf27cdc1c8a8c7f3c1ae1c81c',
+    };
+
+    const responseData = 'Success';
+    mock.onPost(`${url}Prod/updateTrigger`).reply(200, responseData);
+
+    const response = await client.updateTrigger(request);
+    expect(response).toEqual(responseData);
+    // Expect to call post once.
+    expect(mock.history.post.length).toEqual(1);
+    // Expect request params to match.
+    expect(mock.history.post[0].params.toString()).toEqual(
+      new URLSearchParams({ params: stringify(request) }).toString(),
+    );
+  });
+
   it('Should call delete trigger', async () => {
     const request = {
       payload: {
