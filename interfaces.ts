@@ -344,3 +344,11 @@ export const APIEventSchema = z.object({
   }),
 });
 export type APIEvent = z.infer<typeof APIEventSchema>;
+
+export const CheckUserLimitRequestSchema = z.object({
+  ownerAddr: z.string().nonempty(),
+  chainId: ApertureSupportedChainIdEnum,
+  tokenId: z.string().nonempty(),
+  actionType: ActionTypeEnum,
+});
+export type CheckUserLimitRequest = z.infer<typeof CheckUserLimitRequestSchema>;

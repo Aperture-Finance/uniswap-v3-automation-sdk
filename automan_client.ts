@@ -2,6 +2,7 @@ import axios from 'axios';
 import stringify from 'json-stable-stringify';
 import {
   CheckPositionPermitRequest,
+  CheckUserLimitRequest,
   CreateTriggerRequest,
   DeleteTriggerRequest,
   ListTriggerRequest,
@@ -67,5 +68,12 @@ export class AutomanClient {
   ): Promise<string> {
     const url = new URL('/Prod/updatePositionPermit', this.endpoint);
     return (await this.query(url, 'post', stringify(request))).data;
+  }
+
+  async checkUserLimit(
+    request: Readonly<CheckUserLimitRequest>,
+  ): Promise<string> {
+    const url = new URL('/Prod/checkUserLimit', this.endpoint);
+    return (await this.query(url, 'get', stringify(request))).data;
   }
 }
