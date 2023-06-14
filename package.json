@@ -1,7 +1,7 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
   "description": "SDK for Aperture's Uniswap V3 automation platform",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
@@ -26,11 +26,13 @@
   },
   "homepage": "https://aperture.finance/",
   "devDependencies": {
+    "@anatine/zod-openapi": "^1.14.0",
     "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7.21.5",
     "@babel/preset-typescript": "^7.21.5",
     "@types/jest": "^29.5.1",
     "@types/json-stable-stringify": "^1.0.34",
+    "@types/node": "^20.3.1",
     "@typescript-eslint/eslint-plugin": "^5.59.7",
     "@typescript-eslint/parser": "^5.59.7",
     "axios-mock-adapter": "^1.21.4",
@@ -38,6 +40,8 @@
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "http-status-codes": "^2.2.0",
+    "openapi3-ts": "^3.2.0",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4"
   },
