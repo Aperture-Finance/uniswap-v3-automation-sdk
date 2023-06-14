@@ -18,7 +18,6 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../../../../common";
 
 export interface IUniswapV3PoolDerivedStateInterface extends utils.Interface {
@@ -33,11 +32,11 @@ export interface IUniswapV3PoolDerivedStateInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "observe",
-    values: [PromiseOrValue<BigNumberish>[]]
+    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "snapshotCumulativesInside",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [BigNumberish, BigNumberish]
   ): string;
 
   decodeFunctionResult(functionFragment: "observe", data: BytesLike): Result;
@@ -77,7 +76,7 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
 
   functions: {
     observe(
-      secondsAgos: PromiseOrValue<BigNumberish>[],
+      secondsAgos: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<
       [BigNumber[], BigNumber[]] & {
@@ -87,8 +86,8 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
     >;
 
     snapshotCumulativesInside(
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, number] & {
@@ -100,7 +99,7 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
   };
 
   observe(
-    secondsAgos: PromiseOrValue<BigNumberish>[],
+    secondsAgos: BigNumberish[],
     overrides?: CallOverrides
   ): Promise<
     [BigNumber[], BigNumber[]] & {
@@ -110,8 +109,8 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
   >;
 
   snapshotCumulativesInside(
-    tickLower: PromiseOrValue<BigNumberish>,
-    tickUpper: PromiseOrValue<BigNumberish>,
+    tickLower: BigNumberish,
+    tickUpper: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, number] & {
@@ -123,7 +122,7 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
 
   callStatic: {
     observe(
-      secondsAgos: PromiseOrValue<BigNumberish>[],
+      secondsAgos: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<
       [BigNumber[], BigNumber[]] & {
@@ -133,8 +132,8 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
     >;
 
     snapshotCumulativesInside(
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, number] & {
@@ -149,26 +148,26 @@ export interface IUniswapV3PoolDerivedState extends BaseContract {
 
   estimateGas: {
     observe(
-      secondsAgos: PromiseOrValue<BigNumberish>[],
+      secondsAgos: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     snapshotCumulativesInside(
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     observe(
-      secondsAgos: PromiseOrValue<BigNumberish>[],
+      secondsAgos: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     snapshotCumulativesInside(
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

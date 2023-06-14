@@ -25,16 +25,27 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../common";
+
+export declare namespace UniV3Automan {
+  export type FeeConfigStruct = {
+    feeLimitPips: BigNumberish;
+    feeCollector: string;
+  };
+
+  export type FeeConfigStructOutput = [BigNumber, string] & {
+    feeLimitPips: BigNumber;
+    feeCollector: string;
+  };
+}
 
 export declare namespace INonfungiblePositionManager {
   export type DecreaseLiquidityParamsStruct = {
-    tokenId: PromiseOrValue<BigNumberish>;
-    liquidity: PromiseOrValue<BigNumberish>;
-    amount0Min: PromiseOrValue<BigNumberish>;
-    amount1Min: PromiseOrValue<BigNumberish>;
-    deadline: PromiseOrValue<BigNumberish>;
+    tokenId: BigNumberish;
+    liquidity: BigNumberish;
+    amount0Min: BigNumberish;
+    amount1Min: BigNumberish;
+    deadline: BigNumberish;
   };
 
   export type DecreaseLiquidityParamsStructOutput = [
@@ -52,12 +63,12 @@ export declare namespace INonfungiblePositionManager {
   };
 
   export type IncreaseLiquidityParamsStruct = {
-    tokenId: PromiseOrValue<BigNumberish>;
-    amount0Desired: PromiseOrValue<BigNumberish>;
-    amount1Desired: PromiseOrValue<BigNumberish>;
-    amount0Min: PromiseOrValue<BigNumberish>;
-    amount1Min: PromiseOrValue<BigNumberish>;
-    deadline: PromiseOrValue<BigNumberish>;
+    tokenId: BigNumberish;
+    amount0Desired: BigNumberish;
+    amount1Desired: BigNumberish;
+    amount0Min: BigNumberish;
+    amount1Min: BigNumberish;
+    deadline: BigNumberish;
   };
 
   export type IncreaseLiquidityParamsStructOutput = [
@@ -77,17 +88,17 @@ export declare namespace INonfungiblePositionManager {
   };
 
   export type MintParamsStruct = {
-    token0: PromiseOrValue<string>;
-    token1: PromiseOrValue<string>;
-    fee: PromiseOrValue<BigNumberish>;
-    tickLower: PromiseOrValue<BigNumberish>;
-    tickUpper: PromiseOrValue<BigNumberish>;
-    amount0Desired: PromiseOrValue<BigNumberish>;
-    amount1Desired: PromiseOrValue<BigNumberish>;
-    amount0Min: PromiseOrValue<BigNumberish>;
-    amount1Min: PromiseOrValue<BigNumberish>;
-    recipient: PromiseOrValue<string>;
-    deadline: PromiseOrValue<BigNumberish>;
+    token0: string;
+    token1: string;
+    fee: BigNumberish;
+    tickLower: BigNumberish;
+    tickUpper: BigNumberish;
+    amount0Desired: BigNumberish;
+    amount1Desired: BigNumberish;
+    amount0Min: BigNumberish;
+    amount1Min: BigNumberish;
+    recipient: string;
+    deadline: BigNumberish;
   };
 
   export type MintParamsStructOutput = [
@@ -125,8 +136,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)": FunctionFragment;
     "factory()": FunctionFragment;
-    "feeCollector()": FunctionFragment;
-    "feeLimitPips()": FunctionFragment;
+    "feeConfig()": FunctionFragment;
     "getOptimalSwap(address,int24,int24,uint256,uint256)": FunctionFragment;
     "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes)": FunctionFragment;
@@ -146,8 +156,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setControllers(address[],bool[])": FunctionFragment;
-    "setFeeCollector(address)": FunctionFragment;
-    "setFeeLimit(uint256)": FunctionFragment;
+    "setFeeConfig((uint96,address))": FunctionFragment;
     "setSwapRouters(address[],bool[])": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "uniswapV3SwapCallback(int256,int256,bytes)": FunctionFragment;
@@ -161,8 +170,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
       | "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"
       | "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"
       | "factory"
-      | "feeCollector"
-      | "feeLimitPips"
+      | "feeConfig"
       | "getOptimalSwap"
       | "increaseLiquidity"
       | "increaseLiquidityOptimal"
@@ -182,8 +190,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
       | "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"
       | "renounceOwnership"
       | "setControllers"
-      | "setFeeCollector"
-      | "setFeeLimit"
+      | "setFeeConfig"
       | "setSwapRouters"
       | "transferOwnership"
       | "uniswapV3SwapCallback"
@@ -194,60 +201,47 @@ export interface UniV3AutomanInterface extends utils.Interface {
     functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<BigNumberish>
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<boolean>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      boolean,
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<boolean>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
+      boolean,
+      BigNumberish,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "feeCollector",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "feeLimitPips",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "feeConfig", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getOptimalSwap",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [string, BigNumberish, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "increaseLiquidity",
@@ -257,16 +251,16 @@ export interface UniV3AutomanInterface extends utils.Interface {
     functionFragment: "increaseLiquidityOptimal",
     values: [
       INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      PromiseOrValue<BytesLike>
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "isController",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "isWhiteListedSwapRouter",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "mint",
@@ -274,10 +268,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "mintOptimal",
-    values: [
-      INonfungiblePositionManager.MintParamsStruct,
-      PromiseOrValue<BytesLike>
-    ]
+    values: [INonfungiblePositionManager.MintParamsStruct, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "npm", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -285,82 +276,82 @@ export interface UniV3AutomanInterface extends utils.Interface {
     functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)",
     values: [
       INonfungiblePositionManager.MintParamsStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
+      BigNumberish,
+      BigNumberish,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
     values: [
       INonfungiblePositionManager.MintParamsStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes)",
     values: [
       INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
+      BigNumberish,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes,uint256,uint8,bytes32,bytes32)",
     values: [
       INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<BigNumberish>
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<boolean>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      boolean,
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)",
     values: [
       INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      PromiseOrValue<boolean>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
+      boolean,
+      BigNumberish,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
@@ -369,31 +360,23 @@ export interface UniV3AutomanInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setControllers",
-    values: [PromiseOrValue<string>[], PromiseOrValue<boolean>[]]
+    values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "setFeeCollector",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setFeeLimit",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "setFeeConfig",
+    values: [UniV3Automan.FeeConfigStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "setSwapRouters",
-    values: [PromiseOrValue<string>[], PromiseOrValue<boolean>[]]
+    values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "uniswapV3SwapCallback",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
-    ]
+    values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
 
   decodeFunctionResult(functionFragment: "WETH9", data: BytesLike): Result;
@@ -414,14 +397,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "feeCollector",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "feeLimitPips",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "feeConfig", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getOptimalSwap",
     data: BytesLike
@@ -490,11 +466,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setFeeCollector",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setFeeLimit",
+    functionFragment: "setFeeConfig",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -625,52 +597,54 @@ export interface UniV3Automan extends BaseContract {
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     factory(overrides?: CallOverrides): Promise<[string]>;
 
-    feeCollector(overrides?: CallOverrides): Promise<[string]>;
-
-    feeLimitPips(overrides?: CallOverrides): Promise<[BigNumber]>;
+    feeConfig(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, string] & { feeLimitPips: BigNumber; feeCollector: string }
+    >;
 
     getOptimalSwap(
-      pool: PromiseOrValue<string>,
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
-      amount0Desired: PromiseOrValue<BigNumberish>,
-      amount1Desired: PromiseOrValue<BigNumberish>,
+      pool: string,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
+      amount0Desired: BigNumberish,
+      amount1Desired: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, boolean, BigNumber] & {
@@ -683,34 +657,31 @@ export interface UniV3Automan extends BaseContract {
 
     increaseLiquidity(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     increaseLiquidityOptimal(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      swapData: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    isController(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    isController(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
     isWhiteListedSwapRouter(
-      arg0: PromiseOrValue<string>,
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
     mint(
       params: INonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     mintOptimal(
       params: INonfungiblePositionManager.MintParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      swapData: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     npm(overrides?: CallOverrides): Promise<[string]>;
@@ -719,114 +690,109 @@ export interface UniV3Automan extends BaseContract {
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setControllers(
-      controllers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      controllers: string[],
+      statuses: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    setFeeCollector(
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setFeeLimit(
-      _feeLimitPips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    setFeeConfig(
+      _feeConfig: UniV3Automan.FeeConfigStruct,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setSwapRouters(
-      routers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers: string[],
+      statuses: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
 
@@ -834,52 +800,54 @@ export interface UniV3Automan extends BaseContract {
 
   "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    feePips: PromiseOrValue<BigNumberish>,
-    permitDeadline: PromiseOrValue<BigNumberish>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feePips: BigNumberish,
+    permitDeadline: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    feePips: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feePips: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    zeroForOne: PromiseOrValue<boolean>,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    permitDeadline: PromiseOrValue<BigNumberish>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    zeroForOne: boolean,
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    permitDeadline: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    zeroForOne: PromiseOrValue<boolean>,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    zeroForOne: boolean,
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   factory(overrides?: CallOverrides): Promise<string>;
 
-  feeCollector(overrides?: CallOverrides): Promise<string>;
-
-  feeLimitPips(overrides?: CallOverrides): Promise<BigNumber>;
+  feeConfig(
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, string] & { feeLimitPips: BigNumber; feeCollector: string }
+  >;
 
   getOptimalSwap(
-    pool: PromiseOrValue<string>,
-    tickLower: PromiseOrValue<BigNumberish>,
-    tickUpper: PromiseOrValue<BigNumberish>,
-    amount0Desired: PromiseOrValue<BigNumberish>,
-    amount1Desired: PromiseOrValue<BigNumberish>,
+    pool: string,
+    tickLower: BigNumberish,
+    tickUpper: BigNumberish,
+    amount0Desired: BigNumberish,
+    amount1Desired: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, boolean, BigNumber] & {
@@ -892,34 +860,31 @@ export interface UniV3Automan extends BaseContract {
 
   increaseLiquidity(
     params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   increaseLiquidityOptimal(
     params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-    swapData: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    swapData: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  isController(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   isWhiteListedSwapRouter(
-    arg0: PromiseOrValue<string>,
+    arg0: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   mint(
     params: INonfungiblePositionManager.MintParamsStruct,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   mintOptimal(
     params: INonfungiblePositionManager.MintParamsStruct,
-    swapData: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    swapData: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   npm(overrides?: CallOverrides): Promise<string>;
@@ -928,114 +893,109 @@ export interface UniV3Automan extends BaseContract {
 
   "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)"(
     params: INonfungiblePositionManager.MintParamsStruct,
-    tokenId: PromiseOrValue<BigNumberish>,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    tokenId: BigNumberish,
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
     params: INonfungiblePositionManager.MintParamsStruct,
-    tokenId: PromiseOrValue<BigNumberish>,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    permitDeadline: PromiseOrValue<BigNumberish>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    tokenId: BigNumberish,
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    permitDeadline: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes)"(
     params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes,uint256,uint8,bytes32,bytes32)"(
     params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    permitDeadline: PromiseOrValue<BigNumberish>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    permitDeadline: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    feePips: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feePips: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    feePips: PromiseOrValue<BigNumberish>,
-    permitDeadline: PromiseOrValue<BigNumberish>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feePips: BigNumberish,
+    permitDeadline: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    zeroForOne: PromiseOrValue<boolean>,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    permitDeadline: PromiseOrValue<BigNumberish>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    zeroForOne: boolean,
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    permitDeadline: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
     params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    zeroForOne: PromiseOrValue<boolean>,
-    feePips: PromiseOrValue<BigNumberish>,
-    swapData: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    zeroForOne: boolean,
+    feePips: BigNumberish,
+    swapData: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   renounceOwnership(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setControllers(
-    controllers: PromiseOrValue<string>[],
-    statuses: PromiseOrValue<boolean>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    controllers: string[],
+    statuses: boolean[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  setFeeCollector(
-    _feeCollector: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setFeeLimit(
-    _feeLimitPips: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  setFeeConfig(
+    _feeConfig: UniV3Automan.FeeConfigStruct,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setSwapRouters(
-    routers: PromiseOrValue<string>[],
-    statuses: PromiseOrValue<boolean>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    routers: string[],
+    statuses: boolean[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   transferOwnership(
-    newOwner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    newOwner: string,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   uniswapV3SwapCallback(
-    amount0Delta: PromiseOrValue<BigNumberish>,
-    amount1Delta: PromiseOrValue<BigNumberish>,
-    data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    amount0Delta: BigNumberish,
+    amount1Delta: BigNumberish,
+    data: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -1043,11 +1003,11 @@ export interface UniV3Automan extends BaseContract {
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -1055,7 +1015,7 @@ export interface UniV3Automan extends BaseContract {
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
+      feePips: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -1063,36 +1023,38 @@ export interface UniV3Automan extends BaseContract {
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     factory(overrides?: CallOverrides): Promise<string>;
 
-    feeCollector(overrides?: CallOverrides): Promise<string>;
-
-    feeLimitPips(overrides?: CallOverrides): Promise<BigNumber>;
+    feeConfig(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, string] & { feeLimitPips: BigNumber; feeCollector: string }
+    >;
 
     getOptimalSwap(
-      pool: PromiseOrValue<string>,
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
-      amount0Desired: PromiseOrValue<BigNumberish>,
-      amount1Desired: PromiseOrValue<BigNumberish>,
+      pool: string,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
+      amount0Desired: BigNumberish,
+      amount1Desired: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, boolean, BigNumber] & {
@@ -1116,7 +1078,7 @@ export interface UniV3Automan extends BaseContract {
 
     increaseLiquidityOptimal(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
+      swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -1126,13 +1088,10 @@ export interface UniV3Automan extends BaseContract {
       }
     >;
 
-    isController(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     isWhiteListedSwapRouter(
-      arg0: PromiseOrValue<string>,
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1150,7 +1109,7 @@ export interface UniV3Automan extends BaseContract {
 
     mintOptimal(
       params: INonfungiblePositionManager.MintParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
+      swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1167,9 +1126,9 @@ export interface UniV3Automan extends BaseContract {
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1182,13 +1141,13 @@ export interface UniV3Automan extends BaseContract {
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1201,8 +1160,8 @@ export interface UniV3Automan extends BaseContract {
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
+      feePips: BigNumberish,
+      swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -1214,12 +1173,12 @@ export interface UniV3Automan extends BaseContract {
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -1231,7 +1190,7 @@ export interface UniV3Automan extends BaseContract {
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
+      feePips: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -1239,11 +1198,11 @@ export interface UniV3Automan extends BaseContract {
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -1251,110 +1210,93 @@ export interface UniV3Automan extends BaseContract {
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     setControllers(
-      controllers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
+      controllers: string[],
+      statuses: boolean[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setFeeCollector(
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setFeeLimit(
-      _feeLimitPips: PromiseOrValue<BigNumberish>,
+    setFeeConfig(
+      _feeConfig: UniV3Automan.FeeConfigStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
     setSwapRouters(
-      routers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
+      routers: string[],
+      statuses: boolean[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
+      newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
     "DecreaseLiquidity(uint256)"(
-      tokenId?: PromiseOrValue<BigNumberish> | null
+      tokenId?: BigNumberish | null
     ): DecreaseLiquidityEventFilter;
     DecreaseLiquidity(
-      tokenId?: PromiseOrValue<BigNumberish> | null
+      tokenId?: BigNumberish | null
     ): DecreaseLiquidityEventFilter;
 
     "IncreaseLiquidity(uint256)"(
-      tokenId?: PromiseOrValue<BigNumberish> | null
+      tokenId?: BigNumberish | null
     ): IncreaseLiquidityEventFilter;
     IncreaseLiquidity(
-      tokenId?: PromiseOrValue<BigNumberish> | null
+      tokenId?: BigNumberish | null
     ): IncreaseLiquidityEventFilter;
 
-    "Mint(uint256)"(
-      tokenId?: PromiseOrValue<BigNumberish> | null
-    ): MintEventFilter;
-    Mint(tokenId?: PromiseOrValue<BigNumberish> | null): MintEventFilter;
+    "Mint(uint256)"(tokenId?: BigNumberish | null): MintEventFilter;
+    Mint(tokenId?: BigNumberish | null): MintEventFilter;
 
     "OwnershipTransferred(address,address)"(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
+      previousOwner?: string | null,
+      newOwner?: string | null
     ): OwnershipTransferredEventFilter;
     OwnershipTransferred(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
+      previousOwner?: string | null,
+      newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "Rebalance(uint256)"(
-      tokenId?: PromiseOrValue<BigNumberish> | null
-    ): RebalanceEventFilter;
-    Rebalance(
-      tokenId?: PromiseOrValue<BigNumberish> | null
-    ): RebalanceEventFilter;
+    "Rebalance(uint256)"(tokenId?: BigNumberish | null): RebalanceEventFilter;
+    Rebalance(tokenId?: BigNumberish | null): RebalanceEventFilter;
 
-    "Reinvest(uint256)"(
-      tokenId?: PromiseOrValue<BigNumberish> | null
-    ): ReinvestEventFilter;
-    Reinvest(
-      tokenId?: PromiseOrValue<BigNumberish> | null
-    ): ReinvestEventFilter;
+    "Reinvest(uint256)"(tokenId?: BigNumberish | null): ReinvestEventFilter;
+    Reinvest(tokenId?: BigNumberish | null): ReinvestEventFilter;
 
     "RemoveLiquidity(uint256)"(
-      tokenId?: PromiseOrValue<BigNumberish> | null
+      tokenId?: BigNumberish | null
     ): RemoveLiquidityEventFilter;
-    RemoveLiquidity(
-      tokenId?: PromiseOrValue<BigNumberish> | null
-    ): RemoveLiquidityEventFilter;
+    RemoveLiquidity(tokenId?: BigNumberish | null): RemoveLiquidityEventFilter;
   };
 
   estimateGas: {
@@ -1362,85 +1304,80 @@ export interface UniV3Automan extends BaseContract {
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     factory(overrides?: CallOverrides): Promise<BigNumber>;
 
-    feeCollector(overrides?: CallOverrides): Promise<BigNumber>;
-
-    feeLimitPips(overrides?: CallOverrides): Promise<BigNumber>;
+    feeConfig(overrides?: CallOverrides): Promise<BigNumber>;
 
     getOptimalSwap(
-      pool: PromiseOrValue<string>,
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
-      amount0Desired: PromiseOrValue<BigNumberish>,
-      amount1Desired: PromiseOrValue<BigNumberish>,
+      pool: string,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
+      amount0Desired: BigNumberish,
+      amount1Desired: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     increaseLiquidity(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     increaseLiquidityOptimal(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      swapData: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
-    isController(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    isController(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     isWhiteListedSwapRouter(
-      arg0: PromiseOrValue<string>,
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     mint(
       params: INonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     mintOptimal(
       params: INonfungiblePositionManager.MintParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      swapData: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     npm(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1449,114 +1386,109 @@ export interface UniV3Automan extends BaseContract {
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setControllers(
-      controllers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      controllers: string[],
+      statuses: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    setFeeCollector(
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setFeeLimit(
-      _feeLimitPips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    setFeeConfig(
+      _feeConfig: UniV3Automan.FeeConfigStruct,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setSwapRouters(
-      routers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers: string[],
+      statuses: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
@@ -1565,85 +1497,83 @@ export interface UniV3Automan extends BaseContract {
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    feeCollector(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    feeLimitPips(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    feeConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getOptimalSwap(
-      pool: PromiseOrValue<string>,
-      tickLower: PromiseOrValue<BigNumberish>,
-      tickUpper: PromiseOrValue<BigNumberish>,
-      amount0Desired: PromiseOrValue<BigNumberish>,
-      amount1Desired: PromiseOrValue<BigNumberish>,
+      pool: string,
+      tickLower: BigNumberish,
+      tickUpper: BigNumberish,
+      amount0Desired: BigNumberish,
+      amount1Desired: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     increaseLiquidity(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     increaseLiquidityOptimal(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      swapData: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     isController(
-      arg0: PromiseOrValue<string>,
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     isWhiteListedSwapRouter(
-      arg0: PromiseOrValue<string>,
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     mint(
       params: INonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     mintOptimal(
       params: INonfungiblePositionManager.MintParamsStruct,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      swapData: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     npm(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1652,114 +1582,109 @@ export interface UniV3Automan extends BaseContract {
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.MintParamsStruct,
-      tokenId: PromiseOrValue<BigNumberish>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      tokenId: BigNumberish,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      feePips: PromiseOrValue<BigNumberish>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feePips: BigNumberish,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      permitDeadline: PromiseOrValue<BigNumberish>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      permitDeadline: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)"(
       params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: PromiseOrValue<boolean>,
-      feePips: PromiseOrValue<BigNumberish>,
-      swapData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      zeroForOne: boolean,
+      feePips: BigNumberish,
+      swapData: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setControllers(
-      controllers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      controllers: string[],
+      statuses: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    setFeeCollector(
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setFeeLimit(
-      _feeLimitPips: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    setFeeConfig(
+      _feeConfig: UniV3Automan.FeeConfigStruct,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setSwapRouters(
-      routers: PromiseOrValue<string>[],
-      statuses: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers: string[],
+      statuses: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }
