@@ -137,6 +137,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WETH__factory>;
     getContractFactory(
+      name: "ApertureToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ApertureToken__factory>;
+    getContractFactory(
       name: "Payments",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Payments__factory>;
@@ -148,6 +152,30 @@ declare module "hardhat/types/runtime" {
       name: "UniV3Immutables",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniV3Immutables__factory>;
+    getContractFactory(
+      name: "DieselToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DieselToken__factory>;
+    getContractFactory(
+      name: "IDieselToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IDieselToken__factory>;
+    getContractFactory(
+      name: "IDieselTokenExceptions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IDieselTokenExceptions__factory>;
+    getContractFactory(
+      name: "IInterestRateModel",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IInterestRateModel__factory>;
+    getContractFactory(
+      name: "ILendingPool",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ILendingPool__factory>;
+    getContractFactory(
+      name: "IPoolEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPoolEvents__factory>;
     getContractFactory(
       name: "IUniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -168,6 +196,10 @@ declare module "hardhat/types/runtime" {
       name: "OptimalSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
+    getContractFactory(
+      name: "LinearInterestRateModel",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LinearInterestRateModel__factory>;
     getContractFactory(
       name: "UniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
