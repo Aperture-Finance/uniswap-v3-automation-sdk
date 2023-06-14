@@ -20,7 +20,6 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../../../../common";
 
 export interface IUniswapV3SwapCallbackInterface extends utils.Interface {
@@ -34,11 +33,7 @@ export interface IUniswapV3SwapCallbackInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "uniswapV3SwapCallback",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
-    ]
+    values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -77,25 +72,25 @@ export interface IUniswapV3SwapCallback extends BaseContract {
 
   functions: {
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
 
   uniswapV3SwapCallback(
-    amount0Delta: PromiseOrValue<BigNumberish>,
-    amount1Delta: PromiseOrValue<BigNumberish>,
-    data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    amount0Delta: BigNumberish,
+    amount1Delta: BigNumberish,
+    data: BytesLike,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -104,19 +99,19 @@ export interface IUniswapV3SwapCallback extends BaseContract {
 
   estimateGas: {
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     uniswapV3SwapCallback(
-      amount0Delta: PromiseOrValue<BigNumberish>,
-      amount1Delta: PromiseOrValue<BigNumberish>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      amount0Delta: BigNumberish,
+      amount1Delta: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }

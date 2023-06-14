@@ -3,7 +3,6 @@
 /* eslint-disable */
 import { Signer, utils, Contract, ContractFactory, Overrides } from "ethers";
 import type { Provider, TransactionRequest } from "@ethersproject/providers";
-import type { PromiseOrValue } from "../../../common";
 import type { Errors, ErrorsInterface } from "../../../src/libraries/Errors";
 
 const _abi = [
@@ -35,7 +34,7 @@ const _abi = [
 ] as const;
 
 const _bytecode =
-  "0x602d6037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea164736f6c6343000812000a";
+  "0x60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122064667a628361355ffa3f3fcb25192bc32da627c0eb5dde7f6e61748112ac253d64736f6c63430008120033";
 
 type ErrorsConstructorParams =
   | [signer?: Signer]
@@ -54,13 +53,11 @@ export class Errors__factory extends ContractFactory {
     }
   }
 
-  override deploy(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<Errors> {
+  override deploy(overrides?: Overrides & { from?: string }): Promise<Errors> {
     return super.deploy(overrides || {}) as Promise<Errors>;
   }
   override getDeployTransaction(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: string }
   ): TransactionRequest {
     return super.getDeployTransaction(overrides || {});
   }

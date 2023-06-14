@@ -4,4 +4,8 @@
 export * as base from "./base";
 export * as interfaces from "./interfaces";
 export * as libraries from "./libraries";
+export { ApertureToken__factory } from "./ApertureToken__factory";
+export { DieselToken__factory } from "./DieselToken__factory";
+export { LendingPool__factory } from "./LendingPool__factory";
+export { LinearInterestRateModel__factory } from "./LinearInterestRateModel__factory";
 export { UniV3Automan__factory } from "./UniV3Automan__factory";

@@ -5,6 +5,7 @@ import MockAdapter from 'axios-mock-adapter';
 import {
   ActionTypeEnum,
   CheckPositionPermitRequest,
+  CheckUserLimitRequest,
   ConditionTypeEnum,
   UpdatePositionPermitRequest,
 } from '../interfaces';
@@ -168,6 +169,27 @@ describe('Automan client test', () => {
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
     expect(mock.history.post[0].params.toString()).toEqual(
+      new URLSearchParams({ params: stringify(request) }).toString(),
+    );
+  });
+
+  it('Should call check user limit', async () => {
+    const request: CheckUserLimitRequest = {
+      chainId: 1,
+      tokenId: '2',
+      ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
+      actionType: 'Reinvest',
+    };
+
+    const responseData = false;
+    mock.onGet(`${url}Prod/checkUserLimit`).reply(200, responseData);
+
+    const response = await client.checkUserLimit(request);
+    expect(response).toEqual(responseData);
+    // Expect to call get once.
+    expect(mock.history.get.length).toEqual(1);
+    // Expect request params to match.
+    expect(mock.history.get[0].params.toString()).toEqual(
       new URLSearchParams({ params: stringify(request) }).toString(),
     );
   });

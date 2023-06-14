@@ -17,7 +17,6 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
 export interface IUniV3ImmutablesInterface extends utils.Interface {

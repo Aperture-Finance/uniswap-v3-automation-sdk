@@ -1,7 +1,13 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
+  "version": "0.3.0",
   "description": "SDK for Aperture's Uniswap V3 automation platform",
-  "version": "0.2.4",
+  "author": "Aperture Finance <engineering@aperture.finance>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Aperture-Finance/uniswap-v3-automation-sdk/issues"
+  },
+  "homepage": "https://aperture.finance/",
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
@@ -19,16 +25,16 @@
     "uniswap",
     "aperture"
   ],
-  "author": "Aperture Finance <engineering@aperture.finance>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Aperture-Finance/uniswap-v3-automation-sdk/issues"
-  },
-  "homepage": "https://aperture.finance/",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@babel/core": "^7.21.8",
     "@babel/preset-env": "^7.21.5",
     "@babel/preset-typescript": "^7.21.5",
+    "@types/axios-mock-adapter": "^1.10.0",
     "@types/jest": "^29.5.1",
     "@types/json-stable-stringify": "^1.0.34",
     "@typescript-eslint/eslint-plugin": "^5.59.7",

@@ -20,7 +20,6 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../../../common";
 
 export interface IPoolInitializerInterface extends utils.Interface {
@@ -34,12 +33,7 @@ export interface IPoolInitializerInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createAndInitializePoolIfNecessary",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [string, string, BigNumberish, BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -78,28 +72,28 @@ export interface IPoolInitializer extends BaseContract {
 
   functions: {
     createAndInitializePoolIfNecessary(
-      token0: PromiseOrValue<string>,
-      token1: PromiseOrValue<string>,
-      fee: PromiseOrValue<BigNumberish>,
-      sqrtPriceX96: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      token0: string,
+      token1: string,
+      fee: BigNumberish,
+      sqrtPriceX96: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
 
   createAndInitializePoolIfNecessary(
-    token0: PromiseOrValue<string>,
-    token1: PromiseOrValue<string>,
-    fee: PromiseOrValue<BigNumberish>,
-    sqrtPriceX96: PromiseOrValue<BigNumberish>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    token0: string,
+    token1: string,
+    fee: BigNumberish,
+    sqrtPriceX96: BigNumberish,
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     createAndInitializePoolIfNecessary(
-      token0: PromiseOrValue<string>,
-      token1: PromiseOrValue<string>,
-      fee: PromiseOrValue<BigNumberish>,
-      sqrtPriceX96: PromiseOrValue<BigNumberish>,
+      token0: string,
+      token1: string,
+      fee: BigNumberish,
+      sqrtPriceX96: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
   };
@@ -108,21 +102,21 @@ export interface IPoolInitializer extends BaseContract {
 
   estimateGas: {
     createAndInitializePoolIfNecessary(
-      token0: PromiseOrValue<string>,
-      token1: PromiseOrValue<string>,
-      fee: PromiseOrValue<BigNumberish>,
-      sqrtPriceX96: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      token0: string,
+      token1: string,
+      fee: BigNumberish,
+      sqrtPriceX96: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     createAndInitializePoolIfNecessary(
-      token0: PromiseOrValue<string>,
-      token1: PromiseOrValue<string>,
-      fee: PromiseOrValue<BigNumberish>,
-      sqrtPriceX96: PromiseOrValue<BigNumberish>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      token0: string,
+      token1: string,
+      fee: BigNumberish,
+      sqrtPriceX96: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }
