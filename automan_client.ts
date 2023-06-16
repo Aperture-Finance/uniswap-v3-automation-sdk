@@ -1,5 +1,4 @@
 import axios from 'axios';
-import stringify from 'json-stable-stringify';
 import {
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
@@ -19,7 +18,7 @@ async function buildAxiosGetRequest(
 ) {
   return axios.get(url.toString(), {
     params: new URLSearchParams({
-      request: stringify(request),
+      request: JSON.stringify(request),
     }),
   });
 }
