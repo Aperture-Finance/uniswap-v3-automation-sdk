@@ -338,13 +338,6 @@ export const ListTriggerResponseSchema = z.object({
 });
 export type ListTriggerResponse = z.infer<typeof ListTriggerResponseSchema>;
 
-export const APIEventSchema = z.object({
-  queryStringParameters: z.object({
-    params: z.string().nonempty(),
-  }),
-});
-export type APIEvent = z.infer<typeof APIEventSchema>;
-
 export const CheckUserLimitRequestSchema = z.object({
   ownerAddr: z.string().nonempty(),
   chainId: ApertureSupportedChainIdEnum,
