@@ -51,9 +51,7 @@ describe('Automan client test', () => {
     // Expect to call post once.
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
-    expect(mock.history.post[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
-    );
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 
   it('Should call list trigger', async () => {
@@ -78,7 +76,7 @@ describe('Automan client test', () => {
     expect(mock.history.get.length).toEqual(1);
     // Expect request params to match input request.
     expect(mock.history.get[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
+      new URLSearchParams({ request: stringify(request) }).toString(),
     );
   });
 
@@ -102,9 +100,7 @@ describe('Automan client test', () => {
     // Expect to call post once.
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
-    expect(mock.history.post[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
-    );
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 
   it('Should call delete trigger', async () => {
@@ -126,9 +122,7 @@ describe('Automan client test', () => {
     // Expect to call post once.
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
-    expect(mock.history.post[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
-    );
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 
   it('Should call check position approval', async () => {
@@ -146,7 +140,7 @@ describe('Automan client test', () => {
     expect(mock.history.get.length).toEqual(1);
     // Expect request params to match.
     expect(mock.history.get[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
+      new URLSearchParams({ request: stringify(request) }).toString(),
     );
   });
 
@@ -168,9 +162,7 @@ describe('Automan client test', () => {
     // Expect to call post once.
     expect(mock.history.post.length).toEqual(1);
     // Expect request params to match.
-    expect(mock.history.post[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
-    );
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 
   it('Should call check user limit', async () => {
@@ -190,7 +182,7 @@ describe('Automan client test', () => {
     expect(mock.history.get.length).toEqual(1);
     // Expect request params to match.
     expect(mock.history.get[0].params.toString()).toEqual(
-      new URLSearchParams({ params: stringify(request) }).toString(),
+      new URLSearchParams({ request: stringify(request) }).toString(),
     );
   });
 });
