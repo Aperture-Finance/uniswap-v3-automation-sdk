@@ -43,49 +43,49 @@ export class AutomanClient {
   async createTrigger(
     request: Readonly<CreateTriggerRequest>,
   ): Promise<string> {
-    const url = new URL('/Prod/createTrigger', this.endpoint);
+    const url = new URL('/createTrigger', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
   async listTrigger(
     request: Readonly<ListTriggerRequest>,
   ): Promise<ListTriggerResponse> {
-    const url = new URL('/Prod/listTrigger', this.endpoint);
+    const url = new URL('/listTrigger', this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 
   async updateTrigger(
     request: Readonly<UpdateTriggerRequest>,
   ): Promise<string> {
-    const url = new URL('/Prod/updateTrigger', this.endpoint);
+    const url = new URL('/updateTrigger', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
   async deleteTrigger(
     request: Readonly<DeleteTriggerRequest>,
   ): Promise<string> {
-    const url = new URL('/Prod/deleteTrigger', this.endpoint);
+    const url = new URL('/deleteTrigger', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
   async checkPositionApproval(
     request: Readonly<CheckPositionPermitRequest>,
   ): Promise<string> {
-    const url = new URL('/Prod/checkPositionApproval', this.endpoint);
+    const url = new URL('/checkPositionApproval', this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 
   async updatePositionPermit(
     request: Readonly<UpdatePositionPermitRequest>,
   ): Promise<string> {
-    const url = new URL('/Prod/updatePositionPermit', this.endpoint);
+    const url = new URL('/updatePositionPermit', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
   async checkUserLimit(
     request: Readonly<CheckUserLimitRequest>,
   ): Promise<string> {
-    const url = new URL('/Prod/checkUserLimit', this.endpoint);
+    const url = new URL('/checkUserLimit', this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 }
