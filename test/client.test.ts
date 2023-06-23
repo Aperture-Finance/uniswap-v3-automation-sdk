@@ -11,7 +11,7 @@ import {
 
 describe('Automan client test', () => {
   const mock = new MockAdapter(axios);
-  const url = 'https://test-url/';
+  const url = 'https://test-url';
   const client = new AutomanClient(url);
   beforeEach(() => {
     mock.reset();
@@ -43,7 +43,7 @@ describe('Automan client test', () => {
       },
     };
     const responseData = 'Success';
-    mock.onPost(`${url}Prod/createTrigger`).reply(200, responseData);
+    mock.onPost(`${url}/createTrigger`).reply(200, responseData);
 
     const response = await client.createTrigger(request);
     expect(response).toEqual(responseData);
@@ -66,7 +66,7 @@ describe('Automan client test', () => {
         { taskId: 1, nftId: 64448, status: 'Created' },
       ],
     };
-    mock.onGet(`${url}Prod/listTrigger`).reply(200, responseData);
+    mock.onGet(`${url}/listTrigger`).reply(200, responseData);
 
     const response = await client.listTrigger(request);
     expect(response).toEqual(responseData);
@@ -92,7 +92,7 @@ describe('Automan client test', () => {
     };
 
     const responseData = 'Success';
-    mock.onPost(`${url}Prod/updateTrigger`).reply(200, responseData);
+    mock.onPost(`${url}/updateTrigger`).reply(200, responseData);
 
     const response = await client.updateTrigger(request);
     expect(response).toEqual(responseData);
@@ -114,7 +114,7 @@ describe('Automan client test', () => {
     };
 
     const responseData = 'Success';
-    mock.onPost(`${url}Prod/deleteTrigger`).reply(200, responseData);
+    mock.onPost(`${url}/deleteTrigger`).reply(200, responseData);
 
     const response = await client.deleteTrigger(request);
     expect(response).toEqual(responseData);
@@ -131,7 +131,7 @@ describe('Automan client test', () => {
     };
 
     const responseData = false;
-    mock.onGet(`${url}Prod/checkPositionApproval`).reply(200, responseData);
+    mock.onGet(`${url}/checkPositionApproval`).reply(200, responseData);
 
     const response = await client.checkPositionApproval(request);
     expect(response).toEqual(responseData);
@@ -154,7 +154,7 @@ describe('Automan client test', () => {
     };
 
     const responseData = 'Success';
-    mock.onPost(`${url}Prod/updatePositionPermit`).reply(200, responseData);
+    mock.onPost(`${url}/updatePositionPermit`).reply(200, responseData);
 
     const response = await client.updatePositionPermit(request);
     expect(response).toEqual(responseData);
@@ -173,7 +173,7 @@ describe('Automan client test', () => {
     };
 
     const responseData = false;
-    mock.onGet(`${url}Prod/checkUserLimit`).reply(200, responseData);
+    mock.onGet(`${url}/checkUserLimit`).reply(200, responseData);
 
     const response = await client.checkUserLimit(request);
     expect(response).toEqual(responseData);
