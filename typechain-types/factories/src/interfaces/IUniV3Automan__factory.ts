@@ -39,6 +39,25 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "address[]",
+        name: "controllers",
+        type: "address[]",
+      },
+      {
+        indexed: false,
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "ControllersSet",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "uint256",
         name: "tokenId",
@@ -46,6 +65,25 @@ const _abi = [
       },
     ],
     name: "DecreaseLiquidity",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "feeCollector",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint96",
+        name: "feeLimitPips",
+        type: "uint96",
+      },
+    ],
+    name: "FeeConfigSet",
     type: "event",
   },
   {
@@ -111,6 +149,25 @@ const _abi = [
       },
     ],
     name: "RemoveLiquidity",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address[]",
+        name: "routers",
+        type: "address[]",
+      },
+      {
+        indexed: false,
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "SwapRoutersSet",
     type: "event",
   },
   {
