@@ -27,18 +27,6 @@ import type {
   OnEvent,
 } from "../common";
 
-export declare namespace UniV3Automan {
-  export type FeeConfigStruct = {
-    feeLimitPips: BigNumberish;
-    feeCollector: string;
-  };
-
-  export type FeeConfigStructOutput = [BigNumber, string] & {
-    feeLimitPips: BigNumber;
-    feeCollector: string;
-  };
-}
-
 export declare namespace INonfungiblePositionManager {
   export type DecreaseLiquidityParamsStruct = {
     tokenId: BigNumberish;
@@ -128,6 +116,18 @@ export declare namespace INonfungiblePositionManager {
   };
 }
 
+export declare namespace UniV3Automan {
+  export type FeeConfigStruct = {
+    feeCollector: string;
+    feeLimitPips: BigNumberish;
+  };
+
+  export type FeeConfigStructOutput = [string, BigNumber] & {
+    feeCollector: string;
+    feeLimitPips: BigNumber;
+  };
+}
+
 export interface UniV3AutomanInterface extends utils.Interface {
   functions: {
     "WETH9()": FunctionFragment;
@@ -156,7 +156,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
     "removeLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setControllers(address[],bool[])": FunctionFragment;
-    "setFeeConfig((uint96,address))": FunctionFragment;
+    "setFeeConfig((address,uint96))": FunctionFragment;
     "setSwapRouters(address[],bool[])": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "uniswapV3SwapCallback(int256,int256,bytes)": FunctionFragment;
@@ -483,23 +483,40 @@ export interface UniV3AutomanInterface extends utils.Interface {
   ): Result;
 
   events: {
+    "ControllersSet(address[],bool[])": EventFragment;
     "DecreaseLiquidity(uint256)": EventFragment;
+    "FeeConfigSet(address,uint96)": EventFragment;
     "IncreaseLiquidity(uint256)": EventFragment;
     "Mint(uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Rebalance(uint256)": EventFragment;
     "Reinvest(uint256)": EventFragment;
     "RemoveLiquidity(uint256)": EventFragment;
+    "SwapRoutersSet(address[],bool[])": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ControllersSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "DecreaseLiquidity"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "FeeConfigSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "IncreaseLiquidity"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Mint"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Rebalance"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Reinvest"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RemoveLiquidity"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SwapRoutersSet"): EventFragment;
 }
+
+export interface ControllersSetEventObject {
+  controllers: string[];
+  statuses: boolean[];
+}
+export type ControllersSetEvent = TypedEvent<
+  [string[], boolean[]],
+  ControllersSetEventObject
+>;
+
+export type ControllersSetEventFilter = TypedEventFilter<ControllersSetEvent>;
 
 export interface DecreaseLiquidityEventObject {
   tokenId: BigNumber;
@@ -511,6 +528,17 @@ export type DecreaseLiquidityEvent = TypedEvent<
 
 export type DecreaseLiquidityEventFilter =
   TypedEventFilter<DecreaseLiquidityEvent>;
+
+export interface FeeConfigSetEventObject {
+  feeCollector: string;
+  feeLimitPips: BigNumber;
+}
+export type FeeConfigSetEvent = TypedEvent<
+  [string, BigNumber],
+  FeeConfigSetEventObject
+>;
+
+export type FeeConfigSetEventFilter = TypedEventFilter<FeeConfigSetEvent>;
 
 export interface IncreaseLiquidityEventObject {
   tokenId: BigNumber;
@@ -565,6 +593,17 @@ export type RemoveLiquidityEvent = TypedEvent<
 >;
 
 export type RemoveLiquidityEventFilter = TypedEventFilter<RemoveLiquidityEvent>;
+
+export interface SwapRoutersSetEventObject {
+  routers: string[];
+  statuses: boolean[];
+}
+export type SwapRoutersSetEvent = TypedEvent<
+  [string[], boolean[]],
+  SwapRoutersSetEventObject
+>;
+
+export type SwapRoutersSetEventFilter = TypedEventFilter<SwapRoutersSetEvent>;
 
 export interface UniV3Automan extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -636,7 +675,7 @@ export interface UniV3Automan extends BaseContract {
     feeConfig(
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, string] & { feeLimitPips: BigNumber; feeCollector: string }
+      [string, BigNumber] & { feeCollector: string; feeLimitPips: BigNumber }
     >;
 
     getOptimalSwap(
@@ -839,7 +878,7 @@ export interface UniV3Automan extends BaseContract {
   feeConfig(
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, string] & { feeLimitPips: BigNumber; feeCollector: string }
+    [string, BigNumber] & { feeCollector: string; feeLimitPips: BigNumber }
   >;
 
   getOptimalSwap(
@@ -1046,7 +1085,7 @@ export interface UniV3Automan extends BaseContract {
     feeConfig(
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, string] & { feeLimitPips: BigNumber; feeCollector: string }
+      [string, BigNumber] & { feeCollector: string; feeLimitPips: BigNumber }
     >;
 
     getOptimalSwap(
@@ -1261,12 +1300,30 @@ export interface UniV3Automan extends BaseContract {
   };
 
   filters: {
+    "ControllersSet(address[],bool[])"(
+      controllers?: null,
+      statuses?: null
+    ): ControllersSetEventFilter;
+    ControllersSet(
+      controllers?: null,
+      statuses?: null
+    ): ControllersSetEventFilter;
+
     "DecreaseLiquidity(uint256)"(
       tokenId?: BigNumberish | null
     ): DecreaseLiquidityEventFilter;
     DecreaseLiquidity(
       tokenId?: BigNumberish | null
     ): DecreaseLiquidityEventFilter;
+
+    "FeeConfigSet(address,uint96)"(
+      feeCollector?: null,
+      feeLimitPips?: null
+    ): FeeConfigSetEventFilter;
+    FeeConfigSet(
+      feeCollector?: null,
+      feeLimitPips?: null
+    ): FeeConfigSetEventFilter;
 
     "IncreaseLiquidity(uint256)"(
       tokenId?: BigNumberish | null
@@ -1297,6 +1354,12 @@ export interface UniV3Automan extends BaseContract {
       tokenId?: BigNumberish | null
     ): RemoveLiquidityEventFilter;
     RemoveLiquidity(tokenId?: BigNumberish | null): RemoveLiquidityEventFilter;
+
+    "SwapRoutersSet(address[],bool[])"(
+      routers?: null,
+      statuses?: null
+    ): SwapRoutersSetEventFilter;
+    SwapRoutersSet(routers?: null, statuses?: null): SwapRoutersSetEventFilter;
   };
 
   estimateGas: {

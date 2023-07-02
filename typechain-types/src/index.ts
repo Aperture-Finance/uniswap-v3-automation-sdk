@@ -7,8 +7,4 @@ import type * as interfaces from "./interfaces";
 export type { interfaces };
 import type * as libraries from "./libraries";
 export type { libraries };
-export type { ApertureToken } from "./ApertureToken";
-export type { DieselToken } from "./DieselToken";
-export type { LendingPool } from "./LendingPool";
-export type { LinearInterestRateModel } from "./LinearInterestRateModel";
 export type { UniV3Automan } from "./UniV3Automan";

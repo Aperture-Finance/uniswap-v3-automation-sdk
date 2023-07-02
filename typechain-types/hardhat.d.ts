@@ -29,22 +29,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
     getContractFactory(
-      name: "Pausable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Pausable__factory>;
-    getContractFactory(
-      name: "ERC20",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC20__factory>;
-    getContractFactory(
-      name: "IERC20Metadata",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC20Metadata__factory>;
-    getContractFactory(
-      name: "IERC20Permit",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC20Permit__factory>;
-    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -68,10 +52,6 @@ declare module "hardhat/types/runtime" {
       name: "IUniswapV3SwapCallback",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV3SwapCallback__factory>;
-    getContractFactory(
-      name: "IUniswapV3Factory",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV3Factory__factory>;
     getContractFactory(
       name: "IUniswapV3Pool",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -117,10 +97,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPoolInitializer__factory>;
     getContractFactory(
-      name: "TokenVesting",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.TokenVesting__factory>;
-    getContractFactory(
       name: "FixedPointMathLib",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FixedPointMathLib__factory>;
@@ -137,10 +113,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WETH__factory>;
     getContractFactory(
-      name: "ApertureToken",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ApertureToken__factory>;
-    getContractFactory(
       name: "Payments",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Payments__factory>;
@@ -153,30 +125,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniV3Immutables__factory>;
     getContractFactory(
-      name: "DieselToken",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DieselToken__factory>;
-    getContractFactory(
-      name: "IDieselToken",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IDieselToken__factory>;
-    getContractFactory(
-      name: "IDieselTokenExceptions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IDieselTokenExceptions__factory>;
-    getContractFactory(
-      name: "IInterestRateModel",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IInterestRateModel__factory>;
-    getContractFactory(
-      name: "ILendingPool",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ILendingPool__factory>;
-    getContractFactory(
-      name: "IPoolEvents",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPoolEvents__factory>;
-    getContractFactory(
       name: "IUniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniV3Automan__factory>;
@@ -185,21 +133,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniV3Immutables__factory>;
     getContractFactory(
-      name: "LendingPool",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LendingPool__factory>;
-    getContractFactory(
-      name: "Errors",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Errors__factory>;
-    getContractFactory(
       name: "OptimalSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
-    getContractFactory(
-      name: "LinearInterestRateModel",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LinearInterestRateModel__factory>;
     getContractFactory(
       name: "UniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -225,26 +161,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
-    getContractAt(
-      name: "Pausable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Pausable>;
-    getContractAt(
-      name: "ERC20",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ERC20>;
-    getContractAt(
-      name: "IERC20Metadata",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC20Metadata>;
-    getContractAt(
-      name: "IERC20Permit",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC20Permit>;
     getContractAt(
       name: "IERC20",
       address: string,
@@ -275,11 +191,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV3SwapCallback>;
-    getContractAt(
-      name: "IUniswapV3Factory",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV3Factory>;
     getContractAt(
       name: "IUniswapV3Pool",
       address: string,
@@ -336,11 +247,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IPoolInitializer>;
     getContractAt(
-      name: "TokenVesting",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.TokenVesting>;
-    getContractAt(
       name: "FixedPointMathLib",
       address: string,
       signer?: ethers.Signer
@@ -361,11 +267,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.WETH>;
     getContractAt(
-      name: "ApertureToken",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ApertureToken>;
-    getContractAt(
       name: "Payments",
       address: string,
       signer?: ethers.Signer
@@ -381,36 +282,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.UniV3Immutables>;
     getContractAt(
-      name: "DieselToken",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.DieselToken>;
-    getContractAt(
-      name: "IDieselToken",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IDieselToken>;
-    getContractAt(
-      name: "IDieselTokenExceptions",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IDieselTokenExceptions>;
-    getContractAt(
-      name: "IInterestRateModel",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IInterestRateModel>;
-    getContractAt(
-      name: "ILendingPool",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ILendingPool>;
-    getContractAt(
-      name: "IPoolEvents",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPoolEvents>;
-    getContractAt(
       name: "IUniV3Automan",
       address: string,
       signer?: ethers.Signer
@@ -421,25 +292,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IUniV3Immutables>;
     getContractAt(
-      name: "LendingPool",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LendingPool>;
-    getContractAt(
-      name: "Errors",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Errors>;
-    getContractAt(
       name: "OptimalSwap",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.OptimalSwap>;
-    getContractAt(
-      name: "LinearInterestRateModel",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LinearInterestRateModel>;
     getContractAt(
       name: "UniV3Automan",
       address: string,
