@@ -155,12 +155,16 @@ export const AccruedFeesConditionSchema = z
   );
 export type AccruedFeesCondition = z.infer<typeof AccruedFeesConditionSchema>;
 
-export const ConditionSchema = z.discriminatedUnion('type', [
-  TimeConditionSchema,
-  TokenAmountConditionSchema,
-  PriceConditionSchema,
-  AccruedFeesConditionSchema,
-]);
+export const ConditionSchema = z
+  .discriminatedUnion('type', [
+    TimeConditionSchema,
+    TokenAmountConditionSchema,
+    PriceConditionSchema,
+    AccruedFeesConditionSchema,
+  ])
+  .describe(
+    'The condition which triggers the action. If a trigger is successfully created with a condition that is already met at the time of trigger creation, then the action is immediately eligible to be triggered.',
+  );
 export type Condition = z.infer<typeof ConditionSchema>;
 
 export const CloseActionSchema = z
