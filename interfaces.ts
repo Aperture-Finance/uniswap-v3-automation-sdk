@@ -5,6 +5,7 @@ export enum ApertureSupportedChainId {
   ETHEREUM_MAINNET_CHAIN_ID = 1,
   ARBITRUM_MAINNET_CHAIN_ID = 42161,
   GOERLI_TESTNET_CHAIN_ID = 5,
+  ARBITRUM_GOERLI_TESTNET_CHAIN_ID = 421613,
 }
 
 const ApertureSupportedChainIdEnum = z
