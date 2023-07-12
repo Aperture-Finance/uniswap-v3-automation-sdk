@@ -95,16 +95,22 @@ export type PositionStateStruct = {
   position: PositionFullStruct;
   slot0: Slot0Struct;
   activeLiquidity: BigNumberish;
+  decimals0: BigNumberish;
+  decimals1: BigNumberish;
 };
 
 export type PositionStateStructOutput = [
   PositionFullStructOutput,
   Slot0StructOutput,
-  BigNumber
+  BigNumber,
+  number,
+  number
 ] & {
   position: PositionFullStructOutput;
   slot0: Slot0StructOutput;
   activeLiquidity: BigNumber;
+  decimals0: number;
+  decimals1: number;
 };
 
 export interface EphemeralAllPositionsInterface extends utils.Interface {
