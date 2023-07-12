@@ -3,5 +3,6 @@
 /* eslint-disable */
 export * as base from "./base";
 export * as interfaces from "./interfaces";
+export * as lens from "./lens";
 export * as libraries from "./libraries";
 export { UniV3Automan__factory } from "./UniV3Automan__factory";

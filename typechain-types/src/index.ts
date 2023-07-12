@@ -5,6 +5,8 @@ import type * as base from "./base";
 export type { base };
 import type * as interfaces from "./interfaces";
 export type { interfaces };
+import type * as lens from "./lens";
+export type { lens };
 import type * as libraries from "./libraries";
 export type { libraries };
 export type { UniV3Automan } from "./UniV3Automan";
