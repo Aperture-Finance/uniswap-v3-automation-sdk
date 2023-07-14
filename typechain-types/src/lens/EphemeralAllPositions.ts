@@ -18,7 +18,7 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "../../../common";
+} from "../../common";
 
 export type PositionFullStruct = {
   nonce: BigNumberish;
@@ -92,6 +92,7 @@ export type Slot0StructOutput = [
 };
 
 export type PositionStateStruct = {
+  tokenId: BigNumberish;
   position: PositionFullStruct;
   slot0: Slot0Struct;
   activeLiquidity: BigNumberish;
@@ -100,12 +101,14 @@ export type PositionStateStruct = {
 };
 
 export type PositionStateStructOutput = [
+  BigNumber,
   PositionFullStructOutput,
   Slot0StructOutput,
   BigNumber,
   number,
   number
 ] & {
+  tokenId: BigNumber;
   position: PositionFullStructOutput;
   slot0: Slot0StructOutput;
   activeLiquidity: BigNumber;
@@ -113,32 +116,32 @@ export type PositionStateStructOutput = [
   decimals1: number;
 };
 
-export interface EphemeralGetPositionInterface extends utils.Interface {
+export interface EphemeralAllPositionsInterface extends utils.Interface {
   functions: {
-    "getPosition(address,uint256)": FunctionFragment;
+    "allPositions(address,address)": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "getPosition"): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "allPositions"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "getPosition",
-    values: [string, BigNumberish]
+    functionFragment: "allPositions",
+    values: [string, string]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "getPosition",
+    functionFragment: "allPositions",
     data: BytesLike
   ): Result;
 
   events: {};
 }
 
-export interface EphemeralGetPosition extends BaseContract {
+export interface EphemeralAllPositions extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: EphemeralGetPositionInterface;
+  interface: EphemeralAllPositionsInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -160,41 +163,43 @@ export interface EphemeralGetPosition extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    getPosition(
+    allPositions(
       npm: string,
-      tokenId: BigNumberish,
+      owner: string,
       overrides?: CallOverrides
-    ): Promise<[PositionStateStructOutput]>;
+    ): Promise<
+      [PositionStateStructOutput[]] & { positions: PositionStateStructOutput[] }
+    >;
   };
 
-  getPosition(
+  allPositions(
     npm: string,
-    tokenId: BigNumberish,
+    owner: string,
     overrides?: CallOverrides
-  ): Promise<PositionStateStructOutput>;
+  ): Promise<PositionStateStructOutput[]>;
 
   callStatic: {
-    getPosition(
+    allPositions(
       npm: string,
-      tokenId: BigNumberish,
+      owner: string,
       overrides?: CallOverrides
-    ): Promise<PositionStateStructOutput>;
+    ): Promise<PositionStateStructOutput[]>;
   };
 
   filters: {};
 
   estimateGas: {
-    getPosition(
+    allPositions(
       npm: string,
-      tokenId: BigNumberish,
+      owner: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    getPosition(
+    allPositions(
       npm: string,
-      tokenId: BigNumberish,
+      owner: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
