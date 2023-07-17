@@ -1,6 +1,7 @@
-import { AutomanClient } from '../automan_client';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+
+import { AutomanClient } from '../automan_client';
 import {
   ActionTypeEnum,
   CheckPositionPermitRequest,
