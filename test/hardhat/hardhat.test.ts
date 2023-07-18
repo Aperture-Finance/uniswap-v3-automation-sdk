@@ -1,4 +1,3 @@
-import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
@@ -14,10 +13,9 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
 import { run } from 'hardhat';
-import hre from 'hardhat';
 import JSBI from 'jsbi';
 import { TestClient, createTestClient, http, publicActions } from 'viem';
-import { goerli, hardhat } from 'viem/chains';
+import { hardhat } from 'viem/chains';
 
 import { getToken } from '../../currency';
 import {
@@ -29,6 +27,7 @@ import { generatePriceConditionFromTokenValueProportion } from '../../payload';
 import {
   PositionDetails,
   getAllPositions,
+  getNPM,
   getPosition,
   getPositionAtPrice,
   getRebalancedPosition,
@@ -53,7 +52,6 @@ import {
   MIN_PRICE,
   alignPriceToClosestUsableTick,
   priceToClosestUsableTick,
-  readTickToLiquidityMap,
   sqrtRatioToPrice,
 } from '../../tick';
 
@@ -77,6 +75,9 @@ const deadline = '4093484400';
 const TEST_WALLET_PRIVATE_KEY =
   '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
+// Spin up a hardhat node.
+run('node');
+
 async function resetFork(testClient: TestClient) {
   await testClient.reset({
     blockNumber: 17188000n,
@@ -93,7 +94,6 @@ describe('Util tests', function () {
   }).extend(publicActions);
 
   before(async function () {
-    run('node');
     await resetFork(testClient as unknown as TestClient);
     inRangePosition = await getPosition(chainId, 4n, testClient);
   });
@@ -329,34 +329,43 @@ describe('Util tests', function () {
     const publicClient = getPublicClient(5);
     // an address with 90+ positions
     const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
-    // const positions = await getAllPositions(
-    //   address,
-    //   chainId,
-    //   createPublicClient({
-    //     chain: goerli,
-    //     transport: http(),
-    //   }),
-    // );
-    // const basicPositions = await getAllPositionBasicInfoByOwner(
-    //   address,
-    //   chainId,
-    //   publicClient,
-    // );
-    // expect(positions.size).to.equal(basicPositions.size);
-    // for (const [tokenId, pos] of positions.entries()) {
-    //   const basicPosition = basicPositions.get(tokenId);
-    //   expect(basicPosition).to.not.be.undefined;
-    //   expect(basicPosition?.token0).to.deep.equal(pos.pool.token0);
-    //   expect(basicPosition?.token1).to.deep.equal(pos.pool.token1);
-    //   expect(basicPosition?.fee).to.equal(pos.pool.fee);
-    //   expect(basicPosition?.liquidity).to.equal(pos.liquidity.toString());
-    //   expect(basicPosition?.tickLower).to.equal(pos.tickLower);
-    //   expect(basicPosition?.tickUpper).to.equal(pos.tickUpper);
-    // }
+    const positionDetails = await getAllPositions(
+      address,
+      chainId,
+      publicClient,
+    );
+    const npm = getNPM(chainId, publicClient);
+    const numPositions = await npm.read.balanceOf([address]);
+    const positionIds = await Promise.all(
+      [...Array(Number(numPositions)).keys()].map((index) =>
+        npm.read.tokenOfOwnerByIndex([address, BigInt(index)]),
+      ),
+    );
+    const positionInfos = new Map(
+      await Promise.all(
+        positionIds.map(async (positionId) => {
+          return [
+            positionId.toString(),
+            await getPosition(chainId, positionId, publicClient),
+          ] as const;
+        }),
+      ),
+    );
+    expect(positionDetails.size).to.equal(positionInfos.size);
+    for (const [tokenId, pos] of positionDetails.entries()) {
+      const position = positionInfos.get(tokenId);
+      expect(position).to.not.be.undefined;
+      expect(position?.pool.token0).to.deep.equal(pos.pool.token0);
+      expect(position?.pool.token1).to.deep.equal(pos.pool.token1);
+      expect(position?.pool.fee).to.equal(pos.pool.fee);
+      expect(position?.liquidity.toString()).to.equal(pos.liquidity.toString());
+      expect(position?.tickLower).to.equal(pos.tickLower);
+      expect(position?.tickUpper).to.equal(pos.tickUpper);
+    }
   });
 });
 
-describe.skip('CoinGecko tests', function () {
+describe('CoinGecko tests', function () {
   const testClient = createTestClient({
     chain: hardhat,
     mode: 'hardhat',
@@ -364,7 +373,6 @@ describe.skip('CoinGecko tests', function () {
   }).extend(publicActions);
 
   before(async function () {
-    run('node');
     await resetFork(testClient as unknown as TestClient);
   });
 
@@ -442,7 +450,7 @@ describe.skip('CoinGecko tests', function () {
   });
 });
 
-describe.skip('Price to tick conversion', function () {
+describe('Price to tick conversion', function () {
   const token0 = new Token(1, WBTC_ADDRESS, 18);
   const token1 = new Token(1, WETH_ADDRESS, 18);
   const fee = FeeAmount.MEDIUM;

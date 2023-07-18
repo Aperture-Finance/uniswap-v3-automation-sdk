@@ -22,7 +22,7 @@ const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
 const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 
-describe.skip('Pool subgraph query tests', function () {
+describe('Pool subgraph query tests', function () {
   it('Fee tier distribution', async function () {
     const [distribution, distributionOppositeTokenOrder] = await Promise.all([
       getFeeTierDistribution(chainId, WBTC_ADDRESS, WETH_ADDRESS),
@@ -138,5 +138,7 @@ describe.skip('Pool subgraph query tests', function () {
         readTickToLiquidityMap(tickToLiquidityMap, tickCurrentAligned)!,
       ),
     ).to.equal(true);
-  });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+  }, 20000);
 });

@@ -11,7 +11,7 @@ export default {
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'v8',
   // A list of paths to directories that Jest should use to search for files in
-  // roots: ['./tests/unit', './tests/integration'],
+  roots: ['./test/jest'],
   // transform: {
   //   '^.+\\.ts?$': 'esbuild-jest',
   // },

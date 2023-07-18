@@ -22,7 +22,7 @@ import {
 
 import { getChainInfo } from './chain';
 import { ApertureSupportedChainId } from './interfaces';
-import { getPoolContract, getPoolPrice } from './pool';
+import { getPool, getPoolContract, getPoolPrice } from './pool';
 import {
   fractionToBig,
   getTokenValueProportionFromPriceRatio,
@@ -91,12 +91,14 @@ export async function getPosition(
   positionId: bigint,
   publicClient: PublicClient,
 ) {
-  const { position } = await PositionDetails.fromPositionId(
-    chainId,
-    positionId,
-    publicClient,
-  );
-  return position;
+  const [, , token0, token1, fee, tickLower, tickUpper, liquidity] =
+    await getNPM(chainId, publicClient).read.positions([positionId]);
+  return new Position({
+    pool: await getPool(token0, token1, fee, chainId, publicClient),
+    liquidity: liquidity.toString(),
+    tickLower: tickLower,
+    tickUpper: tickUpper,
+  });
 }
 
 /**
