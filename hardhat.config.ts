@@ -13,6 +13,9 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  paths: {
+    tests: './test/hardhat',
+  },
 };
 
 export default config;
