@@ -9,10 +9,10 @@ jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
       - name: Checkout commit # download the code from triggering commit
         uses: actions/checkout@v3
 
-      - name: Set Node.js 16.x # Setup NodeJS
+      - name: Set Node.js 18.x # Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: 'yarn'
 
       - name: Install dependencies 📦
