@@ -127,10 +127,9 @@ describe('Util tests', function () {
   });
 
   it('Token value proportion to price conversion', async function () {
-    const position = await getPosition(chainId, 4n, testClient);
     const price = getRawRelativePriceFromTokenValueProportion(
-      position.tickLower,
-      position.tickUpper,
+      inRangePosition.tickLower,
+      inRangePosition.tickUpper,
       new Big('0.3'),
     );
     expect(price.toString()).to.equal(
@@ -138,24 +137,24 @@ describe('Util tests', function () {
     );
     expect(
       getRawRelativePriceFromTokenValueProportion(
-        position.tickLower,
-        position.tickUpper,
+        inRangePosition.tickLower,
+        inRangePosition.tickUpper,
         new Big('0'),
       ).toString(),
     ).to.equal(
-      new Big(TickMath.getSqrtRatioAtTick(position.tickUpper).toString())
+      new Big(TickMath.getSqrtRatioAtTick(inRangePosition.tickUpper).toString())
         .pow(2)
         .div(Q192)
         .toString(),
     );
     expect(
       getRawRelativePriceFromTokenValueProportion(
-        position.tickLower,
-        position.tickUpper,
+        inRangePosition.tickLower,
+        inRangePosition.tickUpper,
         new Big('1'),
       ).toString(),
     ).to.equal(
-      new Big(TickMath.getSqrtRatioAtTick(position.tickLower).toString())
+      new Big(TickMath.getSqrtRatioAtTick(inRangePosition.tickLower).toString())
         .pow(2)
         .div(Q192)
         .toString(),
@@ -163,8 +162,8 @@ describe('Util tests', function () {
 
     // Verify that the calculated price indeed corresponds to ~30% of the position value in token0.
     const token0ValueProportion = getTokenValueProportionFromPriceRatio(
-      position.tickLower,
-      position.tickUpper,
+      inRangePosition.tickLower,
+      inRangePosition.tickUpper,
       price,
     );
     expect(token0ValueProportion.toFixed(30)).to.equal(
@@ -173,8 +172,8 @@ describe('Util tests', function () {
 
     // Verify that price condition is generated correctly.
     const condition = generatePriceConditionFromTokenValueProportion(
-      position.tickLower,
-      position.tickUpper,
+      inRangePosition.tickLower,
+      inRangePosition.tickUpper,
       false,
       new Big('0.3'),
       /*durationSec=*/ 7200,
@@ -188,8 +187,8 @@ describe('Util tests', function () {
     });
     expect(
       generatePriceConditionFromTokenValueProportion(
-        position.tickLower,
-        position.tickUpper,
+        inRangePosition.tickLower,
+        inRangePosition.tickUpper,
         true,
         new Big('0.95'),
         /*durationSec=*/ undefined,
