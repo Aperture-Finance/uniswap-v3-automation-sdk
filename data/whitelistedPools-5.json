@@ -1,0 +1,178 @@
+[
+  {
+    "id": "0x951b8635A3D7Aa2FD659aB93Cb81710536d90043",
+    "feeTier": "500",
+    "token0": {
+      "id": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      "symbol": "WETH",
+      "decimals": "18",
+      "name": "Wrapped Ether"
+    },
+    "token1": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    }
+  },
+  {
+    "id": "0x04B1560f4F58612a24cF13531F4706c817E8A5Fe",
+    "feeTier": "3000",
+    "token0": {
+      "id": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      "symbol": "WETH",
+      "decimals": "18",
+      "name": "Wrapped Ether"
+    },
+    "token1": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    }
+  },
+  {
+    "id": "0x090e5B8842EfFF84937eD4F30a2c461989ca40E2",
+    "feeTier": "3000",
+    "token0": {
+      "id": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      "symbol": "WETH",
+      "decimals": "18",
+      "name": "Wrapped Ether"
+    },
+    "token1": {
+      "id": "0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05",
+      "symbol": "WBTC",
+      "decimals": "8",
+      "name": "Wrapped BTC"
+    }
+  },
+  {
+    "id": "0xEf7BEb748b337419437A2FEb3aADc4C0b5136145",
+    "feeTier": "3000",
+    "token0": {
+      "id": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      "symbol": "WETH",
+      "decimals": "18",
+      "name": "Wrapped Ether"
+    },
+    "token1": {
+      "id": "0xe802376580c10fE23F027e1E19Ed9D54d4C9311e",
+      "symbol": "USDT",
+      "decimals": "6",
+      "name": "Tether USD"
+    }
+  },
+  {
+    "id": "0xf380EF47167e722D39B4DAC00fe98626Fe511291",
+    "feeTier": "500",
+    "token0": {
+      "id": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+      "symbol": "WETH",
+      "decimals": "18",
+      "name": "Wrapped Ether"
+    },
+    "token1": {
+      "id": "0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05",
+      "symbol": "WBTC",
+      "decimals": "8",
+      "name": "Wrapped BTC"
+    }
+  },
+  {
+    "id": "0x5943cf858b2fb9Fe2d7362E3c5d2f4212F418469",
+    "feeTier": "100",
+    "token0": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    },
+    "token1": {
+      "id": "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60",
+      "symbol": "DAI",
+      "decimals": "18",
+      "name": "Dai Stablecoin"
+    }
+  },
+  {
+    "id": "0xf0156c593b1C26C2a9B082f2F18e4C0b3749c033",
+    "feeTier": "500",
+    "token0": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    },
+    "token1": {
+      "id": "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60",
+      "symbol": "DAI",
+      "decimals": "18",
+      "name": "Dai Stablecoin"
+    }
+  },
+  {
+    "id": "0x993b6502813b5A58ED7Aa39EbF121540076cbFD1",
+    "feeTier": "3000",
+    "token0": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    },
+    "token1": {
+      "id": "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60",
+      "symbol": "DAI",
+      "decimals": "18",
+      "name": "Dai Stablecoin"
+    }
+  },
+  {
+    "id": "0x4D2488fd3D8f76bBAfE25e576a254Cf7d13683C6",
+    "feeTier": "10000",
+    "token0": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    },
+    "token1": {
+      "id": "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60",
+      "symbol": "DAI",
+      "decimals": "18",
+      "name": "Dai Stablecoin"
+    }
+  },
+  {
+    "id": "0x387e7C040f9Da78C18fACa1D65cFEf1C64E8b30a",
+    "feeTier": "3000",
+    "token0": {
+      "id": "0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05",
+      "symbol": "WBTC",
+      "decimals": "8",
+      "name": "Wrapped BTC"
+    },
+    "token1": {
+      "id": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
+      "symbol": "USDC",
+      "decimals": "6",
+      "name": "USD Coin"
+    }
+  },
+  {
+    "id": "0xf83aF5ead11a631DCDe1E62dCA759CC4BA6B8B05",
+    "feeTier": "3000",
+    "token0": {
+      "id": "0x7e1C44fc257153b681eB8771A21abeF47aa36e77",
+      "symbol": "AptrB",
+      "decimals": "6",
+      "name": "ApertureTestTokenB"
+    },
+    "token1": {
+      "id": "0xD15F4770CBcbfbBffc90f9ADEea58cA4a87F2544",
+      "symbol": "AptrA",
+      "decimals": "8",
+      "name": "ApertureTestTokenA"
+    }
+  }
+]
