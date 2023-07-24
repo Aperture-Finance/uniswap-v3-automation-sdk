@@ -7,6 +7,7 @@ import {
 import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
 import { ApertureSupportedChainId } from './interfaces';
+import { getPublicClient } from './public_client';
 import { ERC20__factory } from './typechain-types';
 import { nativeOnChain } from './uniswap-constants';
 
@@ -22,13 +23,14 @@ import { nativeOnChain } from './uniswap-constants';
 export async function getToken(
   tokenAddress: Address,
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<Token> {
   const decimals = await getContract({
     address: tokenAddress,
     abi: ERC20__factory.abi,
-    publicClient,
-  }).read.decimals();
+    publicClient: publicClient ?? getPublicClient(chainId),
+  }).read.decimals({ blockNumber });
   return new Token(chainId, tokenAddress, decimals);
 }
 

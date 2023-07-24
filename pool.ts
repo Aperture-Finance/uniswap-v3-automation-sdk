@@ -17,6 +17,7 @@ import {
 } from './data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId } from './interfaces';
 import { BasicPositionInfo } from './position';
+import { getPublicClient } from './public_client';
 import { sqrtRatioToPrice } from './tick';
 import { IUniswapV3Pool__factory } from './typechain-types';
 
@@ -80,12 +81,14 @@ export function computePoolAddress(
  * @param basicInfo Basic position info.
  * @param chainId Chain id.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  * @returns The constructed Uniswap SDK Pool object where the specified position resides.
  */
 export async function getPoolFromBasicPositionInfo(
   basicInfo: BasicPositionInfo,
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<Pool> {
   return getPool(
     basicInfo.token0,
@@ -93,6 +96,7 @@ export async function getPoolFromBasicPositionInfo(
     basicInfo.fee,
     chainId,
     publicClient,
+    blockNumber,
   );
 }
 
@@ -104,7 +108,7 @@ export function getPoolContract(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
 ) {
   return getContract({
     address: computePoolAddress(
@@ -114,7 +118,7 @@ export function getPoolContract(
       fee,
     ) as Address,
     abi: IUniswapV3Pool__factory.abi,
-    publicClient,
+    publicClient: publicClient ?? getPublicClient(chainId),
   });
 }
 
@@ -126,6 +130,7 @@ export function getPoolContract(
  * @param fee Fee tier of the pool.
  * @param chainId Chain id.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  * @returns The constructed Uniswap SDK Pool object.
  */
 export async function getPool(
@@ -133,8 +138,10 @@ export async function getPool(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<Pool> {
+  publicClient = publicClient ?? getPublicClient(chainId);
   const poolContract = getPoolContract(
     tokenA,
     tokenB,
@@ -142,21 +149,24 @@ export async function getPool(
     chainId,
     publicClient,
   );
+  const opts = { blockNumber };
   // If the specified pool has not been created yet, then the slot0() and liquidity() calls should fail (and throw an error).
   // Also update the tokens to the canonical type.
   const [slot0, inRangeLiquidity, tokenACanon, tokenBCanon] = await Promise.all(
     [
-      poolContract.read.slot0(),
-      poolContract.read.liquidity(),
+      poolContract.read.slot0(opts),
+      poolContract.read.liquidity(opts),
       getToken(
         (typeof tokenA === 'string' ? tokenA : tokenA.address) as Address,
         chainId,
         publicClient,
+        blockNumber,
       ),
       getToken(
         (typeof tokenB === 'string' ? tokenB : tokenB.address) as Address,
         chainId,
         publicClient,
+        blockNumber,
       ),
     ],
   );
