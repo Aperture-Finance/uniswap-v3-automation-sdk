@@ -141,6 +141,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EphemeralAllPositions__factory>;
     getContractFactory(
+      name: "EphemeralGetPopulatedTicksInRange",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EphemeralGetPopulatedTicksInRange__factory>;
+    getContractFactory(
+      name: "EphemeralGetPopulatedTicksInWord",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EphemeralGetPopulatedTicksInWord__factory>;
+    getContractFactory(
       name: "EphemeralGetPosition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EphemeralGetPosition__factory>;
@@ -313,6 +321,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.EphemeralAllPositions>;
+    getContractAt(
+      name: "EphemeralGetPopulatedTicksInRange",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EphemeralGetPopulatedTicksInRange>;
+    getContractAt(
+      name: "EphemeralGetPopulatedTicksInWord",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EphemeralGetPopulatedTicksInWord>;
     getContractAt(
       name: "EphemeralGetPosition",
       address: string,
