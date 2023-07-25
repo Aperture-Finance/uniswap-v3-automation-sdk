@@ -20,8 +20,13 @@ import {
   getContract,
 } from 'viem';
 
+import { ApertureSupportedChainId } from '../interfaces';
+import {
+  EphemeralAllPositions__factory,
+  EphemeralGetPosition__factory,
+  INonfungiblePositionManager__factory,
+} from '../typechain-types';
 import { getChainInfo } from './chain';
-import { ApertureSupportedChainId } from './interfaces';
 import { getPool, getPoolContract, getPoolPrice } from './pool';
 import {
   fractionToBig,
@@ -29,11 +34,6 @@ import {
   priceToSqrtRatioX96,
 } from './price';
 import { getPublicClient } from './public_client';
-import {
-  EphemeralAllPositions__factory,
-  EphemeralGetPosition__factory,
-  INonfungiblePositionManager__factory,
-} from './typechain-types';
 
 export interface BasicPositionInfo {
   token0: Token;
@@ -431,7 +431,7 @@ export async function getTokenSvg(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<URL> {
-  const npm = getNPM(chainId, publicClient ?? getPublicClient(chainId));
+  const npm = getNPM(chainId, publicClient);
   const uri = await npm.read.tokenURI([positionId], { blockNumber });
   const json_uri = Buffer.from(
     uri.replace('data:application/json;base64,', ''),

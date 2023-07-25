@@ -9,17 +9,17 @@ import axios from 'axios';
 import JSBI from 'jsbi';
 import { Address, PublicClient, getContract } from 'viem';
 
-import { getChainInfo } from './chain';
-import { getToken } from './currency';
 import {
   AllV3TicksQuery,
   FeeTierDistributionQuery,
-} from './data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
-import { ApertureSupportedChainId } from './interfaces';
+} from '../data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
+import { ApertureSupportedChainId } from '../interfaces';
+import { IUniswapV3Pool__factory } from '../typechain-types';
+import { getChainInfo } from './chain';
+import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
 import { sqrtRatioToPrice } from './tick';
-import { IUniswapV3Pool__factory } from './typechain-types';
 
 export type PoolKey = {
   token0: Address;
@@ -206,13 +206,13 @@ export async function getFeeTierDistribution(
   tokenA: Address,
   tokenB: Address,
 ): Promise<Record<FeeAmount, number>> {
-  const subgraph_url = getChainInfo(chainId).uniswap_subgraph_url;
-  if (subgraph_url === undefined) {
+  const { uniswap_subgraph_url } = getChainInfo(chainId);
+  if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const [token0, token1] = [tokenA.toLowerCase(), tokenB.toLowerCase()].sort();
   const feeTierTotalValueLocked: FeeTierDistributionQuery = (
-    await axios.post(subgraph_url, {
+    await axios.post(uniswap_subgraph_url, {
       operationName: 'FeeTierDistribution',
       variables: {
         token0,
@@ -272,23 +272,22 @@ export async function getTickToLiquidityMapForPool(
   chainId: ApertureSupportedChainId,
   pool: Pool | PoolKey,
 ): Promise<TickToLiquidityMap> {
-  const subgraph_url = getChainInfo(chainId).uniswap_subgraph_url;
-  if (subgraph_url === undefined) {
+  const { uniswap_subgraph_url, uniswap_v3_factory } = getChainInfo(chainId);
+  if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   let rawData: AllV3TicksQuery['ticks'] = [];
   // Note that Uniswap subgraph returns a maximum of 1000 ticks per query, even if `numTicksPerQuery` is set to a larger value.
   const numTicksPerQuery = 1000;
-  const chainInfo = getChainInfo(chainId);
   const poolAddress = computePoolAddress(
-    chainInfo.uniswap_v3_factory,
+    uniswap_v3_factory,
     pool.token0,
     pool.token1,
     pool.fee,
   ).toLowerCase();
   for (let skip = 0; ; skip += numTicksPerQuery) {
     const response: AllV3TicksQuery | undefined = (
-      await axios.post(subgraph_url, {
+      await axios.post(uniswap_subgraph_url, {
         operationName: 'AllV3Ticks',
         variables: {
           poolAddress,

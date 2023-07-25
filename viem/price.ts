@@ -4,8 +4,8 @@ import axios, { AxiosResponse } from 'axios';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 
+import { ApertureSupportedChainId } from '../interfaces';
 import { getChainInfo } from './chain';
-import { ApertureSupportedChainId } from './interfaces';
 
 // Let Big use 30 decimal places of precision since 2^96 < 10^29.
 Big.DP = 30;
@@ -70,18 +70,18 @@ export async function getTokenPriceFromCoingecko(
   vsCurrencies?: string,
   apiKey?: string,
 ): Promise<number> {
-  const chainInfo = getChainInfo(token.chainId);
-  if (chainInfo.coingecko_asset_platform_id === undefined) return 0;
+  const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
+  if (coingecko_asset_platform_id === undefined) return 0;
   vsCurrencies = vsCurrencies ?? 'usd';
   let priceResponse: AxiosResponse;
   if (apiKey) {
     priceResponse = await axios.get(
-      `https://pro-api.coingecko.com/api/v3/simple/token_price/${chainInfo.coingecko_asset_platform_id}` +
+      `https://pro-api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}&x_cg_pro_api_key=${apiKey}`,
     );
   } else {
     priceResponse = await axios.get(
-      `https://api.coingecko.com/api/v3/simple/token_price/${chainInfo.coingecko_asset_platform_id}` +
+      `https://api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}`,
     );
   }
@@ -138,19 +138,19 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
   vsCurrencies?: string,
   apiKey?: string,
 ): Promise<{ [address: string]: number }> {
-  const chainInfo = getChainInfo(chainId);
-  if (chainInfo.coingecko_asset_platform_id === undefined) return {};
+  const { coingecko_asset_platform_id } = getChainInfo(chainId);
+  if (coingecko_asset_platform_id === undefined) return {};
   vsCurrencies = vsCurrencies ?? 'usd';
   let priceResponse: AxiosResponse;
   const addresses = tokens.toString();
   if (apiKey) {
     priceResponse = await axios.get(
-      `https://pro-api.coingecko.com/api/v3/simple/token_price/${chainInfo.coingecko_asset_platform_id}` +
+      `https://pro-api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}&x_cg_pro_api_key=${apiKey}`,
     );
   } else {
     priceResponse = await axios.get(
-      `https://api.coingecko.com/api/v3/simple/token_price/${chainInfo.coingecko_asset_platform_id}` +
+      `https://api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}`,
     );
   }
@@ -177,18 +177,18 @@ export async function getTokenHistoricalPricesFromCoingecko(
   vsCurrency?: string,
   apiKey?: string,
 ): Promise<CoingeckoHistoricalPriceDatapoint[]> {
-  const chainInfo = getChainInfo(token.chainId);
-  if (chainInfo.coingecko_asset_platform_id === undefined) return [];
+  const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
+  if (coingecko_asset_platform_id === undefined) return [];
   vsCurrency = vsCurrency ?? 'usd';
   let priceResponse: AxiosResponse;
   if (apiKey) {
     priceResponse = await axios.get(
-      `https://pro-api.coingecko.com/api/v3/coins/${chainInfo.coingecko_asset_platform_id}/contract/` +
+      `https://pro-api.coingecko.com/api/v3/coins/${coingecko_asset_platform_id}/contract/` +
         `${token.address}/market_chart?vs_currency=${vsCurrency}&days=${durationDays}&x_cg_pro_api_key=${apiKey}`,
     );
   } else {
     priceResponse = await axios.get(
-      `https://api.coingecko.com/api/v3/coins/${chainInfo.coingecko_asset_platform_id}/contract/` +
+      `https://api.coingecko.com/api/v3/coins/${coingecko_asset_platform_id}/contract/` +
         `${token.address}/market_chart?vs_currency=${vsCurrency}&days=${durationDays}`,
     );
   }

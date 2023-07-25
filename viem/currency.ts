@@ -6,10 +6,10 @@ import {
 } from '@uniswap/sdk-core';
 import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
-import { ApertureSupportedChainId } from './interfaces';
+import { ApertureSupportedChainId } from '../interfaces';
+import { ERC20__factory } from '../typechain-types';
+import { nativeOnChain } from '../uniswap-constants';
 import { getPublicClient } from './public_client';
-import { ERC20__factory } from './typechain-types';
-import { nativeOnChain } from './uniswap-constants';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.
 // When a liquidity pool involves ETH, i.e. WETH is one of the two tokens in the pool, the

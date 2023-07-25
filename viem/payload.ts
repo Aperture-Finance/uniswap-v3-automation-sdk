@@ -7,7 +7,7 @@ import {
   ConditionTypeEnum,
   CreateTriggerPayload,
   PriceCondition,
-} from './interfaces';
+} from '../interfaces';
 import { getRawRelativePriceFromTokenValueProportion } from './price';
 
 export function generateLimitOrderCloseRequestPayload(

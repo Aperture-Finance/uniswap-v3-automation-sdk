@@ -24,20 +24,20 @@ import {
 } from 'viem';
 import { hardhat } from 'viem/chains';
 
-import { getChainInfo } from '../../chain';
-import { getToken } from '../../currency';
 import {
   ApertureSupportedChainId,
   ConditionTypeEnum,
   PriceConditionSchema,
 } from '../../interfaces';
-import { generatePriceConditionFromTokenValueProportion } from '../../payload';
+import { getChainInfo } from '../../viem/chain';
+import { getToken } from '../../viem/currency';
+import { generatePriceConditionFromTokenValueProportion } from '../../viem/payload';
 import {
   getFeeTierDistribution,
   getLiquidityArrayForPool,
   getPool,
   getTickToLiquidityMapForPool,
-} from '../../pool';
+} from '../../viem/pool';
 import {
   PositionDetails,
   getAllPositions,
@@ -48,7 +48,7 @@ import {
   getTokenSvg,
   isPositionInRange,
   projectRebalancedPositionAtPrice,
-} from '../../position';
+} from '../../viem/position';
 import {
   Q192,
   fractionToBig,
@@ -59,8 +59,8 @@ import {
   getTokenPriceListFromCoingeckoWithAddresses,
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
-} from '../../price';
-import { getPublicClient } from '../../public_client';
+} from '../../viem/price';
+import { getPublicClient } from '../../viem/public_client';
 import {
   MAX_PRICE,
   MIN_PRICE,
@@ -68,7 +68,7 @@ import {
   priceToClosestUsableTick,
   readTickToLiquidityMap,
   sqrtRatioToPrice,
-} from '../../tick';
+} from '../../viem/tick';
 
 dotenvConfig();
 
