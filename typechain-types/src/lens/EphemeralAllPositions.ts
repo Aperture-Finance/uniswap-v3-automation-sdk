@@ -7,6 +7,8 @@ import type {
   BigNumberish,
   BytesLike,
   CallOverrides,
+  ContractTransaction,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -166,17 +168,15 @@ export interface EphemeralAllPositions extends BaseContract {
     allPositions(
       npm: string,
       owner: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [PositionStateStructOutput[]] & { positions: PositionStateStructOutput[] }
-    >;
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
   };
 
   allPositions(
     npm: string,
     owner: string,
-    overrides?: CallOverrides
-  ): Promise<PositionStateStructOutput[]>;
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     allPositions(
@@ -192,7 +192,7 @@ export interface EphemeralAllPositions extends BaseContract {
     allPositions(
       npm: string,
       owner: string,
-      overrides?: CallOverrides
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
@@ -200,7 +200,7 @@ export interface EphemeralAllPositions extends BaseContract {
     allPositions(
       npm: string,
       owner: string,
-      overrides?: CallOverrides
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }

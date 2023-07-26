@@ -7,6 +7,8 @@ import type {
   BigNumberish,
   BytesLike,
   CallOverrides,
+  ContractTransaction,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -97,19 +99,15 @@ export interface EphemeralGetPopulatedTicksInWord extends BaseContract {
     getPopulatedTicksInWord(
       pool: string,
       tickBitmapIndex: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [TickLens.PopulatedTickStructOutput[]] & {
-        populatedTicks: TickLens.PopulatedTickStructOutput[];
-      }
-    >;
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
   };
 
   getPopulatedTicksInWord(
     pool: string,
     tickBitmapIndex: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<TickLens.PopulatedTickStructOutput[]>;
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     getPopulatedTicksInWord(
@@ -125,7 +123,7 @@ export interface EphemeralGetPopulatedTicksInWord extends BaseContract {
     getPopulatedTicksInWord(
       pool: string,
       tickBitmapIndex: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
@@ -133,7 +131,7 @@ export interface EphemeralGetPopulatedTicksInWord extends BaseContract {
     getPopulatedTicksInWord(
       pool: string,
       tickBitmapIndex: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }
