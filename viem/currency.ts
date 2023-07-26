@@ -6,9 +6,10 @@ import {
 } from '@uniswap/sdk-core';
 import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
-import { ApertureSupportedChainId } from './interfaces';
-import { ERC20__factory } from './typechain-types';
-import { nativeOnChain } from './uniswap-constants';
+import { ApertureSupportedChainId } from '../interfaces';
+import { ERC20__factory } from '../typechain-types';
+import { nativeOnChain } from '../uniswap-constants';
+import { getPublicClient } from './public_client';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.
 // When a liquidity pool involves ETH, i.e. WETH is one of the two tokens in the pool, the
@@ -22,13 +23,14 @@ import { nativeOnChain } from './uniswap-constants';
 export async function getToken(
   tokenAddress: Address,
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<Token> {
   const decimals = await getContract({
     address: tokenAddress,
     abi: ERC20__factory.abi,
-    publicClient,
-  }).read.decimals();
+    publicClient: publicClient ?? getPublicClient(chainId),
+  }).read.decimals({ blockNumber });
   return new Token(chainId, tokenAddress, decimals);
 }
 

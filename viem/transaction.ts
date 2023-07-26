@@ -8,8 +8,8 @@ import {
   getEventSelector,
 } from 'viem';
 
+import { INonfungiblePositionManager__factory } from '../typechain-types';
 import { CollectableTokenAmounts } from './position';
-import { INonfungiblePositionManager__factory } from './typechain-types';
 
 /**
  * Filter logs by event name.

@@ -2,10 +2,10 @@ import { Token } from '@uniswap/sdk-core';
 import { Address, Chain, getAddress } from 'viem';
 import { arbitrum, arbitrumGoerli, goerli, mainnet } from 'viem/chains';
 
-import whitelistedPoolsEthereum from './data/whitelistedPools-1.json';
-import whitelistedPoolsGoerli from './data/whitelistedPools-5.json';
-import whitelistedPoolsArbitrum from './data/whitelistedPools-42161.json';
-import { ApertureSupportedChainId } from './interfaces';
+import whitelistedPoolsEthereum from '../data/whitelistedPools-1.json';
+import whitelistedPoolsGoerli from '../data/whitelistedPools-5.json';
+import whitelistedPoolsArbitrum from '../data/whitelistedPools-42161.json';
+import { ApertureSupportedChainId } from '../interfaces';
 import {
   WhitelistedPool,
   getWhitelistedPools,

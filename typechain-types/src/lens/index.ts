@@ -2,4 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { EphemeralAllPositions } from "./EphemeralAllPositions";
+export type { EphemeralGetPopulatedTicksInRange } from "./EphemeralGetPopulatedTicksInRange";
+export type { EphemeralGetPopulatedTicksInWord } from "./EphemeralGetPopulatedTicksInWord";
 export type { EphemeralGetPosition } from "./EphemeralGetPosition";

@@ -24,71 +24,53 @@ import {
 } from 'viem';
 import { hardhat } from 'viem/chains';
 
-import { getChainInfo } from '../../chain';
-import { getToken } from '../../currency';
 import {
   ApertureSupportedChainId,
   ConditionTypeEnum,
   PriceConditionSchema,
 } from '../../interfaces';
-import { generatePriceConditionFromTokenValueProportion } from '../../payload';
 import {
+  MAX_PRICE,
+  MIN_PRICE,
+  PositionDetails,
+  Q192,
+  alignPriceToClosestUsableTick,
+  fractionToBig,
+  generatePriceConditionFromTokenValueProportion,
+  getAllPositions,
+  getChainInfo,
   getFeeTierDistribution,
   getLiquidityArrayForPool,
-  getPool,
-  getTickToLiquidityMapForPool,
-} from '../../pool';
-import {
-  PositionDetails,
-  getAllPositions,
   getNPM,
+  getPool,
   getPosition,
   getPositionAtPrice,
-  getRebalancedPosition,
-  getTokenSvg,
-  isPositionInRange,
-  projectRebalancedPositionAtPrice,
-} from '../../position';
-import {
-  Q192,
-  fractionToBig,
+  getPublicClient,
   getRawRelativePriceFromTokenValueProportion,
+  getRebalancedPosition,
+  getTickToLiquidityMapForPool,
+  getToken,
   getTokenHistoricalPricesFromCoingecko,
   getTokenPriceFromCoingecko,
   getTokenPriceListFromCoingecko,
   getTokenPriceListFromCoingeckoWithAddresses,
+  getTokenSvg,
   getTokenValueProportionFromPriceRatio,
-  priceToSqrtRatioX96,
-} from '../../price';
-import { getPublicClient } from '../../public_client';
-import {
-  MAX_PRICE,
-  MIN_PRICE,
-  alignPriceToClosestUsableTick,
+  isPositionInRange,
   priceToClosestUsableTick,
+  priceToSqrtRatioX96,
+  projectRebalancedPositionAtPrice,
   readTickToLiquidityMap,
   sqrtRatioToPrice,
-} from '../../tick';
+} from '../../viem';
 
 dotenvConfig();
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
-// A whale address (Avax bridge) on Ethereum mainnet with a lot of ethers and token balances.
-const WHALE_ADDRESS = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
-// Owner of position id 4 on Ethereum mainnet.
-const eoa = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
-// A fixed epoch second value representing a moment in the year 2099.
-const deadline = '4093484400';
-
-// Test wallet so we can test signing permit messages.
-// Public key: 0x035dcbb4b39244cef94d3263074f358a1d789e6b99f278d5911f9694da54312636
-// Address: 0x1ccaCD01fD2d973e134EC6d4F916b90A45634eCe
-const TEST_WALLET_PRIVATE_KEY =
-  '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
 // Spin up a hardhat node.
 run('node');

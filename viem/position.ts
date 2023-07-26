@@ -20,19 +20,20 @@ import {
   getContract,
 } from 'viem';
 
+import { ApertureSupportedChainId } from '../interfaces';
+import {
+  EphemeralAllPositions__factory,
+  EphemeralGetPosition__factory,
+  INonfungiblePositionManager__factory,
+} from '../typechain-types';
 import { getChainInfo } from './chain';
-import { ApertureSupportedChainId } from './interfaces';
 import { getPool, getPoolContract, getPoolPrice } from './pool';
 import {
   fractionToBig,
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
 } from './price';
-import {
-  EphemeralAllPositions__factory,
-  EphemeralGetPosition__factory,
-  INonfungiblePositionManager__factory,
-} from './typechain-types';
+import { getPublicClient } from './public_client';
 
 export interface BasicPositionInfo {
   token0: Token;
@@ -70,12 +71,12 @@ type PositionStateArray = AbiParametersToPrimitiveTypes<
 
 export function getNPM(
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
 ) {
   return getContract({
     address: getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
     abi: INonfungiblePositionManager__factory.abi,
-    publicClient,
+    publicClient: publicClient ?? getPublicClient(chainId),
   });
 }
 
@@ -84,17 +85,29 @@ export function getNPM(
  * @param chainId The chain ID.
  * @param positionId The position id.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  * @returns The `Position` object.
  */
 export async function getPosition(
   chainId: ApertureSupportedChainId,
   positionId: bigint,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ) {
+  publicClient = publicClient ?? getPublicClient(chainId);
   const [, , token0, token1, fee, tickLower, tickUpper, liquidity] =
-    await getNPM(chainId, publicClient).read.positions([positionId]);
+    await getNPM(chainId, publicClient).read.positions([positionId], {
+      blockNumber,
+    });
   return new Position({
-    pool: await getPool(token0, token1, fee, chainId, publicClient),
+    pool: await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      publicClient,
+      blockNumber,
+    ),
     liquidity: liquidity.toString(),
     tickLower: tickLower,
     tickUpper: tickUpper,
@@ -108,15 +121,17 @@ export async function getPosition(
  * @param owner The owner.
  * @param chainId Chain id.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  * @returns A map where each key is a position id and its associated value is PositionDetails of that position.
  */
 export async function getAllPositions(
   owner: Address,
   chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
   try {
-    await publicClient.call({
+    await (publicClient ?? getPublicClient(chainId)).call({
       data: encodeDeployData({
         abi: EphemeralAllPositions__factory.abi,
         bytecode: EphemeralAllPositions__factory.bytecode,
@@ -125,8 +140,8 @@ export async function getAllPositions(
           owner,
         ],
       }),
+      blockNumber,
     });
-    throw new Error('deployment should revert');
   } catch (error) {
     const positions: PositionStateArray = decodeFunctionResult({
       abi: [AllPositionsAbi],
@@ -142,6 +157,7 @@ export async function getAllPositions(
       }),
     );
   }
+  throw new Error('deployment should revert');
 }
 
 /**
@@ -199,15 +215,17 @@ export class PositionDetails implements BasicPositionInfo {
    * @param chainId Chain id.
    * @param positionId Position id.
    * @param publicClient Viem public client.
+   * @param blockNumber Optional block number to query.
    * @returns The position details.
    */
   public static async fromPositionId(
     chainId: ApertureSupportedChainId,
     positionId: bigint,
-    publicClient: PublicClient,
+    publicClient?: PublicClient,
+    blockNumber?: bigint,
   ): Promise<PositionDetails> {
     try {
-      const returnData = await publicClient.call({
+      const returnData = await (publicClient ?? getPublicClient(chainId)).call({
         data: encodeDeployData({
           abi: EphemeralGetPosition__factory.abi,
           bytecode: EphemeralGetPosition__factory.bytecode,
@@ -216,6 +234,7 @@ export class PositionDetails implements BasicPositionInfo {
             positionId,
           ],
         }),
+        blockNumber,
       });
       const position = decodeFunctionResult({
         abi: [GetPositionAbi],
@@ -223,6 +242,7 @@ export class PositionDetails implements BasicPositionInfo {
       });
       return PositionDetails.fromPositionStateStruct(chainId, position);
     } catch (error) {
+      console.error(error);
       throw new Error('deployment reverts');
     }
   }
@@ -291,11 +311,14 @@ export class PositionDetails implements BasicPositionInfo {
   /**
    * Get the real-time collectable token amounts.
    * @param publicClient Viem public client.
+   * @param blockNumber Optional block number to query.
    * @returns The collectable token amounts.
    */
   public async getCollectableTokenAmounts(
-    publicClient: PublicClient,
+    publicClient?: PublicClient,
+    blockNumber?: bigint,
   ): Promise<CollectableTokenAmounts> {
+    publicClient = publicClient ?? getPublicClient(this.chainId);
     const pool = getPoolContract(
       this.token0,
       this.token1,
@@ -303,6 +326,7 @@ export class PositionDetails implements BasicPositionInfo {
       this.chainId,
       publicClient,
     );
+    const opts = { blockNumber };
     const [
       slot0,
       feeGrowthGlobal0X128,
@@ -311,12 +335,15 @@ export class PositionDetails implements BasicPositionInfo {
       upper,
       position,
     ] = await Promise.all([
-      pool.read.slot0(),
-      pool.read.feeGrowthGlobal0X128(),
-      pool.read.feeGrowthGlobal1X128(),
-      pool.read.ticks([this.tickLower]),
-      pool.read.ticks([this.tickUpper]),
-      getNPM(this.chainId, publicClient).read.positions([BigInt(this.tokenId)]),
+      pool.read.slot0(opts),
+      pool.read.feeGrowthGlobal0X128(opts),
+      pool.read.feeGrowthGlobal1X128(opts),
+      pool.read.ticks([this.tickLower], opts),
+      pool.read.ticks([this.tickUpper], opts),
+      getNPM(this.chainId, publicClient).read.positions(
+        [BigInt(this.tokenId)],
+        opts,
+      ),
     ]);
     const tick = slot0[1];
     const [, , feeGrowthOutside0X128Lower, feeGrowthOutside1X128Lower] = lower;
@@ -395,15 +422,17 @@ export function isPositionInRange(position: Position): boolean {
  * @param chainId Chain id.
  * @param positionId Position id.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  * @returns A promise that resolves to the token SVG URL.
  */
 export async function getTokenSvg(
   chainId: ApertureSupportedChainId,
   positionId: bigint,
-  publicClient: PublicClient,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<URL> {
   const npm = getNPM(chainId, publicClient);
-  const uri = await npm.read.tokenURI([positionId]);
+  const uri = await npm.read.tokenURI([positionId], { blockNumber });
   const json_uri = Buffer.from(
     uri.replace('data:application/json;base64,', ''),
     'base64',
