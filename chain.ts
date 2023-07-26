@@ -1,3 +1,4 @@
+import { Token } from '@uniswap/sdk-core';
 import { Address, Chain, getAddress } from 'viem';
 import { arbitrum, arbitrumGoerli, goerli, mainnet } from 'viem/chains';
 
@@ -23,7 +24,7 @@ export interface ChainInfo {
   uniswap_subgraph_url?: string;
   // Only populated for mainnets. Map from pool addresses to `WhitelistedPool` with information about the two tokens and pool fee tier.
   whitelistedPools?: Map<string, WhitelistedPool>;
-  whitelistedTokens?: Map<string, string>;
+  whitelistedTokens?: Map<string, Token>;
   maxGasCeiling: number;
 }
 
@@ -46,10 +47,7 @@ export const CHAIN_ID_TO_INFO: {
       ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
       whitelistedPoolsGoerli,
     ),
-    whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
-      whitelistedPoolsGoerli,
-    ),
+    whitelistedTokens: getWhitelistedTokens(whitelistedPoolsGoerli),
     maxGasCeiling: 0.05,
   },
   [ApertureSupportedChainId.ARBITRUM_GOERLI_TESTNET_CHAIN_ID]: {
@@ -85,10 +83,7 @@ export const CHAIN_ID_TO_INFO: {
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       whitelistedPoolsEthereum,
     ),
-    whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      whitelistedPoolsEthereum,
-    ),
+    whitelistedTokens: getWhitelistedTokens(whitelistedPoolsEthereum),
     maxGasCeiling: 0.5,
   },
   [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
@@ -110,10 +105,7 @@ export const CHAIN_ID_TO_INFO: {
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
       whitelistedPoolsArbitrum,
     ),
-    whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
-      whitelistedPoolsArbitrum,
-    ),
+    whitelistedTokens: getWhitelistedTokens(whitelistedPoolsArbitrum),
     maxGasCeiling: 0.2,
   },
 };
