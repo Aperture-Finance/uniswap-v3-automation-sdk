@@ -1,5 +1,5 @@
 import { utils } from 'ethers';
-import { Hex, PublicClient, TypedData } from 'viem';
+import { CallExecutionError, Hex, PublicClient, TypedData } from 'viem';
 import { TypedDataDefinition } from 'viem/src/types/typedData';
 
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
@@ -38,8 +38,9 @@ export async function checkPositionApprovalStatus(
       npm.read.ownerOf([positionId], opts),
       npm.read.getApproved([positionId], opts),
     ]);
-  } catch (err: any) {
-    if (err.code === 'CALL_EXCEPTION') {
+  } catch (error) {
+    // TODO: test this
+    if ((error as CallExecutionError).shortMessage === 'CALL_EXCEPTION') {
       return {
         owner: '',
         hasAuthority: false,
