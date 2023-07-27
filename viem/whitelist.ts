@@ -62,10 +62,12 @@ export function getWhitelistedPools(
 
 /**
  * Returns a map of whitelisted tokens for the specified chain.
+ * @param chainId Chain id.
  * @param whitelistedPoolsJson Whitelisted pools JSON.
  * @returns A map of whitelisted tokens keyed by token symbols.
  */
 export function getWhitelistedTokens(
+  chainId: ApertureSupportedChainId,
   whitelistedPoolsJson: Pool[],
 ): Map<string, Token> {
   const whitelistedTokens = new Map();
@@ -73,10 +75,28 @@ export function getWhitelistedTokens(
     const token0Address = getAddress(pool.token0.id);
     const token1Address = getAddress(pool.token1.id);
     if (!whitelistedTokens.has(token0Address)) {
-      whitelistedTokens.set(token0Address, pool.token0);
+      whitelistedTokens.set(
+        token0Address,
+        new Token(
+          chainId,
+          token0Address,
+          Number(pool.token0.decimals),
+          pool.token0.symbol,
+          pool.token0.name,
+        ),
+      );
     }
     if (!whitelistedTokens.has(token1Address)) {
-      whitelistedTokens.set(token1Address, pool.token1);
+      whitelistedTokens.set(
+        token1Address,
+        new Token(
+          chainId,
+          token1Address,
+          Number(pool.token1.decimals),
+          pool.token1.symbol,
+          pool.token1.name,
+        ),
+      );
     }
   }
   return whitelistedTokens;
