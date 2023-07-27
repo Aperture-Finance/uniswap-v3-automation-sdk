@@ -47,7 +47,10 @@ export const CHAIN_ID_TO_INFO: {
       ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
       whitelistedPoolsGoerli,
     ),
-    whitelistedTokens: getWhitelistedTokens(whitelistedPoolsGoerli),
+    whitelistedTokens: getWhitelistedTokens(
+      ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
+      whitelistedPoolsGoerli,
+    ),
     maxGasCeiling: 0.05,
   },
   [ApertureSupportedChainId.ARBITRUM_GOERLI_TESTNET_CHAIN_ID]: {
@@ -83,7 +86,10 @@ export const CHAIN_ID_TO_INFO: {
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       whitelistedPoolsEthereum,
     ),
-    whitelistedTokens: getWhitelistedTokens(whitelistedPoolsEthereum),
+    whitelistedTokens: getWhitelistedTokens(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      whitelistedPoolsEthereum,
+    ),
     maxGasCeiling: 0.5,
   },
   [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
@@ -105,7 +111,10 @@ export const CHAIN_ID_TO_INFO: {
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
       whitelistedPoolsArbitrum,
     ),
-    whitelistedTokens: getWhitelistedTokens(whitelistedPoolsArbitrum),
+    whitelistedTokens: getWhitelistedTokens(
+      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
+      whitelistedPoolsArbitrum,
+    ),
     maxGasCeiling: 0.2,
   },
 };
