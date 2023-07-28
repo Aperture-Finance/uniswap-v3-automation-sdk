@@ -30,6 +30,7 @@ import {
   PriceConditionSchema,
 } from '../../interfaces';
 import {
+  DOUBLE_TICK,
   MAX_PRICE,
   MIN_PRICE,
   PositionDetails,
@@ -62,6 +63,7 @@ import {
   projectRebalancedPositionAtPrice,
   readTickToLiquidityMap,
   sqrtRatioToPrice,
+  tickToLimitOrderRange,
 } from '../../viem';
 
 dotenvConfig();
@@ -94,6 +96,9 @@ describe('Util tests', function () {
     await resetFork(testClient as unknown as TestClient);
     inRangePosition = await getPosition(chainId, 4n, testClient);
   });
+
+  // TODO: add permit tests.
+  it('Position approval', async function () {});
 
   it('Position in-range', async function () {
     const outOfRangePosition = await getPosition(chainId, 7n, testClient);
@@ -542,6 +547,32 @@ describe('Price to tick conversion', function () {
       ),
     ).to.be.true;
   });
+
+  it('Tick to limit order range', function () {
+    const tick = 18;
+    Object.entries(TICK_SPACINGS).forEach(([fee, tickSpacing]) => {
+      const { tickAvg, tickLower, tickUpper } = tickToLimitOrderRange(
+        tick,
+        Number(fee),
+      );
+      expect(Number.isInteger(tickAvg)).to.be.true;
+      expect(Number.isInteger(tickLower)).to.be.true;
+      expect(Number.isInteger(tickUpper)).to.be.true;
+      expect(Math.round(tick - tickAvg)).to.be.lessThan(tickSpacing);
+      expect(tickAvg).to.equal(Math.floor((tickLower + tickUpper) / 2));
+      expect(tickUpper - tickLower).to.equal(tickSpacing);
+    });
+    const widthMultiplier = 2;
+    const { tickAvg, tickLower, tickUpper } = tickToLimitOrderRange(
+      tick,
+      fee,
+      widthMultiplier,
+    );
+    const tickSpacing = TICK_SPACINGS[fee];
+    expect(Math.round(tick - tickAvg)).to.be.lessThan(tickSpacing);
+    expect(tickAvg).to.equal(Math.floor((tickLower + tickUpper) / 2));
+    expect(tickUpper - tickLower).to.equal(widthMultiplier * tickSpacing);
+  });
 });
 
 describe('Pool subgraph query tests', function () {
@@ -550,7 +581,7 @@ describe('Pool subgraph query tests', function () {
       getFeeTierDistribution(chainId, WBTC_ADDRESS, WETH_ADDRESS),
       getFeeTierDistribution(chainId, WETH_ADDRESS, WBTC_ADDRESS),
     ]);
-    expect(distribution).deep.equal(distributionOppositeTokenOrder);
+    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
     expect(
       Object.values(distribution).reduce(
         (partialSum, num) => partialSum + num,
@@ -559,60 +590,75 @@ describe('Pool subgraph query tests', function () {
     ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
   });
 
+  async function testLiquidityDistribution(
+    chainId: ApertureSupportedChainId,
+    pool: Pool,
+  ) {
+    const tickCurrentAligned =
+      Math.floor(pool.tickCurrent / pool.tickSpacing) * pool.tickSpacing;
+    const tickLower = pool.tickCurrent - DOUBLE_TICK;
+    const tickUpper = pool.tickCurrent + DOUBLE_TICK;
+    const [liquidityArr, tickToLiquidityMap] = await Promise.all([
+      getLiquidityArrayForPool(chainId, pool, tickLower, tickUpper),
+      getTickToLiquidityMapForPool(chainId, pool, tickLower, tickUpper),
+    ]);
+    expect(liquidityArr.length).to.be.greaterThan(0);
+    expect(tickToLiquidityMap.size).to.be.greaterThan(0);
+    for (const liquidity of tickToLiquidityMap.values()) {
+      expect(JSBI.greaterThanOrEqual(liquidity, JSBI.BigInt(0))).to.equal(true);
+    }
+    expect(
+      JSBI.equal(
+        pool.liquidity,
+        readTickToLiquidityMap(tickToLiquidityMap, tickCurrentAligned)!,
+      ),
+    ).to.equal(true);
+
+    // Fetch current in-range liquidity from subgraph.
+    const { uniswap_subgraph_url } = getChainInfo(chainId);
+    const poolResponse = (
+      await axios.post(uniswap_subgraph_url!, {
+        operationName: 'PoolLiquidity',
+        variables: {},
+        query: `
+          query PoolLiquidity {
+            pool(id: "${Pool.getAddress(
+              pool.token0,
+              pool.token1,
+              pool.fee,
+            ).toLowerCase()}") {
+              liquidity
+            }
+          }`,
+      })
+    ).data.data.pool;
+
+    // Verify that the subgraph is in sync with the node.
+    if (pool.liquidity.toString() === poolResponse.liquidity) {
+      for (const { tick, liquidityActive } of liquidityArr) {
+        if (tickToLiquidityMap.has(tick)) {
+          expect(liquidityActive).to.equal(
+            tickToLiquidityMap.get(tick)!.toString(),
+          );
+        }
+      }
+      console.log('Liquidity matches');
+    }
+  }
+
   it('Tick liquidity distribution - Ethereum mainnet', async function () {
-    const publicClient = getPublicClient(chainId);
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
       FeeAmount.LOW,
       chainId,
-      publicClient,
+      getPublicClient(chainId),
     );
-    const tickToLiquidityMap = await getTickToLiquidityMapForPool(
-      chainId,
-      pool,
-    );
-    expect(tickToLiquidityMap.size).to.be.greaterThan(0);
-    for (const liquidity of tickToLiquidityMap.values()) {
-      expect(JSBI.greaterThanOrEqual(liquidity, JSBI.BigInt(0))).to.equal(true);
-    }
-
-    // Fetch current in-range liquidity from subgraph.
-    const chainInfo = getChainInfo(chainId);
-    const poolResponse = (
-      await axios.post(chainInfo.uniswap_subgraph_url!, {
-        operationName: 'PoolLiquidity',
-        variables: {},
-        query: `
-          query PoolLiquidity {
-            pool(id: "0x4585fe77225b41b697c938b018e2ac67ac5a20c0") {
-              liquidity
-              tick
-            }
-          }`,
-      })
-    ).data.data.pool;
-    const inRangeLiquidity = JSBI.BigInt(poolResponse.liquidity);
-    const tickSpacing = TICK_SPACINGS[FeeAmount.LOW];
-    const tickCurrentAligned =
-      Math.floor(Number(poolResponse.tick) / tickSpacing) * tickSpacing;
-    expect(
-      JSBI.equal(
-        inRangeLiquidity,
-        readTickToLiquidityMap(tickToLiquidityMap, tickCurrentAligned)!,
-      ),
-    ).to.equal(true);
-    const liquidityArr = await getLiquidityArrayForPool(chainId, pool);
-    expect(
-      liquidityArr.some((element) =>
-        JSBI.equal(element.liquidityActive, inRangeLiquidity),
-      ),
-    ).to.be.true;
+    await testLiquidityDistribution(chainId, pool);
   });
 
   it('Tick liquidity distribution - Arbitrum mainnet', async function () {
     const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const publicClient = getPublicClient(arbitrumChainId);
     const WETH_ARBITRUM = getAddress(
       '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     );
@@ -624,41 +670,8 @@ describe('Pool subgraph query tests', function () {
       USDC_ARBITRUM,
       FeeAmount.LOW,
       arbitrumChainId,
-      publicClient,
+      getPublicClient(arbitrumChainId),
     );
-    const tickToLiquidityMap = await getTickToLiquidityMapForPool(
-      arbitrumChainId,
-      pool,
-    );
-    expect(tickToLiquidityMap.size).to.be.greaterThan(0);
-    for (const liquidity of tickToLiquidityMap.values()) {
-      expect(JSBI.greaterThanOrEqual(liquidity, JSBI.BigInt(0))).to.equal(true);
-    }
-
-    // Fetch current in-range liquidity from subgraph.
-    const chainInfo = getChainInfo(arbitrumChainId);
-    const poolResponse = (
-      await axios.post(chainInfo.uniswap_subgraph_url!, {
-        operationName: 'PoolLiquidity',
-        variables: {},
-        query: `
-          query PoolLiquidity {
-            pool(id: "0xc31e54c7a869b9fcbecc14363cf510d1c41fa443") {
-              liquidity
-              tick
-            }
-          }`,
-      })
-    ).data.data.pool;
-    const inRangeLiquidity = JSBI.BigInt(poolResponse.liquidity);
-    const tickSpacing = TICK_SPACINGS[FeeAmount.LOW];
-    const tickCurrentAligned =
-      Math.floor(Number(poolResponse.tick) / tickSpacing) * tickSpacing;
-    expect(
-      JSBI.equal(
-        inRangeLiquidity,
-        readTickToLiquidityMap(tickToLiquidityMap, tickCurrentAligned)!,
-      ),
-    ).to.equal(true);
+    await testLiquidityDistribution(arbitrumChainId, pool);
   });
 });

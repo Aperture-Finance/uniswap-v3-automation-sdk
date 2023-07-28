@@ -27,7 +27,12 @@ import {
   INonfungiblePositionManager__factory,
 } from '../typechain-types';
 import { getChainInfo } from './chain';
-import { getPool, getPoolContract, getPoolPrice } from './pool';
+import {
+  getPool,
+  getPoolContract,
+  getPoolFromBasicPositionInfo,
+  getPoolPrice,
+} from './pool';
 import {
   fractionToBig,
   getTokenValueProportionFromPriceRatio,
@@ -77,6 +82,28 @@ export function getNPM(
     address: getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
     abi: INonfungiblePositionManager__factory.abi,
     publicClient: publicClient ?? getPublicClient(chainId),
+  });
+}
+
+export async function getPositionFromBasicInfo(
+  basicInfo: BasicPositionInfo,
+  chainId: ApertureSupportedChainId,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
+): Promise<Position> {
+  if (basicInfo.liquidity === undefined) {
+    throw 'Missing position liquidity info';
+  }
+  return new Position({
+    pool: await getPoolFromBasicPositionInfo(
+      basicInfo,
+      chainId,
+      publicClient,
+      blockNumber,
+    ),
+    liquidity: basicInfo.liquidity,
+    tickLower: basicInfo.tickLower,
+    tickUpper: basicInfo.tickUpper,
   });
 }
 

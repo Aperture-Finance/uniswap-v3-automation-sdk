@@ -3,3 +3,6 @@ typechain-types/
 
 # Jest coverage report
 coverage/
+
+cache
+data
