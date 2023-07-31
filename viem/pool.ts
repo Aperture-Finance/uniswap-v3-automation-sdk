@@ -2,49 +2,48 @@ import { Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   Pool,
+  TickMath,
   computePoolAddress as _computePoolAddress,
   tickToPrice,
 } from '@uniswap/v3-sdk';
+import { AbiParametersToPrimitiveTypes } from 'abitype';
 import axios from 'axios';
 import JSBI from 'jsbi';
-import { Address, PublicClient, getContract } from 'viem';
+import {
+  Address,
+  CallExecutionError,
+  Hex,
+  PublicClient,
+  decodeFunctionResult,
+  encodeDeployData,
+  getAbiItem,
+  getContract,
+} from 'viem';
 
 import {
   AllV3TicksQuery,
   FeeTierDistributionQuery,
 } from '../data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId } from '../interfaces';
-import { IUniswapV3Pool__factory } from '../typechain-types';
+import {
+  EphemeralGetPopulatedTicksInRange__factory,
+  IUniswapV3Pool__factory,
+} from '../typechain-types';
 import { getChainInfo } from './chain';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
-import { sqrtRatioToPrice } from './tick';
+import { DOUBLE_TICK, sqrtRatioToPrice } from './tick';
 
-export type PoolKey = {
-  token0: Address;
-  token1: Address;
-  fee: FeeAmount;
-};
+const GetPopulatedTicksInRangeAbi = getAbiItem({
+  abi: EphemeralGetPopulatedTicksInRange__factory.abi,
+  name: 'getPopulatedTicksInRange',
+});
 
-/**
- * Creates the pool key which is enough to compute the pool address
- * @param tokenA The first token of the pair, irrespective of sort order
- * @param tokenB The second token of the pair, irrespective of sort order
- * @param fee The fee tier of the pool
- * @returns The pool key
- */
-export function getPoolKey(
-  tokenA: Address,
-  tokenB: Address,
-  fee: FeeAmount,
-): PoolKey {
-  if (tokenA.toLowerCase() === tokenB.toLowerCase())
-    throw new Error('IDENTICAL_ADDRESSES');
-  return tokenA.toLowerCase() < tokenB.toLowerCase()
-    ? { token0: tokenA, token1: tokenB, fee }
-    : { token0: tokenB, token1: tokenA, fee };
-}
+type PopulatedTickArray = AbiParametersToPrimitiveTypes<
+  (typeof GetPopulatedTicksInRangeAbi)['outputs'],
+  'outputs'
+>[0];
 
 /**
  * Computes a pool address
@@ -258,6 +257,72 @@ export async function getFeeTierDistribution(
   };
 }
 
+/**
+ * Reconstructs the liquidity array from the tick array and the current liquidity.
+ * @param tickArray Sorted array containing the liquidity net for each tick.
+ * @param tickCurrentAligned The current tick aligned to the tick spacing.
+ * @param currentLiquidity The current pool liquidity.
+ * @returns The reconstructed liquidity array.
+ */
+function reconstructLiquidityArray(
+  tickArray: Array<{ tick: number; liquidityNet: bigint }>,
+  tickCurrentAligned: number,
+  currentLiquidity: JSBI,
+): Array<[number, string]> {
+  // Locate the current tick in the populated ticks array.
+  const currentIndex = tickArray.findIndex(
+    ({ tick }) => tick === tickCurrentAligned,
+  );
+  // Accumulate the liquidity from the current tick to the end of the populated ticks array.
+  let cumulativeLiquidity = currentLiquidity;
+  const liquidityArray = new Array<[number, string]>(tickArray.length);
+  for (let i = currentIndex + 1; i < tickArray.length; i++) {
+    // added when tick is crossed from left to right
+    cumulativeLiquidity = JSBI.add(
+      cumulativeLiquidity,
+      JSBI.BigInt(tickArray[i].liquidityNet.toString()),
+    );
+    liquidityArray[i] = [tickArray[i].tick, cumulativeLiquidity.toString()];
+  }
+  cumulativeLiquidity = currentLiquidity;
+  for (let i = currentIndex; i >= 0; i--) {
+    liquidityArray[i] = [tickArray[i].tick, cumulativeLiquidity.toString()];
+    // subtracted when tick is crossed from right to left
+    cumulativeLiquidity = JSBI.subtract(
+      cumulativeLiquidity,
+      JSBI.BigInt(tickArray[i].liquidityNet.toString()),
+    );
+  }
+  return liquidityArray;
+}
+
+/**
+ * Normalizes the specified tick range.
+ * @param pool The liquidity pool.
+ * @param tickLower The lower tick.
+ * @param tickUpper The upper tick.
+ * @returns The normalized tick range.
+ */
+function normalizeTicks(
+  pool: Pool,
+  tickLower: number,
+  tickUpper: number,
+): { tickCurrentAligned: number; tickLower: number; tickUpper: number } {
+  if (tickLower > tickUpper) throw 'tickLower > tickUpper';
+  // The current tick must be within the specified tick range.
+  const tickCurrentAligned =
+    Math.floor(pool.tickCurrent / pool.tickSpacing) * pool.tickSpacing;
+  tickLower = Math.min(
+    Math.max(tickLower, TickMath.MIN_TICK),
+    tickCurrentAligned,
+  );
+  tickUpper = Math.max(
+    Math.min(tickUpper, TickMath.MAX_TICK),
+    tickCurrentAligned,
+  );
+  return { tickCurrentAligned, tickLower, tickUpper };
+}
+
 export type TickNumber = number;
 export type LiquidityAmount = JSBI;
 export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
@@ -266,13 +331,23 @@ export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
  * Fetches the liquidity for all ticks for the specified pool.
  * @param chainId Chain id.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
+ * @param _tickLower The lower tick to fetch liquidity for, defaults to `TickMath.MIN_TICK`.
+ * @param _tickUpper The upper tick to fetch liquidity for, defaults to `TickMath.MAX_TICK`.
  * @returns A map from tick numbers to liquidity amounts for the specified pool.
  */
 export async function getTickToLiquidityMapForPool(
   chainId: ApertureSupportedChainId,
-  pool: Pool | PoolKey,
+  pool: Pool,
+  _tickLower = TickMath.MIN_TICK,
+  _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_subgraph_url, uniswap_v3_factory } = getChainInfo(chainId);
+  // The current tick must be within the specified tick range.
+  const { tickCurrentAligned, tickLower, tickUpper } = normalizeTicks(
+    pool,
+    _tickLower,
+    _tickUpper,
+  );
+  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
@@ -292,10 +367,12 @@ export async function getTickToLiquidityMapForPool(
         variables: {
           poolAddress,
           skip,
+          tickLower,
+          tickUpper,
         },
         query: `
-          query AllV3Ticks($poolAddress: String, $skip: Int!) {
-            ticks(first: 1000, skip: $skip, where: { poolAddress: $poolAddress }, orderBy: tickIdx) {
+          query AllV3Ticks($poolAddress: String, $skip: Int!, $tickLower: Int!, $tickUpper: Int!) {
+            ticks(first: 1000, skip: $skip, where: { poolAddress: $poolAddress, tickIdx_gte: $tickLower, tickIdx_lte: $tickUpper }, orderBy: tickIdx) {
               tick: tickIdx
               liquidityNet
             }
@@ -312,50 +389,121 @@ export async function getTickToLiquidityMapForPool(
       break;
     }
   }
-
   const data = new Map<TickNumber, LiquidityAmount>();
   if (rawData.length > 0) {
-    rawData.sort((a, b) => Number(a.tick) - Number(b.tick));
-    let cumulativeLiquidity = JSBI.BigInt(0);
-    for (const { tick, liquidityNet } of rawData) {
-      cumulativeLiquidity = JSBI.add(
-        cumulativeLiquidity,
-        JSBI.BigInt(liquidityNet),
-      );
+    rawData.forEach((item) => {
+      item.tick = Number(item.tick);
+    });
+    rawData.sort((a, b) => a.tick - b.tick);
+    const liquidityArray = reconstructLiquidityArray(
+      rawData,
+      tickCurrentAligned,
+      pool.liquidity,
+    );
+    for (const [tick, liquidityActive] of liquidityArray) {
       // There is a `Number.isInteger` check in `tickToPrice`.
-      data.set(Math.floor(tick), cumulativeLiquidity);
+      data.set(Math.round(tick), JSBI.BigInt(liquidityActive));
     }
   }
   return data;
 }
 
+/**
+ * Fetches the liquidity within the tick range for the specified pool by deploying an ephemeral contract via `eth_call`.
+ * Each tick consumes about 100k gas, so this method may fail if the number of ticks exceeds 3k assuming the provider
+ * gas limit is 300m.
+ * @param chainId Chain id.
+ * @param pool The liquidity pool to fetch the tick to liquidity map for.
+ * @param tickLower The lower tick to fetch liquidity for.
+ * @param tickUpper The upper tick to fetch liquidity for.
+ * @param publicClient Viem public client.
+ */
+async function getPopulatedTicksInRange(
+  chainId: ApertureSupportedChainId,
+  pool: Pool,
+  tickLower: number,
+  tickUpper: number,
+  publicClient?: PublicClient,
+) {
+  try {
+    await (publicClient ?? getPublicClient(chainId)).call({
+      data: encodeDeployData({
+        abi: EphemeralGetPopulatedTicksInRange__factory.abi,
+        bytecode: EphemeralGetPopulatedTicksInRange__factory.bytecode,
+        args: [
+          computePoolAddress(
+            getChainInfo(chainId).uniswap_v3_factory,
+            pool.token0,
+            pool.token1,
+            pool.fee,
+          ),
+          tickLower,
+          tickUpper,
+        ],
+      }),
+    });
+  } catch (error) {
+    const ticks: PopulatedTickArray = decodeFunctionResult({
+      abi: [GetPopulatedTicksInRangeAbi],
+      data: ((error as CallExecutionError).walk() as unknown as { data: Hex })
+        .data,
+    });
+    return ticks.map(({ tick, liquidityNet }) => {
+      return { tick, liquidityNet };
+    });
+  }
+  throw new Error('deployment should revert');
+}
+
 export interface Liquidity {
-  liquidityActive: LiquidityAmount;
+  tick: number;
+  liquidityActive: string;
   price0: string;
   price1: string;
 }
 
 /**
- * Transform the tick to liquidity map into an array suitable for the UI.
+ * Fetches the liquidity within the tick range for the specified pool.
  * @param chainId Chain id.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
+ * @param _tickLower The lower tick to fetch liquidity for, defaults to half of the current price.
+ * @param _tickUpper The upper tick to fetch liquidity for, defaults to twice of the current price.
+ * @param publicClient Viem public client.
  * @returns An array of liquidity objects.
  */
 export async function getLiquidityArrayForPool(
   chainId: ApertureSupportedChainId,
   pool: Pool,
+  _tickLower = pool.tickCurrent - DOUBLE_TICK,
+  _tickUpper = pool.tickCurrent + DOUBLE_TICK,
+  publicClient?: PublicClient,
 ): Promise<Liquidity[]> {
-  const token0 = pool.token0;
-  const token1 = pool.token1;
-  const tickToLiquidityMap = await getTickToLiquidityMapForPool(chainId, pool);
-  const liquidityArray: Liquidity[] = [];
-  tickToLiquidityMap.forEach((liquidity, tick) => {
+  // The current tick must be within the specified tick range.
+  const { tickCurrentAligned, tickLower, tickUpper } = normalizeTicks(
+    pool,
+    _tickLower,
+    _tickUpper,
+  );
+  const { token0, token1 } = pool;
+  const populatedTicks = await getPopulatedTicksInRange(
+    chainId,
+    pool,
+    tickLower,
+    tickUpper,
+    publicClient,
+  );
+  const liquidityArray = reconstructLiquidityArray(
+    populatedTicks,
+    tickCurrentAligned,
+    pool.liquidity,
+  );
+  return liquidityArray.map(([tick, liquidityActive]) => {
     const price = tickToPrice(token0, token1, tick);
-    liquidityArray.push({
-      liquidityActive: liquidity,
+    return {
+      tick,
+      liquidityActive,
       price0: price.toFixed(token0.decimals),
       price1: price.invert().toFixed(token1.decimals),
-    });
+    };
   });
-  return liquidityArray;
 }
