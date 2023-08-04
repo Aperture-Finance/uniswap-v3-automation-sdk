@@ -91,7 +91,7 @@ export async function getTokenPriceFromCoingecko(
 
 /**
  * Fetches tokens' current price from Coingecko in a batch.
- * @param tokens The tokens to fetch price information for. All tokens must have the same chain id.
+ * @param tokens The tokens to fetch price information for. All tokens must have the same chain id. The number of tokens cannot be too big, exact threshold unknown but 50 should be safe; otherwise only some tokens will be fetched.
  * @param vsCurrencies The denominated currencies to fetch price information for. Defaults to 'usd'.
  * @param apiKey The Coingecko API key to use. Use the free api if not specified.
  * @returns The tokens' current USD price. For example,
@@ -123,7 +123,7 @@ export async function getTokenPriceListFromCoingecko(
 /**
  * Fetches tokens' current price from Coingecko in a batch.
  * @param chainId The chain id.
- * @param tokens The checksum addresses of tokens to fetch price information for.
+ * @param tokens The checksum addresses of tokens to fetch price information for. All tokens must have the same chain id. The number of tokens cannot be too big, exact threshold unknown but 50 should be safe; otherwise only some tokens will be fetched.
  * @param vsCurrencies The denominated currencies to fetch price information for. Defaults to 'usd'.
  * @param apiKey The Coingecko API key to use. Use the free api if not specified.
  * @returns The tokens' current USD price. For example,
