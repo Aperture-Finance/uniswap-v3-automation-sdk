@@ -12,6 +12,7 @@ import JSBI from 'jsbi';
 import {
   Address,
   CallExecutionError,
+  GetContractReturnType,
   Hex,
   PublicClient,
   decodeFunctionResult,
@@ -77,7 +78,10 @@ type PositionStateArray = AbiParametersToPrimitiveTypes<
 export function getNPM(
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
-) {
+): GetContractReturnType<
+  typeof INonfungiblePositionManager__factory.abi,
+  PublicClient
+> {
   return getContract({
     address: getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
     abi: INonfungiblePositionManager__factory.abi,

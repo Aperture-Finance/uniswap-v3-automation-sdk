@@ -12,6 +12,7 @@ import JSBI from 'jsbi';
 import {
   Address,
   CallExecutionError,
+  GetContractReturnType,
   Hex,
   PublicClient,
   decodeFunctionResult,
@@ -108,7 +109,7 @@ export function getPoolContract(
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
-) {
+): GetContractReturnType<typeof IUniswapV3Pool__factory.abi, PublicClient> {
   return getContract({
     address: computePoolAddress(
       getChainInfo(chainId).uniswap_v3_factory,
