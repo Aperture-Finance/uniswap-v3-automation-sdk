@@ -1,5 +1,5 @@
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { Abi, AbiEvent } from 'abitype';
+import { AbiEvent } from 'abitype';
 import {
   Log,
   TransactionReceipt,
@@ -8,27 +8,60 @@ import {
   getEventSelector,
 } from 'viem';
 
+import { ApertureSupportedChainId } from '../interfaces';
 import { INonfungiblePositionManager__factory } from '../typechain-types';
+import { getChainInfo } from './chain';
 import { CollectableTokenAmounts } from './position';
 
 /**
  * Filter logs by event name.
  * @param receipt Transaction receipt.
- * @param abi Contract ABI.
- * @param eventName Event name.
+ * @param eventAbi Event ABI.
  * @returns The filtered logs.
  */
 export function filterLogsByEvent(
   receipt: TransactionReceipt,
-  abi: Abi,
-  eventName: string,
+  eventAbi: AbiEvent,
 ): Log[] {
-  const eventAbi = getAbiItem({
-    abi,
-    name: eventName,
-  }) as AbiEvent;
   const eventSig = getEventSelector(eventAbi);
   return receipt.logs.filter((log) => log.topics[0] === eventSig);
+}
+
+/**
+ * Parses the specified transaction receipt and extracts the position id (token id) minted by NPM within the transaction.
+ * @param chainId Chain id.
+ * @param txReceipt The transaction receipt to parse.
+ * @param recipientAddress The receipt address to which the position is minted.
+ * @returns If a position is minted to `recipientAddress`, the position id is returned. If there is more than one, the first is returned. If there are none, `undefined` is returned.
+ */
+export function getMintedPositionIdFromTxReceipt(
+  chainId: ApertureSupportedChainId,
+  txReceipt: TransactionReceipt,
+  recipientAddress: string,
+): bigint | undefined {
+  const npmAddress =
+    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager.toLowerCase();
+  const TransferEventAbi = getAbiItem({
+    abi: INonfungiblePositionManager__factory.abi,
+    name: 'Transfer',
+  });
+  const transferLogs = filterLogsByEvent(txReceipt, TransferEventAbi);
+  recipientAddress = recipientAddress.toLowerCase();
+  for (const log of transferLogs) {
+    if (log.address.toLowerCase() === npmAddress) {
+      try {
+        const transferEvent = decodeEventLog({
+          abi: [TransferEventAbi],
+          data: log.data,
+          topics: log.topics,
+        });
+        if (transferEvent.args.to.toLowerCase() === recipientAddress) {
+          return transferEvent.args.tokenId;
+        }
+      } catch (e) {}
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -47,7 +80,7 @@ export function getCollectedFeesFromReceipt(
     abi: INonfungiblePositionManager__factory.abi,
     name: 'Collect',
   });
-  const collectLog = filterLogsByEvent(receipt, [CollectEventAbi], 'Collect');
+  const collectLog = filterLogsByEvent(receipt, CollectEventAbi);
   let total0: bigint, total1: bigint;
   try {
     const collectEvent = decodeEventLog({
@@ -66,8 +99,7 @@ export function getCollectedFeesFromReceipt(
   });
   const decreaseLiquidityLog = filterLogsByEvent(
     receipt,
-    [DecreaseLiquidityEventAbi],
-    'DecreaseLiquidity',
+    DecreaseLiquidityEventAbi,
   );
   let principal0 = BigInt(0);
   let principal1 = BigInt(0);
