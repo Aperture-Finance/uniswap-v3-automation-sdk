@@ -224,6 +224,12 @@ export const RebalanceActionSchema = z
       .describe('The upper tick of the new price range.'),
     slippage: SlippageSchema,
     maxGasProportion: MaxGasProportionSchema,
+    isCurrentTickOffset: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, `tickLower` and `tickUpper` are offsets from the current tick.',
+      ),
   })
   .describe(
     'The "Rebalance" action closes the position, and swap tokens (principal and collected fees) to the ' +
