@@ -45,7 +45,8 @@ const SlippageSchema = z
   .nonnegative()
   .lte(1)
   .describe(
-    'A number between 0 and 1, inclusive, which Aperture will use as the slippage setting when triggering the action after condition is met. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.',
+    'A number between 0 and 1, inclusive, which Aperture will use as the slippage setting when triggering ' +
+      'the action after condition is met. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.',
   );
 
 export const TriggerStatusEnum = z
@@ -88,10 +89,10 @@ export const TokenAmountConditionSchema = z
       .describe('Either 0 or 1, representing token0 or token1, respectively.'),
   })
   .describe(
-    'The "TokenAmount" condition is considered met if the specified token has a zero (principal) amount in the position. ' +
-      '`zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, respectively. ' +
-      'For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the position is exactly zero. ' +
-      'Note that only the principal amount is considered; accrued fees are not.',
+    'The "TokenAmount" condition is considered met if the specified token has a zero (principal) amount in ' +
+      'the position. `zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, ' +
+      'respectively. For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the ' +
+      'position is exactly zero. Note that only the principal amount is considered; accrued fees are not.',
   );
 export type TokenAmountCondition = z.infer<typeof TokenAmountConditionSchema>;
 
@@ -102,8 +103,9 @@ export const PriceConditionSchema = z
       .union([z.literal(0), z.literal(1)])
       .optional()
       .describe(
-        'If `singleToken` is set, the condition is considered met if the current USD price of the specified token' +
-          " (either token0 or token1) meets the specified threshold; otherwise, token0's price denominated in token1 is compared against the specified threshold,",
+        'If `singleToken` is set, the condition is considered met if the current USD price of the specified' +
+          " token (either token0 or token1) meets the specified threshold; otherwise, token0's price denominated in " +
+          'token1 is compared against the specified threshold,',
       ),
     gte: z
       .string()
@@ -130,7 +132,8 @@ export const PriceConditionSchema = z
       ),
   })
   .describe(
-    "The 'Price' condition checks either one token's price or the two tokens' relative price. If `singleToken` is set, the price condition compares the specified token's USD price against the specified threshold." +
+    "The 'Price' condition checks either one token's price or the two tokens' relative price. If `singleToken`" +
+      " is set, the price condition compares the specified token's USD price against the specified threshold." +
       "Otherwise, token0's price denominated in token1 is compared against the specified threshold, " +
       'and we follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
       '"Raw" means the raw uint256 integer amount used in the token contract. For example, if token A uses 8 decimals, ' +
@@ -163,7 +166,8 @@ export const ConditionSchema = z
     AccruedFeesConditionSchema,
   ])
   .describe(
-    'The condition which triggers the action. If a trigger is successfully created with a condition that is already met at the time of trigger creation, then the action is immediately eligible to be triggered.',
+    'The condition which triggers the action. If a trigger is successfully created with a condition that is' +
+      ' already met at the time of trigger creation, then the action is immediately eligible to be triggered.',
   );
 export type Condition = z.infer<typeof ConditionSchema>;
 
@@ -185,7 +189,8 @@ export const LimitOrderCloseActionSchema = z
       .string()
       .nonempty()
       .describe(
-        'The address of the input token for the limit order, i.e. the token which the user provided and wants to sell. Must be one of the two tokens in the position.',
+        'The address of the input token for the limit order, i.e. the token which the user provided and ' +
+          'wants to sell. Must be one of the two tokens in the position.',
       ),
     maxGasProportion: MaxGasProportionSchema,
   })
@@ -219,10 +224,16 @@ export const RebalanceActionSchema = z
       .describe('The upper tick of the new price range.'),
     slippage: SlippageSchema,
     maxGasProportion: MaxGasProportionSchema,
+    isCurrentTickOffset: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, `tickLower` and `tickUpper` are offsets from the current tick.',
+      ),
   })
   .describe(
-    'The "Rebalance" action closes the position, and swap tokens (principal and collected fees) to the ratio required by the ' +
-      'specified new price range, and open a position with that price range.',
+    'The "Rebalance" action closes the position, and swap tokens (principal and collected fees) to the ' +
+      'ratio required by the specified new price range, and open a position with that price range.',
   );
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 
@@ -290,7 +301,8 @@ export const PermitInfoSchema = z
       .string()
       .nonempty()
       .describe(
-        'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated, for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
+        'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated,' +
+          ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
       ),
     deadline: z
       .string()
@@ -300,7 +312,9 @@ export const PermitInfoSchema = z
       ),
   })
   .describe(
-    'Information about a "permit" message signed by the position owner authorizing Aperture UniV3 Automan contract to trigger actions on the position. See https://eips.ethereum.org/EIPS/eip-4494 for information on the "permit" approval flow.',
+    'Information about a "permit" message signed by the position owner authorizing Aperture UniV3 Automan ' +
+      'contract to trigger actions on the position. See https://eips.ethereum.org/EIPS/eip-4494 for information on ' +
+      'the "permit" approval flow.',
   );
 export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
