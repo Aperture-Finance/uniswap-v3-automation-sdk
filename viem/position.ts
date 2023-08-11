@@ -6,19 +6,22 @@ import {
   PositionLibrary,
   TickMath,
 } from '@uniswap/v3-sdk';
-import { AbiParametersToPrimitiveTypes } from 'abitype';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 import {
   Address,
   CallExecutionError,
-  GetContractReturnType,
   Hex,
   PublicClient,
+  WalletClient,
   decodeFunctionResult,
+  encodeAbiParameters,
   encodeDeployData,
   getAbiItem,
   getContract,
+  keccak256,
+  parseAbiParameters,
+  toHex,
 } from 'viem';
 
 import { ApertureSupportedChainId } from '../interfaces';
@@ -26,8 +29,11 @@ import {
   EphemeralAllPositions__factory,
   EphemeralGetPosition__factory,
   INonfungiblePositionManager__factory,
+  UniV3Automan__factory,
 } from '../typechain-types';
+import { getAutomanReinvestCalldata } from './automan';
 import { getChainInfo } from './chain';
+import { GetAbiFunctionReturnTypes } from './generics';
 import {
   getPool,
   getPoolContract,
@@ -65,27 +71,26 @@ const GetPositionAbi = getAbiItem({
   name: 'getPosition',
 });
 
-type PositionStateStruct = AbiParametersToPrimitiveTypes<
-  (typeof GetPositionAbi)['outputs'],
-  'outputs'
+type PositionStateStruct = GetAbiFunctionReturnTypes<
+  [typeof GetPositionAbi],
+  'getPosition'
 >[0];
 
-type PositionStateArray = AbiParametersToPrimitiveTypes<
-  (typeof AllPositionsAbi)['outputs'],
-  'outputs'
+type PositionStateArray = GetAbiFunctionReturnTypes<
+  [typeof AllPositionsAbi],
+  'allPositions'
 >[0];
 
 export function getNPM(
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
-): GetContractReturnType<
-  typeof INonfungiblePositionManager__factory.abi,
-  PublicClient
-> {
+  walletClient?: WalletClient,
+) {
   return getContract({
     address: getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
     abi: INonfungiblePositionManager__factory.abi,
-    publicClient: publicClient ?? getPublicClient(chainId),
+    publicClient,
+    walletClient,
   });
 }
 
@@ -554,4 +559,86 @@ export function projectRebalancedPositionAtPrice(
     newTickLower,
     newTickUpper,
   );
+}
+
+/**
+ * Compute the storage slot for the operator approval in NonfungiblePositionManager.
+ * @param owner The owner of the position.
+ * @param spender The spender of the position.
+ * @returns The storage slot.
+ */
+export function computeOperatorApprovalSlot(
+  owner: Address,
+  spender: Address,
+): Hex {
+  return keccak256(
+    encodeAbiParameters(parseAbiParameters('address, bytes32'), [
+      spender,
+      keccak256(
+        encodeAbiParameters(parseAbiParameters('address, bytes32'), [
+          owner,
+          '0x0000000000000000000000000000000000000000000000000000000000000005',
+        ]),
+      ),
+    ]),
+  );
+}
+
+/**
+ * Predict the change in liquidity and token amounts after a reinvestment without a prior approval.
+ * https://github.com/dragonfly-xyz/useful-solidity-patterns/blob/main/patterns/eth_call-tricks/README.md#geth-overrides
+ * @param chainId The chain ID.
+ * @param positionId The position id.
+ * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
+ * @returns The predicted change in liquidity and token amounts.
+ */
+export async function getReinvestedPosition(
+  chainId: ApertureSupportedChainId,
+  positionId: bigint,
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+): Promise<readonly [liquidity: bigint, amount0: bigint, amount1: bigint]> {
+  const owner = await getNPM(chainId, publicClient).read.ownerOf([positionId], {
+    blockNumber,
+  });
+  const data = getAutomanReinvestCalldata(
+    positionId,
+    BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
+  );
+  const {
+    aperture_uniswap_v3_automan,
+    uniswap_v3_nonfungible_position_manager,
+  } = getChainInfo(chainId);
+  const returnData = (await publicClient.request({
+    method: 'eth_call',
+    params: [
+      {
+        from: owner,
+        to: aperture_uniswap_v3_automan,
+        data,
+      },
+      blockNumber ? toHex(blockNumber) : 'pending',
+      // forge an operator approval using state overrides.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      {
+        [uniswap_v3_nonfungible_position_manager]: {
+          stateDiff: {
+            [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
+              '0x0000000000000000000000000000000000000000000000000000000000000001',
+          },
+        },
+      },
+    ],
+  })) as Hex;
+  return decodeFunctionResult({
+    abi: [
+      getAbiItem({
+        abi: UniV3Automan__factory.abi,
+        name: 'reinvest',
+      }),
+    ],
+    data: returnData,
+  });
 }

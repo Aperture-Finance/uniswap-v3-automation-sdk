@@ -17,12 +17,14 @@ import { run } from 'hardhat';
 import JSBI from 'jsbi';
 import {
   TestClient,
+  createPublicClient,
   createTestClient,
   getAddress,
   http,
   publicActions,
+  walletActions,
 } from 'viem';
-import { hardhat } from 'viem/chains';
+import { arbitrum, hardhat, mainnet } from 'viem/chains';
 
 import {
   ApertureSupportedChainId,
@@ -49,6 +51,7 @@ import {
   getPublicClient,
   getRawRelativePriceFromTokenValueProportion,
   getRebalancedPosition,
+  getReinvestedPosition,
   getTickToLiquidityMapForPool,
   getToken,
   getTokenHistoricalPricesFromCoingecko,
@@ -65,6 +68,7 @@ import {
   sqrtRatioToPrice,
   tickToLimitOrderRange,
 } from '../../viem';
+import { getAutomanReinvestCalldata } from '../../viem/automan';
 
 dotenvConfig();
 
@@ -92,7 +96,7 @@ describe('Util tests', function () {
     transport: http(),
   }).extend(publicActions);
 
-  before(async function () {
+  beforeEach(async function () {
     await resetFork(testClient as unknown as TestClient);
     inRangePosition = await getPosition(chainId, 4n, testClient);
   });
@@ -363,6 +367,70 @@ describe('Util tests', function () {
       expect(position?.tickLower).to.equal(pos.tickLower);
       expect(position?.tickUpper).to.equal(pos.tickUpper);
     }
+  });
+
+  it('Test getReinvestedPosition', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
+    const publicClient = createPublicClient({
+      chain: arbitrum,
+      transport: http(jsonRpcUrl),
+    });
+    const positionId = 761879n;
+    const blockNumber = 119626480n;
+    const npm = getNPM(chainId, publicClient);
+    const owner = await npm.read.ownerOf([positionId], {
+      blockNumber,
+    });
+    expect(
+      await npm.read.isApprovedForAll([owner, aperture_uniswap_v3_automan], {
+        blockNumber,
+      }),
+    ).to.be.false;
+    const [liquidity] = await getReinvestedPosition(
+      chainId,
+      positionId,
+      publicClient,
+      blockNumber,
+    );
+    // testClient doesn't change chainId after reset
+    await testClient.reset({
+      blockNumber,
+      jsonRpcUrl,
+    });
+    await testClient.impersonateAccount({ address: owner });
+    const walletClient = testClient.extend(walletActions);
+    await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
+      [aperture_uniswap_v3_automan, true],
+      {
+        account: owner,
+        chain: mainnet,
+      },
+    );
+    const { liquidity: liquidityBefore } = await getPosition(
+      chainId,
+      positionId,
+      testClient,
+    );
+    const data = getAutomanReinvestCalldata(
+      positionId,
+      BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
+    );
+    await walletClient.sendTransaction({
+      account: owner,
+      chain: mainnet,
+      to: aperture_uniswap_v3_automan,
+      data,
+    });
+    const { liquidity: liquidityAfter } = await getPosition(
+      chainId,
+      positionId,
+      testClient,
+    );
+    expect(JSBI.subtract(liquidityAfter, liquidityBefore).toString()).to.equal(
+      liquidity.toString(),
+    );
   });
 });
 
