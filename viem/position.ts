@@ -21,6 +21,7 @@ import {
   getContract,
   keccak256,
   parseAbiParameters,
+  toHex,
 } from 'viem';
 
 import { ApertureSupportedChainId } from '../interfaces';
@@ -617,8 +618,7 @@ export async function getReinvestedPosition(
         to: aperture_uniswap_v3_automan,
         data,
       },
-      // hexlify the block number.
-      blockNumber ? (('0x' + blockNumber.toString(16)) as Hex) : 'pending',
+      blockNumber ? toHex(blockNumber) : 'pending',
       // forge an operator approval using state overrides.
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
