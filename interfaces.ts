@@ -2,8 +2,19 @@ import { FeeAmount } from '@uniswap/v3-sdk';
 import { z } from 'zod';
 
 export enum ApertureSupportedChainId {
+  // Mainnets that use ETH native currency.
   ETHEREUM_MAINNET_CHAIN_ID = 1,
   ARBITRUM_MAINNET_CHAIN_ID = 42161,
+  OPTIMISM_MAINNET_CHAIN_ID = 10,
+  BASE_MAINNET_CHAIN_ID = 8453,
+
+  // Mainnets that use non-ETH native currency.
+  POLYGON_MAINNET_CHAIN_ID = 137,
+  AVALANCHE_MAINNET_CHAIN_ID = 43114,
+  BNB_MAINNET_CHAIN_ID = 56,
+  CELO_MAINNET_CHAIN_ID = 42220,
+
+  // Testnets.
   GOERLI_TESTNET_CHAIN_ID = 5,
   ARBITRUM_GOERLI_TESTNET_CHAIN_ID = 421613,
 }
@@ -99,13 +110,11 @@ export type TokenAmountCondition = z.infer<typeof TokenAmountConditionSchema>;
 export const PriceConditionSchema = z
   .object({
     type: z.literal(ConditionTypeEnum.enum.Price),
-    singleToken: z
-      .union([z.literal(0), z.literal(1)])
+    frontendType: z
+      .string()
       .optional()
       .describe(
-        'If `singleToken` is set, the condition is considered met if the current USD price of the specified' +
-          " token (either token0 or token1) meets the specified threshold; otherwise, token0's price denominated in " +
-          'token1 is compared against the specified threshold,',
+        'The type of the price condition to display on the frontend. This allows the frontend to distinguish between ratio-based and relative-price-based contidions.',
       ),
     gte: z
       .string()
@@ -129,6 +138,15 @@ export const PriceConditionSchema = z
           ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
           'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
           'price feed used is Coingecko.',
+      ),
+    // Deprecated. New triggers with `singleToken` set will be rejected after backend is updated. Existing triggers will continue to work.
+    singleToken: z
+      .union([z.literal(0), z.literal(1)])
+      .optional()
+      .describe(
+        'If `singleToken` is set, the condition is considered met if the current USD price of the specified' +
+          " token (either token0 or token1) meets the specified threshold; otherwise, token0's price denominated in " +
+          'token1 is compared against the specified threshold,',
       ),
   })
   .describe(
