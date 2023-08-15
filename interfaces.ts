@@ -111,7 +111,7 @@ export const PriceConditionSchema = z
   .object({
     type: z.literal(ConditionTypeEnum.enum.Price),
     frontendType: z
-      .string()
+      .enum(['POSITION_VALUE_RATIO', 'RELATIVE_PRICE'])
       .optional()
       .describe(
         'The type of the price condition to display on the frontend. This allows the frontend to distinguish between ratio-based and relative-price-based contidions.',
