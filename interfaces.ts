@@ -17,6 +17,7 @@ export enum ApertureSupportedChainId {
   // Testnets.
   GOERLI_TESTNET_CHAIN_ID = 5,
   ARBITRUM_GOERLI_TESTNET_CHAIN_ID = 421613,
+  MANTA_PACIFIC_TESTNET_CHAIN_ID = 3441005,
 }
 
 const ApertureSupportedChainIdEnum = z
