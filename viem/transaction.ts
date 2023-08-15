@@ -8,9 +8,8 @@ import {
   getEventSelector,
 } from 'viem';
 
-import { ApertureSupportedChainId } from '../interfaces';
 import { INonfungiblePositionManager__factory } from '../typechain-types';
-import { getChainInfo } from './chain';
+import { ViemSupportedChainId, getChainInfo } from './chain';
 import { CollectableTokenAmounts } from './position';
 
 /**
@@ -35,7 +34,7 @@ export function filterLogsByEvent(
  * @returns If a position is minted to `recipientAddress`, the position id is returned. If there is more than one, the first is returned. If there are none, `undefined` is returned.
  */
 export function getMintedPositionIdFromTxReceipt(
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   txReceipt: TransactionReceipt,
   recipientAddress: string,
 ): bigint | undefined {

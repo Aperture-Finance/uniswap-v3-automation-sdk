@@ -25,12 +25,11 @@ import {
   AllV3TicksQuery,
   FeeTierDistributionQuery,
 } from '../data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
-import { ApertureSupportedChainId } from '../interfaces';
 import {
   EphemeralGetPopulatedTicksInRange__factory,
   IUniswapV3Pool__factory,
 } from '../typechain-types';
-import { getChainInfo } from './chain';
+import { ViemSupportedChainId, getChainInfo } from './chain';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
@@ -86,7 +85,7 @@ export function computePoolAddress(
  */
 export async function getPoolFromBasicPositionInfo(
   basicInfo: BasicPositionInfo,
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
@@ -107,7 +106,7 @@ export function getPoolContract(
   tokenA: Token | string,
   tokenB: Token | string,
   fee: FeeAmount,
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ) {
@@ -139,7 +138,7 @@ export async function getPool(
   tokenA: Token | string,
   tokenB: Token | string,
   fee: FeeAmount,
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
@@ -204,7 +203,7 @@ export function getPoolPrice(pool: Pool): Price<Token, Token> {
  * @returns A record with four entries where the keys are the fee tiers and the values are the TVL fractions with the corresponding fee tiers.
  */
 export async function getFeeTierDistribution(
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   tokenA: Address,
   tokenB: Address,
 ): Promise<Record<FeeAmount, number>> {
@@ -339,7 +338,7 @@ export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
  * @returns A map from tick numbers to liquidity amounts for the specified pool.
  */
 export async function getTickToLiquidityMapForPool(
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   pool: Pool,
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
@@ -422,7 +421,7 @@ export async function getTickToLiquidityMapForPool(
  * @param publicClient Viem public client.
  */
 async function getPopulatedTicksInRange(
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   pool: Pool,
   tickLower: number,
   tickUpper: number,
@@ -475,7 +474,7 @@ export interface Liquidity {
  * @returns An array of liquidity objects.
  */
 export async function getLiquidityArrayForPool(
-  chainId: ApertureSupportedChainId,
+  chainId: ViemSupportedChainId,
   pool: Pool,
   _tickLower = pool.tickCurrent - DOUBLE_TICK,
   _tickUpper = pool.tickCurrent + DOUBLE_TICK,

@@ -5,12 +5,18 @@ import { arbitrum, arbitrumGoerli, goerli, mainnet } from 'viem/chains';
 import whitelistedPoolsEthereum from '../data/whitelistedPools-1.json';
 import whitelistedPoolsGoerli from '../data/whitelistedPools-5.json';
 import whitelistedPoolsArbitrum from '../data/whitelistedPools-42161.json';
-import { ApertureSupportedChainId } from '../interfaces';
 import {
   WhitelistedPool,
   getWhitelistedPools,
   getWhitelistedTokens,
 } from './whitelist';
+
+export enum ViemSupportedChainId {
+  ETHEREUM_MAINNET_CHAIN_ID = 1,
+  ARBITRUM_MAINNET_CHAIN_ID = 42161,
+  GOERLI_TESTNET_CHAIN_ID = 5,
+  ARBITRUM_GOERLI_TESTNET_CHAIN_ID = 421613,
+}
 
 export interface ChainInfo {
   chain: Chain;
@@ -29,9 +35,9 @@ export interface ChainInfo {
 }
 
 export const CHAIN_ID_TO_INFO: {
-  [key in ApertureSupportedChainId]: ChainInfo;
+  [key in ViemSupportedChainId]: ChainInfo;
 } = {
-  [ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID]: {
+  [ViemSupportedChainId.GOERLI_TESTNET_CHAIN_ID]: {
     chain: goerli,
     uniswap_v3_factory: getAddress(
       '0x1F98431c8aD98523631AE4a59f267346ea31F984',
@@ -44,16 +50,16 @@ export const CHAIN_ID_TO_INFO: {
     ),
     infura_network_id: 'goerli',
     whitelistedPools: getWhitelistedPools(
-      ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
+      ViemSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
       whitelistedPoolsGoerli,
     ),
     whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
+      ViemSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
       whitelistedPoolsGoerli,
     ),
     maxGasCeiling: 0.05,
   },
-  [ApertureSupportedChainId.ARBITRUM_GOERLI_TESTNET_CHAIN_ID]: {
+  [ViemSupportedChainId.ARBITRUM_GOERLI_TESTNET_CHAIN_ID]: {
     chain: arbitrumGoerli,
     uniswap_v3_factory: getAddress(
       '0x4893376342d5D7b3e31d4184c08b265e5aB2A3f6',
@@ -67,7 +73,7 @@ export const CHAIN_ID_TO_INFO: {
     infura_network_id: 'arbitrum-goerli',
     maxGasCeiling: 0.05,
   },
-  [ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]: {
+  [ViemSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]: {
     chain: mainnet,
     uniswap_v3_factory: getAddress(
       '0x1F98431c8aD98523631AE4a59f267346ea31F984',
@@ -83,16 +89,16 @@ export const CHAIN_ID_TO_INFO: {
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
     whitelistedPools: getWhitelistedPools(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      ViemSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       whitelistedPoolsEthereum,
     ),
     whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      ViemSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       whitelistedPoolsEthereum,
     ),
     maxGasCeiling: 0.5,
   },
-  [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
+  [ViemSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
     chain: arbitrum,
     uniswap_v3_factory: getAddress(
       '0x1F98431c8aD98523631AE4a59f267346ea31F984',
@@ -108,17 +114,17 @@ export const CHAIN_ID_TO_INFO: {
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
     whitelistedPools: getWhitelistedPools(
-      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
+      ViemSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
       whitelistedPoolsArbitrum,
     ),
     whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
+      ViemSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
       whitelistedPoolsArbitrum,
     ),
     maxGasCeiling: 0.2,
   },
 };
 
-export function getChainInfo(chainId: ApertureSupportedChainId) {
+export function getChainInfo(chainId: ViemSupportedChainId) {
   return CHAIN_ID_TO_INFO[chainId];
 }
