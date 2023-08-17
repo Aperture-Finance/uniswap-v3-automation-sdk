@@ -24,6 +24,7 @@ import {
   toHex,
 } from 'viem';
 
+import { ApertureSupportedChainId } from '../interfaces';
 import {
   EphemeralAllPositions__factory,
   EphemeralGetPosition__factory,
@@ -31,7 +32,6 @@ import {
   UniV3Automan__factory,
 } from '../typechain-types';
 import { getAutomanReinvestCalldata } from './automan';
-import { ViemSupportedChainId } from './chain';
 import { getChainInfo } from './chain';
 import { GetAbiFunctionReturnTypes } from './generics';
 import {
@@ -82,7 +82,7 @@ type PositionStateArray = GetAbiFunctionReturnTypes<
 >[0];
 
 export function getNPM(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ) {
@@ -96,7 +96,7 @@ export function getNPM(
 
 export async function getPositionFromBasicInfo(
   basicInfo: BasicPositionInfo,
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Position> {
@@ -125,7 +125,7 @@ export async function getPositionFromBasicInfo(
  * @returns The `Position` object.
  */
 export async function getPosition(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   positionId: bigint,
   publicClient?: PublicClient,
   blockNumber?: bigint,
@@ -162,7 +162,7 @@ export async function getPosition(
  */
 export async function getAllPositions(
   owner: Address,
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
@@ -255,7 +255,7 @@ export class PositionDetails implements BasicPositionInfo {
    * @returns The position details.
    */
   public static async fromPositionId(
-    chainId: ViemSupportedChainId,
+    chainId: ApertureSupportedChainId,
     positionId: bigint,
     publicClient?: PublicClient,
     blockNumber?: bigint,
@@ -295,7 +295,7 @@ export class PositionDetails implements BasicPositionInfo {
    * @returns The position details.
    */
   public static fromPositionStateStruct(
-    chainId: ViemSupportedChainId,
+    chainId: ApertureSupportedChainId,
     {
       tokenId,
       position,
@@ -462,7 +462,7 @@ export function isPositionInRange(position: Position): boolean {
  * @returns A promise that resolves to the token SVG URL.
  */
 export async function getTokenSvg(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   positionId: bigint,
   publicClient?: PublicClient,
   blockNumber?: bigint,
@@ -594,7 +594,7 @@ export function computeOperatorApprovalSlot(
  * @returns The predicted change in liquidity and token amounts.
  */
 export async function getReinvestedPosition(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   positionId: bigint,
   publicClient: PublicClient,
   blockNumber?: bigint,

@@ -6,9 +6,9 @@ import {
 } from '@uniswap/sdk-core';
 import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
+import { ApertureSupportedChainId } from '../interfaces';
 import { ERC20__factory } from '../typechain-types';
 import { nativeOnChain } from '../uniswap-constants';
-import { ViemSupportedChainId } from './chain';
 import { getPublicClient } from './public_client';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.
@@ -22,7 +22,7 @@ import { getPublicClient } from './public_client';
 
 export async function getToken(
   tokenAddress: Address,
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Token> {
@@ -35,10 +35,10 @@ export async function getToken(
 }
 
 export function getNativeCurrency(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
 ): NativeCurrency {
   // `nativeOnChain()` may only return a `Token` when `chainId` represents a Celo chain.
-  // Since `ViemSupportedChainId` does not contain any Celo chains, `nativeOnChain()` will always return a `NativeCurrency`.
+  // Since `ApertureSupportedChainId` does not contain any Celo chains, `nativeOnChain()` will always return a `NativeCurrency`.
   return nativeOnChain(chainId) as NativeCurrency;
 }
 

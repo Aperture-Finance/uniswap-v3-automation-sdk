@@ -2,7 +2,7 @@ import { Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { getAddress } from 'viem';
 
-import { ViemSupportedChainId } from './chain';
+import { ApertureSupportedChainId } from '../interfaces';
 
 export interface WhitelistedPool {
   token0: Token;
@@ -34,7 +34,7 @@ export interface Pool {
  * @returns A map of whitelisted pools keyed by pool addresses.
  */
 export function getWhitelistedPools(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   whitelistedPoolsJson: Pool[],
 ): Map<string, WhitelistedPool> {
   const whitelistedPoolsMap = new Map();
@@ -67,7 +67,7 @@ export function getWhitelistedPools(
  * @returns A map of whitelisted tokens keyed by token symbols.
  */
 export function getWhitelistedTokens(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   whitelistedPoolsJson: Pool[],
 ): Map<string, Token> {
   const whitelistedTokens = new Map();
