@@ -2,8 +2,8 @@ import { utils } from 'ethers';
 import { CallExecutionError, Hex, PublicClient, TypedData } from 'viem';
 import { TypedDataDefinition } from 'viem/src/types/typedData';
 
-import { PermitInfo } from '../interfaces';
-import { ViemSupportedChainId, getChainInfo } from './chain';
+import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
+import { getChainInfo } from './chain';
 import { getNPM } from './position';
 
 export interface PositionApprovalStatus {
@@ -25,7 +25,7 @@ export interface PositionApprovalStatus {
 export async function checkPositionApprovalStatus(
   positionId: bigint,
   permitInfo: PermitInfo | undefined,
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<PositionApprovalStatus> {
@@ -113,7 +113,7 @@ export async function checkPositionApprovalStatus(
 export async function checkPositionPermit(
   positionId: bigint,
   permitInfo: PermitInfo,
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
@@ -161,7 +161,7 @@ const PermitTypes: TypedData = {
  * @returns An object containing typed data ready to be signed with, for example, ethers `Wallet._signTypedData(domain, types, value)`.
  */
 export async function generateTypedDataForPermit(
-  chainId: ViemSupportedChainId,
+  chainId: ApertureSupportedChainId,
   positionId: bigint,
   deadlineEpochSeconds: bigint,
   publicClient?: PublicClient,

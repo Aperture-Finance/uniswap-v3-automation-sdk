@@ -8,3 +8,4 @@ export * from './price';
 export * from './public_client';
 export * from './tick';
 export * from './transaction';
+export * from './whitelist';

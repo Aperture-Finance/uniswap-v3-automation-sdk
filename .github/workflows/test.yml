@@ -21,8 +21,7 @@ jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
       - name: Run jest tests
         run: yarn test
 
-      # Temporarily disable viem tests as it started failing. For example: https://github.com/Aperture-Finance/uniswap-v3-automation-sdk/actions/runs/5872252460/job/15923511168?pr=57
-      # - name: Run hardhat tests
-      #  run: yarn test:hardhat
-      #  env:
-      #    INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+      - name: Run hardhat tests
+        run: yarn test:hardhat
+        env:
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}

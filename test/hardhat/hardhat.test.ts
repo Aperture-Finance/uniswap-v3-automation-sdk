@@ -26,14 +26,17 @@ import {
 } from 'viem';
 import { arbitrum, hardhat, mainnet } from 'viem/chains';
 
-import { ConditionTypeEnum, PriceConditionSchema } from '../../interfaces';
+import {
+  ApertureSupportedChainId,
+  ConditionTypeEnum,
+  PriceConditionSchema,
+} from '../../interfaces';
 import {
   DOUBLE_TICK,
   MAX_PRICE,
   MIN_PRICE,
   PositionDetails,
   Q192,
-  ViemSupportedChainId,
   alignPriceToClosestUsableTick,
   fractionToBig,
   generatePriceConditionFromTokenValueProportion,
@@ -71,7 +74,7 @@ dotenvConfig();
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
-const chainId = ViemSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
 const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 
@@ -367,7 +370,7 @@ describe('Util tests', function () {
   });
 
   it('Test getReinvestedPosition', async function () {
-    const chainId = ViemSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
     const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
     const publicClient = createPublicClient({
@@ -475,7 +478,7 @@ describe('CoinGecko tests', function () {
 
     {
       const prices = await getTokenPriceListFromCoingeckoWithAddresses(
-        ViemSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+        ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
         [WBTC_ADDRESS, WETH_ADDRESS],
         'usd',
         process.env.COINGECKO_API_KEY,
@@ -490,11 +493,11 @@ describe('CoinGecko tests', function () {
         await Promise.all([
           getToken(
             WBTC_ADDRESS,
-            ViemSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+            ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
             testClient,
           ),
           new Token(
-            ViemSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
+            ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
             '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
             6,
           ),
@@ -656,7 +659,7 @@ describe('Pool subgraph query tests', function () {
   });
 
   async function testLiquidityDistribution(
-    chainId: ViemSupportedChainId,
+    chainId: ApertureSupportedChainId,
     pool: Pool,
   ) {
     const tickCurrentAligned =
@@ -723,7 +726,7 @@ describe('Pool subgraph query tests', function () {
   });
 
   it('Tick liquidity distribution - Arbitrum mainnet', async function () {
-    const arbitrumChainId = ViemSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const WETH_ARBITRUM = getAddress(
       '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
     );
