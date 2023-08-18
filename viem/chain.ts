@@ -296,9 +296,8 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1',
     ),
-    // Not yet deployed.
     aperture_uniswap_v3_automan: getAddress(
-      '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+      '0x00000000EDb4489cB49FE07246f39345c9f838cD',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
