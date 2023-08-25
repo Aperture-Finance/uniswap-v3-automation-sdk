@@ -8,7 +8,6 @@ import {
   nearestUsableTick,
   tickToPrice,
 } from '@uniswap/v3-sdk';
-import axios from 'axios';
 import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -16,11 +15,16 @@ import { config as dotenvConfig } from 'dotenv';
 import { run } from 'hardhat';
 import JSBI from 'jsbi';
 import {
+  Address,
   TestClient,
   createPublicClient,
   createTestClient,
+  encodeAbiParameters,
+  encodeFunctionData,
   getAddress,
+  getContractAddress,
   http,
+  parseAbiParameters,
   publicActions,
   walletActions,
 } from 'viem';
@@ -31,6 +35,7 @@ import {
   ConditionTypeEnum,
   PriceConditionSchema,
 } from '../../interfaces';
+import { IERC20__factory, UniV3Automan__factory } from '../../typechain-types';
 import {
   DOUBLE_TICK,
   MAX_PRICE,
@@ -38,9 +43,12 @@ import {
   PositionDetails,
   Q192,
   alignPriceToClosestUsableTick,
+  computeOperatorApprovalSlot,
   fractionToBig,
+  generateAccessList,
   generatePriceConditionFromTokenValueProportion,
   getAllPositions,
+  getAutomanReinvestCalldata,
   getChainInfo,
   getFeeTierDistribution,
   getLiquidityArrayForPool,
@@ -55,6 +63,7 @@ import {
   getTickToLiquidityMapForPool,
   getToken,
   getTokenHistoricalPricesFromCoingecko,
+  getTokenOverrides,
   getTokenPriceFromCoingecko,
   getTokenPriceListFromCoingecko,
   getTokenPriceListFromCoingeckoWithAddresses,
@@ -65,18 +74,22 @@ import {
   priceToSqrtRatioX96,
   projectRebalancedPositionAtPrice,
   readTickToLiquidityMap,
+  simulateMintOptimal,
   sqrtRatioToPrice,
   tickToLimitOrderRange,
 } from '../../viem';
-import { getAutomanReinvestCalldata } from '../../viem/automan';
 
 dotenvConfig();
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+// A whale address (Avax bridge) on Ethereum mainnet with a lot of ethers and token balances.
+const WHALE_ADDRESS = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+// Owner of position id 4 on Ethereum mainnet.
+const eoa = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
 
 // Spin up a hardhat node.
 run('node');
@@ -88,7 +101,174 @@ async function resetFork(testClient: TestClient) {
   });
 }
 
-describe('Util tests', function () {
+describe('State overrides tests', function () {
+  it('Test computeOperatorApprovalSlot', async function () {
+    const testClient = createTestClient({
+      chain: hardhat,
+      mode: 'hardhat',
+      transport: http(),
+    }).extend(publicActions);
+    await resetFork(testClient as unknown as TestClient);
+    await testClient.impersonateAccount({ address: WHALE_ADDRESS });
+    const walletClient = testClient.extend(walletActions);
+    // Deploy Automan.
+    await walletClient.deployContract({
+      abi: UniV3Automan__factory.abi,
+      account: WHALE_ADDRESS,
+      chain: mainnet,
+      args: [
+        getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+        /*owner=*/ WHALE_ADDRESS,
+      ],
+      bytecode: UniV3Automan__factory.bytecode,
+    });
+    const automanAddress = getContractAddress({
+      from: WHALE_ADDRESS,
+      nonce: BigInt(
+        await testClient.getTransactionCount({
+          address: WHALE_ADDRESS,
+        }),
+      ),
+    });
+    const npm = getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const slot = computeOperatorApprovalSlot(eoa, automanAddress);
+    expect(slot).to.equal(
+      '0x51156c1de32f203e86d75e4e57e423f7f92397e1c16780f885a8a97775f56b6a',
+    );
+    expect(await testClient.getStorageAt({ address: npm, slot })).to.equal(
+      encodeAbiParameters(parseAbiParameters('bool'), [false]),
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
+      [automanAddress, true],
+      {
+        account: eoa,
+        chain: mainnet,
+      },
+    );
+    expect(await testClient.getStorageAt({ address: npm, slot })).to.equal(
+      encodeAbiParameters(parseAbiParameters('bool'), [true]),
+    );
+  });
+
+  it('Test generateAccessList', async function () {
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const balanceOfData = encodeFunctionData({
+      abi: IERC20__factory.abi,
+      args: [eoa] as const,
+      functionName: 'balanceOf',
+    });
+    const res = await generateAccessList(
+      {
+        from: eoa,
+        to: WETH_ADDRESS,
+        data: balanceOfData,
+      },
+      publicClient,
+    );
+    expect(res[0].storageKeys[0]).to.equal(
+      '0x5408245386fab212e3c3357882670a5f5af556f7edf543831e2995afd71f4348',
+    );
+  });
+
+  it('Test getTokensOverrides', async function () {
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const amount0Desired = 1000000000000000000n;
+    const amount1Desired = 100000000n;
+    const stateOverrides = await getTokenOverrides(
+      chainId,
+      publicClient,
+      eoa,
+      WETH_ADDRESS,
+      WBTC_ADDRESS,
+      amount0Desired,
+      amount1Desired,
+    );
+    expect(stateOverrides).to.deep.equal({
+      [WETH_ADDRESS]: {
+        stateDiff: {
+          '0x5408245386fab212e3c3357882670a5f5af556f7edf543831e2995afd71f4348':
+            '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+          '0x746950bb1accd12acebc948663f14ea555a83343e6f94af3b6143301c7cadd30':
+            '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+        },
+      },
+      [WBTC_ADDRESS]: {
+        stateDiff: {
+          '0x45746063dcd859f1d120c6388dbc814c95df435a74a62b64d984ad16fe434fff':
+            '0x0000000000000000000000000000000000000000000000000000000005f5e100',
+          '0x71f8d5def281e31983e4625bff84022ae0c3d962552b2a6a1798de60e3860703':
+            '0x0000000000000000000000000000000000000000000000000000000005f5e100',
+        },
+      },
+    });
+  });
+
+  it('Test simulateMintOptimal', async function () {
+    const blockNumber = 17975698n;
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const token0 = WBTC_ADDRESS;
+    const token1 = WETH_ADDRESS;
+    const fee = FeeAmount.MEDIUM;
+    const amount0Desired = 100000000n;
+    const amount1Desired = 1000000000000000000n;
+    const pool = await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      undefined,
+      blockNumber,
+    );
+    const mintParams = {
+      token0: token0 as Address,
+      token1: token1 as Address,
+      fee,
+      tickLower: nearestUsableTick(
+        pool.tickCurrent - 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      tickUpper: nearestUsableTick(
+        pool.tickCurrent + 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      recipient: eoa as Address,
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+    const [, liquidity, amount0, amount1] = await simulateMintOptimal(
+      chainId,
+      publicClient,
+      eoa,
+      mintParams,
+      undefined,
+      blockNumber,
+    );
+    expect(liquidity.toString()).to.equal('716894157038546');
+    expect(amount0.toString()).to.equal('51320357');
+    expect(amount1.toString()).to.equal('8736560293857784398');
+  });
+});
+
+describe('Position util tests', function () {
   let inRangePosition: Position;
   const testClient = createTestClient({
     chain: hardhat,
@@ -102,7 +282,7 @@ describe('Util tests', function () {
   });
 
   // TODO: add permit tests.
-  it('Position approval', async function () {});
+  // it('Position approval', async function () {});
 
   it('Position in-range', async function () {
     const outOfRangePosition = await getPosition(chainId, 7n, testClient);
@@ -380,13 +560,15 @@ describe('Util tests', function () {
     const positionId = 761879n;
     const blockNumber = 119626480n;
     const npm = getNPM(chainId, publicClient);
-    const owner = await npm.read.ownerOf([positionId], {
+    const opts = {
       blockNumber,
-    });
+    };
+    const owner = await npm.read.ownerOf([positionId], opts);
     expect(
-      await npm.read.isApprovedForAll([owner, aperture_uniswap_v3_automan], {
-        blockNumber,
-      }),
+      await npm.read.isApprovedForAll(
+        [owner, aperture_uniswap_v3_automan],
+        opts,
+      ),
     ).to.be.false;
     const [liquidity] = await getReinvestedPosition(
       chainId,
@@ -405,7 +587,7 @@ describe('Util tests', function () {
       [aperture_uniswap_v3_automan, true],
       {
         account: owner,
-        chain: mainnet,
+        chain: mainnet, // has to be mainnet due to viem's quirkiness
       },
     );
     const { liquidity: liquidityBefore } = await getPosition(
@@ -681,37 +863,12 @@ describe('Pool subgraph query tests', function () {
         readTickToLiquidityMap(tickToLiquidityMap, tickCurrentAligned)!,
       ),
     ).to.equal(true);
-
-    // Fetch current in-range liquidity from subgraph.
-    const { uniswap_subgraph_url } = getChainInfo(chainId);
-    const poolResponse = (
-      await axios.post(uniswap_subgraph_url!, {
-        operationName: 'PoolLiquidity',
-        variables: {},
-        query: `
-          query PoolLiquidity {
-            pool(id: "${Pool.getAddress(
-              pool.token0,
-              pool.token1,
-              pool.fee,
-            ).toLowerCase()}") {
-              liquidity
-            }
-          }`,
-      })
-    ).data.data.pool;
-
-    // Verify that the subgraph is in sync with the node.
-    if (pool.liquidity.toString() === poolResponse.liquidity) {
-      for (const { tick, liquidityActive } of liquidityArr) {
-        if (tickToLiquidityMap.has(tick)) {
-          expect(liquidityActive).to.equal(
-            tickToLiquidityMap.get(tick)!.toString(),
-          );
-        }
-      }
-      console.log('Liquidity matches');
-    }
+    const filteredLiquidityArr = liquidityArr.filter(
+      ({ tick }) => tick <= tickCurrentAligned,
+    );
+    expect(
+      filteredLiquidityArr[filteredLiquidityArr.length - 1].liquidityActive,
+    ).to.equal(pool.liquidity.toString());
   }
 
   it('Tick liquidity distribution - Ethereum mainnet', async function () {

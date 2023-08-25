@@ -16,6 +16,6 @@ export function getPublicClient(
       multicall: true,
     },
     chain: getChainInfo(chainId).chain,
-    transport: http(),
+    transport: http(getChainInfo(chainId).rpc_url),
   });
 }
