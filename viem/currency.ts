@@ -1,6 +1,7 @@
 import {
   Currency,
   CurrencyAmount,
+  Ether,
   NativeCurrency,
   Token,
 } from '@uniswap/sdk-core';
@@ -8,7 +9,7 @@ import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
 import { ApertureSupportedChainId } from '../interfaces';
 import { ERC20__factory } from '../typechain-types';
-import { nativeOnChain } from '../uniswap-constants';
+import { getChainInfo } from './chain';
 import { getPublicClient } from './public_client';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.
@@ -25,13 +26,127 @@ export async function getToken(
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   blockNumber?: bigint,
+  showSymbolAndName?: boolean,
 ): Promise<Token> {
-  const decimals = await getContract({
+  const contract = getContract({
     address: tokenAddress,
     abi: ERC20__factory.abi,
     publicClient: publicClient ?? getPublicClient(chainId),
-  }).read.decimals({ blockNumber });
-  return new Token(chainId, tokenAddress, decimals);
+  });
+  const opts = { blockNumber };
+  if (showSymbolAndName) {
+    try {
+      const [decimals, symbol, name] = await Promise.all([
+        contract.read.decimals(opts),
+        contract.read.symbol(opts),
+        contract.read.name(opts),
+      ]);
+      return new Token(chainId, tokenAddress, decimals, symbol, name);
+    } catch (e) {
+      console.log(
+        `Not able to fetch token info for tokenAddress ${tokenAddress}`,
+        e,
+      );
+      return new Token(chainId, tokenAddress, 18);
+    }
+  } else {
+    const decimals = await contract.read.decimals(opts);
+    return new Token(chainId, tokenAddress, decimals);
+  }
+}
+
+class MaticNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId;
+  }
+
+  get wrapped(): Token {
+    return getChainInfo(ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID)
+      .wrappedNativeCurrency;
+  }
+
+  public constructor() {
+    super(
+      ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID,
+      18,
+      'MATIC',
+      'Polygon Matic',
+    );
+  }
+}
+
+class BscNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId;
+  }
+
+  get wrapped(): Token {
+    return getChainInfo(ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID)
+      .wrappedNativeCurrency;
+  }
+
+  public constructor() {
+    super(ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID, 18, 'BNB', 'BNB');
+  }
+}
+
+class AvaxNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId;
+  }
+
+  get wrapped(): Token {
+    return getChainInfo(ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID)
+      .wrappedNativeCurrency;
+  }
+
+  public constructor() {
+    super(
+      ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
+      18,
+      'AVAX',
+      'AVAX',
+    );
+  }
+}
+
+class ExtendedEther extends Ether {
+  public get wrapped(): Token {
+    return getChainInfo(this.chainId).wrappedNativeCurrency;
+  }
+
+  private static _cachedExtendedEther: { [chainId: number]: NativeCurrency } =
+    {};
+
+  public static onChain(chainId: number): ExtendedEther {
+    return (
+      this._cachedExtendedEther[chainId] ??
+      (this._cachedExtendedEther[chainId] = new ExtendedEther(chainId))
+    );
+  }
+}
+
+const cachedNativeCurrency: {
+  [chainId: number]: NativeCurrency | Token;
+} = {};
+
+export function nativeOnChain(
+  chainId: ApertureSupportedChainId,
+): NativeCurrency | Token {
+  if (cachedNativeCurrency[chainId]) return cachedNativeCurrency[chainId];
+  let nativeCurrency: NativeCurrency | Token;
+  if (chainId === ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID) {
+    nativeCurrency = new MaticNativeCurrency();
+  } else if (chainId === ApertureSupportedChainId.CELO_MAINNET_CHAIN_ID) {
+    nativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
+  } else if (chainId === ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID) {
+    nativeCurrency = new BscNativeCurrency();
+  } else if (chainId === ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID) {
+    nativeCurrency = new AvaxNativeCurrency();
+  } else {
+    nativeCurrency = ExtendedEther.onChain(chainId);
+  }
+  return (cachedNativeCurrency[chainId] = nativeCurrency);
 }
 
 export function getNativeCurrency(

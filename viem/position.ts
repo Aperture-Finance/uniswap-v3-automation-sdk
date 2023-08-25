@@ -15,13 +15,9 @@ import {
   PublicClient,
   WalletClient,
   decodeFunctionResult,
-  encodeAbiParameters,
   encodeDeployData,
   getAbiItem,
   getContract,
-  keccak256,
-  parseAbiParameters,
-  toHex,
 } from 'viem';
 
 import { ApertureSupportedChainId } from '../interfaces';
@@ -34,6 +30,7 @@ import {
 import { getAutomanReinvestCalldata } from './automan';
 import { getChainInfo } from './chain';
 import { GetAbiFunctionReturnTypes } from './generics';
+import { getNPMApprovalOverrides, staticCallWithOverrides } from './overrides';
 import {
   getPool,
   getPoolContract,
@@ -562,29 +559,6 @@ export function projectRebalancedPositionAtPrice(
 }
 
 /**
- * Compute the storage slot for the operator approval in NonfungiblePositionManager.
- * @param owner The owner of the position.
- * @param spender The spender of the position.
- * @returns The storage slot.
- */
-export function computeOperatorApprovalSlot(
-  owner: Address,
-  spender: Address,
-): Hex {
-  return keccak256(
-    encodeAbiParameters(parseAbiParameters('address, bytes32'), [
-      spender,
-      keccak256(
-        encodeAbiParameters(parseAbiParameters('address, bytes32'), [
-          owner,
-          '0x0000000000000000000000000000000000000000000000000000000000000005',
-        ]),
-      ),
-    ]),
-  );
-}
-
-/**
  * Predict the change in liquidity and token amounts after a reinvestment without a prior approval.
  * https://github.com/dragonfly-xyz/useful-solidity-patterns/blob/main/patterns/eth_call-tricks/README.md#geth-overrides
  * @param chainId The chain ID.
@@ -606,32 +580,17 @@ export async function getReinvestedPosition(
     positionId,
     BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
   );
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
-  const returnData = (await publicClient.request({
-    method: 'eth_call',
-    params: [
-      {
-        from: owner,
-        to: aperture_uniswap_v3_automan,
-        data,
-      },
-      blockNumber ? toHex(blockNumber) : 'pending',
-      // forge an operator approval using state overrides.
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      {
-        [uniswap_v3_nonfungible_position_manager]: {
-          stateDiff: {
-            [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
-              '0x0000000000000000000000000000000000000000000000000000000000000001',
-          },
-        },
-      },
-    ],
-  })) as Hex;
+  const returnData = await staticCallWithOverrides(
+    {
+      from: owner,
+      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      data,
+    },
+    // forge an operator approval using state overrides.
+    getNPMApprovalOverrides(chainId, owner),
+    publicClient,
+    blockNumber,
+  );
   return decodeFunctionResult({
     abi: [
       getAbiItem({

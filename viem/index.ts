@@ -1,5 +1,7 @@
+export * from './automan';
 export * from './chain';
 export * from './currency';
+export * from './overrides';
 export * from './payload';
 export * from './permission';
 export * from './pool';

@@ -44,6 +44,7 @@ export interface ChainInfo {
   uniswap_v3_factory: Address;
   uniswap_v3_nonfungible_position_manager: Address;
   aperture_uniswap_v3_automan: Address;
+  aperture_router_proxy?: Address;
   wrappedNativeCurrency: Token;
   routingApiInfo: ChainSpecificRoutingAPIInfo;
   // Automan maximum allowed gas deduction ceiling.
@@ -161,6 +162,9 @@ const CHAIN_ID_TO_INFO: {
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
     ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
       getAddress('0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'),
@@ -251,10 +255,10 @@ const CHAIN_ID_TO_INFO: {
     // Uniswap NPM contracts sets WETH9 as the zero address. Aperture Automan contract should be updated to check for this, and skip wrapping/unwraping accordingly.
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.CELO_MAINNET_CHAIN_ID,
-      getAddress('0x8dd4f800851Db9DC219fdFaEB82F8d69e2B13582'),
+      getAddress('0x471EcE3750Da237f93B8E339c536989b8978a438'),
       18,
-      'cGLD',
-      'Celo Gold',
+      'CELO',
+      'Celo native asset',
     ),
     coingecko_asset_platform_id: 'celo',
     rpc_url: 'https://forno.celo.org',
