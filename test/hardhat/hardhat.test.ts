@@ -8,7 +8,6 @@ import {
   nearestUsableTick,
   tickToPrice,
 } from '@uniswap/v3-sdk';
-import axios from 'axios';
 import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
