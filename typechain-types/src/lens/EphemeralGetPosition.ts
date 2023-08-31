@@ -95,6 +95,7 @@ export type Slot0StructOutput = [
 
 export type PositionStateStruct = {
   tokenId: BigNumberish;
+  owner: string;
   position: PositionFullStruct;
   slot0: Slot0Struct;
   activeLiquidity: BigNumberish;
@@ -104,6 +105,7 @@ export type PositionStateStruct = {
 
 export type PositionStateStructOutput = [
   BigNumber,
+  string,
   PositionFullStructOutput,
   Slot0StructOutput,
   BigNumber,
@@ -111,6 +113,7 @@ export type PositionStateStructOutput = [
   number
 ] & {
   tokenId: BigNumber;
+  owner: string;
   position: PositionFullStructOutput;
   slot0: Slot0StructOutput;
   activeLiquidity: BigNumber;

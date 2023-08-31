@@ -9,4 +9,6 @@ import type * as lens from "./lens";
 export type { lens };
 import type * as libraries from "./libraries";
 export type { libraries };
+export type { OptimalSwapRouter } from "./OptimalSwapRouter";
+export type { RouterProxy } from "./RouterProxy";
 export type { UniV3Automan } from "./UniV3Automan";

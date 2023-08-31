@@ -5,5 +5,4 @@ export * as apertureFinance from "./@aperture_finance";
 export * as openzeppelin from "./@openzeppelin";
 export * as uniswap from "./@uniswap";
 export * as solady from "./solady";
-export * as solmate from "./solmate";
 export * as src from "./src";

@@ -54,6 +54,11 @@ const _abi = [
     name: "MulWadFailed",
     type: "error",
   },
+  {
+    inputs: [],
+    name: "RPowOverflow",
+    type: "error",
+  },
 ] as const;
 
 const _bytecode =
