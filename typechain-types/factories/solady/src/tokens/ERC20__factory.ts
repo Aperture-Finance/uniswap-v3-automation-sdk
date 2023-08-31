@@ -7,9 +7,44 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   ERC20,
   ERC20Interface,
-} from "../../../../solmate/src/tokens/ERC20";
+} from "../../../../solady/src/tokens/ERC20";
 
 const _abi = [
+  {
+    inputs: [],
+    name: "AllowanceOverflow",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AllowanceUnderflow",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InsufficientAllowance",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InsufficientBalance",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidPermit",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "PermitExpired",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "TotalSupplyOverflow",
+    type: "error",
+  },
   {
     anonymous: false,
     inputs: [
@@ -66,7 +101,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "",
+        name: "result",
         type: "bytes32",
       },
     ],
@@ -77,12 +112,12 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "owner",
         type: "address",
       },
       {
         internalType: "address",
-        name: "",
+        name: "spender",
         type: "address",
       },
     ],
@@ -90,7 +125,7 @@ const _abi = [
     outputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "result",
         type: "uint256",
       },
     ],
@@ -125,7 +160,7 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "owner",
         type: "address",
       },
     ],
@@ -133,7 +168,7 @@ const _abi = [
     outputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "result",
         type: "uint256",
       },
     ],
@@ -154,6 +189,54 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "difference",
+        type: "uint256",
+      },
+    ],
+    name: "decreaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "difference",
+        type: "uint256",
+      },
+    ],
+    name: "increaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "name",
     outputs: [
@@ -170,7 +253,7 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "owner",
         type: "address",
       },
     ],
@@ -178,7 +261,7 @@ const _abi = [
     outputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "result",
         type: "uint256",
       },
     ],
@@ -247,7 +330,7 @@ const _abi = [
     outputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "result",
         type: "uint256",
       },
     ],

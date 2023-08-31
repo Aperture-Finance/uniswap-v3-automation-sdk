@@ -5,4 +5,6 @@ export * as base from "./base";
 export * as interfaces from "./interfaces";
 export * as lens from "./lens";
 export * as libraries from "./libraries";
+export { OptimalSwapRouter__factory } from "./OptimalSwapRouter__factory";
+export { RouterProxy__factory } from "./RouterProxy__factory";
 export { UniV3Automan__factory } from "./UniV3Automan__factory";
