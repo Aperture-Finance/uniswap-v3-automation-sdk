@@ -502,11 +502,12 @@ describe('Position util tests', function () {
   });
 
   it('Test get position details', async function () {
-    const { position } = await PositionDetails.fromPositionId(
+    const { owner, position } = await PositionDetails.fromPositionId(
       chainId,
       4n,
       testClient,
     );
+    expect(owner).to.equal(eoa);
     expect(position).to.deep.equal(await getPosition(chainId, 4n, testClient));
   });
 
@@ -863,11 +864,10 @@ describe('Pool subgraph query tests', function () {
         readTickToLiquidityMap(tickToLiquidityMap, tickCurrentAligned)!,
       ),
     ).to.equal(true);
-    const filteredLiquidityArr = liquidityArr.filter(
-      ({ tick }) => tick <= tickCurrentAligned,
-    );
     expect(
-      filteredLiquidityArr[filteredLiquidityArr.length - 1].liquidityActive,
+      liquidityArr[
+        liquidityArr.findIndex(({ tick }) => tick > tickCurrentAligned) - 1
+      ].liquidityActive,
     ).to.equal(pool.liquidity.toString());
   }
 
