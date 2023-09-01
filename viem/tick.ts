@@ -139,10 +139,9 @@ export function readTickToLiquidityMap(
   if (tickToLiquidityMap.get(tick) !== undefined) {
     return tickToLiquidityMap.get(tick)!;
   } else {
-    for (const [_tick, liquidity] of tickToLiquidityMap) {
-      if (_tick >= tick) {
-        return liquidity;
-      }
+    const key = [...tickToLiquidityMap.keys()].findIndex((t) => t > tick) - 1;
+    if (key >= 0) {
+      return tickToLiquidityMap.get(key)!;
     }
   }
   return JSBI.BigInt(0);

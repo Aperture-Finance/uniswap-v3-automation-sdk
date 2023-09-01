@@ -1,6 +1,13 @@
-import { utils } from 'ethers';
-import { CallExecutionError, Hex, PublicClient, TypedData } from 'viem';
-import { TypedDataDefinition } from 'viem/src/types/typedData';
+import { secp256k1 } from '@noble/curves/secp256k1';
+import {
+  CallExecutionError,
+  Hex,
+  PublicClient,
+  Signature,
+  TypedData,
+  TypedDataDefinition,
+  numberToHex,
+} from 'viem';
 
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
 import { getChainInfo } from './chain';
@@ -39,8 +46,9 @@ export async function checkPositionApprovalStatus(
       npm.read.getApproved([positionId], opts),
     ]);
   } catch (error) {
-    // TODO: test this
-    if ((error as CallExecutionError).shortMessage === 'CALL_EXCEPTION') {
+    if (
+      (error as CallExecutionError).walk().message.includes('nonexistent token')
+    ) {
       return {
         owner: '',
         hasAuthority: false,
@@ -101,6 +109,16 @@ export async function checkPositionApprovalStatus(
   }
 }
 
+export function hexToSignature(signatureHex: Hex): Signature {
+  const { r, s } = secp256k1.Signature.fromCompact(signatureHex.slice(2, 130));
+  const v = BigInt(`0x${signatureHex.slice(130)}`);
+  return {
+    r: numberToHex(r, { size: 32 }),
+    s: numberToHex(s, { size: 32 }),
+    v,
+  };
+}
+
 /**
  * Check if the permit is valid by calling the permit function on `NonfungiblePositionManager`.
  * @param positionId Position id.
@@ -120,16 +138,15 @@ export async function checkPositionPermit(
   const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
   const npm = getNPM(chainId, publicClient);
   try {
-    // TODO: https://github.com/wagmi-dev/viem/discussions/458
-    const permitSignature = utils.splitSignature(permitInfo.signature);
+    const permitSignature = hexToSignature(permitInfo.signature as Hex);
     await npm.simulate.permit(
       [
         aperture_uniswap_v3_automan,
         positionId,
         BigInt(permitInfo.deadline),
-        permitSignature.v,
-        permitSignature.r as Hex,
-        permitSignature.s as Hex,
+        Number(permitSignature.v),
+        permitSignature.r,
+        permitSignature.s,
       ],
       {
         account: aperture_uniswap_v3_automan,
