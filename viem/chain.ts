@@ -45,6 +45,7 @@ export interface ChainInfo {
   uniswap_v3_nonfungible_position_manager: Address;
   aperture_uniswap_v3_automan: Address;
   aperture_router_proxy?: Address;
+  optimal_swap_router?: Address;
   wrappedNativeCurrency: Token;
   routingApiInfo: ChainSpecificRoutingAPIInfo;
   // Automan maximum allowed gas deduction ceiling.
@@ -164,6 +165,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
@@ -383,9 +387,14 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x2dc114c0DEf2BC849996756E691FC6e8339649E1',
     ),
-    // Not yet deployed.
     aperture_uniswap_v3_automan: getAddress(
-      '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+      '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
+    ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0x000000002c1732dCF01E5C9E057d3fD2A7f1c238',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_TESTNET_CHAIN_ID,

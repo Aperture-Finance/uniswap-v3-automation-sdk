@@ -69,15 +69,14 @@ export function getNPMApprovalOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  routerToWhitelist: Address,
 ): StateOverrides {
-  const { aperture_uniswap_v3_automan, aperture_router_proxy } =
-    getChainInfo(chainId);
   return {
-    [aperture_uniswap_v3_automan]: {
+    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [
-            aperture_router_proxy!,
+            routerToWhitelist,
             encodeAbiParameters(parseAbiParameters('uint256'), [3n]),
           ]),
         )]: encodeAbiParameters(parseAbiParameters('bool'), [true]),
@@ -93,6 +92,16 @@ function symmetricalDifference<T>(arr1: T[], arr2: T[]): T[] {
   ];
 }
 
+/**
+ * Get the balance and allowance state overrides for `token0` and `token1`.
+ * @param chainId The chain ID.
+ * @param publicClient A JSON RPC provider that supports `eth_createAccessList`.
+ * @param from The sender address.
+ * @param token0 The token0 address.
+ * @param token1 The token1 address.
+ * @param amount0Desired The amount of token0 to set the balance and allowance to.
+ * @param amount1Desired The amount of token1 to set the balance and allowance to.
+ */
 export async function getTokenOverrides(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
@@ -112,7 +121,6 @@ export async function getTokenOverrides(
     args: [from, getChainInfo(chainId).aperture_uniswap_v3_automan] as const,
     functionName: 'allowance',
   });
-  // TODO: use an ephemeral contract to get the storage keys
   const [
     token0BalanceOfAccessList,
     token0AllowanceAccessList,
@@ -173,6 +181,7 @@ export async function getTokenOverrides(
   ) {
     throw new Error('Invalid access list length');
   }
+  // get rid of the storage key of implementation address
   const token0StorageKeys = symmetricalDifference(
     filteredToken0BalanceOfAccessList[0].storageKeys,
     filteredToken0AllowanceAccessList[0].storageKeys,
@@ -224,7 +233,7 @@ export async function generateAccessList(
       params: [
         {
           ...tx,
-          gas: '0x989680',
+          gas: '0x11E1A300',
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           gasPrice: '0x0',
@@ -239,6 +248,13 @@ export async function generateAccessList(
   }
 }
 
+/**
+ * Call a contract with the given state overrides.
+ * @param tx The transaction request.
+ * @param overrides The state overrides.
+ * @param publicClient A JSON RPC provider that supports `eth_call` with state overrides.
+ * @param blockNumber Optional block number to use for the call.
+ */
 export async function staticCallWithOverrides(
   tx: RpcTransactionRequest,
   overrides: StateOverrides,
