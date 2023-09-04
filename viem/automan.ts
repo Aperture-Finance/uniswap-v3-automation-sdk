@@ -8,6 +8,7 @@ import {
   encodeFunctionData,
   encodePacked,
   getContract,
+  hexToSignature,
 } from 'viem';
 
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
@@ -25,7 +26,6 @@ import {
   getTokenOverrides,
   staticCallWithOverrides,
 } from './overrides';
-import { hexToSignature } from './permission';
 
 export type AutomanActionName =
   | 'mintOptimal'

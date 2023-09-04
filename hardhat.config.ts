@@ -4,6 +4,8 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       chainId: 1,
+      loggingEnabled: false,
+      accounts: [],
     },
   },
   paths: {
