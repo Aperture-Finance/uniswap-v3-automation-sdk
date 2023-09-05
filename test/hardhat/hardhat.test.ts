@@ -19,6 +19,7 @@ import {
   TestClient,
   createPublicClient,
   createTestClient,
+  createWalletClient,
   encodeAbiParameters,
   encodeFunctionData,
   getAddress,
@@ -28,6 +29,7 @@ import {
   publicActions,
   walletActions,
 } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, hardhat, mainnet } from 'viem/chains';
 
 import {
@@ -43,13 +45,16 @@ import {
   PositionDetails,
   Q192,
   alignPriceToClosestUsableTick,
+  checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
   fractionToBig,
   generateAccessList,
   generatePriceConditionFromTokenValueProportion,
+  generateTypedDataForPermit,
   getAllPositions,
   getAutomanReinvestCalldata,
   getChainInfo,
+  getERC20Overrides,
   getFeeTierDistribution,
   getLiquidityArrayForPool,
   getNPM,
@@ -63,7 +68,6 @@ import {
   getTickToLiquidityMapForPool,
   getToken,
   getTokenHistoricalPricesFromCoingecko,
-  getTokenOverrides,
   getTokenPriceFromCoingecko,
   getTokenPriceListFromCoingecko,
   getTokenPriceListFromCoingeckoWithAddresses,
@@ -90,6 +94,14 @@ const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 // Owner of position id 4 on Ethereum mainnet.
 const eoa = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
+// A fixed epoch second value representing a moment in the year 2099.
+const deadline = '4093484400';
+
+// Test wallet so we can test signing permit messages.
+// Public key: 0x035dcbb4b39244cef94d3263074f358a1d789e6b99f278d5911f9694da54312636
+// Address: 0x1ccaCD01fD2d973e134EC6d4F916b90A45634eCe
+const TEST_WALLET_PRIVATE_KEY =
+  '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
 // Spin up a hardhat node.
 run('node');
@@ -163,7 +175,7 @@ describe('State overrides tests', function () {
       args: [eoa] as const,
       functionName: 'balanceOf',
     });
-    const res = await generateAccessList(
+    const { accessList } = await generateAccessList(
       {
         from: eoa,
         to: WETH_ADDRESS,
@@ -171,7 +183,7 @@ describe('State overrides tests', function () {
       },
       publicClient,
     );
-    expect(res[0].storageKeys[0]).to.equal(
+    expect(accessList[0].storageKeys[0]).to.equal(
       '0x5408245386fab212e3c3357882670a5f5af556f7edf543831e2995afd71f4348',
     );
   });
@@ -185,15 +197,23 @@ describe('State overrides tests', function () {
     });
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
-    const stateOverrides = await getTokenOverrides(
-      chainId,
-      publicClient,
-      eoa,
-      WETH_ADDRESS,
-      WBTC_ADDRESS,
-      amount0Desired,
-      amount1Desired,
-    );
+    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const stateOverrides = {
+      ...(await getERC20Overrides(
+        WETH_ADDRESS,
+        eoa,
+        aperture_uniswap_v3_automan,
+        amount0Desired,
+        publicClient,
+      )),
+      ...(await getERC20Overrides(
+        WBTC_ADDRESS,
+        eoa,
+        aperture_uniswap_v3_automan,
+        amount1Desired,
+        publicClient,
+      )),
+    };
     expect(stateOverrides).to.deep.equal({
       [WETH_ADDRESS]: {
         stateDiff: {
@@ -281,8 +301,142 @@ describe('Position util tests', function () {
     inRangePosition = await getPosition(chainId, 4n, testClient);
   });
 
-  // TODO: add permit tests.
-  // it('Position approval', async function () {});
+  it('Position approval', async function () {
+    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    // This position is owned by `eoa`.
+    const positionId = 4n;
+    expect(
+      await checkPositionApprovalStatus(
+        positionId,
+        undefined,
+        chainId,
+        testClient,
+      ),
+    ).to.deep.equal({
+      hasAuthority: false,
+      owner: eoa,
+      reason: 'missingSignedPermission',
+    });
+
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+    const npm = getNPM(chainId, undefined, walletClient);
+    await npm.write.setApprovalForAll([aperture_uniswap_v3_automan, true], {
+      account: eoa,
+      chain: mainnet,
+    });
+    expect(
+      await checkPositionApprovalStatus(
+        positionId,
+        undefined,
+        chainId,
+        testClient,
+      ),
+    ).to.deep.equal({
+      hasAuthority: true,
+      owner: eoa,
+      reason: 'onChainUserLevelApproval',
+    });
+
+    await npm.write.approve([aperture_uniswap_v3_automan, positionId], {
+      account: eoa,
+      chain: mainnet,
+    });
+    expect(
+      await checkPositionApprovalStatus(
+        positionId,
+        undefined,
+        chainId,
+        testClient,
+      ),
+    ).to.deep.include({
+      hasAuthority: true,
+      reason: 'onChainPositionSpecificApproval',
+    });
+
+    expect(
+      await checkPositionApprovalStatus(
+        0n, // Nonexistent position id.
+        undefined,
+        chainId,
+        testClient,
+      ),
+    ).to.deep.include({
+      hasAuthority: false,
+      reason: 'nonexistentPositionId',
+    });
+  });
+
+  it('Position permit', async function () {
+    const positionId = 4n;
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+    const npm = getNPM(chainId, undefined, walletClient);
+
+    // Construct and sign a permit digest that approves position id 4.
+    const account = privateKeyToAccount(TEST_WALLET_PRIVATE_KEY);
+    const client = createWalletClient({
+      account,
+      chain: mainnet,
+      transport: http(),
+    });
+    const permitTypedData = await generateTypedDataForPermit(
+      chainId,
+      positionId,
+      BigInt(deadline),
+      testClient,
+    );
+    const signature = await client.signTypedData({
+      ...permitTypedData,
+    });
+
+    // Transfer position id 4 from `eoa` to the test wallet.
+    await npm.write.transferFrom([eoa, account.address, positionId], {
+      account: eoa,
+      chain: mainnet,
+    });
+
+    // Check test wallet's permit.
+    expect(
+      await checkPositionApprovalStatus(
+        positionId,
+        {
+          deadline,
+          signature,
+        },
+        chainId,
+        testClient,
+      ),
+    ).to.deep.include({
+      hasAuthority: true,
+      reason: 'offChainPositionSpecificApproval',
+    });
+
+    // Test permit message with an incorrect position id.
+    const anotherPermitTypedData = await generateTypedDataForPermit(
+      chainId,
+      positionId + 1n,
+      BigInt(deadline),
+      testClient,
+    );
+    const anotherSignature = await client.signTypedData({
+      ...anotherPermitTypedData,
+    });
+    expect(
+      await checkPositionApprovalStatus(
+        positionId,
+        {
+          deadline,
+          signature: anotherSignature,
+        },
+        chainId,
+        testClient,
+      ),
+    ).to.deep.include({
+      hasAuthority: false,
+      reason: 'invalidSignedPermission',
+    });
+  });
 
   it('Position in-range', async function () {
     const outOfRangePosition = await getPosition(chainId, 7n, testClient);

@@ -272,10 +272,9 @@ function reconstructLiquidityArray(
   tickCurrentAligned: number,
   currentLiquidity: JSBI,
 ): Array<[number, string]> {
-  // Locate the current tick in the populated ticks array.
-  const currentIndex = tickArray.findIndex(
-    ({ tick }) => tick === tickCurrentAligned,
-  );
+  // Locate the tick in the populated ticks array with the current liquidity.
+  const currentIndex =
+    tickArray.findIndex(({ tick }) => tick > tickCurrentAligned) - 1;
   // Accumulate the liquidity from the current tick to the end of the populated ticks array.
   let cumulativeLiquidity = currentLiquidity;
   const liquidityArray = new Array<[number, string]>(tickArray.length);

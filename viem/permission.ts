@@ -1,6 +1,11 @@
-import { utils } from 'ethers';
-import { CallExecutionError, Hex, PublicClient, TypedData } from 'viem';
-import { TypedDataDefinition } from 'viem/src/types/typedData';
+import {
+  CallExecutionError,
+  Hex,
+  PublicClient,
+  TypedData,
+  TypedDataDefinition,
+  hexToSignature,
+} from 'viem';
 
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
 import { getChainInfo } from './chain';
@@ -39,8 +44,9 @@ export async function checkPositionApprovalStatus(
       npm.read.getApproved([positionId], opts),
     ]);
   } catch (error) {
-    // TODO: test this
-    if ((error as CallExecutionError).shortMessage === 'CALL_EXCEPTION') {
+    if (
+      (error as CallExecutionError).walk().message.includes('nonexistent token')
+    ) {
       return {
         owner: '',
         hasAuthority: false,
@@ -120,16 +126,15 @@ export async function checkPositionPermit(
   const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
   const npm = getNPM(chainId, publicClient);
   try {
-    // TODO: https://github.com/wagmi-dev/viem/discussions/458
-    const permitSignature = utils.splitSignature(permitInfo.signature);
+    const permitSignature = hexToSignature(permitInfo.signature as Hex);
     await npm.simulate.permit(
       [
         aperture_uniswap_v3_automan,
         positionId,
         BigInt(permitInfo.deadline),
-        permitSignature.v,
-        permitSignature.r as Hex,
-        permitSignature.s as Hex,
+        Number(permitSignature.v),
+        permitSignature.r,
+        permitSignature.s,
       ],
       {
         account: aperture_uniswap_v3_automan,
