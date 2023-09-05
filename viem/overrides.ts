@@ -85,7 +85,7 @@ export function getAutomanWhitelistOverrides(
   };
 }
 
-function symmetricalDifference<T>(arr1: T[], arr2: T[]): T[] {
+function symmetricDifference<T>(arr1: T[], arr2: T[]): T[] {
   return [
     ...arr1.filter((item) => !arr2.includes(item)),
     ...arr2.filter((item) => !arr1.includes(item)),
@@ -149,7 +149,7 @@ export async function getERC20Overrides(
     throw new Error('Invalid access list length');
   }
   // get rid of the storage key of implementation address
-  const storageKeys = symmetricalDifference(
+  const storageKeys = symmetricDifference(
     filteredBalanceOfAccessList[0].storageKeys,
     filteredAllowanceAccessList[0].storageKeys,
   );
@@ -159,7 +159,6 @@ export async function getERC20Overrides(
   const encodedAmount = encodeAbiParameters(parseAbiParameters('uint256'), [
     amount,
   ]);
-  // TODO: handle native ETH edge case
   return {
     [token]: {
       stateDiff: {
@@ -216,4 +215,47 @@ export async function staticCallWithOverrides(
     // @ts-ignore
     params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
   })) as Hex;
+}
+
+/**
+ * Try to call a contract with the given state overrides. If the call fails, fall back to a regular call.
+ * @param from The sender address.
+ * @param to The contract address.
+ * @param data The transaction data.
+ * @param overrides The state overrides.
+ * @param publicClient A JSON RPC provider that map support `eth_call` with state overrides.
+ * @param blockNumber Optional block number to use for the call.
+ */
+export async function tryStaticCallWithOverrides(
+  from: Address,
+  to: Address,
+  data: Hex,
+  overrides: StateOverrides,
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+): Promise<Hex> {
+  const tx = {
+    from,
+    to,
+    data,
+  };
+  let returnData: Hex;
+  try {
+    returnData = await staticCallWithOverrides(
+      tx,
+      overrides,
+      publicClient,
+      blockNumber,
+    );
+  } catch (e) {
+    returnData = (
+      await publicClient.call({
+        account: from,
+        data: tx.data,
+        to: tx.to,
+        blockNumber,
+      })
+    ).data!;
+  }
+  return returnData;
 }

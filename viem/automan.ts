@@ -25,6 +25,7 @@ import {
   getERC20Overrides,
   getNPMApprovalOverrides,
   staticCallWithOverrides,
+  tryStaticCallWithOverrides,
 } from './overrides';
 
 export type AutomanActionName =
@@ -388,32 +389,16 @@ export async function simulateRemoveLiquidity(
     amount1Min,
     feeBips,
   );
-  const tx = {
-    from,
-    to: getChainInfo(chainId).aperture_uniswap_v3_automan,
-    data,
-  };
-  let returnData: Hex;
-  try {
-    returnData = await staticCallWithOverrides(
-      tx,
+  return decodeFunctionResult({
+    abi: UniV3Automan__factory.abi,
+    data: await tryStaticCallWithOverrides(
+      from,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      data,
       getNPMApprovalOverrides(chainId, from),
       publicClient,
       blockNumber,
-    );
-  } catch (e) {
-    returnData = (
-      await publicClient.call({
-        account: from,
-        data: tx.data,
-        to: tx.to,
-        blockNumber,
-      })
-    ).data!;
-  }
-  return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
-    data: returnData,
+    ),
     functionName: 'removeLiquidity',
   });
 }
@@ -447,32 +432,16 @@ export async function simulateRebalance(
     undefined,
     swapData,
   );
-  const tx = {
-    from,
-    to: getChainInfo(chainId).aperture_uniswap_v3_automan,
-    data,
-  };
-  let returnData: Hex;
-  try {
-    returnData = await staticCallWithOverrides(
-      tx,
+  return decodeFunctionResult({
+    abi: UniV3Automan__factory.abi,
+    data: await tryStaticCallWithOverrides(
+      from,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      data,
       getNPMApprovalOverrides(chainId, from),
       publicClient,
       blockNumber,
-    );
-  } catch (e) {
-    returnData = (
-      await publicClient.call({
-        account: from,
-        data: tx.data,
-        to: tx.to,
-        blockNumber,
-      })
-    ).data!;
-  }
-  return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
-    data: returnData,
+    ),
     functionName: 'rebalance',
   });
 }
