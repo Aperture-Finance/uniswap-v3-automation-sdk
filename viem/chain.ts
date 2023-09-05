@@ -377,7 +377,10 @@ const CHAIN_ID_TO_INFO: {
         },
       },
       contracts: {
-        multicall3: undefined,
+        multicall3: {
+          address: '0x07dba6DE009f8B367D934d9b33B7ddca41ec8269',
+          blockCreated: 550901,
+        },
       },
       testnet: true,
     } as const satisfies Chain,
