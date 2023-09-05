@@ -22,8 +22,8 @@ import {
   GetAbiFunctionReturnTypes,
 } from './generics';
 import {
+  getERC20Overrides,
   getNPMApprovalOverrides,
-  getTokenOverrides,
   staticCallWithOverrides,
 } from './overrides';
 
@@ -309,25 +309,37 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
+  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
   const tx = {
     from,
-    to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+    to: aperture_uniswap_v3_automan,
     data,
   };
   let returnData: Hex;
   try {
+    // forge token approvals and balances
+    const [token0Overrides, token1Overrides] = await Promise.all([
+      getERC20Overrides(
+        mintParams.token0,
+        from,
+        aperture_uniswap_v3_automan,
+        mintParams.amount0Desired,
+        publicClient,
+      ),
+      getERC20Overrides(
+        mintParams.token1,
+        from,
+        aperture_uniswap_v3_automan,
+        mintParams.amount1Desired,
+        publicClient,
+      ),
+    ]);
     returnData = await staticCallWithOverrides(
       tx,
-      // forge token approvals and balances
-      await getTokenOverrides(
-        chainId,
-        publicClient,
-        from,
-        mintParams.token0,
-        mintParams.token1,
-        mintParams.amount0Desired,
-        mintParams.amount1Desired,
-      ),
+      {
+        ...token0Overrides,
+        ...token1Overrides,
+      },
       publicClient,
       blockNumber,
     );

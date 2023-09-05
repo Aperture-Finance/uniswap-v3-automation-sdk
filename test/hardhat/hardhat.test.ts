@@ -54,6 +54,7 @@ import {
   getAllPositions,
   getAutomanReinvestCalldata,
   getChainInfo,
+  getERC20Overrides,
   getFeeTierDistribution,
   getLiquidityArrayForPool,
   getNPM,
@@ -67,7 +68,6 @@ import {
   getTickToLiquidityMapForPool,
   getToken,
   getTokenHistoricalPricesFromCoingecko,
-  getTokenOverrides,
   getTokenPriceFromCoingecko,
   getTokenPriceListFromCoingecko,
   getTokenPriceListFromCoingeckoWithAddresses,
@@ -175,7 +175,7 @@ describe('State overrides tests', function () {
       args: [eoa] as const,
       functionName: 'balanceOf',
     });
-    const res = await generateAccessList(
+    const { accessList } = await generateAccessList(
       {
         from: eoa,
         to: WETH_ADDRESS,
@@ -183,7 +183,7 @@ describe('State overrides tests', function () {
       },
       publicClient,
     );
-    expect(res[0].storageKeys[0]).to.equal(
+    expect(accessList[0].storageKeys[0]).to.equal(
       '0x5408245386fab212e3c3357882670a5f5af556f7edf543831e2995afd71f4348',
     );
   });
@@ -197,15 +197,23 @@ describe('State overrides tests', function () {
     });
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
-    const stateOverrides = await getTokenOverrides(
-      chainId,
-      publicClient,
-      eoa,
-      WETH_ADDRESS,
-      WBTC_ADDRESS,
-      amount0Desired,
-      amount1Desired,
-    );
+    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const stateOverrides = {
+      ...(await getERC20Overrides(
+        WETH_ADDRESS,
+        eoa,
+        aperture_uniswap_v3_automan,
+        amount0Desired,
+        publicClient,
+      )),
+      ...(await getERC20Overrides(
+        WBTC_ADDRESS,
+        eoa,
+        aperture_uniswap_v3_automan,
+        amount1Desired,
+        publicClient,
+      )),
+    };
     expect(stateOverrides).to.deep.equal({
       [WETH_ADDRESS]: {
         stateDiff: {
