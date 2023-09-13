@@ -346,6 +346,70 @@ const CHAIN_ID_TO_INFO: {
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
+  [ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID]: {
+    chain: {
+      id: 169,
+      name: 'Manta Pacific Mainnet',
+      network: 'manta-mainnet',
+      nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+      },
+      rpcUrls: {
+        public: {
+          http: ['https://pacific-rpc.manta.network/http'],
+          webSocket: ['wss://pacific-rpc.manta.network/ws'],
+        },
+        default: {
+          http: ['https://pacific-rpc.manta.network/http'],
+          webSocket: ['wss://pacific-rpc.manta.network/ws'],
+        },
+      },
+      blockExplorers: {
+        etherscan: {
+          name: 'manta-mainnet',
+          url: 'https://pacific-explorer.manta.network',
+        },
+        default: {
+          name: 'manta-testnet',
+          url: 'https://pacific-explorer.manta.network',
+        },
+      },
+      contracts: {
+        multicall3: {
+          address: '0xf43727c9BEb4C0aA3fEE1281A902e518f8586E54',
+          blockCreated: 41570,
+        },
+      },
+    } as const satisfies Chain,
+    uniswap_v3_factory: getAddress(
+      '0x5bd1F6735B80e58aAC88B8A94836854d3068a13a',
+    ),
+    uniswap_v3_nonfungible_position_manager: getAddress(
+      '0xe77e3F98a386a4C8f8c706A2aCfFdf57e70D06c6',
+    ),
+    // TODO: Not yet deployed.
+    aperture_uniswap_v3_automan: getAddress(
+      '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
+    ),
+    wrappedNativeCurrency: new Token(
+      ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
+      getAddress('0x0Dc808adcE2099A9F62AA87D9670745AbA741746'),
+      18,
+      'WETH',
+      'Wrapped Ether',
+    ),
+    rpc_url: 'https://pacific-rpc.manta.network/http',
+    maxGasCeiling: 0.2,
+    // TODO: Not yet deployed.
+    uniswap_subgraph_url:
+      'http://manta-loadb-nvw76zgfhxpo-e5139453fef6a975.elb.us-west-2.amazonaws.com:8000/subgraphs/name/aperture/uniswap-v3',
+    routingApiInfo: {
+      type: 'ROUTING_API',
+      url: 'https://manta-routing.aperture.finance/quote',
+    },
+  },
   [ApertureSupportedChainId.MANTA_PACIFIC_TESTNET_CHAIN_ID]: {
     chain: {
       id: 3441005,
