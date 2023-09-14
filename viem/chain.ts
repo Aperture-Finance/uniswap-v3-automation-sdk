@@ -393,6 +393,14 @@ const CHAIN_ID_TO_INFO: {
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
     ),
+    // TODO: Not yet deployed.
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    // TODO: Not yet deployed.
+    optimal_swap_router: getAddress(
+      '0x000000002c1732dCF01E5C9E057d3fD2A7f1c238',
+    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       getAddress('0x0Dc808adcE2099A9F62AA87D9670745AbA741746'),
@@ -402,9 +410,8 @@ const CHAIN_ID_TO_INFO: {
     ),
     rpc_url: 'https://pacific-rpc.manta.network/http',
     maxGasCeiling: 0.2,
-    // TODO: Not yet deployed.
     uniswap_subgraph_url:
-      'http://manta-loadb-nvw76zgfhxpo-e5139453fef6a975.elb.us-west-2.amazonaws.com:8000/subgraphs/name/aperture/uniswap-v3',
+      'https://d2vin613o4opvi.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
     routingApiInfo: {
       type: 'ROUTING_API',
       url: 'https://manta-routing.aperture.finance/quote',
@@ -473,7 +480,7 @@ const CHAIN_ID_TO_INFO: {
     rpc_url: 'https://manta-testnet.calderachain.xyz/http',
     maxGasCeiling: 0.2,
     uniswap_subgraph_url:
-      'http://manta-loadb-nvw76zgfhxpo-e5139453fef6a975.elb.us-west-2.amazonaws.com:8000/subgraphs/name/aperture/uniswap-v3',
+      'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
     routingApiInfo: {
       type: 'ROUTING_API',
       url: 'https://manta-routing.aperture.finance/quote',
