@@ -130,6 +130,12 @@ const CHAIN_ID_TO_INFO: {
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
     ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       getAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
