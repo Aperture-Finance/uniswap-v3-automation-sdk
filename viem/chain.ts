@@ -395,17 +395,14 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xe77e3F98a386a4C8f8c706A2aCfFdf57e70D06c6',
     ),
-    // TODO: Not yet deployed.
     aperture_uniswap_v3_automan: getAddress(
-      '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
+      '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
     ),
-    // TODO: Not yet deployed.
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    // TODO: Not yet deployed.
     optimal_swap_router: getAddress(
-      '0x000000002c1732dCF01E5C9E057d3fD2A7f1c238',
+      '0x000000000d44011EACAB39AB7965687d0bc2B16A',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
