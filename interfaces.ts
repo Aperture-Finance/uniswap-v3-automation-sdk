@@ -36,7 +36,15 @@ export const ConditionTypeEnum = z.enum([
 export type ConditionTypeEnum = z.infer<typeof ConditionTypeEnum>;
 
 export const ActionTypeEnum = z
-  .enum(['Close', 'LimitOrderClose', 'Reinvest', 'Rebalance'])
+  .enum([
+    'Close',
+    'LimitOrderClose',
+    'Reinvest',
+    'Rebalance',
+    'RecurringPercentage',
+    'RecurringPrice',
+    'RecurringRatio',
+  ])
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
 
@@ -191,15 +199,16 @@ export const ConditionSchema = z
   );
 export type Condition = z.infer<typeof ConditionSchema>;
 
-export const CloseActionSchema = z
-  .object({
-    type: z.literal(ActionTypeEnum.enum.Close),
-    slippage: SlippageSchema,
-    maxGasProportion: MaxGasProportionSchema,
-  })
-  .describe(
-    'The "Close" action close the position, and send both tokens (principal and collected fees) to the position owner.',
-  );
+const BaseActionSchema = z.object({
+  slippage: SlippageSchema,
+  maxGasProportion: MaxGasProportionSchema,
+});
+
+export const CloseActionSchema = BaseActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.Close),
+}).describe(
+  'The "Close" action close the position, and send both tokens (principal and collected fees) to the position owner.',
+);
 export type CloseAction = z.infer<typeof CloseActionSchema>;
 
 export const LimitOrderCloseActionSchema = z
@@ -220,48 +229,101 @@ export const LimitOrderCloseActionSchema = z
   );
 export type LimitOrderCloseAction = z.infer<typeof LimitOrderCloseActionSchema>;
 
-export const ReinvestActionSchema = z
-  .object({
-    type: z.literal(ActionTypeEnum.enum.Reinvest),
-    slippage: SlippageSchema,
-    maxGasProportion: MaxGasProportionSchema,
-  })
-  .describe(
-    'The "Reinvest" action claims accrued fees, swap them to the same ratio as the principal amounts, and add liquidity.',
-  );
+export const ReinvestActionSchema = BaseActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.Reinvest),
+}).describe(
+  'The "Reinvest" action claims accrued fees, swap them to the same ratio as the principal amounts, and add liquidity.',
+);
 export type ReinvestAction = z.infer<typeof ReinvestActionSchema>;
 
-export const RebalanceActionSchema = z
-  .object({
-    type: z.literal(ActionTypeEnum.enum.Rebalance),
-    tickLower: z
-      .number()
-      .int()
-      .describe('The lower tick of the new price range.'),
-    tickUpper: z
-      .number()
-      .int()
-      .describe('The upper tick of the new price range.'),
-    slippage: SlippageSchema,
-    maxGasProportion: MaxGasProportionSchema,
-    isCurrentTickOffset: z
-      .boolean()
-      .optional()
-      .describe(
-        'When true, `tickLower` and `tickUpper` are offsets from the current tick.',
-      ),
-  })
-  .describe(
-    'The "Rebalance" action closes the position, and swap tokens (principal and collected fees) to the ' +
-      'ratio required by the specified new price range, and open a position with that price range.',
-  );
+export const RebalanceActionSchema = BaseActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.Rebalance),
+  tickLower: z
+    .number()
+    .int()
+    .describe('The lower tick of the new price range.'),
+  tickUpper: z
+    .number()
+    .int()
+    .describe('The upper tick of the new price range.'),
+  isCurrentTickOffset: z
+    .boolean()
+    .optional()
+    .describe(
+      'When true, `tickLower` and `tickUpper` are offsets from the current tick.',
+    ),
+}).describe(
+  'The "Rebalance" action closes the position, and swap tokens (principal and collected fees) to the ' +
+    'ratio required by the specified new price range, and open a position with that price range.',
+);
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
+
+const BaseRecurringActionSchema = BaseActionSchema.extend({
+  uuid: z
+    .string()
+    .nonempty()
+    .describe(
+      'The uuid of the recurring rebalance to identify the series of positions.',
+    ),
+});
+
+export const RecurringPercentageActionSchema = BaseRecurringActionSchema.extend(
+  {
+    type: z.literal(ActionTypeEnum.enum.RecurringPercentage),
+    tickLowerOffset: z
+      .number()
+      .int()
+      .describe('The lower tick offset of the new price range.'),
+    tickUpperOffset: z
+      .number()
+      .int()
+      .describe('The upper tick offset of the new price range.'),
+  },
+).describe(
+  'Rebalance to a new price range specified by the future pool tick and the tick offsets.',
+);
+export type RecurringPercentageAction = z.infer<
+  typeof RecurringPercentageActionSchema
+>;
+
+export const RecurringPriceActionSchema = BaseRecurringActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.RecurringPrice),
+  baseToken: z
+    .union([z.literal(0), z.literal(1)])
+    .describe('Either 0 or 1, representing token0 or token1, respectively.'),
+  priceLowerOffset: z
+    .string()
+    .nonempty()
+    .describe('The lower price offset in human-readable format.'),
+  priceUpperOffset: z
+    .string()
+    .nonempty()
+    .describe('The upper price offset in human-readable format.'),
+}).describe(
+  'Rebalance to a new price range specified by the future pool price of the base token and the price offsets.',
+);
+export type RecurringPriceAction = z.infer<typeof RecurringPriceActionSchema>;
+
+export const RecurringRatioActionSchema = BaseRecurringActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.RecurringRatio),
+  tickRangeWidth: z.number().int().describe('The width of the tick range.'),
+  token0ValueProportion: z
+    .string()
+    .nonempty()
+    .describe('The proportion of the position value in token0.'),
+}).describe(
+  'Rebalance to a new price range specified by the tick range width and the proportion of the position value in token0.',
+);
+export type RecurringRatioAction = z.infer<typeof RecurringRatioActionSchema>;
 
 export const ActionSchema = z.discriminatedUnion('type', [
   CloseActionSchema,
   LimitOrderCloseActionSchema,
   ReinvestActionSchema,
   RebalanceActionSchema,
+  RecurringPercentageActionSchema,
+  RecurringPriceActionSchema,
+  RecurringRatioActionSchema,
 ]);
 export type Action = z.infer<typeof ActionSchema>;
 
@@ -443,6 +505,24 @@ export const TriggerItemSchema = z.object({
     .int()
     .positive()
     .describe('Unix timestamp in seconds when this trigger expires.'),
+  creation: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Unix timestamp in seconds when this trigger is created.'),
+  completion: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Unix timestamp in seconds when this trigger is completed.'),
+  transactionHash: z
+    .string()
+    .optional()
+    .describe(
+      'The transaction hash of the transaction that triggered this action.',
+    ),
 });
 export type TriggerItem = z.infer<typeof TriggerItemSchema>;
 
