@@ -258,6 +258,85 @@ export const RebalanceActionSchema = BaseActionSchema.extend({
 );
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 
+export const RecurringConditionTypeEnum = z.enum([
+  'Percentage',
+  'Price',
+  'Ratio',
+]);
+export type RecurringConditionTypeEnum = z.infer<
+  typeof RecurringConditionTypeEnum
+>;
+
+export const RecurringPercentageConditionSchema = z
+  .object({
+    type: z.literal(RecurringConditionTypeEnum.enum.Percentage),
+    currentTickOffset: z
+      .number()
+      .describe('Next trigger price as a tick offset from the current tick.'),
+    durationSec: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe(
+        'If set, the condition is only considered met if the price remains satisfaction the threshold requirement' +
+          ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
+          'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
+          'price feed used is Coingecko.',
+      ),
+  })
+  .describe(
+    'The "RecurringPercentage" condition defines the target price in terms of a percentage offset from the ' +
+      'current price for the next trigger condition.',
+  );
+export type RecurringPercentageCondition = z.infer<
+  typeof RecurringPercentageConditionSchema
+>;
+
+export const RecurringPriceConditionSchema = z
+  .object({
+    type: z.literal(RecurringConditionTypeEnum.enum.Price),
+    baseToken: z
+      .union([z.literal(0), z.literal(1)])
+      .describe('Either 0 or 1, representing token0 or token1, respectively.'),
+    priceOffset: z
+      .string()
+      .nonempty()
+      .describe(
+        'The next trigger price as a price offset from the current price in human-readable format.',
+      ),
+  })
+  .describe(
+    'The "RecurringPrice" condition defines the target price in terms of a price offset from the current ' +
+      'price for the next trigger condition.',
+  );
+export type RecurringPriceCondition = z.infer<
+  typeof RecurringPriceConditionSchema
+>;
+
+export const RecurringRatioConditionSchema = z
+  .object({
+    type: z.literal(RecurringConditionTypeEnum.enum.Ratio),
+    token0ValueProportion: z
+      .string()
+      .nonempty()
+      .describe('The proportion of the position value in token0.'),
+  })
+  .describe(
+    'The "RecurringRatio" condition defines the target ratio in terms of the proportion of the position ' +
+      'value in token0 for the next trigger condition.',
+  );
+export type RecurringRatioCondition = z.infer<
+  typeof RecurringRatioConditionSchema
+>;
+
+export const RecurringConditionSchema = z.discriminatedUnion('type', [
+  RecurringPercentageConditionSchema,
+  RecurringPriceConditionSchema,
+  RecurringRatioConditionSchema,
+]);
+export type RecurringCondition = z.infer<typeof RecurringConditionSchema>;
+
 const BaseRecurringActionSchema = BaseActionSchema.extend({
   uuid: z
     .string()
@@ -265,6 +344,9 @@ const BaseRecurringActionSchema = BaseActionSchema.extend({
     .describe(
       'The uuid of the recurring rebalance to identify the series of positions.',
     ),
+  condition: RecurringConditionSchema.describe(
+    'The definition of the next trigger condition.',
+  ),
 });
 
 export const RecurringPercentageActionSchema = BaseRecurringActionSchema.extend(

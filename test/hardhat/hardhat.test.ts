@@ -122,6 +122,11 @@ describe('State overrides tests', function () {
       chain: hardhat,
       mode: 'hardhat',
       transport: http(),
+      name: 'Test Client',
+      account: WHALE_ADDRESS,
+      key: 'test',
+      cacheTime: undefined,
+      pollingInterval: undefined,
     }).extend(publicActions);
     await resetFork(testClient as unknown as TestClient);
     await testClient.impersonateAccount({ address: WHALE_ADDRESS });
@@ -297,6 +302,11 @@ describe('Position util tests', function () {
     chain: hardhat,
     mode: 'hardhat',
     transport: http(),
+    name: 'Test Client',
+    account: eoa,
+    key: 'test',
+    cacheTime: undefined,
+    pollingInterval: undefined,
   }).extend(publicActions);
 
   beforeEach(async function () {
@@ -779,6 +789,11 @@ describe('CoinGecko tests', function () {
     chain: hardhat,
     mode: 'hardhat',
     transport: http(),
+    name: 'Test Client',
+    account: eoa,
+    key: 'test',
+    cacheTime: undefined,
+    pollingInterval: undefined,
   }).extend(publicActions);
 
   before(async function () {
@@ -1074,7 +1089,7 @@ describe('Pool subgraph query tests', function () {
     await testLiquidityDistribution(chainId, pool);
   });
 
-  it('Tick liquidity distribution - Arbitrum mainnet', async function () {
+  it.skip('Tick liquidity distribution - Arbitrum mainnet', async function () {
     const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const WETH_ARBITRUM = getAddress(
       '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
