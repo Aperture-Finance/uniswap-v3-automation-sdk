@@ -73,13 +73,16 @@ import {
   getTokenPriceListFromCoingeckoWithAddresses,
   getTokenSvg,
   getTokenValueProportionFromPriceRatio,
+  humanPriceToClosestTick,
   isPositionInRange,
   priceToClosestUsableTick,
   priceToSqrtRatioX96,
   projectRebalancedPositionAtPrice,
+  rangeWidthRatioToTicks,
   readTickToLiquidityMap,
   simulateMintOptimal,
   sqrtRatioToPrice,
+  tickToBigPrice,
   tickToLimitOrderRange,
 } from '../../viem';
 
@@ -977,6 +980,41 @@ describe('Price to tick conversion', function () {
     expect(Math.round(tick - tickAvg)).to.be.lessThan(tickSpacing);
     expect(tickAvg).to.equal(Math.floor((tickLower + tickUpper) / 2));
     expect(tickUpper - tickLower).to.equal(widthMultiplier * tickSpacing);
+  });
+
+  it('Tick to big price', function () {
+    expect(tickToBigPrice(100).toNumber()).to.be.equal(
+      new Big(1.0001).pow(100).toNumber(),
+    );
+  });
+
+  it('Range width and ratio to ticks', function () {
+    const tickCurrent = 200000;
+    const price = tickToBigPrice(tickCurrent);
+    const token0ValueProportion = new Big(0.3);
+    const width = 1000;
+    const { tickLower, tickUpper } = rangeWidthRatioToTicks(
+      width,
+      tickCurrent,
+      token0ValueProportion,
+    );
+    expect(tickUpper - tickLower).to.equal(width);
+    const priceLowerSqrt = tickToBigPrice(tickLower).sqrt();
+    const priceUpperSqrt = tickToBigPrice(tickUpper).sqrt();
+    // amount0 = liquidity * (1 / sqrt(price)) - (1 / sqrt(priceUpper))
+    const amount0 = new Big(1)
+      .div(price.sqrt())
+      .minus(new Big(1).div(priceUpperSqrt));
+    // amount1 = liquidity * (sqrt(price) - sqrt(priceLower))
+    const amount1 = price.sqrt().minus(priceLowerSqrt);
+    const value0 = amount0.times(price);
+    const ratio = value0.div(value0.add(amount1)).toNumber();
+    expect(ratio).to.be.closeTo(token0ValueProportion.toNumber(), 0.001);
+  });
+
+  it('Human price to closest tick', function () {
+    const tick = humanPriceToClosestTick(token0, token1, maxPrice.toFixed());
+    expect(tick).to.equal(TickMath.MAX_TICK - 1);
   });
 });
 

@@ -9,7 +9,7 @@ import { getChainInfo } from './chain';
 
 // Let Big use 30 decimal places of precision since 2^96 < 10^29.
 Big.DP = 30;
-export const Q96 = new Big('2').pow(96);
+export const Q96 = new Big(2).pow(96);
 export const Q192 = Q96.times(Q96);
 
 // A list of two numbers representing a historical price datapoint provided by Coingecko.
@@ -273,32 +273,6 @@ export function priceToSqrtRatioX96(price: Big): JSBI {
   } else {
     return sqrtRatioX96;
   }
-}
-
-/**
- * Given a Big price of quoteToken/baseToken, calculate the closest tick.
- * @param price The price of quoteToken/baseToken, as a `Big` number.
- * @param baseToken The base token.
- * @param quoteToken The quote token.
- * @returns The closest tick.
- */
-export function bigToClosestTickSafe(
-  price: Big,
-  baseToken: Token,
-  quoteToken: Token,
-): number {
-  if (price.lte(0)) {
-    throw new Error('Invalid price: must be greater than 0');
-  }
-  const sorted = baseToken.sortsBefore(quoteToken);
-  if (!sorted) {
-    const DP = Big.DP;
-    Big.DP = 30;
-    price = new Big(1).div(price);
-    Big.DP = DP;
-  }
-  const sqrtPriceX96 = priceToSqrtRatioX96(price);
-  return TickMath.getTickAtSqrtRatio(sqrtPriceX96);
 }
 
 /**
