@@ -117,6 +117,18 @@ export const TokenAmountConditionSchema = z
   );
 export type TokenAmountCondition = z.infer<typeof TokenAmountConditionSchema>;
 
+const DurationSecSchema = z
+  .number()
+  .int()
+  .positive()
+  .optional()
+  .describe(
+    'If set, the condition is only considered met if the price remains satisfaction the threshold requirement' +
+      ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
+      'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
+      'price feed used is Coingecko.',
+  );
+
 export const PriceConditionSchema = z
   .object({
     type: z.literal(ConditionTypeEnum.enum.Price),
@@ -138,17 +150,7 @@ export const PriceConditionSchema = z
       .describe(
         'If `lte` is set, the condition is considered met if the current price <= `lte`.',
       ),
-    durationSec: z
-      .number()
-      .int()
-      .positive()
-      .optional()
-      .describe(
-        'If set, the condition is only considered met if the price remains satisfaction the threshold requirement' +
-          ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
-          'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
-          'price feed used is Coingecko.',
-      ),
+    durationSec: DurationSecSchema,
     // Deprecated. New triggers with `singleToken` set will be rejected after backend is updated. Existing triggers will continue to work.
     singleToken: z
       .union([z.literal(0), z.literal(1)])
@@ -273,17 +275,7 @@ export const RecurringPercentageConditionSchema = z
     currentTickOffset: z
       .number()
       .describe('Next trigger price as a tick offset from the current tick.'),
-    durationSec: z
-      .number()
-      .int()
-      .positive()
-      .optional()
-      .describe(
-        'If set, the condition is only considered met if the price remains satisfaction the threshold requirement' +
-          ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
-          'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
-          'price feed used is Coingecko.',
-      ),
+    durationSec: DurationSecSchema,
   })
   .describe(
     'The "RecurringPercentage" condition defines the target price in terms of a percentage offset from the ' +
@@ -305,6 +297,7 @@ export const RecurringPriceConditionSchema = z
       .describe(
         'The next trigger price as a price offset from the current price in human-readable format.',
       ),
+    durationSec: DurationSecSchema,
   })
   .describe(
     'The "RecurringPrice" condition defines the target price in terms of a price offset from the current ' +
@@ -321,6 +314,7 @@ export const RecurringRatioConditionSchema = z
       .string()
       .nonempty()
       .describe('The proportion of the position value in token0.'),
+    durationSec: DurationSecSchema,
   })
   .describe(
     'The "RecurringRatio" condition defines the target ratio in terms of the proportion of the position ' +
