@@ -392,6 +392,13 @@ export const RecurringRatioActionSchema = BaseRecurringActionSchema.extend({
 );
 export type RecurringRatioAction = z.infer<typeof RecurringRatioActionSchema>;
 
+export const RecurringActionSchema = z.discriminatedUnion('type', [
+  RecurringPercentageActionSchema,
+  RecurringPriceActionSchema,
+  RecurringRatioActionSchema,
+]);
+export type RecurringAction = z.infer<typeof RecurringActionSchema>;
+
 export const ActionSchema = z.discriminatedUnion('type', [
   CloseActionSchema,
   LimitOrderCloseActionSchema,
