@@ -21,6 +21,15 @@ export enum ApertureSupportedChainId {
   MANTA_PACIFIC_TESTNET_CHAIN_ID = 3441005,
 }
 
+export const ClientTypeEnum = z.enum(['FRONTEND', 'API']);
+export type ClientTypeEnum = z.infer<typeof ClientTypeEnum>;
+
+const ClientTypeSchema = z.object({
+  clientType: ClientTypeEnum.default(ClientTypeEnum.enum.API).describe(
+    'The type of the client.',
+  ),
+});
+
 const ApertureSupportedChainIdEnum = z
   .nativeEnum(ApertureSupportedChainId)
   .describe(
@@ -265,7 +274,7 @@ export const ActionSchema = z.discriminatedUnion('type', [
 ]);
 export type Action = z.infer<typeof ActionSchema>;
 
-const BaseTriggerPayloadSchema = z.object({
+const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
   ownerAddr: z
     .string()
     .nonempty()
@@ -338,7 +347,7 @@ export const PermitInfoSchema = z
   );
 export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
-export const CheckPositionPermitRequestSchema = z.object({
+export const CheckPositionPermitRequestSchema = ClientTypeSchema.extend({
   chainId: ApertureSupportedChainIdEnum,
   tokenId: z
     .string()
@@ -451,7 +460,7 @@ export const ListTriggerResponseSchema = z.object({
 });
 export type ListTriggerResponse = z.infer<typeof ListTriggerResponseSchema>;
 
-export const CheckUserLimitRequestSchema = z.object({
+export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
   ownerAddr: z
     .string()
     .nonempty()
