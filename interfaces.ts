@@ -25,9 +25,7 @@ export const ClientTypeEnum = z.enum(['FRONTEND', 'API']);
 export type ClientTypeEnum = z.infer<typeof ClientTypeEnum>;
 
 const ClientTypeSchema = z.object({
-  clientType: ClientTypeEnum.default(ClientTypeEnum.enum.API).describe(
-    'The type of the client.',
-  ),
+  clientType: ClientTypeEnum.optional().describe('The type of the client.'),
 });
 
 const ApertureSupportedChainIdEnum = z
