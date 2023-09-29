@@ -11,12 +11,12 @@ import {
   hexToSignature,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
 import {
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
 } from '../typechain-types';
-import { getChainInfo } from './chain';
 import {
   GetAbiFunctionParamsTypes,
   GetAbiFunctionReturnTypes,

@@ -10,7 +10,6 @@ import {
 import Big from 'big.js';
 import JSBI from 'jsbi';
 
-import { LiquidityAmount, TickNumber, TickToLiquidityMap } from './pool';
 import { parsePrice } from './price';
 
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
@@ -200,25 +199,4 @@ export function rangeWidthRatioToTicks(
     tickUpper = tickLower + width;
   }
   return { tickLower, tickUpper };
-}
-
-/**
- * Returns the liquidity amount at the specified tick.
- * @param tickToLiquidityMap Sorted map from tick to liquidity amount.
- * @param tick The tick to query.
- * @returns The liquidity amount at the specified tick.
- */
-export function readTickToLiquidityMap(
-  tickToLiquidityMap: TickToLiquidityMap,
-  tick: TickNumber,
-): LiquidityAmount {
-  if (tickToLiquidityMap.get(tick) !== undefined) {
-    return tickToLiquidityMap.get(tick)!;
-  } else {
-    const key = [...tickToLiquidityMap.keys()].findIndex((t) => t > tick) - 1;
-    if (key >= 0) {
-      return tickToLiquidityMap.get(key)!;
-    }
-  }
-  return JSBI.BigInt(0);
 }

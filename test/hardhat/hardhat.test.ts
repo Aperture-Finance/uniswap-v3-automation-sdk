@@ -32,28 +32,45 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, hardhat, mainnet } from 'viem/chains';
 
+import { getChainInfo } from '../../chain';
 import {
   ApertureSupportedChainId,
   ConditionTypeEnum,
   PriceConditionSchema,
 } from '../../interfaces';
-import { IERC20__factory, UniV3Automan__factory } from '../../typechain-types';
+import {
+  Q192,
+  fractionToBig,
+  getRawRelativePriceFromTokenValueProportion,
+  getTokenHistoricalPricesFromCoingecko,
+  getTokenPriceFromCoingecko,
+  getTokenPriceListFromCoingecko,
+  getTokenPriceListFromCoingeckoWithAddresses,
+  getTokenValueProportionFromPriceRatio,
+  priceToSqrtRatioX96,
+} from '../../price';
 import {
   DOUBLE_TICK,
   MAX_PRICE,
   MIN_PRICE,
-  PositionDetails,
-  Q192,
   alignPriceToClosestUsableTick,
+  humanPriceToClosestTick,
+  priceToClosestUsableTick,
+  rangeWidthRatioToTicks,
+  sqrtRatioToPrice,
+  tickToBigPrice,
+  tickToLimitOrderRange,
+} from '../../tick';
+import { IERC20__factory, UniV3Automan__factory } from '../../typechain-types';
+import {
+  PositionDetails,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
-  fractionToBig,
   generateAccessList,
   generatePriceConditionFromTokenValueProportion,
   generateTypedDataForPermit,
   getAllPositions,
   getAutomanReinvestCalldata,
-  getChainInfo,
   getERC20Overrides,
   getFeeTierDistribution,
   getLiquidityArrayForPool,
@@ -62,28 +79,15 @@ import {
   getPosition,
   getPositionAtPrice,
   getPublicClient,
-  getRawRelativePriceFromTokenValueProportion,
   getRebalancedPosition,
   getReinvestedPosition,
   getTickToLiquidityMapForPool,
   getToken,
-  getTokenHistoricalPricesFromCoingecko,
-  getTokenPriceFromCoingecko,
-  getTokenPriceListFromCoingecko,
-  getTokenPriceListFromCoingeckoWithAddresses,
   getTokenSvg,
-  getTokenValueProportionFromPriceRatio,
-  humanPriceToClosestTick,
   isPositionInRange,
-  priceToClosestUsableTick,
-  priceToSqrtRatioX96,
   projectRebalancedPositionAtPrice,
-  rangeWidthRatioToTicks,
   readTickToLiquidityMap,
   simulateMintOptimal,
-  sqrtRatioToPrice,
-  tickToBigPrice,
-  tickToLimitOrderRange,
 } from '../../viem';
 
 dotenvConfig();
@@ -1089,7 +1093,7 @@ describe('Pool subgraph query tests', function () {
     await testLiquidityDistribution(chainId, pool);
   });
 
-  it.skip('Tick liquidity distribution - Arbitrum mainnet', async function () {
+  it('Tick liquidity distribution - Arbitrum mainnet', async function () {
     const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const WETH_ARBITRUM = getAddress(
       '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',

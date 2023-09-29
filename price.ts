@@ -4,8 +4,8 @@ import axios, { AxiosResponse } from 'axios';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 
-import { ApertureSupportedChainId } from '../interfaces';
 import { getChainInfo } from './chain';
+import { ApertureSupportedChainId } from './interfaces';
 
 // Let Big use 30 decimal places of precision since 2^96 < 10^29.
 Big.DP = 30;

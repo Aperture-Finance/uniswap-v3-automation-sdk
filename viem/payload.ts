@@ -8,7 +8,7 @@ import {
   CreateTriggerPayload,
   PriceCondition,
 } from '../interfaces';
-import { getRawRelativePriceFromTokenValueProportion } from './price';
+import { getRawRelativePriceFromTokenValueProportion } from '../price';
 
 export function generateLimitOrderCloseRequestPayload(
   ownerAddr: string,
