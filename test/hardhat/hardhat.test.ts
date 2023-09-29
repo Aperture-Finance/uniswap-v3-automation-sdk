@@ -49,6 +49,7 @@ import {
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
 } from '../../price';
+import { convertRecurringCondition, normalizeTicks } from '../../rebalance';
 import {
   DOUBLE_TICK,
   MAX_PRICE,
@@ -1109,5 +1110,15 @@ describe('Pool subgraph query tests', function () {
       getPublicClient(arbitrumChainId),
     );
     await testLiquidityDistribution(arbitrumChainId, pool);
+  });
+});
+
+describe('Recurring rebalance tests', function () {
+  it('Test convertRecurringCondition', async function () {
+    convertRecurringCondition;
+  });
+
+  it('Test normalizeTicks', async function () {
+    normalizeTicks;
   });
 });
