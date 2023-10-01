@@ -32,28 +32,46 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, hardhat, mainnet } from 'viem/chains';
 
+import { getChainInfo } from '../../chain';
 import {
   ApertureSupportedChainId,
   ConditionTypeEnum,
   PriceConditionSchema,
 } from '../../interfaces';
-import { IERC20__factory, UniV3Automan__factory } from '../../typechain-types';
+import {
+  Q192,
+  fractionToBig,
+  getRawRelativePriceFromTokenValueProportion,
+  getTokenHistoricalPricesFromCoingecko,
+  getTokenPriceFromCoingecko,
+  getTokenPriceListFromCoingecko,
+  getTokenPriceListFromCoingeckoWithAddresses,
+  getTokenValueProportionFromPriceRatio,
+  priceToSqrtRatioX96,
+} from '../../price';
+import { convertRecurringCondition, normalizeTicks } from '../../rebalance';
 import {
   DOUBLE_TICK,
   MAX_PRICE,
   MIN_PRICE,
-  PositionDetails,
-  Q192,
   alignPriceToClosestUsableTick,
+  humanPriceToClosestTick,
+  priceToClosestUsableTick,
+  rangeWidthRatioToTicks,
+  sqrtRatioToPrice,
+  tickToBigPrice,
+  tickToLimitOrderRange,
+} from '../../tick';
+import { IERC20__factory, UniV3Automan__factory } from '../../typechain-types';
+import {
+  PositionDetails,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
-  fractionToBig,
   generateAccessList,
   generatePriceConditionFromTokenValueProportion,
   generateTypedDataForPermit,
   getAllPositions,
   getAutomanReinvestCalldata,
-  getChainInfo,
   getERC20Overrides,
   getFeeTierDistribution,
   getLiquidityArrayForPool,
@@ -62,25 +80,15 @@ import {
   getPosition,
   getPositionAtPrice,
   getPublicClient,
-  getRawRelativePriceFromTokenValueProportion,
   getRebalancedPosition,
   getReinvestedPosition,
   getTickToLiquidityMapForPool,
   getToken,
-  getTokenHistoricalPricesFromCoingecko,
-  getTokenPriceFromCoingecko,
-  getTokenPriceListFromCoingecko,
-  getTokenPriceListFromCoingeckoWithAddresses,
   getTokenSvg,
-  getTokenValueProportionFromPriceRatio,
   isPositionInRange,
-  priceToClosestUsableTick,
-  priceToSqrtRatioX96,
   projectRebalancedPositionAtPrice,
   readTickToLiquidityMap,
   simulateMintOptimal,
-  sqrtRatioToPrice,
-  tickToLimitOrderRange,
 } from '../../viem';
 
 dotenvConfig();
@@ -119,6 +127,11 @@ describe('State overrides tests', function () {
       chain: hardhat,
       mode: 'hardhat',
       transport: http(),
+      name: 'Test Client',
+      account: undefined,
+      key: 'test',
+      cacheTime: undefined,
+      pollingInterval: undefined,
     }).extend(publicActions);
     await resetFork(testClient as unknown as TestClient);
     await testClient.impersonateAccount({ address: WHALE_ADDRESS });
@@ -294,6 +307,11 @@ describe('Position util tests', function () {
     chain: hardhat,
     mode: 'hardhat',
     transport: http(),
+    name: 'Test Client',
+    account: undefined,
+    key: 'test',
+    cacheTime: undefined,
+    pollingInterval: undefined,
   }).extend(publicActions);
 
   beforeEach(async function () {
@@ -776,6 +794,11 @@ describe('CoinGecko tests', function () {
     chain: hardhat,
     mode: 'hardhat',
     transport: http(),
+    name: 'Test Client',
+    account: undefined,
+    key: 'test',
+    cacheTime: undefined,
+    pollingInterval: undefined,
   }).extend(publicActions);
 
   before(async function () {
@@ -978,6 +1001,41 @@ describe('Price to tick conversion', function () {
     expect(tickAvg).to.equal(Math.floor((tickLower + tickUpper) / 2));
     expect(tickUpper - tickLower).to.equal(widthMultiplier * tickSpacing);
   });
+
+  it('Tick to big price', function () {
+    expect(tickToBigPrice(100).toNumber()).to.be.equal(
+      new Big(1.0001).pow(100).toNumber(),
+    );
+  });
+
+  it('Range width and ratio to ticks', function () {
+    const tickCurrent = 200000;
+    const price = tickToBigPrice(tickCurrent);
+    const token0ValueProportion = new Big(0.3);
+    const width = 1000;
+    const { tickLower, tickUpper } = rangeWidthRatioToTicks(
+      width,
+      tickCurrent,
+      token0ValueProportion,
+    );
+    expect(tickUpper - tickLower).to.equal(width);
+    const priceLowerSqrt = tickToBigPrice(tickLower).sqrt();
+    const priceUpperSqrt = tickToBigPrice(tickUpper).sqrt();
+    // amount0 = liquidity * (1 / sqrt(price)) - (1 / sqrt(priceUpper))
+    const amount0 = new Big(1)
+      .div(price.sqrt())
+      .minus(new Big(1).div(priceUpperSqrt));
+    // amount1 = liquidity * (sqrt(price) - sqrt(priceLower))
+    const amount1 = price.sqrt().minus(priceLowerSqrt);
+    const value0 = amount0.times(price);
+    const ratio = value0.div(value0.add(amount1)).toNumber();
+    expect(ratio).to.be.closeTo(token0ValueProportion.toNumber(), 0.001);
+  });
+
+  it('Human price to closest tick', function () {
+    const tick = humanPriceToClosestTick(token0, token1, maxPrice.toFixed());
+    expect(tick).to.equal(TickMath.MAX_TICK - 1);
+  });
 });
 
 describe('Pool subgraph query tests', function () {
@@ -1052,5 +1110,15 @@ describe('Pool subgraph query tests', function () {
       getPublicClient(arbitrumChainId),
     );
     await testLiquidityDistribution(arbitrumChainId, pool);
+  });
+});
+
+describe('Recurring rebalance tests', function () {
+  it('Test convertRecurringCondition', async function () {
+    convertRecurringCondition;
+  });
+
+  it('Test normalizeTicks', async function () {
+    normalizeTicks;
   });
 });

@@ -1,7 +1,7 @@
 import { PublicClient, createPublicClient, http } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId } from '../interfaces';
-import { getChainInfo } from './chain';
 
 /**
  * Creates a Viem public client for the specified chain id.

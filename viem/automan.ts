@@ -11,12 +11,12 @@ import {
   hexToSignature,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
 import {
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
 } from '../typechain-types';
-import { getChainInfo } from './chain';
 import {
   GetAbiFunctionParamsTypes,
   GetAbiFunctionReturnTypes,
@@ -366,6 +366,7 @@ export async function simulateMintOptimal(
  * @param chainId The chain ID.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
+ * @param owner The owner of the position to burn.
  * @param tokenId The token ID of the position to burn.
  * @param amount0Min The minimum amount of token0 to receive.
  * @param amount1Min The minimum amount of token1 to receive.
@@ -376,6 +377,7 @@ export async function simulateRemoveLiquidity(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
+  owner: Address,
   tokenId: bigint,
   amount0Min: bigint = BigInt(0),
   amount1Min: bigint = BigInt(0),
@@ -395,7 +397,7 @@ export async function simulateRemoveLiquidity(
       from,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
       data,
-      getNPMApprovalOverrides(chainId, from),
+      getNPMApprovalOverrides(chainId, owner),
       publicClient,
       blockNumber,
     ),
@@ -408,6 +410,7 @@ export async function simulateRemoveLiquidity(
  * @param chainId The chain ID.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
+ * @param owner The owner of the position to rebalance.
  * @param mintParams The mint parameters.
  * @param tokenId The token ID of the position to rebalance.
  * @param feeBips The percentage of position value to pay as a fee, multiplied by 1e18.
@@ -418,6 +421,7 @@ export async function simulateRebalance(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
+  owner: Address,
   mintParams: MintParams,
   tokenId: bigint,
   feeBips: bigint = BigInt(0),
@@ -438,7 +442,7 @@ export async function simulateRebalance(
       from,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
       data,
-      getNPMApprovalOverrides(chainId, from),
+      getNPMApprovalOverrides(chainId, owner),
       publicClient,
       blockNumber,
     ),

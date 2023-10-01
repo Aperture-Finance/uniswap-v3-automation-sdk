@@ -21,7 +21,13 @@ import {
   getContract,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId } from '../interfaces';
+import {
+  fractionToBig,
+  getTokenValueProportionFromPriceRatio,
+  priceToSqrtRatioX96,
+} from '../price';
 import {
   EphemeralAllPositions__factory,
   EphemeralGetPosition__factory,
@@ -29,7 +35,6 @@ import {
   UniV3Automan__factory,
 } from '../typechain-types';
 import { getAutomanReinvestCalldata } from './automan';
-import { getChainInfo } from './chain';
 import { GetAbiFunctionReturnTypes } from './generics';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from './overrides';
 import {
@@ -38,11 +43,6 @@ import {
   getPoolFromBasicPositionInfo,
   getPoolPrice,
 } from './pool';
-import {
-  fractionToBig,
-  getTokenValueProportionFromPriceRatio,
-  priceToSqrtRatioX96,
-} from './price';
 import { getPublicClient } from './public_client';
 
 export interface BasicPositionInfo {

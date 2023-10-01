@@ -8,9 +8,9 @@ import {
   getEventSelector,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId } from '../interfaces';
 import { INonfungiblePositionManager__factory } from '../typechain-types';
-import { getChainInfo } from './chain';
 import { CollectableTokenAmounts } from './position';
 
 /**

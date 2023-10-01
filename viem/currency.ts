@@ -7,9 +7,9 @@ import {
 } from '@uniswap/sdk-core';
 import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId } from '../interfaces';
 import { ERC20__factory } from '../typechain-types';
-import { getChainInfo } from './chain';
 import { getPublicClient } from './public_client';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.

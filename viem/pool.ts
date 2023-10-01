@@ -21,20 +21,20 @@ import {
   getContract,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import {
   AllV3TicksQuery,
   FeeTierDistributionQuery,
 } from '../data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId } from '../interfaces';
+import { DOUBLE_TICK, sqrtRatioToPrice } from '../tick';
 import {
   EphemeralGetPopulatedTicksInRange__factory,
   IUniswapV3Pool__factory,
 } from '../typechain-types';
-import { getChainInfo } from './chain';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
-import { DOUBLE_TICK, sqrtRatioToPrice } from './tick';
 
 const GetPopulatedTicksInRangeAbi = getAbiItem({
   abi: EphemeralGetPopulatedTicksInRange__factory.abi,
@@ -408,6 +408,27 @@ export async function getTickToLiquidityMapForPool(
     }
   }
   return data;
+}
+
+/**
+ * Returns the liquidity amount at the specified tick.
+ * @param tickToLiquidityMap Sorted map from tick to liquidity amount.
+ * @param tick The tick to query.
+ * @returns The liquidity amount at the specified tick.
+ */
+export function readTickToLiquidityMap(
+  tickToLiquidityMap: TickToLiquidityMap,
+  tick: TickNumber,
+): LiquidityAmount {
+  if (tickToLiquidityMap.get(tick) !== undefined) {
+    return tickToLiquidityMap.get(tick)!;
+  } else {
+    const key = [...tickToLiquidityMap.keys()].findIndex((t) => t > tick) - 1;
+    if (key >= 0) {
+      return tickToLiquidityMap.get(key)!;
+    }
+  }
+  return JSBI.BigInt(0);
 }
 
 /**
