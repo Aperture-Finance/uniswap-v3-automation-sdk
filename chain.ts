@@ -43,6 +43,7 @@ export interface ChainInfo {
   chain: Chain;
   uniswap_v3_factory: Address;
   uniswap_v3_nonfungible_position_manager: Address;
+  uniswap_v3_swap_router_02: Address;
   aperture_uniswap_v3_automan: Address;
   aperture_router_proxy?: Address;
   optimal_swap_router?: Address;
@@ -75,6 +76,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
     ),
@@ -105,6 +109,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x622e4726a167799826d1E1D150b076A7725f5D81',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0xcd9002c47348c54B1C044e30E449CdAe44124139',
     ),
@@ -126,6 +133,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+    ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
@@ -166,6 +176,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
     ),
@@ -205,6 +218,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
     ),
@@ -230,6 +246,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
     ),
@@ -254,6 +273,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x3d79EdAaBC0EaB6F08ED885C05Fc0B014290D95A',
+    ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x5615CDAb10dc425a742d643d949a7F474C01abc4',
     ),
     // Not yet deployed.
     aperture_uniswap_v3_automan: getAddress(
@@ -285,6 +307,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x7b8A01B39D58278b5DE7e48c8449c9f4F5170613',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
     ),
@@ -310,6 +335,9 @@ const CHAIN_ID_TO_INFO: {
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1',
     ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x2626664c2603336E57B271c5C0b26F421741e481',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000EDb4489cB49FE07246f39345c9f838cD',
     ),
@@ -334,6 +362,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x655C406EBFa14EE2006250925e54ec43AD184f8B',
+    ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0xbb00FF08d01D300023C629E8fFfFcb65A5a578cE',
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
@@ -394,6 +425,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0xe77e3F98a386a4C8f8c706A2aCfFdf57e70D06c6',
+    ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x3488d5A2D0281f546e43435715C436b46Ec1C678',
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
@@ -463,6 +497,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_nonfungible_position_manager: getAddress(
       '0x2dc114c0DEf2BC849996756E691FC6e8339649E1',
+    ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0x5bd1F6735B80e58aAC88B8A94836854d3068a13a',
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
