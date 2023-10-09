@@ -7,8 +7,8 @@ import {
   hexToSignature,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
-import { getChainInfo } from './chain';
 import { getNPM } from './position';
 
 export interface PositionApprovalStatus {

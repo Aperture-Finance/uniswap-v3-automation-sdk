@@ -11,9 +11,9 @@ import {
   toHex,
 } from 'viem';
 
+import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId } from '../interfaces';
 import { IERC20__factory } from '../typechain-types';
-import { getChainInfo } from './chain';
 
 type StateOverrides = {
   [address: Address]: {

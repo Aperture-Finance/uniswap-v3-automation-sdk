@@ -4,12 +4,12 @@ import axios, { AxiosResponse } from 'axios';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 
-import { ApertureSupportedChainId } from '../interfaces';
 import { getChainInfo } from './chain';
+import { ApertureSupportedChainId } from './interfaces';
 
 // Let Big use 30 decimal places of precision since 2^96 < 10^29.
 Big.DP = 30;
-export const Q96 = new Big('2').pow(96);
+export const Q96 = new Big(2).pow(96);
 export const Q192 = Q96.times(Q96);
 
 // A list of two numbers representing a historical price datapoint provided by Coingecko.
@@ -262,6 +262,9 @@ export function fractionToBig(price: Fraction): Big {
  * @returns The sqrt ratio of token1/token0, as a `JSBI` number.
  */
 export function priceToSqrtRatioX96(price: Big): JSBI {
+  if (price.lte(0)) {
+    throw new Error('Invalid price: must be greater than 0');
+  }
   const sqrtRatioX96 = JSBI.BigInt(price.times(Q192).sqrt().toFixed(0));
   if (JSBI.lessThan(sqrtRatioX96, TickMath.MIN_SQRT_RATIO)) {
     return TickMath.MIN_SQRT_RATIO;

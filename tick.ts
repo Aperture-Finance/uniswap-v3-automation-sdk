@@ -7,9 +7,10 @@ import {
   priceToClosestTick,
   tickToPrice,
 } from '@uniswap/v3-sdk';
+import Big from 'big.js';
 import JSBI from 'jsbi';
 
-import { LiquidityAmount, TickNumber, TickToLiquidityMap } from './pool';
+import { parsePrice } from './price';
 
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
 const Q192 = JSBI.multiply(Q96, Q96);
@@ -57,6 +58,21 @@ export function priceToClosestTickSafe(price: Price<Token, Token>): number {
   } else {
     return priceToClosestTick(price);
   }
+}
+
+/**
+ * Given a human-readable price of `baseToken` denominated in `quoteToken`, calculate the closest tick.
+ * @param humanPrice The human-readable price of `baseToken` denominated in `quoteToken`.
+ * @param baseToken The base token.
+ * @param quoteToken The quote token.
+ * @returns The closest tick.
+ */
+export function humanPriceToClosestTick(
+  baseToken: Token,
+  quoteToken: Token,
+  humanPrice: string,
+): number {
+  return priceToClosestTickSafe(parsePrice(baseToken, quoteToken, humanPrice));
 }
 
 /**
@@ -127,22 +143,60 @@ export function tickToLimitOrderRange(
 }
 
 /**
- * Returns the liquidity amount at the specified tick.
- * @param tickToLiquidityMap Sorted map from tick to liquidity amount.
+ * Returns token0's raw price in terms of token1.
  * @param tick The tick to query.
- * @returns The liquidity amount at the specified tick.
+ * @returns The token0 price in terms of token1.
  */
-export function readTickToLiquidityMap(
-  tickToLiquidityMap: TickToLiquidityMap,
-  tick: TickNumber,
-): LiquidityAmount {
-  if (tickToLiquidityMap.get(tick) !== undefined) {
-    return tickToLiquidityMap.get(tick)!;
-  } else {
-    const key = [...tickToLiquidityMap.keys()].findIndex((t) => t > tick) - 1;
-    if (key >= 0) {
-      return tickToLiquidityMap.get(key)!;
-    }
+export function tickToBigPrice(tick: number): Big {
+  return new Big(TickMath.getSqrtRatioAtTick(tick).toString())
+    .pow(2)
+    .div(Q192.toString());
+}
+
+/**
+ * Returns the tick range for a position ratio and range width.
+ * @param width The width of the range.
+ * @param tickCurrent The current tick of the pool.
+ * @param token0ValueProportion The proportion of the position value that is held in token0, as a `Big` number between 0
+ * and 1, inclusive.
+ * @returns The tick range for the position.
+ */
+export function rangeWidthRatioToTicks(
+  width: number,
+  tickCurrent: number,
+  token0ValueProportion: Big,
+): {
+  tickLower: number;
+  tickUpper: number;
+} {
+  let tickLower: number, tickUpper: number;
+  if (token0ValueProportion.lt(0) || token0ValueProportion.gt(1)) {
+    throw new Error('token0ValueProportion must be between 0 and 1');
   }
-  return JSBI.BigInt(0);
+  if (token0ValueProportion.eq(0)) {
+    tickLower = tickCurrent - width;
+    tickUpper = tickCurrent;
+  } else if (token0ValueProportion.eq(1)) {
+    tickLower = tickCurrent;
+    tickUpper = tickCurrent + width;
+  } else {
+    const price = tickToBigPrice(tickCurrent);
+    const a = token0ValueProportion;
+    const b = new Big(1).minus(a.times(2)).times(price.sqrt());
+    const c = price
+      .times(a.minus(new Big(1)))
+      .div(tickToBigPrice(width).sqrt());
+    const priceLowerSqrt = b
+      .pow(2)
+      .minus(a.times(c).times(4))
+      .sqrt()
+      .minus(b)
+      .div(a.times(2));
+    const sqrtRatioLowerX96 = JSBI.BigInt(
+      priceLowerSqrt.times(new Big(2).pow(96)).toFixed(0),
+    );
+    tickLower = TickMath.getTickAtSqrtRatio(sqrtRatioLowerX96);
+    tickUpper = tickLower + width;
+  }
+  return { tickLower, tickUpper };
 }

@@ -2,7 +2,7 @@ import { Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { getAddress } from 'viem';
 
-import { ApertureSupportedChainId } from '../interfaces';
+import { ApertureSupportedChainId } from './interfaces';
 
 export interface WhitelistedPool {
   token0: Token;
