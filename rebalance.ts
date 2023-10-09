@@ -71,18 +71,14 @@ export function convertRecurringCondition(
     const gtePriceOffset = condition.gtePriceOffset
       ? new Big(condition.gtePriceOffset)
       : undefined;
-    if (gtePriceOffset !== undefined) {
-      if (gtePriceOffset.lte(0)) {
-        throw new Error('gtePriceOffset must be positive');
-      }
+    if (gtePriceOffset?.lte(0)) {
+      throw new Error('gtePriceOffset must be positive');
     }
     const ltePriceOffset = condition.ltePriceOffset
       ? new Big(condition.ltePriceOffset)
       : undefined;
-    if (ltePriceOffset !== undefined) {
-      if (ltePriceOffset.gte(0)) {
-        throw new Error('ltePriceOffset must be negative');
-      }
+    if (ltePriceOffset?.gte(0)) {
+      throw new Error('ltePriceOffset must be negative');
     }
     let gteTriggerPrice: Big | undefined, lteTriggerPrice: Big | undefined;
     if (condition.baseToken === 0) {
@@ -139,8 +135,8 @@ export function convertRecurringCondition(
       type: ConditionTypeEnum.enum.Price,
       durationSec: condition.durationSec,
       frontendType: 'RELATIVE_PRICE',
-      gte: gteTriggerPrice ? gteTriggerPrice.toString() : undefined,
-      lte: lteTriggerPrice ? lteTriggerPrice.toString() : undefined,
+      gte: gteTriggerPrice?.toString(),
+      lte: lteTriggerPrice?.toString(),
     };
   } else if (
     condition.type === RecurringConditionTypeEnum.enum.RecurringRatio
@@ -170,8 +166,8 @@ export function convertRecurringCondition(
       type: ConditionTypeEnum.enum.Price,
       durationSec: condition.durationSec,
       frontendType: 'POSITION_VALUE_RATIO',
-      gte: gteTriggerPrice ? gteTriggerPrice.toString() : undefined,
-      lte: lteTriggerPrice ? lteTriggerPrice.toString() : undefined,
+      gte: gteTriggerPrice?.toString(),
+      lte: lteTriggerPrice?.toString(),
     };
   } else {
     throw new Error('Invalid recurring condition type');
@@ -197,7 +193,13 @@ export function normalizeTicks(action: Action, pool: Pool) {
   } else if (action.type === ActionTypeEnum.enum.RecurringPrice) {
     const isToken0 = action.baseToken === 0;
     const price = isToken0 ? pool.token0Price : pool.token1Price;
-    const bigPrice = fractionToBig(price);
+    const bigPrice = fractionToBig(price).mul(
+      new Big(10).pow(
+        isToken0
+          ? pool.token0.decimals - pool.token1.decimals
+          : pool.token1.decimals - pool.token0.decimals,
+      ),
+    );
     const lowerPrice = bigPrice.add(action.priceLowerOffset);
     const upperPrice = bigPrice.add(action.priceUpperOffset);
     tickLower = humanPriceToClosestTick(

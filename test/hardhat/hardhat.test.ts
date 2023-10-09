@@ -34,9 +34,17 @@ import { arbitrum, hardhat, mainnet } from 'viem/chains';
 
 import { getChainInfo } from '../../chain';
 import {
+  ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
   PriceConditionSchema,
+  RecurringConditionTypeEnum,
+  RecurringPercentageAction,
+  RecurringPercentageCondition,
+  RecurringPriceAction,
+  RecurringPriceCondition,
+  RecurringRatioAction,
+  RecurringRatioCondition,
 } from '../../interfaces';
 import {
   Q192,
@@ -1114,11 +1122,121 @@ describe('Pool subgraph query tests', function () {
 });
 
 describe('Recurring rebalance tests', function () {
+  const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+  const WETH_ARBITRUM = getAddress(
+    '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+  );
+  const USDC_ARBITRUM = getAddress(
+    '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
+  );
+  let pool: Pool;
+
+  before(async function () {
+    pool = await getPool(
+      WETH_ARBITRUM,
+      USDC_ARBITRUM,
+      FeeAmount.LOW,
+      arbitrumChainId,
+      getPublicClient(arbitrumChainId),
+    );
+  });
+
   it('Test convertRecurringCondition', async function () {
-    convertRecurringCondition;
+    const price = fractionToBig(pool.token0Price);
+    {
+      const recurringCondition = {
+        type: RecurringConditionTypeEnum.enum.RecurringPercentage,
+        gteTickOffset: 100,
+        lteTickOffset: -100,
+      } as RecurringPercentageCondition;
+      const priceCondition = convertRecurringCondition(
+        recurringCondition,
+        pool,
+      );
+      expect(new Big(priceCondition.gte!).gt(price)).to.be.true;
+      expect(new Big(priceCondition.lte!).lt(price)).to.be.true;
+    }
+    {
+      const recurringCondition = {
+        type: RecurringConditionTypeEnum.enum.RecurringPrice,
+        baseToken: 0,
+        gtePriceOffset: '100',
+        ltePriceOffset: '-100',
+      } as RecurringPriceCondition;
+      const priceCondition = convertRecurringCondition(
+        recurringCondition,
+        pool,
+      );
+      expect(new Big(priceCondition.gte!).gt(price)).to.be.true;
+      expect(new Big(priceCondition.lte!).lt(price)).to.be.true;
+    }
+    {
+      const recurringCondition = {
+        type: RecurringConditionTypeEnum.enum.RecurringPrice,
+        baseToken: 1,
+        gtePriceOffset: '0.0001',
+        ltePriceOffset: '-0.0001',
+      } as RecurringPriceCondition;
+      const priceCondition = convertRecurringCondition(
+        recurringCondition,
+        pool,
+      );
+      expect(new Big(priceCondition.gte!).gt(price)).to.be.true;
+      expect(new Big(priceCondition.lte!).lt(price)).to.be.true;
+    }
+    {
+      const recurringCondition = {
+        type: RecurringConditionTypeEnum.enum.RecurringRatio,
+        gteToken0ValueProportion: '0.6',
+        lteToken0ValueProportion: '0.4',
+      } as RecurringRatioCondition;
+      const priceCondition = convertRecurringCondition(
+        recurringCondition,
+        pool,
+        pool.tickCurrent - 100,
+        pool.tickCurrent + 100,
+      );
+      expect(new Big(priceCondition.gte!).gt(price)).to.be.true;
+      expect(new Big(priceCondition.lte!).lt(price)).to.be.true;
+    }
   });
 
   it('Test normalizeTicks', async function () {
-    normalizeTicks;
+    {
+      const action = {
+        type: ActionTypeEnum.enum.RecurringPercentage,
+        tickLowerOffset: -100,
+        tickUpperOffset: 100,
+      } as RecurringPercentageAction;
+      const { tickLower } = normalizeTicks(action, pool);
+      expect(tickLower).to.equal(
+        nearestUsableTick(
+          pool.tickCurrent + action.tickLowerOffset,
+          pool.tickSpacing,
+        ),
+      );
+    }
+    {
+      const action = {
+        type: ActionTypeEnum.enum.RecurringPrice,
+        baseToken: 0,
+        priceLowerOffset: '-100',
+        priceUpperOffset: '100',
+      } as RecurringPriceAction;
+      const { tickLower, tickUpper } = normalizeTicks(action, pool);
+      expect(tickLower).to.be.lessThan(pool.tickCurrent);
+      expect(tickUpper).to.be.greaterThan(pool.tickCurrent);
+    }
+    {
+      const action = {
+        type: ActionTypeEnum.enum.RecurringRatio,
+        tickRangeWidth: 1000,
+        token0ValueProportion: '0.5',
+      } as RecurringRatioAction;
+      const { tickLower, tickUpper } = normalizeTicks(action, pool);
+      expect(tickLower).to.be.lessThan(pool.tickCurrent);
+      expect(tickUpper).to.be.greaterThan(pool.tickCurrent);
+      expect(tickUpper - tickLower).to.equal(action.tickRangeWidth);
+    }
   });
 });
