@@ -153,6 +153,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EphemeralGetPosition__factory>;
     getContractFactory(
+      name: "EphemeralGetPositions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EphemeralGetPositions__factory>;
+    getContractFactory(
       name: "OptimalSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
@@ -344,6 +348,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.EphemeralGetPosition>;
+    getContractAt(
+      name: "EphemeralGetPositions",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EphemeralGetPositions>;
     getContractAt(
       name: "OptimalSwap",
       address: string,

@@ -82,6 +82,8 @@ export type { EphemeralGetPopulatedTicksInWord } from "./src/lens/EphemeralGetPo
 export { EphemeralGetPopulatedTicksInWord__factory } from "./factories/src/lens/EphemeralGetPopulatedTicksInWord__factory";
 export type { EphemeralGetPosition } from "./src/lens/EphemeralGetPosition";
 export { EphemeralGetPosition__factory } from "./factories/src/lens/EphemeralGetPosition__factory";
+export type { EphemeralGetPositions } from "./src/lens/EphemeralGetPositions";
+export { EphemeralGetPositions__factory } from "./factories/src/lens/EphemeralGetPositions__factory";
 export type { OptimalSwap } from "./src/libraries/OptimalSwap";
 export { OptimalSwap__factory } from "./factories/src/libraries/OptimalSwap__factory";
 export type { OptimalSwapRouter } from "./src/OptimalSwapRouter";
