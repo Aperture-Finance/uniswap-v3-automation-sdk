@@ -134,16 +134,16 @@ export function getAutomanMintOptimalCalldata(
 }
 
 export function getAutomanDecreaseLiquidityCalldata(
-  positionId: bigint,
+  tokenId: bigint,
   liquidity: bigint,
   deadline: bigint,
-  amount0Min: bigint = BigInt(0),
-  amount1Min: bigint = BigInt(0),
-  feeBips: bigint = BigInt(0),
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
   permitInfo?: PermitInfo,
 ): Hex {
   const params: DecreaseLiquidityParams = {
-    tokenId: positionId,
+    tokenId,
     liquidity,
     amount0Min,
     amount1Min,
@@ -156,16 +156,16 @@ export function getAutomanDecreaseLiquidityCalldata(
       functionName: 'decreaseLiquidity',
     });
   }
-  const permitSignature = hexToSignature(permitInfo.signature as Hex);
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
     abi: UniV3Automan__factory.abi,
     args: [
       params,
       feeBips,
       BigInt(permitInfo.deadline),
-      Number(permitSignature.v),
-      permitSignature.r,
-      permitSignature.s,
+      Number(v),
+      r,
+      s,
     ] as const,
     functionName: 'decreaseLiquidity',
   });
@@ -173,46 +173,46 @@ export function getAutomanDecreaseLiquidityCalldata(
 
 export function getAutomanRebalanceCalldata(
   mintParams: MintParams,
-  existingPositionId: bigint,
-  feeBips: bigint = BigInt(0),
+  tokenId: bigint,
+  feeBips = BigInt(0),
   permitInfo?: PermitInfo,
   swapData: Hex = '0x',
 ): Hex {
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: UniV3Automan__factory.abi,
-      args: [mintParams, existingPositionId, feeBips, swapData] as const,
+      args: [mintParams, tokenId, feeBips, swapData] as const,
       functionName: 'rebalance',
     });
   }
-  const permitSignature = hexToSignature(permitInfo.signature as Hex);
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
     abi: UniV3Automan__factory.abi,
     args: [
       mintParams,
-      existingPositionId,
+      tokenId,
       feeBips,
       swapData,
       BigInt(permitInfo.deadline),
-      Number(permitSignature.v),
-      permitSignature.r,
-      permitSignature.s,
+      Number(v),
+      r,
+      s,
     ] as const,
     functionName: 'rebalance',
   });
 }
 
 export function getAutomanReinvestCalldata(
-  positionId: bigint,
+  tokenId: bigint,
   deadline: bigint,
-  amount0Min: bigint = BigInt(0),
-  amount1Min: bigint = BigInt(0),
-  feeBips: bigint = BigInt(0),
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
   permitInfo?: PermitInfo,
   swapData: Hex = '0x',
 ): Hex {
-  const increaseLiquidityParams: IncreaseLiquidityParams = {
-    tokenId: positionId,
+  const params: IncreaseLiquidityParams = {
+    tokenId,
     amount0Desired: BigInt(0), // Param value ignored by Automan.
     amount1Desired: BigInt(0), // Param value ignored by Automan.
     amount0Min,
@@ -222,21 +222,21 @@ export function getAutomanReinvestCalldata(
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: UniV3Automan__factory.abi,
-      args: [increaseLiquidityParams, feeBips, swapData] as const,
+      args: [params, feeBips, swapData] as const,
       functionName: 'reinvest',
     });
   }
-  const permitSignature = hexToSignature(permitInfo.signature as Hex);
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
     abi: UniV3Automan__factory.abi,
     args: [
-      increaseLiquidityParams,
+      params,
       feeBips,
       swapData,
       BigInt(permitInfo.deadline),
-      Number(permitSignature.v),
-      permitSignature.r,
-      permitSignature.s,
+      Number(v),
+      r,
+      s,
     ] as const,
     functionName: 'reinvest',
   });
@@ -245,9 +245,9 @@ export function getAutomanReinvestCalldata(
 export function getAutomanRemoveLiquidityCalldata(
   tokenId: bigint,
   deadline: bigint,
-  amount0Min: bigint = BigInt(0),
-  amount1Min: bigint = BigInt(0),
-  feeBips: bigint = BigInt(0),
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
   permitInfo?: PermitInfo,
 ): Hex {
   const params: DecreaseLiquidityParams = {
@@ -264,16 +264,16 @@ export function getAutomanRemoveLiquidityCalldata(
       functionName: 'removeLiquidity',
     });
   }
-  const permitSignature = hexToSignature(permitInfo.signature as Hex);
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
     abi: UniV3Automan__factory.abi,
     args: [
       params,
       feeBips,
       BigInt(permitInfo.deadline),
-      Number(permitSignature.v),
-      permitSignature.r,
-      permitSignature.s,
+      Number(v),
+      r,
+      s,
     ] as const,
     functionName: 'removeLiquidity',
   });
@@ -379,9 +379,9 @@ export async function simulateRemoveLiquidity(
   from: Address,
   owner: Address,
   tokenId: bigint,
-  amount0Min: bigint = BigInt(0),
-  amount1Min: bigint = BigInt(0),
-  feeBips: bigint = BigInt(0),
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
   blockNumber?: bigint,
 ): Promise<RemoveLiquidityReturnType> {
   const data = getAutomanRemoveLiquidityCalldata(
@@ -424,7 +424,7 @@ export async function simulateRebalance(
   owner: Address,
   mintParams: MintParams,
   tokenId: bigint,
-  feeBips: bigint = BigInt(0),
+  feeBips = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RebalanceReturnType> {
