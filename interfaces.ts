@@ -86,7 +86,10 @@ export const TriggerStatusEnum = z
 export type TriggerStatusEnum = z.infer<typeof TriggerStatusEnum>;
 
 export const TokenAmountSchema = z.object({
-  address: z.string().nonempty().describe('The ERC-20 token contract address.'),
+  address: z
+    .string()
+    .startsWith('0x')
+    .describe('The ERC-20 token contract address.'),
   rawAmount: z
     .string()
     .nonempty()
@@ -342,7 +345,7 @@ export const LimitOrderCloseActionSchema = z
     type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
     inputTokenAddr: z
       .string()
-      .nonempty()
+      .startsWith('0x')
       .describe(
         'The address of the input token for the limit order, i.e. the token which the user provided and ' +
           'wants to sell. Must be one of the two tokens in the position.',
@@ -387,7 +390,7 @@ export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 const BaseRecurringActionSchema = BaseActionSchema.extend({
   uuid: z
     .string()
-    .nonempty()
+    .optional()
     .describe(
       'The uuid of the recurring rebalance to identify the series of positions.',
     ),
@@ -463,7 +466,7 @@ export type Action = z.infer<typeof ActionSchema>;
 const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
   ownerAddr: z
     .string()
-    .nonempty()
+    .startsWith('0x')
     .describe('The owner address of the position; must be a checksum address.'),
   chainId: ApertureSupportedChainIdEnum,
 });
@@ -514,7 +517,7 @@ export const PermitInfoSchema = z
   .object({
     signature: z
       .string()
-      .nonempty()
+      .startsWith('0x')
       .describe(
         'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated,' +
           ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
@@ -553,7 +556,10 @@ export type UpdatePositionPermitRequest = z.infer<
 >;
 
 const PayloadSignatureSchema = z.object({
-  payloadSignature: z.string().nonempty().describe('Signature of the payload.'),
+  payloadSignature: z
+    .string()
+    .startsWith('0x')
+    .describe('Signature of the payload.'),
 });
 export const CreateTriggerRequestSchema = PayloadSignatureSchema.extend({
   payload: CreateTriggerPayloadSchema,
@@ -652,6 +658,7 @@ export const TriggerItemSchema = z.object({
     .describe('Unix timestamp in seconds when this trigger is completed.'),
   transactionHash: z
     .string()
+    .startsWith('0x')
     .optional()
     .describe(
       'The transaction hash of the transaction that triggered this action.',
@@ -667,7 +674,7 @@ export type ListTriggerResponse = z.infer<typeof ListTriggerResponseSchema>;
 export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
   ownerAddr: z
     .string()
-    .nonempty()
+    .startsWith('0x')
     .describe(
       'The owner address of position `tokenId`; must be a checksum address.',
     ),
