@@ -224,6 +224,12 @@ const CHAIN_ID_TO_INFO: {
     aperture_uniswap_v3_automan: getAddress(
       '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
     ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID,
       getAddress('0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'),
@@ -251,6 +257,12 @@ const CHAIN_ID_TO_INFO: {
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+    ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
@@ -313,6 +325,12 @@ const CHAIN_ID_TO_INFO: {
     aperture_uniswap_v3_automan: getAddress(
       '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
     ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0xE0529B92EBdd478B36BC22434625d898ebE4b489',
+    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
       getAddress('0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'),
@@ -341,6 +359,12 @@ const CHAIN_ID_TO_INFO: {
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000EDb4489cB49FE07246f39345c9f838cD',
     ),
+    aperture_router_proxy: getAddress(
+      '0x7ECD9FDB80E1445Defd38170F05189B85084EA93',
+    ),
+    optimal_swap_router: getAddress(
+      '0xCc06600868DdDab1073DEEC925E9D8c22fA8b889',
+    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
       getAddress('0x4200000000000000000000000000000000000006'),
@@ -368,6 +392,12 @@ const CHAIN_ID_TO_INFO: {
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
+    ),
+    aperture_router_proxy: getAddress(
+      '0x0000000095538AD2A95685330eD1268C69753BC2',
+    ),
+    optimal_swap_router: getAddress(
+      '0x039eC83141218fC68bd85E0067d696769E0576bf',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
