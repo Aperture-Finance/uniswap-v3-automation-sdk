@@ -478,7 +478,7 @@ const CHAIN_ID_TO_INFO: {
     rpc_url: 'https://pacific-rpc.manta.network/http',
     maxGasCeiling: 0.2,
     uniswap_subgraph_url:
-      'https://d2vin613o4opvi.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
+      'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture/uniswap-v3/gn',
     routingApiInfo: {
       type: 'ROUTING_API',
       url: 'https://manta-routing.aperture.finance/quote',
