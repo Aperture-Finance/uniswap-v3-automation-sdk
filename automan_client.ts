@@ -5,6 +5,8 @@ import {
   CheckUserLimitRequest,
   CreateTriggerRequest,
   DeleteTriggerRequest,
+  GetStrategyDetailRequest,
+  GetStrategyDetailResponse,
   ListTriggerRequest,
   ListTriggerResponse,
   UpdatePositionPermitRequest,
@@ -14,7 +16,10 @@ import {
 async function buildAxiosGetRequest(
   url: URL,
   request: Readonly<
-    ListTriggerRequest | CheckPositionPermitRequest | CheckUserLimitRequest
+    | ListTriggerRequest
+    | CheckPositionPermitRequest
+    | CheckUserLimitRequest
+    | GetStrategyDetailRequest
   >,
 ) {
   return axios.get(url.toString(), {
@@ -87,6 +92,13 @@ export class AutomanClient {
     request: Readonly<CheckUserLimitRequest>,
   ): Promise<string> {
     const url = new URL('/checkUserLimit', this.endpoint);
+    return (await buildAxiosGetRequest(url, request)).data;
+  }
+
+  async getStrategyDetail(
+    request: Readonly<GetStrategyDetailRequest>,
+  ): Promise<GetStrategyDetailResponse> {
+    const url = new URL('/getStrategyDetail', this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 }
