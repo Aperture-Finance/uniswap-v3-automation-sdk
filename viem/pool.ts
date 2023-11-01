@@ -300,20 +300,22 @@ function reconstructLiquidityArray(
 
 /**
  * Normalizes the specified tick range.
- * @param pool The liquidity pool.
+ * @param tickCurrent The current tick.
+ * @param tickSpacing The tick spacing.
  * @param tickLower The lower tick.
  * @param tickUpper The upper tick.
  * @returns The normalized tick range.
  */
 function normalizeTicks(
-  pool: Pool,
+  tickCurrent: number,
+  tickSpacing: number,
   tickLower: number,
   tickUpper: number,
 ): { tickCurrentAligned: number; tickLower: number; tickUpper: number } {
   if (tickLower > tickUpper) throw 'tickLower > tickUpper';
   // The current tick must be within the specified tick range.
   const tickCurrentAligned =
-    Math.floor(pool.tickCurrent / pool.tickSpacing) * pool.tickSpacing;
+    Math.floor(tickCurrent / tickSpacing) * tickSpacing;
   tickLower = Math.min(
     Math.max(tickLower, TickMath.MIN_TICK),
     tickCurrentAligned,
@@ -343,25 +345,40 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  // The current tick must be within the specified tick range.
-  const { tickCurrentAligned, tickLower, tickUpper } = normalizeTicks(
-    pool,
-    _tickLower,
-    _tickUpper,
-  );
   const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
-  let rawData: AllV3TicksQuery['ticks'] = [];
-  // Note that Uniswap subgraph returns a maximum of 1000 ticks per query, even if `numTicksPerQuery` is set to a larger value.
-  const numTicksPerQuery = 1000;
   const poolAddress = computePoolAddress(
     uniswap_v3_factory,
     pool.token0,
     pool.token1,
     pool.fee,
   ).toLowerCase();
+  // Fetch current in-range liquidity from subgraph.
+  const poolResponse = (
+    await axios.post(uniswap_subgraph_url, {
+      operationName: 'PoolLiquidity',
+      variables: {},
+      query: `
+          query PoolLiquidity {
+            pool(id: "${poolAddress}") {
+              liquidity
+              tick
+            }
+          }`,
+    })
+  ).data.data.pool;
+  // The current tick must be within the specified tick range.
+  const { tickCurrentAligned, tickLower, tickUpper } = normalizeTicks(
+    Number(poolResponse.tick),
+    pool.tickSpacing,
+    _tickLower,
+    _tickUpper,
+  );
+  let rawData: AllV3TicksQuery['ticks'] = [];
+  // Note that Uniswap subgraph returns a maximum of 1000 ticks per query, even if `numTicksPerQuery` is set to a larger value.
+  const numTicksPerQuery = 1000;
   for (let skip = 0; ; skip += numTicksPerQuery) {
     const response: AllV3TicksQuery | undefined = (
       await axios.post(uniswap_subgraph_url, {
@@ -400,7 +417,7 @@ export async function getTickToLiquidityMapForPool(
     const liquidityArray = reconstructLiquidityArray(
       rawData,
       tickCurrentAligned,
-      pool.liquidity,
+      JSBI.BigInt(poolResponse.liquidity),
     );
     for (const [tick, liquidityActive] of liquidityArray) {
       // There is a `Number.isInteger` check in `tickToPrice`.
@@ -503,7 +520,8 @@ export async function getLiquidityArrayForPool(
 ): Promise<Liquidity[]> {
   // The current tick must be within the specified tick range.
   const { tickCurrentAligned, tickLower, tickUpper } = normalizeTicks(
-    pool,
+    pool.tickCurrent,
+    pool.tickSpacing,
     _tickLower,
     _tickUpper,
   );
