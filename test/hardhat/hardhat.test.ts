@@ -95,7 +95,6 @@ import {
   getTokenSvg,
   isPositionInRange,
   projectRebalancedPositionAtPrice,
-  readTickToLiquidityMap,
   simulateMintOptimal,
 } from '../../viem';
 
