@@ -716,3 +716,6 @@ export const HasSignedPrivateBetaAgreementResponseSchema = z.object({
       'True if the user has signed the private beta agreement; false otherwise.',
     ),
 });
+export type HasSignedPrivateBetaAgreementResponse = z.infer<
+  typeof HasSignedPrivateBetaAgreementResponseSchema
+>;
