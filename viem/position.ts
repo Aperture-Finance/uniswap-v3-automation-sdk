@@ -177,19 +177,23 @@ export async function getAllPositions(
       blockNumber,
     });
   } catch (error) {
-    const positions: PositionStateArray = decodeFunctionResult({
-      abi: [AllPositionsAbi],
-      data: ((error as CallExecutionError).walk() as unknown as { data: Hex })
-        .data,
-    });
-    return new Map(
-      positions.map((pos) => {
-        return [
-          pos.tokenId.toString(),
-          PositionDetails.fromPositionStateStruct(chainId, pos),
-        ] as const;
-      }),
-    );
+    const baseError = (error as CallExecutionError).walk();
+    if ('data' in baseError) {
+      const positions: PositionStateArray = decodeFunctionResult({
+        abi: [AllPositionsAbi],
+        data: baseError.data as Hex,
+      });
+      return new Map(
+        positions.map((pos) => {
+          return [
+            pos.tokenId.toString(),
+            PositionDetails.fromPositionStateStruct(chainId, pos),
+          ] as const;
+        }),
+      );
+    } else {
+      throw error;
+    }
   }
   throw new Error('deployment should revert');
 }
