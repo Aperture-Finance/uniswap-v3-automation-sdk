@@ -692,7 +692,7 @@ export const SignPrivateBetaAgreementRequestSchema = ClientTypeSchema.extend({
     .string()
     .startsWith('0x')
     .describe('The user wallet address; must be a checksum address.'),
-  signature: PayloadSignatureSchema,
+  signature: z.string().startsWith('0x').describe('User signature.'),
 });
 export type SignPrivateBetaAgreementRequest = z.infer<
   typeof SignPrivateBetaAgreementRequestSchema
