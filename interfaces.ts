@@ -686,3 +686,36 @@ export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
   actionType: ActionTypeEnum,
 });
 export type CheckUserLimitRequest = z.infer<typeof CheckUserLimitRequestSchema>;
+
+export const SignPrivateBetaAgreementRequestSchema = ClientTypeSchema.extend({
+  ownerAddr: z
+    .string()
+    .startsWith('0x')
+    .describe('The user wallet address; must be a checksum address.'),
+  signature: z.string().startsWith('0x').describe('User signature.'),
+});
+export type SignPrivateBetaAgreementRequest = z.infer<
+  typeof SignPrivateBetaAgreementRequestSchema
+>;
+
+export const HasSignedPrivateBetaAgreementRequestSchema =
+  ClientTypeSchema.extend({
+    ownerAddr: z
+      .string()
+      .startsWith('0x')
+      .describe('The user wallet address; must be a checksum address.'),
+  });
+export type HasSignedPrivateBetaAgreementRequest = z.infer<
+  typeof HasSignedPrivateBetaAgreementRequestSchema
+>;
+
+export const HasSignedPrivateBetaAgreementResponseSchema = z.object({
+  hasSigned: z
+    .boolean()
+    .describe(
+      'True if the user has signed the private beta agreement; false otherwise.',
+    ),
+});
+export type HasSignedPrivateBetaAgreementResponse = z.infer<
+  typeof HasSignedPrivateBetaAgreementResponseSchema
+>;
