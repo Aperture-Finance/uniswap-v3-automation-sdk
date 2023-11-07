@@ -12,13 +12,13 @@ import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
-import { run } from 'hardhat';
+import hre from 'hardhat';
 import JSBI from 'jsbi';
 import {
   Address,
+  PublicClient,
   TestClient,
   createPublicClient,
-  createTestClient,
   createWalletClient,
   encodeAbiParameters,
   encodeFunctionData,
@@ -26,11 +26,10 @@ import {
   getContractAddress,
   http,
   parseAbiParameters,
-  publicActions,
   walletActions,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { arbitrum, hardhat, mainnet } from 'viem/chains';
+import { arbitrum, mainnet } from 'viem/chains';
 
 import { getChainInfo } from '../../chain';
 import {
@@ -118,9 +117,6 @@ const deadline = '4093484400';
 const TEST_WALLET_PRIVATE_KEY =
   '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
-// Spin up a hardhat node.
-run('node');
-
 async function resetFork(testClient: TestClient) {
   await testClient.reset({
     blockNumber: 17188000n,
@@ -130,17 +126,9 @@ async function resetFork(testClient: TestClient) {
 
 describe('State overrides tests', function () {
   it('Test computeOperatorApprovalSlot', async function () {
-    const testClient = createTestClient({
-      chain: hardhat,
-      mode: 'hardhat',
-      transport: http(),
-      name: 'Test Client',
-      account: undefined,
-      key: 'test',
-      cacheTime: undefined,
-      pollingInterval: undefined,
-    }).extend(publicActions);
-    await resetFork(testClient as unknown as TestClient);
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
     await testClient.impersonateAccount({ address: WHALE_ADDRESS });
     const walletClient = testClient.extend(walletActions);
     // Deploy Automan.
@@ -157,7 +145,7 @@ describe('State overrides tests', function () {
     const automanAddress = getContractAddress({
       from: WHALE_ADDRESS,
       nonce: BigInt(
-        await testClient.getTransactionCount({
+        await publicClient.getTransactionCount({
           address: WHALE_ADDRESS,
         }),
       ),
@@ -167,7 +155,7 @@ describe('State overrides tests', function () {
     expect(slot).to.equal(
       '0x51156c1de32f203e86d75e4e57e423f7f92397e1c16780f885a8a97775f56b6a',
     );
-    expect(await testClient.getStorageAt({ address: npm, slot })).to.equal(
+    expect(await publicClient.getStorageAt({ address: npm, slot })).to.equal(
       encodeAbiParameters(parseAbiParameters('bool'), [false]),
     );
     await testClient.impersonateAccount({ address: eoa });
@@ -178,7 +166,7 @@ describe('State overrides tests', function () {
         chain: mainnet,
       },
     );
-    expect(await testClient.getStorageAt({ address: npm, slot })).to.equal(
+    expect(await publicClient.getStorageAt({ address: npm, slot })).to.equal(
       encodeAbiParameters(parseAbiParameters('bool'), [true]),
     );
   });
@@ -310,20 +298,14 @@ describe('State overrides tests', function () {
 
 describe('Position util tests', function () {
   let inRangePosition: Position;
-  const testClient = createTestClient({
-    chain: hardhat,
-    mode: 'hardhat',
-    transport: http(),
-    name: 'Test Client',
-    account: undefined,
-    key: 'test',
-    cacheTime: undefined,
-    pollingInterval: undefined,
-  }).extend(publicActions);
+  let testClient: TestClient;
+  let publicClient: PublicClient;
 
   beforeEach(async function () {
-    await resetFork(testClient as unknown as TestClient);
-    inRangePosition = await getPosition(chainId, 4n, testClient);
+    testClient = await hre.viem.getTestClient();
+    publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    inRangePosition = await getPosition(chainId, 4n, publicClient);
   });
 
   it('Position approval', async function () {
@@ -335,7 +317,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
-        testClient,
+        publicClient,
       ),
     ).to.deep.equal({
       hasAuthority: false,
@@ -348,14 +330,14 @@ describe('Position util tests', function () {
     const npm = getNPM(chainId, undefined, walletClient);
     await npm.write.setApprovalForAll([aperture_uniswap_v3_automan, true], {
       account: eoa,
-      chain: mainnet,
+      chain: walletClient.chain,
     });
     expect(
       await checkPositionApprovalStatus(
         positionId,
         undefined,
         chainId,
-        testClient,
+        publicClient,
       ),
     ).to.deep.equal({
       hasAuthority: true,
@@ -365,14 +347,14 @@ describe('Position util tests', function () {
 
     await npm.write.approve([aperture_uniswap_v3_automan, positionId], {
       account: eoa,
-      chain: mainnet,
+      chain: walletClient.chain,
     });
     expect(
       await checkPositionApprovalStatus(
         positionId,
         undefined,
         chainId,
-        testClient,
+        publicClient,
       ),
     ).to.deep.include({
       hasAuthority: true,
@@ -384,7 +366,7 @@ describe('Position util tests', function () {
         0n, // Nonexistent position id.
         undefined,
         chainId,
-        testClient,
+        publicClient,
       ),
     ).to.deep.include({
       hasAuthority: false,
@@ -394,12 +376,18 @@ describe('Position util tests', function () {
 
   it('Position permit', async function () {
     const positionId = 4n;
+    const account = privateKeyToAccount(TEST_WALLET_PRIVATE_KEY);
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const npm = getNPM(chainId, undefined, walletClient);
 
+    // Transfer position id 4 from `eoa` to the test wallet.
+    await npm.write.transferFrom([eoa, account.address, positionId], {
+      account: eoa,
+      chain: walletClient.chain,
+    });
+
     // Construct and sign a permit digest that approves position id 4.
-    const account = privateKeyToAccount(TEST_WALLET_PRIVATE_KEY);
     const client = createWalletClient({
       account,
       chain: mainnet,
@@ -409,16 +397,10 @@ describe('Position util tests', function () {
       chainId,
       positionId,
       BigInt(deadline),
-      testClient,
+      publicClient,
     );
     const signature = await client.signTypedData({
       ...permitTypedData,
-    });
-
-    // Transfer position id 4 from `eoa` to the test wallet.
-    await npm.write.transferFrom([eoa, account.address, positionId], {
-      account: eoa,
-      chain: mainnet,
     });
 
     // Check test wallet's permit.
@@ -430,7 +412,7 @@ describe('Position util tests', function () {
           signature,
         },
         chainId,
-        testClient,
+        publicClient,
       ),
     ).to.deep.include({
       hasAuthority: true,
@@ -442,7 +424,7 @@ describe('Position util tests', function () {
       chainId,
       positionId + 1n,
       BigInt(deadline),
-      testClient,
+      publicClient,
     );
     const anotherSignature = await client.signTypedData({
       ...anotherPermitTypedData,
@@ -455,7 +437,7 @@ describe('Position util tests', function () {
           signature: anotherSignature,
         },
         chainId,
-        testClient,
+        publicClient,
       ),
     ).to.deep.include({
       hasAuthority: false,
@@ -464,13 +446,13 @@ describe('Position util tests', function () {
   });
 
   it('Position in-range', async function () {
-    const outOfRangePosition = await getPosition(chainId, 7n, testClient);
+    const outOfRangePosition = await getPosition(chainId, 7n, publicClient);
     expect(isPositionInRange(inRangePosition)).to.equal(true);
     expect(isPositionInRange(outOfRangePosition)).to.equal(false);
   });
 
   it('Token Svg', async function () {
-    const url = await getTokenSvg(chainId, 4n, testClient);
+    const url = await getTokenSvg(chainId, 4n, publicClient);
     expect(url.toString().slice(0, 60)).to.equal(
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjkwIiBoZWlnaHQ9Ij',
     );
@@ -670,10 +652,10 @@ describe('Position util tests', function () {
     const positionDetails = await PositionDetails.fromPositionId(
       chainId,
       4n,
-      testClient,
+      publicClient,
     );
     const colletableTokenAmounts =
-      await positionDetails.getCollectableTokenAmounts(testClient);
+      await positionDetails.getCollectableTokenAmounts(publicClient);
     expect(colletableTokenAmounts).to.deep.equal({
       token0Amount: positionDetails.tokensOwed0,
       token1Amount: positionDetails.tokensOwed1,
@@ -684,10 +666,12 @@ describe('Position util tests', function () {
     const { owner, position } = await PositionDetails.fromPositionId(
       chainId,
       4n,
-      testClient,
+      publicClient,
     );
     expect(owner).to.equal(eoa);
-    expect(position).to.deep.equal(await getPosition(chainId, 4n, testClient));
+    expect(position).to.deep.equal(
+      await getPosition(chainId, 4n, publicClient),
+    );
   });
 
   it('Test getAllPositions', async function () {
@@ -756,7 +740,6 @@ describe('Position util tests', function () {
       publicClient,
       blockNumber,
     );
-    // testClient doesn't change chainId after reset
     await testClient.reset({
       blockNumber,
       jsonRpcUrl,
@@ -767,53 +750,50 @@ describe('Position util tests', function () {
       [aperture_uniswap_v3_automan, true],
       {
         account: owner,
-        chain: mainnet, // has to be mainnet due to viem's quirkiness
+        chain: walletClient.chain,
       },
     );
-    const { liquidity: liquidityBefore } = await getPosition(
-      chainId,
-      positionId,
-      testClient,
-    );
-    const data = getAutomanReinvestCalldata(
-      positionId,
-      BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
-    );
-    await walletClient.sendTransaction({
-      account: owner,
-      chain: mainnet,
-      to: aperture_uniswap_v3_automan,
-      data,
-    });
-    const { liquidity: liquidityAfter } = await getPosition(
-      chainId,
-      positionId,
-      testClient,
-    );
-    expect(JSBI.subtract(liquidityAfter, liquidityBefore).toString()).to.equal(
-      liquidity.toString(),
-    );
+    {
+      const publicClient = await hre.viem.getPublicClient();
+      const { liquidity: liquidityBefore } = await getPosition(
+        chainId,
+        positionId,
+        publicClient,
+      );
+      const data = getAutomanReinvestCalldata(
+        positionId,
+        BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
+      );
+      await walletClient.sendTransaction({
+        account: owner,
+        chain: walletClient.chain,
+        to: aperture_uniswap_v3_automan,
+        data,
+      });
+      const { liquidity: liquidityAfter } = await getPosition(
+        chainId,
+        positionId,
+        publicClient,
+      );
+      expect(
+        JSBI.subtract(liquidityAfter, liquidityBefore).toString(),
+      ).to.equal(liquidity.toString());
+    }
   });
 });
 
 describe('CoinGecko tests', function () {
-  const testClient = createTestClient({
-    chain: hardhat,
-    mode: 'hardhat',
-    transport: http(),
-    name: 'Test Client',
-    account: undefined,
-    key: 'test',
-    cacheTime: undefined,
-    pollingInterval: undefined,
-  }).extend(publicActions);
+  let testClient: TestClient;
+  let publicClient: PublicClient;
 
-  before(async function () {
-    await resetFork(testClient as unknown as TestClient);
+  beforeEach(async function () {
+    testClient = await hre.viem.getTestClient();
+    publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
   });
 
   it('Test CoinGecko single price', async function () {
-    const token = await getToken(WETH_ADDRESS, chainId, testClient);
+    const token = await getToken(WETH_ADDRESS, chainId, publicClient);
     const usdPrice = await getTokenPriceFromCoingecko(
       token,
       'usd',
@@ -832,8 +812,8 @@ describe('CoinGecko tests', function () {
     {
       const prices = await getTokenPriceListFromCoingecko(
         await Promise.all([
-          getToken(WBTC_ADDRESS, chainId, testClient),
-          getToken(WETH_ADDRESS, chainId, testClient),
+          getToken(WBTC_ADDRESS, chainId, publicClient),
+          getToken(WETH_ADDRESS, chainId, publicClient),
         ]),
         'eth',
         process.env.COINGECKO_API_KEY,
@@ -861,7 +841,7 @@ describe('CoinGecko tests', function () {
           getToken(
             WBTC_ADDRESS,
             ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-            testClient,
+            publicClient,
           ),
           new Token(
             ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
@@ -875,7 +855,7 @@ describe('CoinGecko tests', function () {
   });
 
   it('Test CoinGecko historical price list', async function () {
-    const token = await getToken(WETH_ADDRESS, chainId, testClient);
+    const token = await getToken(WETH_ADDRESS, chainId, publicClient);
     const prices = await getTokenHistoricalPricesFromCoingecko(
       token,
       30,
