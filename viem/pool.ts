@@ -483,14 +483,18 @@ async function getPopulatedTicksInRange(
       }),
     });
   } catch (error) {
-    const ticks: PopulatedTickArray = decodeFunctionResult({
-      abi: [GetPopulatedTicksInRangeAbi],
-      data: ((error as CallExecutionError).walk() as unknown as { data: Hex })
-        .data,
-    });
-    return ticks.map(({ tick, liquidityNet }) => {
-      return { tick, liquidityNet };
-    });
+    const baseError = (error as CallExecutionError).walk();
+    if ('data' in baseError) {
+      const ticks: PopulatedTickArray = decodeFunctionResult({
+        abi: [GetPopulatedTicksInRangeAbi],
+        data: baseError.data as Hex,
+      });
+      return ticks.map(({ tick, liquidityNet }) => {
+        return { tick, liquidityNet };
+      });
+    } else {
+      throw error;
+    }
   }
   throw new Error('deployment should revert');
 }
