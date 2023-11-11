@@ -739,6 +739,9 @@ export const StrategyDetailItemSechema = TriggerItemSchema.omit({
 }).extend({
   gas_fee: z.number().nonnegative().optional(),
   gas_fee_value: z.number().nonnegative().optional(),
+  token0Address: z.string().length(42).optional(),
+  token1Address: z.string().length(42).optional(),
+  feeTier: z.number().nonnegative().optional(),
   tickLower: z.number().int().optional(),
   tickUpper: z.number().int().optional(),
   positionEtherValue: z
