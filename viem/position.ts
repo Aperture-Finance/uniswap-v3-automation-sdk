@@ -266,7 +266,7 @@ export class PositionDetails implements BasicPositionInfo {
     blockNumber?: bigint,
   ): Promise<PositionDetails> {
     try {
-      const returnData = await (publicClient ?? getPublicClient(chainId)).call({
+      const { data } = await (publicClient ?? getPublicClient(chainId)).call({
         data: encodeDeployData({
           abi: EphemeralGetPosition__factory.abi,
           bytecode: EphemeralGetPosition__factory.bytecode,
@@ -279,7 +279,7 @@ export class PositionDetails implements BasicPositionInfo {
       });
       const position = decodeFunctionResult({
         abi: [GetPositionAbi],
-        data: returnData.data!,
+        data: data!,
       });
       return PositionDetails.fromPositionStateStruct(chainId, position);
     } catch (error) {

@@ -85,14 +85,25 @@ export const TriggerStatusEnum = z
   .describe('The status of the trigger.');
 export type TriggerStatusEnum = z.infer<typeof TriggerStatusEnum>;
 
+export const HexSchema = z
+  .string()
+  .startsWith('0x')
+  .describe('A hexadecimal string.');
+
+export const AddressSchema = HexSchema.length(42).describe(
+  'A hexadecimal address.',
+);
+
+export const SignatureSchema = HexSchema.length(132).describe(
+  'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated,' +
+    ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
+);
+
 export const TokenAmountSchema = z.object({
-  address: z
-    .string()
-    .startsWith('0x')
-    .describe('The ERC-20 token contract address.'),
+  address: AddressSchema.describe('The ERC-20 token contract address.'),
   rawAmount: z
     .string()
-    .nonempty()
+    .min(1)
     .describe(
       'The raw amount, which is the human-readable format multiplied by the token decimal.',
     ),
@@ -214,7 +225,7 @@ export type RecurringConditionTypeEnum = z.infer<
 export const BaseRecurringConditionSchema = z.object({
   sqrtPriceX96: z
     .string()
-    .nonempty()
+    .min(1)
     .describe(
       'Square root price of `token0` multiplied by 2^96 at trigger creation',
     ),
@@ -254,7 +265,7 @@ export const RecurringPriceConditionSchema =
       .describe('Either 0 or 1, representing token0 or token1, respectively.'),
     gtePriceOffset: z
       .string()
-      .nonempty()
+      .min(1)
       .optional()
       .describe(
         'The next trigger price that gets triggered when the pool price is greater than or equal to it, ' +
@@ -262,7 +273,7 @@ export const RecurringPriceConditionSchema =
       ),
     ltePriceOffset: z
       .string()
-      .nonempty()
+      .min(1)
       .optional()
       .describe(
         'The next trigger price that gets triggered when the pool price is less than or equal to it, ' +
@@ -281,7 +292,7 @@ export const RecurringRatioConditionSchema =
     type: z.literal(RecurringConditionTypeEnum.enum.RecurringRatio),
     gteToken0ValueProportion: z
       .string()
-      .nonempty()
+      .min(1)
       .optional()
       .describe(
         'The proportion of the position value in token0 that defines the target price which gets ' +
@@ -289,7 +300,7 @@ export const RecurringRatioConditionSchema =
       ),
     lteToken0ValueProportion: z
       .string()
-      .nonempty()
+      .min(1)
       .optional()
       .describe(
         'The proportion of the position value in token0 that defines the target price which gets ' +
@@ -343,13 +354,10 @@ export type CloseAction = z.infer<typeof CloseActionSchema>;
 export const LimitOrderCloseActionSchema = z
   .object({
     type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
-    inputTokenAddr: z
-      .string()
-      .startsWith('0x')
-      .describe(
-        'The address of the input token for the limit order, i.e. the token which the user provided and ' +
-          'wants to sell. Must be one of the two tokens in the position.',
-      ),
+    inputTokenAddr: AddressSchema.describe(
+      'The address of the input token for the limit order, i.e. the token which the user provided and ' +
+        'wants to sell. Must be one of the two tokens in the position.',
+    ),
     maxGasProportion: MaxGasProportionSchema,
   })
   .describe(
@@ -422,11 +430,11 @@ export const RecurringPriceActionSchema = BaseRecurringActionSchema.extend({
     .describe('Either 0 or 1, representing token0 or token1, respectively.'),
   priceLowerOffset: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The lower price offset in human-readable format.'),
   priceUpperOffset: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The upper price offset in human-readable format.'),
 }).describe(
   'Rebalance to a new price range specified by the future pool price of the base token and the price offsets.',
@@ -438,7 +446,7 @@ export const RecurringRatioActionSchema = BaseRecurringActionSchema.extend({
   tickRangeWidth: z.number().int().describe('The width of the tick range.'),
   token0ValueProportion: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The proportion of the position value in token0.'),
 }).describe(
   'Rebalance to a new price range specified by the tick range width and the proportion of the position value in token0.',
@@ -464,17 +472,16 @@ export const ActionSchema = z.discriminatedUnion('type', [
 export type Action = z.infer<typeof ActionSchema>;
 
 const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
-  ownerAddr: z
-    .string()
-    .startsWith('0x')
-    .describe('The owner address of the position; must be a checksum address.'),
+  ownerAddr: AddressSchema.describe(
+    'The owner address of the position; must be a checksum address.',
+  ),
   chainId: ApertureSupportedChainIdEnum,
 });
 
 export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   nftId: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The nonfungible token id of the position.'),
   action: ActionSchema,
   condition: ConditionSchema,
@@ -515,16 +522,10 @@ export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
 
 export const PermitInfoSchema = z
   .object({
-    signature: z
-      .string()
-      .startsWith('0x')
-      .describe(
-        'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated,' +
-          ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
-      ),
+    signature: SignatureSchema,
     deadline: z
       .string()
-      .nonempty()
+      .min(1)
       .describe(
         'Unix timestamp in seconds indicating deadline for the signed "permit".',
       ),
@@ -540,7 +541,7 @@ export const CheckPositionPermitRequestSchema = ClientTypeSchema.extend({
   chainId: ApertureSupportedChainIdEnum,
   tokenId: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The nonfungible token id of the position.'),
 });
 export type CheckPositionPermitRequest = z.infer<
@@ -556,10 +557,7 @@ export type UpdatePositionPermitRequest = z.infer<
 >;
 
 const PayloadSignatureSchema = z.object({
-  payloadSignature: z
-    .string()
-    .startsWith('0x')
-    .describe('Signature of the payload.'),
+  payloadSignature: SignatureSchema.describe('Signature of the payload.'),
 });
 export const CreateTriggerRequestSchema = PayloadSignatureSchema.extend({
   payload: CreateTriggerPayloadSchema,
@@ -629,7 +627,7 @@ export const TriggerItemSchema = z.object({
     .describe("The task id of the trigger in Aperture's automation service."),
   nftId: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The nonfungible token id of the position.'),
   status: TriggerStatusEnum,
   lastFailedMessage: z
@@ -656,13 +654,9 @@ export const TriggerItemSchema = z.object({
     .positive()
     .optional()
     .describe('Unix timestamp in seconds when this trigger is completed.'),
-  transactionHash: z
-    .string()
-    .startsWith('0x')
-    .optional()
-    .describe(
-      'The transaction hash of the transaction that triggered this action.',
-    ),
+  transactionHash: HexSchema.optional().describe(
+    'The transaction hash of the transaction that triggered this action.',
+  ),
 });
 export type TriggerItem = z.infer<typeof TriggerItemSchema>;
 
@@ -672,27 +666,23 @@ export const ListTriggerResponseSchema = z.object({
 export type ListTriggerResponse = z.infer<typeof ListTriggerResponseSchema>;
 
 export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
-  ownerAddr: z
-    .string()
-    .startsWith('0x')
-    .describe(
-      'The owner address of position `tokenId`; must be a checksum address.',
-    ),
+  ownerAddr: AddressSchema.describe(
+    'The owner address of position `tokenId`; must be a checksum address.',
+  ),
   chainId: ApertureSupportedChainIdEnum,
   tokenId: z
     .string()
-    .nonempty()
+    .min(1)
     .describe('The nonfungible token id of the position to check limit for.'),
   actionType: ActionTypeEnum,
 });
 export type CheckUserLimitRequest = z.infer<typeof CheckUserLimitRequestSchema>;
 
 export const SignPrivateBetaAgreementRequestSchema = ClientTypeSchema.extend({
-  ownerAddr: z
-    .string()
-    .startsWith('0x')
-    .describe('The user wallet address; must be a checksum address.'),
-  signature: z.string().startsWith('0x').describe('User signature.'),
+  ownerAddr: AddressSchema.describe(
+    'The user wallet address; must be a checksum address.',
+  ),
+  signature: SignatureSchema.describe('User signature.'),
 });
 export type SignPrivateBetaAgreementRequest = z.infer<
   typeof SignPrivateBetaAgreementRequestSchema
@@ -700,10 +690,9 @@ export type SignPrivateBetaAgreementRequest = z.infer<
 
 export const HasSignedPrivateBetaAgreementRequestSchema =
   ClientTypeSchema.extend({
-    ownerAddr: z
-      .string()
-      .startsWith('0x')
-      .describe('The user wallet address; must be a checksum address.'),
+    ownerAddr: AddressSchema.describe(
+      'The user wallet address; must be a checksum address.',
+    ),
   });
 export type HasSignedPrivateBetaAgreementRequest = z.infer<
   typeof HasSignedPrivateBetaAgreementRequestSchema
