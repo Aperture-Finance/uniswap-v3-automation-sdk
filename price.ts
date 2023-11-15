@@ -81,11 +81,12 @@ export async function getTokenPriceFromCoingecko(
     );
   } else {
     priceResponse = await axios.get(
-      `https://api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
+      `https://d2d8ugqzmyeyby.cloudfront.net/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}`,
     );
   }
   // Coingecko call example: https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&vs_currencies=usd
+  // Proxy Coingecko call example: https://d2d8ugqzmyeyby.cloudfront.net/api/v3/simple/token_price/arbitrum-one?contract_addresses=0xf97f4df75117a78c1a5a0dbb814af92458539fb4&vs_currencies=usd
   return priceResponse.data[token.address.toLowerCase()][vsCurrencies];
 }
 
@@ -150,11 +151,12 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
     );
   } else {
     priceResponse = await axios.get(
-      `https://api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
+      `https://d2d8ugqzmyeyby.cloudfront.net/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}`,
     );
   }
   // Coingecko call example: https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&vs_currencies=usd
+  // Proxy Coingecko call example: https://d2d8ugqzmyeyby.cloudfront.net/api/v3/simple/token_price/arbitrum-one?contract_addresses=0xf97f4df75117a78c1a5a0dbb814af92458539fb4,0x912CE59144191C1204E64559FE8253a0e49E6548&vs_currencies=usd
   return Object.keys(priceResponse.data).reduce(
     (obj: { [address: string]: number }, address: string) => {
       obj[address] = priceResponse.data[address][vsCurrencies!];
@@ -188,7 +190,7 @@ export async function getTokenHistoricalPricesFromCoingecko(
     );
   } else {
     priceResponse = await axios.get(
-      `https://api.coingecko.com/api/v3/coins/${coingecko_asset_platform_id}/contract/` +
+      `https://d2d8ugqzmyeyby.cloudfront.net/api/v3/coins/${coingecko_asset_platform_id}/contract/` +
         `${token.address}/market_chart?vs_currency=${vsCurrency}&days=${durationDays}`,
     );
   }
