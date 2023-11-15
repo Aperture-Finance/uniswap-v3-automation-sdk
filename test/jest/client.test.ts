@@ -7,6 +7,8 @@ import {
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
   ConditionTypeEnum,
+  GetStrategyDetailRequest,
+  GetStrategyDetailResponse,
   UpdatePositionPermitRequest,
 } from '../../interfaces';
 
@@ -177,6 +179,26 @@ describe('Automan client test', () => {
     mock.onGet(`${url}/checkUserLimit`).reply(200, responseData);
 
     const response = await client.checkUserLimit(request);
+    expect(response).toEqual(responseData);
+    // Expect to call get once.
+    expect(mock.history.get.length).toEqual(1);
+    // Expect request params to match.
+    expect(JSON.parse(mock.history.get[0].params.get('request'))).toEqual(
+      request,
+    );
+  });
+
+  it('Should call get strategy detail', async () => {
+    const request: GetStrategyDetailRequest = {
+      chainId: 5,
+      ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
+      uuid: 'effc0cdc899eba75ea5294dccd78194ec0bd36eae80ed53acfa0a9b3fe8e6bb0',
+    };
+
+    const responseData = {} as GetStrategyDetailResponse;
+    mock.onGet(`${url}/getStrategyDetail`).reply(200, responseData);
+
+    const response = await client.getStrategyDetail(request);
     expect(response).toEqual(responseData);
     // Expect to call get once.
     expect(mock.history.get.length).toEqual(1);

@@ -708,3 +708,101 @@ export const HasSignedPrivateBetaAgreementResponseSchema = z.object({
 export type HasSignedPrivateBetaAgreementResponse = z.infer<
   typeof HasSignedPrivateBetaAgreementResponseSchema
 >;
+
+export const GetStrategyDetailRequestSchema = ClientTypeSchema.extend({
+  ownerAddr: z
+    .string()
+    .startsWith('0x')
+    .describe(
+      'The owner address of position `tokenId`; must be a checksum address.',
+    ),
+  chainId: ApertureSupportedChainIdEnum,
+  uuid: z.string().nonempty().describe('The uuid of the strategy.'),
+});
+export type GetStrategyDetailRequest = z.infer<
+  typeof GetStrategyDetailRequestSchema
+>;
+
+export const StrategyDetailItemSechema = TriggerItemSchema.omit({
+  limitOrderInfo: true,
+}).extend({
+  gas_fee: z.number().nonnegative().optional(),
+  gas_fee_value: z.number().nonnegative().optional(),
+  token0Address: z.string().length(42).optional(),
+  token1Address: z.string().length(42).optional(),
+  feeTier: z.number().nonnegative().optional(),
+  tickLower: z.number().int().optional(),
+  tickUpper: z.number().int().optional(),
+  positionEtherValue: z
+    .number()
+    .optional()
+    .describe(
+      "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated when the action is triggered and the task switches to STARTED status.",
+    ),
+  positionEtherValueWhenCompleted: z
+    .number()
+    .optional()
+    .describe(
+      "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated when the action is completed and the task switches to COMPLETED status.",
+    ),
+  positionUsdValueWhenCompleted: z
+    .number()
+    .optional()
+    .describe(
+      "The value of the position's prinpical tokens in USD. Only populated when the action is completed and the task switches to COMPLETED status.",
+    ),
+  accruedFeeFraction: z
+    .number()
+    .optional()
+    .describe(
+      'A number representing the ratio between accrued fees in the position and principal value. Only populated when the action is triggered and the task switches to STARTED status, and the condition is of type AccruedFees.',
+    ),
+  feeCollectedToken0: z
+    .number()
+    .optional()
+    .describe(
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+    ),
+  feeCollectedToken1: z
+    .number()
+    .optional()
+    .describe(
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+    ),
+  feeCollectedToken0UsdValue: z
+    .number()
+    .optional()
+    .describe(
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+    ),
+  feeCollectedToken1UsdValue: z
+    .number()
+    .optional()
+    .describe(
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+    ),
+});
+
+export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSechema>;
+
+export const GetStrategyDetailResponseSchema = z.object({
+  executed: z
+    .number()
+    .int()
+    .describe('Number of times the strategy is executed.'),
+  feeCollected: z.object({
+    feeCollectedToken0: z.number(),
+    feeCollectedToken1: z.number(),
+    feeCollectedToken0UsdValue: z.number(),
+    feeCollectedToken1UsdValue: z.number(),
+  }),
+  current: z
+    .array(StrategyDetailItemSechema)
+    .describe('Current strategy trigger.'),
+  history: z
+    .array(StrategyDetailItemSechema)
+    .describe('History of strategy triggers.'),
+});
+export type GetStrategyDetailResponse = z.infer<
+  typeof GetStrategyDetailResponseSchema
+>;
