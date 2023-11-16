@@ -17,6 +17,9 @@ export const Q192 = Q96.times(Q96);
 // timestamp in milliseconds, and the second element is the price at that timestamp.
 export type CoingeckoHistoricalPriceDatapoint = [number, number];
 
+const COINGECKO_PRO_URL = 'https://pro-api.coingecko.com/api/v3';
+const COINGECKO_PROXY_URL = 'https://d2d8ugqzmyeyby.cloudfront.net/api/v3';
+
 /**
  * Parses the specified price string for the price of `baseToken` denominated in `quoteToken`.
  * As an example, if `baseToken` is WBTC and `quoteToken` is WETH, then the "10.23" price string represents the exchange
@@ -76,12 +79,12 @@ export async function getTokenPriceFromCoingecko(
   let priceResponse: AxiosResponse;
   if (apiKey) {
     priceResponse = await axios.get(
-      `https://pro-api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
+      `${COINGECKO_PRO_URL}/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}&x_cg_pro_api_key=${apiKey}`,
     );
   } else {
     priceResponse = await axios.get(
-      `https://d2d8ugqzmyeyby.cloudfront.net/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
+      `${COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}`,
     );
   }
@@ -146,12 +149,12 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
   const addresses = tokens.toString();
   if (apiKey) {
     priceResponse = await axios.get(
-      `https://pro-api.coingecko.com/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
+      `${COINGECKO_PRO_URL}/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}&x_cg_pro_api_key=${apiKey}`,
     );
   } else {
     priceResponse = await axios.get(
-      `https://d2d8ugqzmyeyby.cloudfront.net/api/v3/simple/token_price/${coingecko_asset_platform_id}` +
+      `${COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}` +
         `?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}`,
     );
   }
@@ -185,12 +188,12 @@ export async function getTokenHistoricalPricesFromCoingecko(
   let priceResponse: AxiosResponse;
   if (apiKey) {
     priceResponse = await axios.get(
-      `https://pro-api.coingecko.com/api/v3/coins/${coingecko_asset_platform_id}/contract/` +
+      `${COINGECKO_PRO_URL}/coins/${coingecko_asset_platform_id}/contract/` +
         `${token.address}/market_chart?vs_currency=${vsCurrency}&days=${durationDays}&x_cg_pro_api_key=${apiKey}`,
     );
   } else {
     priceResponse = await axios.get(
-      `https://d2d8ugqzmyeyby.cloudfront.net/api/v3/coins/${coingecko_asset_platform_id}/contract/` +
+      `${COINGECKO_PROXY_URL}/coins/${coingecko_asset_platform_id}/contract/` +
         `${token.address}/market_chart?vs_currency=${vsCurrency}&days=${durationDays}`,
     );
   }
