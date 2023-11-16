@@ -396,11 +396,11 @@ export const RebalanceActionSchema = BaseActionSchema.extend({
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 
 const BaseRecurringActionSchema = BaseActionSchema.extend({
-  uuid: z
+  strategyId: z
     .string()
     .optional()
     .describe(
-      'The uuid of the recurring rebalance to identify the series of positions.',
+      'The id of the recurring rebalance strategy to identify the series of positions.',
     ),
 });
 
@@ -490,6 +490,13 @@ export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
     .int()
     .positive()
     .describe('Unix timestamp in seconds when this trigger expires.'),
+  autoCompound: z
+    .object({
+      action: ReinvestActionSchema,
+      condition: AccruedFeesConditionSchema,
+    })
+    .optional()
+    .describe('If populated, a reinvest trigger will be created as well.'),
 });
 export type CreateTriggerPayload = z.infer<typeof CreateTriggerPayloadSchema>;
 
@@ -710,14 +717,11 @@ export type HasSignedPrivateBetaAgreementResponse = z.infer<
 >;
 
 export const GetStrategyDetailRequestSchema = ClientTypeSchema.extend({
-  ownerAddr: z
-    .string()
-    .startsWith('0x')
-    .describe(
-      'The owner address of position `tokenId`; must be a checksum address.',
-    ),
+  ownerAddr: AddressSchema.describe(
+    'The owner address of position `tokenId`; must be a checksum address.',
+  ),
   chainId: ApertureSupportedChainIdEnum,
-  uuid: z.string().nonempty().describe('The uuid of the strategy.'),
+  strategyId: z.string().min(1).describe('The id of the strategy.'),
 });
 export type GetStrategyDetailRequest = z.infer<
   typeof GetStrategyDetailRequestSchema
@@ -737,13 +741,17 @@ export const StrategyDetailItemSechema = TriggerItemSchema.omit({
     .number()
     .optional()
     .describe(
-      "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated when the action is triggered and the task switches to STARTED status.",
+      "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means " +
+        "that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated " +
+        'when the action is triggered and the task switches to STARTED status.',
     ),
   positionEtherValueWhenCompleted: z
     .number()
     .optional()
     .describe(
-      "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated when the action is completed and the task switches to COMPLETED status.",
+      "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means " +
+        "that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated " +
+        'when the action is completed and the task switches to COMPLETED status.',
     ),
   positionUsdValueWhenCompleted: z
     .number()
@@ -755,31 +763,36 @@ export const StrategyDetailItemSechema = TriggerItemSchema.omit({
     .number()
     .optional()
     .describe(
-      'A number representing the ratio between accrued fees in the position and principal value. Only populated when the action is triggered and the task switches to STARTED status, and the condition is of type AccruedFees.',
+      'A number representing the ratio between accrued fees in the position and principal value. Only populated ' +
+        'when the action is triggered and the task switches to STARTED status, and the condition is of type AccruedFees.',
     ),
   feeCollectedToken0: z
     .number()
     .optional()
     .describe(
-      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
   feeCollectedToken1: z
     .number()
     .optional()
     .describe(
-      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
   feeCollectedToken0UsdValue: z
     .number()
     .optional()
     .describe(
-      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
   feeCollectedToken1UsdValue: z
     .number()
     .optional()
     .describe(
-      'A number representing the fee collected on token0. Only populated when the action is triggered and the task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+      'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
 });
 
