@@ -192,7 +192,8 @@ describe('Automan client test', () => {
     const request: GetStrategyDetailRequest = {
       chainId: 5,
       ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
-      uuid: 'effc0cdc899eba75ea5294dccd78194ec0bd36eae80ed53acfa0a9b3fe8e6bb0',
+      strategyId:
+        'effc0cdc899eba75ea5294dccd78194ec0bd36eae80ed53acfa0a9b3fe8e6bb0',
     };
 
     const responseData = {} as GetStrategyDetailResponse;
