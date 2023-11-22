@@ -267,8 +267,8 @@ export function fractionToBig(price: Fraction): Big {
  * @returns The sqrt ratio of token1/token0, as a `JSBI` number.
  */
 export function priceToSqrtRatioX96(price: Big): JSBI {
-  if (price.lte(0)) {
-    throw new Error('Invalid price: must be greater than 0');
+  if (price.lt(0)) {
+    throw new Error('Invalid price: must be non-negative');
   }
   const sqrtRatioX96 = JSBI.BigInt(price.times(Q192).sqrt().toFixed(0));
   if (JSBI.lessThan(sqrtRatioX96, TickMath.MIN_SQRT_RATIO)) {

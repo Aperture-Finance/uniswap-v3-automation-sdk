@@ -473,24 +473,14 @@ describe('Position util tests', function () {
         inRangePosition.tickUpper,
         new Big('0'),
       ).toString(),
-    ).to.equal(
-      new Big(TickMath.getSqrtRatioAtTick(inRangePosition.tickUpper).toString())
-        .pow(2)
-        .div(Q192)
-        .toString(),
-    );
+    ).to.equal(tickToBigPrice(inRangePosition.tickUpper).toString());
     expect(
       getRawRelativePriceFromTokenValueProportion(
         inRangePosition.tickLower,
         inRangePosition.tickUpper,
         new Big('1'),
       ).toString(),
-    ).to.equal(
-      new Big(TickMath.getSqrtRatioAtTick(inRangePosition.tickLower).toString())
-        .pow(2)
-        .div(Q192)
-        .toString(),
-    );
+    ).to.equal(tickToBigPrice(inRangePosition.tickLower).toString());
 
     // Verify that the calculated price indeed corresponds to ~30% of the position value in token0.
     const token0ValueProportion = getTokenValueProportionFromPriceRatio(
@@ -539,11 +529,7 @@ describe('Position util tests', function () {
     );
     const DP = ratio.toString().length - 3;
     Big.DP = DP;
-    const ratio2 = getTokenValueProportionFromPriceRatio(
-      -887220,
-      27720,
-      new Big(pp.toString()),
-    );
+    const ratio2 = getTokenValueProportionFromPriceRatio(-887220, 27720, pp);
     expect(ratio.toFixed(DP)).to.equal(ratio2.toFixed(DP));
   });
 
