@@ -94,7 +94,7 @@ export const AddressSchema = HexSchema.length(42).describe(
   'A hexadecimal address.',
 );
 
-export const SignatureSchema = HexSchema.length(132).describe(
+export const SignatureSchema = HexSchema.min(132).describe(
   'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated,' +
     ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
 );
