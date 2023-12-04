@@ -6,18 +6,19 @@ import {
   computePoolAddress as _computePoolAddress,
   tickToPrice,
 } from '@uniswap/v3-sdk';
-import { AbiParametersToPrimitiveTypes } from 'abitype';
+import { Abi, AbiFunction } from 'abitype';
 import axios from 'axios';
 import JSBI from 'jsbi';
 import {
   Address,
   CallExecutionError,
+  ContractFunctionResult,
+  EncodeDeployDataParameters,
   Hex,
   PublicClient,
   WalletClient,
   decodeFunctionResult,
   encodeDeployData,
-  getAbiItem,
   getContract,
 } from 'viem';
 
@@ -35,16 +36,6 @@ import {
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
-
-const GetPopulatedTicksInRangeAbi = getAbiItem({
-  abi: EphemeralGetPopulatedTicksInRange__factory.abi,
-  name: 'getPopulatedTicksInRange',
-});
-
-type PopulatedTickArray = AbiParametersToPrimitiveTypes<
-  (typeof GetPopulatedTicksInRangeAbi)['outputs'],
-  'outputs'
->[0];
 
 /**
  * Computes a pool address
@@ -449,6 +440,44 @@ export function readTickToLiquidityMap(
 }
 
 /**
+ * Deploy an ephemeral contract which reverts data in the constructor via `eth_call`.
+ * @param deployParams The abi, bytecode, and constructor arguments.
+ * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
+ * @returns The result of the contract function call.
+ */
+export async function callEphemeralContract<TAbi extends Abi>(
+  deployParams: EncodeDeployDataParameters<TAbi>,
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+): Promise<ContractFunctionResult<TAbi>> {
+  try {
+    await publicClient.call({
+      data: encodeDeployData(deployParams),
+      blockNumber,
+    });
+  } catch (error) {
+    const baseError = (error as CallExecutionError).walk();
+    if ('data' in baseError) {
+      const abiFunctions = deployParams.abi.filter(
+        (x) => x.type === 'function',
+      );
+      if (abiFunctions.length === 1) {
+        return decodeFunctionResult({
+          abi: abiFunctions as [AbiFunction],
+          data: baseError.data as Hex,
+        }) as ContractFunctionResult<TAbi>;
+      } else {
+        throw new Error('abi should contain exactly one function');
+      }
+    } else {
+      throw error;
+    }
+  }
+  throw new Error('deployment should revert');
+}
+
+/**
  * Fetches the liquidity within the tick range for the specified pool by deploying an ephemeral contract via `eth_call`.
  * Each tick consumes about 100k gas, so this method may fail if the number of ticks exceeds 3k assuming the provider
  * gas limit is 300m.
@@ -457,6 +486,7 @@ export function readTickToLiquidityMap(
  * @param tickLower The lower tick to fetch liquidity for.
  * @param tickUpper The upper tick to fetch liquidity for.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  */
 async function getPopulatedTicksInRange(
   chainId: ApertureSupportedChainId,
@@ -464,39 +494,27 @@ async function getPopulatedTicksInRange(
   tickLower: number,
   tickUpper: number,
   publicClient?: PublicClient,
+  blockNumber?: bigint,
 ) {
-  try {
-    await (publicClient ?? getPublicClient(chainId)).call({
-      data: encodeDeployData({
-        abi: EphemeralGetPopulatedTicksInRange__factory.abi,
-        bytecode: EphemeralGetPopulatedTicksInRange__factory.bytecode,
-        args: [
-          computePoolAddress(
-            getChainInfo(chainId).uniswap_v3_factory,
-            pool.token0,
-            pool.token1,
-            pool.fee,
-          ),
-          tickLower,
-          tickUpper,
-        ],
-      }),
-    });
-  } catch (error) {
-    const baseError = (error as CallExecutionError).walk();
-    if ('data' in baseError) {
-      const ticks: PopulatedTickArray = decodeFunctionResult({
-        abi: [GetPopulatedTicksInRangeAbi],
-        data: baseError.data as Hex,
-      });
-      return ticks.map(({ tick, liquidityNet }) => {
-        return { tick, liquidityNet };
-      });
-    } else {
-      throw error;
-    }
-  }
-  throw new Error('deployment should revert');
+  const ticks = await callEphemeralContract(
+    {
+      abi: EphemeralGetPopulatedTicksInRange__factory.abi,
+      bytecode: EphemeralGetPopulatedTicksInRange__factory.bytecode,
+      args: [
+        computePoolAddress(
+          getChainInfo(chainId).uniswap_v3_factory,
+          pool.token0,
+          pool.token1,
+          pool.fee,
+        ),
+        tickLower,
+        tickUpper,
+      ],
+    },
+    publicClient ?? getPublicClient(chainId),
+    blockNumber,
+  );
+  return ticks.map(({ tick, liquidityNet }) => ({ tick, liquidityNet }));
 }
 
 export interface Liquidity {

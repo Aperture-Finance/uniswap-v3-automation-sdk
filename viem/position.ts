@@ -10,8 +10,7 @@ import Big from 'big.js';
 import JSBI from 'jsbi';
 import {
   Address,
-  CallExecutionError,
-  Hex,
+  ContractFunctionResult,
   PublicClient,
   WalletClient,
   decodeFunctionResult,
@@ -35,9 +34,9 @@ import {
   UniV3Automan__factory,
 } from '../typechain-types';
 import { getAutomanReinvestCalldata } from './automan';
-import { GetAbiFunctionReturnTypes } from './generics';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from './overrides';
 import {
+  callEphemeralContract,
   getPool,
   getPoolContract,
   getPoolFromBasicPositionInfo,
@@ -59,25 +58,15 @@ export interface CollectableTokenAmounts {
   token1Amount: CurrencyAmount<Token>;
 }
 
-const AllPositionsAbi = getAbiItem({
-  abi: EphemeralAllPositions__factory.abi,
-  name: 'allPositions',
-});
-
-const GetPositionAbi = getAbiItem({
-  abi: EphemeralGetPosition__factory.abi,
-  name: 'getPosition',
-});
-
-type PositionStateStruct = GetAbiFunctionReturnTypes<
-  [typeof GetPositionAbi],
+type PositionStateStruct = ContractFunctionResult<
+  typeof EphemeralGetPosition__factory.abi,
   'getPosition'
->[0];
+>;
 
-type PositionStateArray = GetAbiFunctionReturnTypes<
-  [typeof AllPositionsAbi],
+type PositionStateArray = ContractFunctionResult<
+  typeof EphemeralAllPositions__factory.abi,
   'allPositions'
->[0];
+>;
 
 export function getNPM(
   chainId: ApertureSupportedChainId,
@@ -164,38 +153,27 @@ export async function getAllPositions(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
-  try {
-    await (publicClient ?? getPublicClient(chainId)).call({
-      data: encodeDeployData({
-        abi: EphemeralAllPositions__factory.abi,
-        bytecode: EphemeralAllPositions__factory.bytecode,
-        args: [
-          getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
-          owner,
-        ],
-      }),
-      blockNumber,
-    });
-  } catch (error) {
-    const baseError = (error as CallExecutionError).walk();
-    if ('data' in baseError) {
-      const positions: PositionStateArray = decodeFunctionResult({
-        abi: [AllPositionsAbi],
-        data: baseError.data as Hex,
-      });
-      return new Map(
-        positions.map((pos) => {
-          return [
-            pos.tokenId.toString(),
-            PositionDetails.fromPositionStateStruct(chainId, pos),
-          ] as const;
-        }),
-      );
-    } else {
-      throw error;
-    }
-  }
-  throw new Error('deployment should revert');
+  const positions: PositionStateArray = await callEphemeralContract(
+    {
+      abi: EphemeralAllPositions__factory.abi,
+      bytecode: EphemeralAllPositions__factory.bytecode,
+      args: [
+        getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+        owner,
+      ],
+    },
+    publicClient ?? getPublicClient(chainId),
+    blockNumber,
+  );
+  return new Map(
+    positions.map(
+      (pos) =>
+        [
+          pos.tokenId.toString(),
+          PositionDetails.fromPositionStateStruct(chainId, pos),
+        ] as const,
+    ),
+  );
 }
 
 /**
@@ -278,7 +256,12 @@ export class PositionDetails implements BasicPositionInfo {
         blockNumber,
       });
       const position = decodeFunctionResult({
-        abi: [GetPositionAbi],
+        abi: [
+          getAbiItem({
+            abi: EphemeralGetPosition__factory.abi,
+            name: 'getPosition',
+          }),
+        ],
         data: data!,
       });
       return PositionDetails.fromPositionStateStruct(chainId, position);

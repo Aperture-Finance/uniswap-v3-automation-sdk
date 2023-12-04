@@ -1,6 +1,7 @@
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
 import {
   Address,
+  ContractFunctionResult,
   Hex,
   PublicClient,
   WalletClient,
@@ -17,10 +18,7 @@ import {
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
 } from '../typechain-types';
-import {
-  GetAbiFunctionParamsTypes,
-  GetAbiFunctionReturnTypes,
-} from './generics';
+import { GetAbiFunctionParamsTypes } from './generics';
 import {
   getERC20Overrides,
   getNPMApprovalOverrides,
@@ -38,8 +36,8 @@ export type AutomanActionName =
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof UniV3Automan__factory.abi, T>;
 
-export type GetAutomanReturnTypes<T extends AutomanActionName> =
-  GetAbiFunctionReturnTypes<typeof UniV3Automan__factory.abi, T>;
+export type GetAutomanReturnTypes<TFunctionName extends AutomanActionName> =
+  ContractFunctionResult<typeof UniV3Automan__factory.abi, TFunctionName>;
 
 type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof INonfungiblePositionManager__factory.abi,
