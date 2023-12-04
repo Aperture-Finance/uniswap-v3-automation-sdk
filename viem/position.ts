@@ -166,12 +166,13 @@ export async function getAllPositions(
     blockNumber,
   );
   return new Map(
-    positions.map((pos) => {
-      return [
-        pos.tokenId.toString(),
-        PositionDetails.fromPositionStateStruct(chainId, pos),
-      ] as const;
-    }),
+    positions.map(
+      (pos) =>
+        [
+          pos.tokenId.toString(),
+          PositionDetails.fromPositionStateStruct(chainId, pos),
+        ] as const,
+    ),
   );
 }
 

@@ -514,9 +514,7 @@ async function getPopulatedTicksInRange(
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
-  return ticks.map(({ tick, liquidityNet }) => {
-    return { tick, liquidityNet };
-  });
+  return ticks.map(({ tick, liquidityNet }) => ({ tick, liquidityNet }));
 }
 
 export interface Liquidity {
