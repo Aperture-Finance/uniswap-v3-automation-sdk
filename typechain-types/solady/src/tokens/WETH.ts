@@ -34,9 +34,7 @@ export interface WETHInterface extends utils.Interface {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "decimals()": FunctionFragment;
-    "decreaseAllowance(address,uint256)": FunctionFragment;
     "deposit()": FunctionFragment;
-    "increaseAllowance(address,uint256)": FunctionFragment;
     "name()": FunctionFragment;
     "nonces(address)": FunctionFragment;
     "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)": FunctionFragment;
@@ -54,9 +52,7 @@ export interface WETHInterface extends utils.Interface {
       | "approve"
       | "balanceOf"
       | "decimals"
-      | "decreaseAllowance"
       | "deposit"
-      | "increaseAllowance"
       | "name"
       | "nonces"
       | "permit"
@@ -81,15 +77,7 @@ export interface WETHInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "decreaseAllowance",
-    values: [string, BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "deposit", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "increaseAllowance",
-    values: [string, BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "nonces", values: [string]): string;
   encodeFunctionData(
@@ -130,15 +118,7 @@ export interface WETHInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "decreaseAllowance",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "increaseAllowance",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "permit", data: BytesLike): Result;
@@ -260,20 +240,8 @@ export interface WETH extends BaseContract {
 
     decimals(overrides?: CallOverrides): Promise<[number]>;
 
-    decreaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     deposit(
       overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    increaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     name(overrides?: CallOverrides): Promise<[string]>;
@@ -337,20 +305,8 @@ export interface WETH extends BaseContract {
 
   decimals(overrides?: CallOverrides): Promise<number>;
 
-  decreaseAllowance(
-    spender: string,
-    difference: BigNumberish,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   deposit(
     overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  increaseAllowance(
-    spender: string,
-    difference: BigNumberish,
-    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   name(overrides?: CallOverrides): Promise<string>;
@@ -409,19 +365,7 @@ export interface WETH extends BaseContract {
 
     decimals(overrides?: CallOverrides): Promise<number>;
 
-    decreaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
     deposit(overrides?: CallOverrides): Promise<void>;
-
-    increaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
@@ -513,20 +457,8 @@ export interface WETH extends BaseContract {
 
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
 
-    decreaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     deposit(
       overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    increaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
@@ -589,20 +521,8 @@ export interface WETH extends BaseContract {
 
     decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    decreaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     deposit(
       overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    increaseAllowance(
-      spender: string,
-      difference: BigNumberish,
-      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;

@@ -4,4 +4,3 @@
 import type * as interfaces from "./interfaces";
 export type { interfaces };
 export type { FullMath } from "./FullMath";
-export type { LiquidityAmounts } from "./LiquidityAmounts";
