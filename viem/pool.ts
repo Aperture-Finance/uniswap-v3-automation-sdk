@@ -6,21 +6,10 @@ import {
   computePoolAddress as _computePoolAddress,
   tickToPrice,
 } from '@uniswap/v3-sdk';
-import { Abi, AbiFunction } from 'abitype';
+import { viem } from 'aperture-lens';
 import axios from 'axios';
 import JSBI from 'jsbi';
-import {
-  Address,
-  CallExecutionError,
-  ContractFunctionResult,
-  EncodeDeployDataParameters,
-  Hex,
-  PublicClient,
-  WalletClient,
-  decodeFunctionResult,
-  encodeDeployData,
-  getContract,
-} from 'viem';
+import { Address, PublicClient, WalletClient, getContract } from 'viem';
 
 import { getChainInfo } from '../chain';
 import {
@@ -29,10 +18,7 @@ import {
 } from '../data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId } from '../interfaces';
 import { DOUBLE_TICK, sqrtRatioToPrice } from '../tick';
-import {
-  EphemeralGetPopulatedTicksInRange__factory,
-  IUniswapV3Pool__factory,
-} from '../typechain-types';
+import { IUniswapV3Pool__factory } from '../typechain-types';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
@@ -440,44 +426,6 @@ export function readTickToLiquidityMap(
 }
 
 /**
- * Deploy an ephemeral contract which reverts data in the constructor via `eth_call`.
- * @param deployParams The abi, bytecode, and constructor arguments.
- * @param publicClient Viem public client.
- * @param blockNumber Optional block number to query.
- * @returns The result of the contract function call.
- */
-export async function callEphemeralContract<TAbi extends Abi>(
-  deployParams: EncodeDeployDataParameters<TAbi>,
-  publicClient: PublicClient,
-  blockNumber?: bigint,
-): Promise<ContractFunctionResult<TAbi>> {
-  try {
-    await publicClient.call({
-      data: encodeDeployData(deployParams),
-      blockNumber,
-    });
-  } catch (error) {
-    const baseError = (error as CallExecutionError).walk();
-    if ('data' in baseError) {
-      const abiFunctions = deployParams.abi.filter(
-        (x) => x.type === 'function',
-      );
-      if (abiFunctions.length === 1) {
-        return decodeFunctionResult({
-          abi: abiFunctions as [AbiFunction],
-          data: baseError.data as Hex,
-        }) as ContractFunctionResult<TAbi>;
-      } else {
-        throw new Error('abi should contain exactly one function');
-      }
-    } else {
-      throw error;
-    }
-  }
-  throw new Error('deployment should revert');
-}
-
-/**
  * Fetches the liquidity within the tick range for the specified pool by deploying an ephemeral contract via `eth_call`.
  * Each tick consumes about 100k gas, so this method may fail if the number of ticks exceeds 3k assuming the provider
  * gas limit is 300m.
@@ -496,21 +444,15 @@ async function getPopulatedTicksInRange(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
-  const ticks = await callEphemeralContract(
-    {
-      abi: EphemeralGetPopulatedTicksInRange__factory.abi,
-      bytecode: EphemeralGetPopulatedTicksInRange__factory.bytecode,
-      args: [
-        computePoolAddress(
-          getChainInfo(chainId).uniswap_v3_factory,
-          pool.token0,
-          pool.token1,
-          pool.fee,
-        ),
-        tickLower,
-        tickUpper,
-      ],
-    },
+  const ticks = await viem.getPopulatedTicksInRange(
+    computePoolAddress(
+      getChainInfo(chainId).uniswap_v3_factory,
+      pool.token0,
+      pool.token1,
+      pool.fee,
+    ),
+    tickLower,
+    tickUpper,
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
