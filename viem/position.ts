@@ -6,6 +6,11 @@ import {
   PositionLibrary,
   TickMath,
 } from '@uniswap/v3-sdk';
+import {
+  EphemeralAllPositionsByOwner__factory,
+  EphemeralGetPosition__factory,
+  viem,
+} from 'aperture-lens';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 import {
@@ -14,7 +19,6 @@ import {
   PublicClient,
   WalletClient,
   decodeFunctionResult,
-  encodeDeployData,
   getAbiItem,
   getAddress,
   getContract,
@@ -28,15 +32,12 @@ import {
   priceToSqrtRatioX96,
 } from '../price';
 import {
-  EphemeralAllPositions__factory,
-  EphemeralGetPosition__factory,
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
 } from '../typechain-types';
 import { getAutomanReinvestCalldata } from './automan';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from './overrides';
 import {
-  callEphemeralContract,
   getPool,
   getPoolContract,
   getPoolFromBasicPositionInfo,
@@ -64,7 +65,7 @@ type PositionStateStruct = ContractFunctionResult<
 >;
 
 type PositionStateArray = ContractFunctionResult<
-  typeof EphemeralAllPositions__factory.abi,
+  typeof EphemeralAllPositionsByOwner__factory.abi,
   'allPositions'
 >;
 
@@ -153,15 +154,9 @@ export async function getAllPositions(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
-  const positions: PositionStateArray = await callEphemeralContract(
-    {
-      abi: EphemeralAllPositions__factory.abi,
-      bytecode: EphemeralAllPositions__factory.bytecode,
-      args: [
-        getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
-        owner,
-      ],
-    },
+  const positions: PositionStateArray = await viem.getAllPositionsByOwner(
+    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+    owner,
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
@@ -243,32 +238,13 @@ export class PositionDetails implements BasicPositionInfo {
     publicClient?: PublicClient,
     blockNumber?: bigint,
   ): Promise<PositionDetails> {
-    try {
-      const { data } = await (publicClient ?? getPublicClient(chainId)).call({
-        data: encodeDeployData({
-          abi: EphemeralGetPosition__factory.abi,
-          bytecode: EphemeralGetPosition__factory.bytecode,
-          args: [
-            getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
-            positionId,
-          ],
-        }),
-        blockNumber,
-      });
-      const position = decodeFunctionResult({
-        abi: [
-          getAbiItem({
-            abi: EphemeralGetPosition__factory.abi,
-            name: 'getPosition',
-          }),
-        ],
-        data: data!,
-      });
-      return PositionDetails.fromPositionStateStruct(chainId, position);
-    } catch (error) {
-      console.error(error);
-      throw new Error('deployment reverts');
-    }
+    const position = await viem.getPositionDetails(
+      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      positionId,
+      publicClient ?? getPublicClient(chainId),
+      blockNumber,
+    );
+    return PositionDetails.fromPositionStateStruct(chainId, position);
   }
 
   /**

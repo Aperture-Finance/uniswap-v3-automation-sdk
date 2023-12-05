@@ -41,7 +41,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "Log2Undefined",
+    name: "MantissaOverflow",
     type: "error",
   },
   {
@@ -52,6 +52,11 @@ const _abi = [
   {
     inputs: [],
     name: "MulWadFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OutOfDomain",
     type: "error",
   },
   {

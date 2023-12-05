@@ -21,10 +21,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.INonfungiblePositionManager__factory>;
     getContractFactory(
-      name: "LiquidityAmounts",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LiquidityAmounts__factory>;
-    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -137,26 +133,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniV3Immutables__factory>;
     getContractFactory(
-      name: "EphemeralAllPositions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EphemeralAllPositions__factory>;
-    getContractFactory(
-      name: "EphemeralGetPopulatedTicksInRange",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EphemeralGetPopulatedTicksInRange__factory>;
-    getContractFactory(
-      name: "EphemeralGetPopulatedTicksInWord",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EphemeralGetPopulatedTicksInWord__factory>;
-    getContractFactory(
-      name: "EphemeralGetPosition",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EphemeralGetPosition__factory>;
-    getContractFactory(
-      name: "EphemeralGetPositions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.EphemeralGetPositions__factory>;
-    getContractFactory(
       name: "OptimalSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
@@ -183,11 +159,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.INonfungiblePositionManager>;
-    getContractAt(
-      name: "LiquidityAmounts",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LiquidityAmounts>;
     getContractAt(
       name: "Ownable",
       address: string,
@@ -328,31 +299,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniV3Immutables>;
-    getContractAt(
-      name: "EphemeralAllPositions",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EphemeralAllPositions>;
-    getContractAt(
-      name: "EphemeralGetPopulatedTicksInRange",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EphemeralGetPopulatedTicksInRange>;
-    getContractAt(
-      name: "EphemeralGetPopulatedTicksInWord",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EphemeralGetPopulatedTicksInWord>;
-    getContractAt(
-      name: "EphemeralGetPosition",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EphemeralGetPosition>;
-    getContractAt(
-      name: "EphemeralGetPositions",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.EphemeralGetPositions>;
     getContractAt(
       name: "OptimalSwap",
       address: string,

@@ -808,18 +808,18 @@ export interface UniV3Automan extends BaseContract {
     setControllers(
       controllers: string[],
       statuses: boolean[],
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setFeeConfig(
       _feeConfig: UniV3Automan.FeeConfigStruct,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setSwapRouters(
       routers: string[],
       statuses: boolean[],
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     transferOwnership(
@@ -1011,18 +1011,18 @@ export interface UniV3Automan extends BaseContract {
   setControllers(
     controllers: string[],
     statuses: boolean[],
-    overrides?: Overrides & { from?: string }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setFeeConfig(
     _feeConfig: UniV3Automan.FeeConfigStruct,
-    overrides?: Overrides & { from?: string }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setSwapRouters(
     routers: string[],
     statuses: boolean[],
-    overrides?: Overrides & { from?: string }
+    overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   transferOwnership(
@@ -1528,18 +1528,18 @@ export interface UniV3Automan extends BaseContract {
     setControllers(
       controllers: string[],
       statuses: boolean[],
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     setFeeConfig(
       _feeConfig: UniV3Automan.FeeConfigStruct,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     setSwapRouters(
       routers: string[],
       statuses: boolean[],
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     transferOwnership(
@@ -1724,18 +1724,18 @@ export interface UniV3Automan extends BaseContract {
     setControllers(
       controllers: string[],
       statuses: boolean[],
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setFeeConfig(
       _feeConfig: UniV3Automan.FeeConfigStruct,
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setSwapRouters(
       routers: string[],
       statuses: boolean[],
-      overrides?: Overrides & { from?: string }
+      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(
