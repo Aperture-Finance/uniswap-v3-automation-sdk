@@ -8,6 +8,7 @@ export enum ApertureSupportedChainId {
   OPTIMISM_MAINNET_CHAIN_ID = 10,
   BASE_MAINNET_CHAIN_ID = 8453,
   MANTA_PACIFIC_MAINNET_CHAIN_ID = 169,
+  SCROLL_MAINNET_CHAIN_ID = 534352,
 
   // Mainnets that use non-ETH native currency.
   POLYGON_MAINNET_CHAIN_ID = 137,

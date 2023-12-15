@@ -9,8 +9,11 @@ import {
   celo,
   goerli,
   mainnet,
+  manta,
+  mantaTestnet,
   optimism,
   polygon,
+  scroll,
 } from 'viem/chains';
 
 import whitelistedPoolsEthereum from './data/whitelistedPools-1.json';
@@ -414,42 +417,7 @@ const CHAIN_ID_TO_INFO: {
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
   [ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID]: {
-    chain: {
-      id: 169,
-      name: 'Manta Pacific Mainnet',
-      network: 'manta-mainnet',
-      nativeCurrency: {
-        decimals: 18,
-        name: 'Ether',
-        symbol: 'ETH',
-      },
-      rpcUrls: {
-        public: {
-          http: ['https://pacific-rpc.manta.network/http'],
-          webSocket: ['wss://pacific-rpc.manta.network/ws'],
-        },
-        default: {
-          http: ['https://pacific-rpc.manta.network/http'],
-          webSocket: ['wss://pacific-rpc.manta.network/ws'],
-        },
-      },
-      blockExplorers: {
-        etherscan: {
-          name: 'manta-mainnet',
-          url: 'https://pacific-explorer.manta.network',
-        },
-        default: {
-          name: 'manta-testnet',
-          url: 'https://pacific-explorer.manta.network',
-        },
-      },
-      contracts: {
-        multicall3: {
-          address: '0xf43727c9BEb4C0aA3fEE1281A902e518f8586E54',
-          blockCreated: 41570,
-        },
-      },
-    } as const satisfies Chain,
+    chain: manta,
     uniswap_v3_factory: getAddress(
       '0x5bd1F6735B80e58aAC88B8A94836854d3068a13a',
     ),
@@ -481,47 +449,11 @@ const CHAIN_ID_TO_INFO: {
       'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture/uniswap-v3/gn',
     routingApiInfo: {
       type: 'ROUTING_API',
-      url: 'https://manta-routing.aperture.finance/quote',
+      url: 'https://uniswap-routing.aperture.finance/quote',
     },
   },
   [ApertureSupportedChainId.MANTA_PACIFIC_TESTNET_CHAIN_ID]: {
-    chain: {
-      id: 3441005,
-      name: 'Manta Testnet L2 Rollup',
-      network: 'manta-testnet',
-      nativeCurrency: {
-        decimals: 18,
-        name: 'Ether',
-        symbol: 'ETH',
-      },
-      rpcUrls: {
-        public: {
-          http: ['https://manta-testnet.calderachain.xyz/http'],
-          webSocket: ['wss://manta-testnet.calderachain.xyz/ws'],
-        },
-        default: {
-          http: ['https://manta-testnet.calderachain.xyz/http'],
-          webSocket: ['wss://manta-testnet.calderachain.xyz/ws'],
-        },
-      },
-      blockExplorers: {
-        etherscan: {
-          name: 'manta-testnet',
-          url: 'https://pacific-explorer.manta.network',
-        },
-        default: {
-          name: 'manta-testnet',
-          url: 'https://pacific-explorer.manta.network',
-        },
-      },
-      contracts: {
-        multicall3: {
-          address: '0x07dba6DE009f8B367D934d9b33B7ddca41ec8269',
-          blockCreated: 550901,
-        },
-      },
-      testnet: true,
-    } as const satisfies Chain,
+    chain: mantaTestnet,
     uniswap_v3_factory: getAddress(
       '0x884402DfdEf9702dBA7fF8dDdF62AbD6afffb28b',
     ),
@@ -553,7 +485,44 @@ const CHAIN_ID_TO_INFO: {
       'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
     routingApiInfo: {
       type: 'ROUTING_API',
-      url: 'https://manta-routing.aperture.finance/quote',
+      url: 'https://uniswap-routing.aperture.finance/quote',
+    },
+  },
+  [ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID]: {
+    chain: scroll,
+    uniswap_v3_factory: getAddress(
+      '0x70C62C8b8e801124A4Aa81ce07b637A3e83cb919',
+    ),
+    uniswap_v3_nonfungible_position_manager: getAddress(
+      '0xB39002E4033b162fAc607fc3471E205FA2aE5967',
+    ),
+    uniswap_v3_swap_router_02: getAddress(
+      '0xfc30937f5cDe93Df8d48aCAF7e6f5D8D8A31F636',
+    ),
+    aperture_uniswap_v3_automan: getAddress(
+      '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
+    ),
+    aperture_router_proxy: getAddress(
+      '0x0000008007b63BaC0E4aC47f855005285DF20e89',
+    ),
+    optimal_swap_router: getAddress(
+      '0x00000000Ff5c300B992ae04D59a799AA4fbA1dC8',
+    ),
+    wrappedNativeCurrency: new Token(
+      ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
+      getAddress('0x5300000000000000000000000000000000000004'),
+      18,
+      'WETH',
+      'Wrapped Ether',
+    ),
+    coingecko_asset_platform_id: 'scroll',
+    rpc_url: 'https://rpc.scroll.io',
+    maxGasCeiling: 0.2,
+    uniswap_subgraph_url:
+      'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
+    routingApiInfo: {
+      type: 'ROUTING_API',
+      url: 'https://uniswap-routing.aperture.finance/quote',
     },
   },
 };
