@@ -717,13 +717,20 @@ export type HasSignedPrivateBetaAgreementResponse = z.infer<
   typeof HasSignedPrivateBetaAgreementResponseSchema
 >;
 
-export const GetStrategyDetailRequestSchema = ClientTypeSchema.extend({
+export const GetStrategiesDetailRequestSchema = ClientTypeSchema.extend({
   ownerAddr: AddressSchema.describe(
     'The owner address of position `tokenId`; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
-  strategyId: z.string().min(1).describe('The id of the strategy.'),
 });
+export type GetStrategiesDetailRequest = z.infer<
+  typeof GetStrategiesDetailRequestSchema
+>;
+
+export const GetStrategyDetailRequestSchema =
+  GetStrategiesDetailRequestSchema.extend({
+    strategyId: z.string().min(1).describe('The id of the strategy.'),
+  });
 export type GetStrategyDetailRequest = z.infer<
   typeof GetStrategyDetailRequestSchema
 >;
@@ -819,4 +826,11 @@ export const GetStrategyDetailResponseSchema = z.object({
 });
 export type GetStrategyDetailResponse = z.infer<
   typeof GetStrategyDetailResponseSchema
+>;
+
+export const GetStrategiesDetailResponseSchema = z.array(
+  GetStrategyDetailResponseSchema,
+);
+export type GetStrategiesDetailResponse = z.infer<
+  typeof GetStrategiesDetailResponseSchema
 >;
