@@ -5,6 +5,8 @@ import {
   CheckUserLimitRequest,
   CreateTriggerRequest,
   DeleteTriggerRequest,
+  GetStrategiesDetailRequest,
+  GetStrategiesDetailResponse,
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
   HasSignedPrivateBetaAgreementRequest,
@@ -118,6 +120,13 @@ export class AutomanClient {
     request: Readonly<GetStrategyDetailRequest>,
   ): Promise<GetStrategyDetailResponse> {
     const url = new URL('/getStrategyDetail', this.endpoint);
+    return (await buildAxiosGetRequest(url, request)).data;
+  }
+
+  async getStrategiesDetail(
+    request: Readonly<GetStrategiesDetailRequest>,
+  ): Promise<GetStrategiesDetailResponse> {
+    const url = new URL('/getStrategiesDetail', this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 }
