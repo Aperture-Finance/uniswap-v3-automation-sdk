@@ -16,15 +16,7 @@ import {
   scroll,
 } from 'viem/chains';
 
-import whitelistedPoolsEthereum from './data/whitelistedPools-1.json';
-import whitelistedPoolsGoerli from './data/whitelistedPools-5.json';
-import whitelistedPoolsArbitrum from './data/whitelistedPools-42161.json';
 import { ApertureSupportedChainId } from './interfaces';
-import {
-  WhitelistedPool,
-  getWhitelistedPools,
-  getWhitelistedTokens,
-} from './whitelist';
 
 export interface ChainSpecificRoutingAPIInfo {
   url: string;
@@ -62,10 +54,6 @@ export interface ChainInfo {
   coingecko_asset_platform_id?: string;
   // Only populated for networks with a Uniswap subgraph URL.
   uniswap_subgraph_url?: string;
-  // TODO: remove `whitelistedPools` and `whitelistedTokens` once the frontend is updated to allow all pools/tokens.
-  // Only populated for networks with whitelisted pools.
-  whitelistedPools?: Map<string, WhitelistedPool>;
-  whitelistedTokens?: Map<string, Token>;
 }
 
 const CHAIN_ID_TO_INFO: {
@@ -93,14 +81,6 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     infura_network_id: 'goerli',
-    whitelistedPools: getWhitelistedPools(
-      ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
-      whitelistedPoolsGoerli,
-    ),
-    whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID,
-      whitelistedPoolsGoerli,
-    ),
     maxGasCeiling: 0.05,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -160,14 +140,6 @@ const CHAIN_ID_TO_INFO: {
     infura_network_id: 'mainnet',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
-    whitelistedPools: getWhitelistedPools(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      whitelistedPoolsEthereum,
-    ),
-    whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      whitelistedPoolsEthereum,
-    ),
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -202,14 +174,6 @@ const CHAIN_ID_TO_INFO: {
     infura_network_id: 'arbitrum',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
-    whitelistedPools: getWhitelistedPools(
-      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
-      whitelistedPoolsArbitrum,
-    ),
-    whitelistedTokens: getWhitelistedTokens(
-      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
-      whitelistedPoolsArbitrum,
-    ),
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
