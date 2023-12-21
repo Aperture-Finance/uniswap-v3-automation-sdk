@@ -24,3 +24,4 @@ coverage/
 .vscode
 .idea
 dist
+test/artifacts.d.ts

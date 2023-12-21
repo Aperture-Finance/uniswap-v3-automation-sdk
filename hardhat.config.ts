@@ -11,6 +11,7 @@ const config: HardhatUserConfig = {
   },
   paths: {
     tests: './test/hardhat',
+    artifacts: './test',
   },
 };
 
