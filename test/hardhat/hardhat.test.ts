@@ -74,6 +74,8 @@ import {
   PositionDetails,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
+  estimateRebalanceGas,
+  estimateReinvestGas,
   generateAccessList,
   generatePriceConditionFromTokenValueProportion,
   generateTypedDataForPermit,
@@ -293,6 +295,86 @@ describe('State overrides tests', function () {
     expect(liquidity.toString()).to.equal('716894157038546');
     expect(amount0.toString()).to.equal('51320357');
     expect(amount1.toString()).to.equal('8736560293857784398');
+  });
+
+  it('Test estimateRebalanceGas', async function () {
+    const blockNumber = 17975698n;
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const token0 = WBTC_ADDRESS;
+    const token1 = WETH_ADDRESS;
+    const fee = FeeAmount.MEDIUM;
+    const amount0Desired = 100000000n;
+    const amount1Desired = 1000000000000000000n;
+    const pool = await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      undefined,
+      blockNumber,
+    );
+    const mintParams = {
+      token0: token0 as Address,
+      token1: token1 as Address,
+      fee,
+      tickLower: nearestUsableTick(
+        pool.tickCurrent - 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      tickUpper: nearestUsableTick(
+        pool.tickCurrent + 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      recipient: eoa as Address,
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+    const gas = await estimateRebalanceGas(
+      chainId,
+      publicClient,
+      eoa,
+      eoa,
+      mintParams,
+      4n,
+      undefined,
+      undefined,
+      blockNumber,
+    );
+    expect(gas).to.equal(776289n);
+  });
+
+  it('Test estimateReinvestGas', async function () {
+    const blockNumber = 17975698n;
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const amount0Desired = 100000n;
+    const amount1Desired = 1000000000000000n;
+    const gas = await estimateReinvestGas(
+      chainId,
+      publicClient,
+      eoa,
+      eoa,
+      4n,
+      BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+      amount0Desired,
+      amount1Desired,
+      BigInt(0),
+      '0x',
+      blockNumber,
+    );
+    expect(gas).to.equal(529485n);
   });
 });
 

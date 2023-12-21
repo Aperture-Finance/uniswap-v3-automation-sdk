@@ -6,6 +6,7 @@ import {
   RpcTransactionRequest,
   encodeAbiParameters,
   encodeFunctionData,
+  hexToBigInt,
   keccak256,
   parseAbiParameters,
   toHex,
@@ -215,6 +216,36 @@ export async function staticCallWithOverrides(
     // @ts-ignore
     params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
   })) as Hex;
+}
+
+/**
+ * Estimate Gas of a contract call with the given state overrides.
+ * @param tx The transaction request.
+ * @param overrides The state overrides.
+ * @param publicClient A JSON RPC provider that supports `eth_estimateGas` with state overrides.
+ * @param blockNumber Optional block number to use for the call.
+ */
+export async function estimateGasWithOverrides(
+  from: Address,
+  to: Address,
+  data: Hex,
+  overrides: StateOverrides,
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+): Promise<bigint> {
+  const tx = {
+    from,
+    to,
+    data,
+  };
+  return hexToBigInt(
+    (await publicClient.request({
+      method: 'eth_estimateGas',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
+    })) as Hex,
+  );
 }
 
 /**

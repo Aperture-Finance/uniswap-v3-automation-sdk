@@ -20,6 +20,7 @@ import {
 } from '../typechain-types';
 import { GetAbiFunctionParamsTypes } from './generics';
 import {
+  estimateGasWithOverrides,
   getERC20Overrides,
   getNPMApprovalOverrides,
   staticCallWithOverrides,
@@ -446,4 +447,65 @@ export async function simulateRebalance(
     ),
     functionName: 'rebalance',
   });
+}
+
+export async function estimateRebalanceGas(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  owner: Address,
+  mintParams: MintParams,
+  tokenId: bigint,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  checkTicks(mintParams);
+  const data = getAutomanRebalanceCalldata(
+    mintParams,
+    tokenId,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  return await estimateGasWithOverrides(
+    from,
+    getChainInfo(chainId).aperture_uniswap_v3_automan,
+    data,
+    getNPMApprovalOverrides(chainId, owner),
+    publicClient,
+    blockNumber,
+  );
+}
+
+export async function estimateReinvestGas(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  const data = getAutomanReinvestCalldata(
+    tokenId,
+    deadline,
+    amount0Min,
+    amount1Min,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  return await estimateGasWithOverrides(
+    from,
+    getChainInfo(chainId).aperture_uniswap_v3_automan,
+    data,
+    getNPMApprovalOverrides(chainId, owner),
+    publicClient,
+    blockNumber,
+  );
 }
