@@ -34,6 +34,18 @@ const UNISWAP_OFFICIAL_ROUTING_API_INFO: ChainSpecificRoutingAPIInfo = {
   type: 'UNIFIED_ROUTING_API',
 };
 
+export type InfuraNetworkId =
+  | 'goerli'
+  | 'arbitrum-goerli'
+  | 'mainnet'
+  | 'arbitrum'
+  | 'matic'
+  | 'optimism'
+  | 'celo'
+  | 'bnbsmartchain'
+  | 'base'
+  | 'avalanche';
+
 export interface ChainInfo {
   chain: Chain;
   uniswap_v3_factory: Address;
@@ -47,7 +59,7 @@ export interface ChainInfo {
   // Automan maximum allowed gas deduction ceiling.
   maxGasCeiling: number;
   // Only populated for networks that have an Infura endpoint.
-  infura_network_id?: string;
+  infura_network_id?: InfuraNetworkId;
   // Only populated for networks that do not have an Infura endpoint.
   rpc_url?: string;
   // Only populated for networks with a CoinGecko asset platform ID.
@@ -272,6 +284,7 @@ const CHAIN_ID_TO_INFO: {
       'Celo native asset',
     ),
     coingecko_asset_platform_id: 'celo',
+    infura_network_id: 'celo',
     rpc_url: 'https://forno.celo.org',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/jesse-sawa/uniswap-celo',
@@ -306,6 +319,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped BNB',
     ),
     coingecko_asset_platform_id: 'binance-smart-chain',
+    infura_network_id: 'bnbsmartchain',
     rpc_url: 'https://bsc-dataseed.bnbchain.org',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/ilyamk/uniswap-v3---bnb-chain',
@@ -340,6 +354,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'base',
+    infura_network_id: 'base',
     rpc_url: 'https://mainnet.base.org',
     uniswap_subgraph_url:
       'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
@@ -374,6 +389,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped AVAX',
     ),
     coingecko_asset_platform_id: 'avalanche',
+    infura_network_id: 'avalanche',
     rpc_url: 'https://api.avax.network/ext/bc/C/rpc',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
