@@ -25,6 +25,7 @@ import {
   getNPMApprovalOverrides,
   staticCallWithOverrides,
   tryStaticCallWithOverrides,
+  updateIsControllerOverrides,
 } from './overrides';
 
 export type AutomanActionName =
@@ -449,6 +450,23 @@ export async function simulateRebalance(
   });
 }
 
+async function checkAuthorizedForFrom(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  owner: Address,
+  blockNumber?: bigint,
+) {
+  const automan = getAutomanContract(chainId, publicClient);
+  const isController = await automan.read.isController([from], {
+    blockNumber,
+  });
+  if (isController || from === owner) {
+    return true;
+  }
+  return false;
+}
+
 export async function estimateRebalanceGas(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
@@ -468,11 +486,23 @@ export async function estimateRebalanceGas(
     undefined,
     swapData,
   );
+  const overrides = getNPMApprovalOverrides(chainId, owner);
+  if (
+    !(await checkAuthorizedForFrom(
+      chainId,
+      publicClient,
+      from,
+      owner,
+      blockNumber,
+    ))
+  ) {
+    updateIsControllerOverrides(overrides, chainId, from);
+  }
   return await estimateGasWithOverrides(
     from,
     getChainInfo(chainId).aperture_uniswap_v3_automan,
     data,
-    getNPMApprovalOverrides(chainId, owner),
+    overrides,
     publicClient,
     blockNumber,
   );
@@ -500,11 +530,15 @@ export async function estimateReinvestGas(
     undefined,
     swapData,
   );
+  const overrides = getNPMApprovalOverrides(chainId, owner);
+  if (!(await checkAuthorizedForFrom(chainId, publicClient, from, owner))) {
+    updateIsControllerOverrides(overrides, chainId, from);
+  }
   return await estimateGasWithOverrides(
     from,
     getChainInfo(chainId).aperture_uniswap_v3_automan,
     data,
-    getNPMApprovalOverrides(chainId, owner),
+    overrides,
     publicClient,
     blockNumber,
   );

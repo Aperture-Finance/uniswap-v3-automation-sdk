@@ -50,6 +50,20 @@ export function computeOperatorApprovalSlot(
   );
 }
 
+/**
+ * Compute the storage slot for the isController in UniV3Automan.
+ * @param from The address of controller.
+ * @returns The storage slot.
+ */
+export function computeIsControllerSlot(from: Address): Hex {
+  return keccak256(
+    encodeAbiParameters(parseAbiParameters('address, bytes32'), [
+      from,
+      encodeAbiParameters(parseAbiParameters('uint256'), [1n]),
+    ]),
+  );
+}
+
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
   owner: Address,
@@ -64,6 +78,22 @@ export function getNPMApprovalOverrides(
         [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
+    },
+  };
+}
+
+export function updateIsControllerOverrides(
+  overrides: StateOverrides,
+  chainId: ApertureSupportedChainId,
+  from: Address,
+) {
+  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  overrides[aperture_uniswap_v3_automan] = {
+    stateDiff: {
+      [computeIsControllerSlot(from)]: encodeAbiParameters(
+        parseAbiParameters('bool'),
+        [true],
+      ),
     },
   };
 }
