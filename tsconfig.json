@@ -13,5 +13,5 @@
     "declarationDir": "dist"
   },
   "include": ["./**/*.ts", "./typechain-types"],
-  "exclude": ["test", "hardhat.config.ts", "jest.config.ts"]
+  "exclude": ["./dist/**/*", "test", "hardhat.config.ts", "jest.config.ts"]
 }
