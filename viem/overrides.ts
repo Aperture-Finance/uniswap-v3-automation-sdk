@@ -59,7 +59,7 @@ export function computeIsControllerSlot(from: Address): Hex {
   return keccak256(
     encodeAbiParameters(parseAbiParameters('address, bytes32'), [
       from,
-      encodeAbiParameters(parseAbiParameters('uint256'), [1n]),
+      encodeAbiParameters(parseAbiParameters('uint256'), [2n]),
     ]),
   );
 }
