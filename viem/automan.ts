@@ -11,6 +11,7 @@ import {
   getContract,
   hexToSignature,
 } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
@@ -450,27 +451,10 @@ export async function simulateRebalance(
   });
 }
 
-async function checkAuthorizedForFrom(
-  chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
-  from: Address,
-  owner: Address,
-  blockNumber?: bigint,
-) {
-  const automan = getAutomanContract(chainId, publicClient);
-  const isController = await automan.read.isController([from], {
-    blockNumber,
-  });
-  if (isController || from === owner) {
-    return true;
-  }
-  return false;
-}
-
 export async function estimateRebalanceGas(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
-  from: Address,
+  from: Address | undefined,
   owner: Address,
   mintParams: MintParams,
   tokenId: bigint,
@@ -487,17 +471,12 @@ export async function estimateRebalanceGas(
     swapData,
   );
   const overrides = getNPMApprovalOverrides(chainId, owner);
-  if (
-    !(await checkAuthorizedForFrom(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      blockNumber,
-    ))
-  ) {
-    updateIsControllerOverrides(overrides, chainId, from);
+  if (from === undefined) {
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
+    from = account.address;
   }
+  updateIsControllerOverrides(overrides, chainId, from);
   return await estimateGasWithOverrides(
     from,
     getChainInfo(chainId).aperture_uniswap_v3_automan,
@@ -511,7 +490,7 @@ export async function estimateRebalanceGas(
 export async function estimateReinvestGas(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
-  from: Address,
+  from: Address | undefined,
   owner: Address,
   tokenId: bigint,
   deadline: bigint,
@@ -531,9 +510,12 @@ export async function estimateReinvestGas(
     swapData,
   );
   const overrides = getNPMApprovalOverrides(chainId, owner);
-  if (!(await checkAuthorizedForFrom(chainId, publicClient, from, owner))) {
-    updateIsControllerOverrides(overrides, chainId, from);
+  if (from === undefined) {
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
+    from = account.address;
   }
+  updateIsControllerOverrides(overrides, chainId, from);
   return await estimateGasWithOverrides(
     from,
     getChainInfo(chainId).aperture_uniswap_v3_automan,

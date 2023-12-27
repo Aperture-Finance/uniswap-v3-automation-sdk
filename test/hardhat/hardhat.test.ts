@@ -127,7 +127,7 @@ async function resetFork(testClient: TestClient) {
 }
 
 describe('Estimate gas tests', function () {
-  async function estimateRebalanceGasWithFrom(from: Address) {
+  async function estimateRebalanceGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
     const publicClient = createPublicClient({
       chain: mainnet,
@@ -181,7 +181,7 @@ describe('Estimate gas tests', function () {
     return gas;
   }
 
-  async function estimateReinvestGasWithFrom(from: Address) {
+  async function estimateReinvestGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
     const publicClient = createPublicClient({
       chain: mainnet,
@@ -209,21 +209,21 @@ describe('Estimate gas tests', function () {
 
   it('Test estimateRebalanceGas with owner', async function () {
     const gas = await estimateRebalanceGasWithFrom(eoa);
-    expect(gas).to.equal(776289n);
+    expect(gas).to.equal(775010n);
   });
 
   it('Test estimateRebalanceGas with whale', async function () {
-    const gas = await estimateRebalanceGasWithFrom(WHALE_ADDRESS);
+    const gas = await estimateRebalanceGasWithFrom(undefined);
     expect(gas).to.equal(777510n);
   });
 
-  it('Test estimateReinvestGas', async function () {
+  it('Test estimateReinvestGas with owner', async function () {
     const gas = await estimateReinvestGasWithFrom(eoa);
-    expect(gas).to.equal(529485n);
+    expect(gas).to.equal(528206n);
   });
 
   it('Test estimateReinvestGas with whale', async function () {
-    const gas = await estimateReinvestGasWithFrom(WHALE_ADDRESS);
+    const gas = await estimateReinvestGasWithFrom(undefined);
     expect(gas).to.equal(528206n);
   });
 });
