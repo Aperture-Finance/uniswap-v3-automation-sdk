@@ -11,6 +11,7 @@ import {
   getContract,
   hexToSignature,
 } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
@@ -20,10 +21,12 @@ import {
 } from '../typechain-types';
 import { GetAbiFunctionParamsTypes } from './generics';
 import {
+  estimateGasWithOverrides,
   getERC20Overrides,
   getNPMApprovalOverrides,
   staticCallWithOverrides,
   tryStaticCallWithOverrides,
+  updateIsControllerOverrides,
 } from './overrides';
 
 export type AutomanActionName =
@@ -446,4 +449,79 @@ export async function simulateRebalance(
     ),
     functionName: 'rebalance',
   });
+}
+
+export async function estimateRebalanceGas(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: MintParams,
+  tokenId: bigint,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  checkTicks(mintParams);
+  const data = getAutomanRebalanceCalldata(
+    mintParams,
+    tokenId,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  const overrides = getNPMApprovalOverrides(chainId, owner);
+  if (from === undefined) {
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
+    from = account.address;
+  }
+  updateIsControllerOverrides(overrides, chainId, from);
+  return await estimateGasWithOverrides(
+    from,
+    getChainInfo(chainId).aperture_uniswap_v3_automan,
+    data,
+    overrides,
+    publicClient,
+    blockNumber,
+  );
+}
+
+export async function estimateReinvestGas(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  const data = getAutomanReinvestCalldata(
+    tokenId,
+    deadline,
+    amount0Min,
+    amount1Min,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  const overrides = getNPMApprovalOverrides(chainId, owner);
+  if (from === undefined) {
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
+    from = account.address;
+  }
+  updateIsControllerOverrides(overrides, chainId, from);
+  return await estimateGasWithOverrides(
+    from,
+    getChainInfo(chainId).aperture_uniswap_v3_automan,
+    data,
+    overrides,
+    publicClient,
+    blockNumber,
+  );
 }

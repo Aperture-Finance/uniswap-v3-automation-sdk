@@ -74,6 +74,8 @@ import {
   PositionDetails,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
+  estimateRebalanceGas,
+  estimateReinvestGas,
   generateAccessList,
   generatePriceConditionFromTokenValueProportion,
   generateTypedDataForPermit,
@@ -123,6 +125,108 @@ async function resetFork(testClient: TestClient) {
     jsonRpcUrl: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
   });
 }
+
+describe('Estimate gas tests', function () {
+  async function estimateRebalanceGasWithFrom(from: Address | undefined) {
+    const blockNumber = 17975698n;
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const token0 = WBTC_ADDRESS;
+    const token1 = WETH_ADDRESS;
+    const fee = FeeAmount.MEDIUM;
+    const amount0Desired = 100000000n;
+    const amount1Desired = 1000000000000000000n;
+    const pool = await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      undefined,
+      blockNumber,
+    );
+    const mintParams = {
+      token0: token0 as Address,
+      token1: token1 as Address,
+      fee,
+      tickLower: nearestUsableTick(
+        pool.tickCurrent - 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      tickUpper: nearestUsableTick(
+        pool.tickCurrent + 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      recipient: eoa as Address,
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+    const gas = await estimateRebalanceGas(
+      chainId,
+      publicClient,
+      from,
+      eoa,
+      mintParams,
+      4n,
+      undefined,
+      undefined,
+      blockNumber,
+    );
+    return gas;
+  }
+
+  async function estimateReinvestGasWithFrom(from: Address | undefined) {
+    const blockNumber = 17975698n;
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
+    const amount0Desired = 100000n;
+    const amount1Desired = 1000000000000000n;
+    const gas = await estimateReinvestGas(
+      chainId,
+      publicClient,
+      from,
+      eoa,
+      4n,
+      BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+      amount0Desired,
+      amount1Desired,
+      BigInt(0),
+      '0x',
+      blockNumber,
+    );
+    return gas;
+  }
+
+  it('Test estimateRebalanceGas with owner', async function () {
+    const gas = await estimateRebalanceGasWithFrom(eoa);
+    expect(gas).to.equal(775010n);
+  });
+
+  it('Test estimateRebalanceGas with whale', async function () {
+    const gas = await estimateRebalanceGasWithFrom(undefined);
+    expect(gas).to.equal(777510n);
+  });
+
+  it('Test estimateReinvestGas with owner', async function () {
+    const gas = await estimateReinvestGasWithFrom(eoa);
+    expect(gas).to.equal(528206n);
+  });
+
+  it('Test estimateReinvestGas with whale', async function () {
+    const gas = await estimateReinvestGasWithFrom(undefined);
+    expect(gas).to.equal(528206n);
+  });
+});
 
 describe('State overrides tests', function () {
   it('Test computeOperatorApprovalSlot', async function () {

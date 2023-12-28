@@ -6,6 +6,7 @@ import {
   RpcTransactionRequest,
   encodeAbiParameters,
   encodeFunctionData,
+  hexToBigInt,
   keccak256,
   parseAbiParameters,
   toHex,
@@ -49,6 +50,20 @@ export function computeOperatorApprovalSlot(
   );
 }
 
+/**
+ * Compute the storage slot for the isController in UniV3Automan.
+ * @param from The address of controller.
+ * @returns The storage slot.
+ */
+export function computeIsControllerSlot(from: Address): Hex {
+  return keccak256(
+    encodeAbiParameters(parseAbiParameters('address, bytes32'), [
+      from,
+      encodeAbiParameters(parseAbiParameters('uint256'), [2n]),
+    ]),
+  );
+}
+
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
   owner: Address,
@@ -63,6 +78,22 @@ export function getNPMApprovalOverrides(
         [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
+    },
+  };
+}
+
+export function updateIsControllerOverrides(
+  overrides: StateOverrides,
+  chainId: ApertureSupportedChainId,
+  from: Address,
+) {
+  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  overrides[aperture_uniswap_v3_automan] = {
+    stateDiff: {
+      [computeIsControllerSlot(from)]: encodeAbiParameters(
+        parseAbiParameters('bool'),
+        [true],
+      ),
     },
   };
 }
@@ -215,6 +246,36 @@ export async function staticCallWithOverrides(
     // @ts-ignore
     params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
   })) as Hex;
+}
+
+/**
+ * Estimate Gas of a contract call with the given state overrides.
+ * @param tx The transaction request.
+ * @param overrides The state overrides.
+ * @param publicClient A JSON RPC provider that supports `eth_estimateGas` with state overrides.
+ * @param blockNumber Optional block number to use for the call.
+ */
+export async function estimateGasWithOverrides(
+  from: Address,
+  to: Address,
+  data: Hex,
+  overrides: StateOverrides,
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+): Promise<bigint> {
+  const tx = {
+    from,
+    to,
+    data,
+  };
+  return hexToBigInt(
+    (await publicClient.request({
+      method: 'eth_estimateGas',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
+    })) as Hex,
+  );
 }
 
 /**
