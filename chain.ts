@@ -354,7 +354,6 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'base',
-    infura_network_id: 'base',
     rpc_url: 'https://mainnet.base.org',
     uniswap_subgraph_url:
       'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
