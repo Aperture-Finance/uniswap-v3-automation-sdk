@@ -51,7 +51,7 @@ export function computeOperatorApprovalSlot(
 }
 
 /**
- * Compute the storage slot for the isController in UniV3Automan.
+ * Compute the storage slot for the isController mapping in UniV3Automan.
  * @param from The address of controller.
  * @returns The storage slot.
  */
@@ -82,18 +82,18 @@ export function getNPMApprovalOverrides(
   };
 }
 
-export function updateIsControllerOverrides(
-  overrides: StateOverrides,
+export function getControllerOverrides(
   chainId: ApertureSupportedChainId,
   from: Address,
 ) {
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
-  overrides[aperture_uniswap_v3_automan] = {
-    stateDiff: {
-      [computeIsControllerSlot(from)]: encodeAbiParameters(
-        parseAbiParameters('bool'),
-        [true],
-      ),
+  return {
+    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+      stateDiff: {
+        [computeIsControllerSlot(from)]: encodeAbiParameters(
+          parseAbiParameters('bool'),
+          [true],
+        ),
+      },
     },
   };
 }
@@ -200,27 +200,74 @@ export async function getERC20Overrides(
   };
 }
 
+export type AccessListReturnType = {
+  accessList: AccessList;
+  gasUsed: string;
+  gasRefund: string;
+};
+
+export type RpcReturnType = {
+  eth_call: Hex;
+  eth_estimateGas: Hex;
+  eth_createAccessList: AccessListReturnType;
+};
+
+/**
+ * Makes a request to the RPC endpoint with optional overrides.
+ *
+ * @param {string} method - The method to call on the RPC endpoint.
+ * @param {RpcTransactionRequest} tx - The transaction request object.
+ * @param {PublicClient} publicClient - The public client instance for making the request.
+ * @param {StateOverrides} [overrides] - Optional state overrides.
+ * @param {bigint} [blockNumber] - Optional block number.
+ * @returns {Promise<RpcReturnType[M]>} - A promise that resolves to the result of the RPC call.
+ */
+export async function requestWithOverrides<M extends keyof RpcReturnType>(
+  method: M,
+  tx: RpcTransactionRequest,
+  publicClient: PublicClient,
+  overrides?: StateOverrides,
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
+  const params = overrides ? [tx, blockTag, overrides] : [tx, blockTag];
+  return await publicClient.request({
+    // @ts-expect-error viem doesn't include 'eth_createAccessList'
+    method,
+    // @ts-expect-error viem doesn't type overrides
+    params,
+  });
+}
+
+/**
+ * Generates an access list for the given transaction using the specified public client.
+ *
+ * @param {RpcTransactionRequest} tx - The transaction to generate the access list for.
+ * @param {PublicClient} publicClient - The public client to use for the request.
+ * @param {bigint} [blockNumber] - The block number to use for the request, optional.
+ *
+ * @return {Promise<AccessListReturnType>} - A promise that resolves with the generated access list.
+ *
+ * @throws {Error} - If an error occurs while generating the access list.
+ */
 export async function generateAccessList(
   tx: RpcTransactionRequest,
   publicClient: PublicClient,
   blockNumber?: bigint,
-): Promise<{ accessList: AccessList; gasUsed: string; gasRefund: string }> {
+): Promise<AccessListReturnType> {
   try {
-    return await publicClient.request({
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      method: 'eth_createAccessList',
-      params: [
-        {
-          ...tx,
-          gas: '0x11E1A300',
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          gasPrice: '0x0',
-        },
-        blockNumber ? toHex(blockNumber) : 'latest',
-      ],
-    });
+    return await requestWithOverrides(
+      'eth_createAccessList',
+      // @ts-expect-error viem doesn't include 'eth_createAccessList'
+      {
+        ...tx,
+        gas: '0x11E1A300',
+        gasPrice: '0x0',
+      },
+      publicClient,
+      undefined,
+      blockNumber,
+    );
   } catch (error) {
     console.error('Error generating access list:', error);
     throw error;
@@ -240,12 +287,13 @@ export async function staticCallWithOverrides(
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<Hex> {
-  return (await publicClient.request({
-    method: 'eth_call',
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
-  })) as Hex;
+  return requestWithOverrides(
+    'eth_call',
+    tx,
+    publicClient,
+    overrides,
+    blockNumber,
+  );
 }
 
 /**
@@ -256,25 +304,19 @@ export async function staticCallWithOverrides(
  * @param blockNumber Optional block number to use for the call.
  */
 export async function estimateGasWithOverrides(
-  from: Address,
-  to: Address,
-  data: Hex,
+  tx: RpcTransactionRequest,
   overrides: StateOverrides,
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<bigint> {
-  const tx = {
-    from,
-    to,
-    data,
-  };
   return hexToBigInt(
-    (await publicClient.request({
-      method: 'eth_estimateGas',
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      params: [tx, blockNumber ? toHex(blockNumber) : 'latest', overrides],
-    })) as Hex,
+    await requestWithOverrides(
+      'eth_estimateGas',
+      tx,
+      publicClient,
+      overrides,
+      blockNumber,
+    ),
   );
 }
 
@@ -295,28 +337,52 @@ export async function tryStaticCallWithOverrides(
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<Hex> {
-  const tx = {
-    from,
-    to,
-    data,
-  };
-  let returnData: Hex;
+  return tryRequestWithOverrides(
+    'eth_call',
+    {
+      from,
+      to,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
+
+/**
+ * Tries to make a request with optional overrides and returns the result if successful.
+ * If an error occurs, fallbacks to making the request without overrides.
+ *
+ * @param {string} method - The RPC method to invoke.
+ * @param {RpcTransactionRequest} tx - The transaction request to include in the RPC call.
+ * @param {PublicClient} publicClient - The public client to use for making the RPC call.
+ * @param {StateOverrides} [overrides] - Optional overrides to include in the RPC call.
+ * @param {bigint} [blockNumber] - Optional block number to include in the RPC call.
+ *
+ * @returns {Promise<RpcReturnType[M]>} - A promise that resolves with the RPC call result or rejects with an error.
+ */
+export async function tryRequestWithOverrides<M extends keyof RpcReturnType>(
+  method: M,
+  tx: RpcTransactionRequest,
+  publicClient: PublicClient,
+  overrides?: StateOverrides,
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
   try {
-    returnData = await staticCallWithOverrides(
+    return await requestWithOverrides(
+      method,
       tx,
-      overrides,
       publicClient,
+      overrides,
       blockNumber,
     );
   } catch (e) {
-    returnData = (
-      await publicClient.call({
-        account: from,
-        data: tx.data,
-        to: tx.to,
-        blockNumber,
-      })
-    ).data!;
+    const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
+    return await publicClient.request({
+      // @ts-expect-error viem doesn't include 'eth_createAccessList'
+      method,
+      params: [tx, blockTag],
+    });
   }
-  return returnData;
 }

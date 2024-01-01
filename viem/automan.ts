@@ -9,6 +9,7 @@ import {
   encodeFunctionData,
   encodePacked,
   getContract,
+  hexToBigInt,
   hexToSignature,
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
@@ -21,12 +22,12 @@ import {
 } from '../typechain-types';
 import { GetAbiFunctionParamsTypes } from './generics';
 import {
-  estimateGasWithOverrides,
+  RpcReturnType,
+  getControllerOverrides,
   getERC20Overrides,
   getNPMApprovalOverrides,
   staticCallWithOverrides,
-  tryStaticCallWithOverrides,
-  updateIsControllerOverrides,
+  tryRequestWithOverrides,
 } from './overrides';
 
 export type AutomanActionName =
@@ -394,16 +395,66 @@ export async function simulateRemoveLiquidity(
   );
   return decodeFunctionResult({
     abi: UniV3Automan__factory.abi,
-    data: await tryStaticCallWithOverrides(
-      from,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
-      data,
-      getNPMApprovalOverrides(chainId, owner),
+    data: await tryRequestWithOverrides(
+      'eth_call',
+      {
+        from,
+        to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+        data,
+      },
       publicClient,
+      getNPMApprovalOverrides(chainId, owner),
       blockNumber,
     ),
     functionName: 'removeLiquidity',
   });
+}
+
+function getFromAddress(from?: Address) {
+  if (from === undefined) {
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
+    from = account.address;
+  }
+  return from;
+}
+
+export async function requestRebalance<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: MintParams,
+  tokenId: bigint,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  checkTicks(mintParams);
+  const data = getAutomanRebalanceCalldata(
+    mintParams,
+    tokenId,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, owner),
+    ...getControllerOverrides(chainId, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
 }
 
 /**
@@ -421,7 +472,7 @@ export async function simulateRemoveLiquidity(
 export async function simulateRebalance(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
-  from: Address,
+  from: Address | undefined,
   owner: Address,
   mintParams: MintParams,
   tokenId: bigint,
@@ -429,24 +480,21 @@ export async function simulateRebalance(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RebalanceReturnType> {
-  checkTicks(mintParams);
-  const data = getAutomanRebalanceCalldata(
+  const data = await requestRebalance(
+    'eth_call',
+    chainId,
+    publicClient,
+    from,
+    owner,
     mintParams,
     tokenId,
     feeBips,
-    undefined,
     swapData,
+    blockNumber,
   );
   return decodeFunctionResult({
     abi: UniV3Automan__factory.abi,
-    data: await tryStaticCallWithOverrides(
-      from,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
-      data,
-      getNPMApprovalOverrides(chainId, owner),
-      publicClient,
-      blockNumber,
-    ),
+    data,
     functionName: 'rebalance',
   });
 }
@@ -462,27 +510,59 @@ export async function estimateRebalanceGas(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<bigint> {
-  checkTicks(mintParams);
-  const data = getAutomanRebalanceCalldata(
-    mintParams,
+  return hexToBigInt(
+    await requestRebalance(
+      'eth_estimateGas',
+      chainId,
+      publicClient,
+      from,
+      owner,
+      mintParams,
+      tokenId,
+      feeBips,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function requestReinvest<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanReinvestCalldata(
     tokenId,
+    deadline,
+    amount0Min,
+    amount1Min,
     feeBips,
     undefined,
     swapData,
   );
-  const overrides = getNPMApprovalOverrides(chainId, owner);
-  if (from === undefined) {
-    const privateKey = generatePrivateKey();
-    const account = privateKeyToAccount(privateKey);
-    from = account.address;
-  }
-  updateIsControllerOverrides(overrides, chainId, from);
-  return await estimateGasWithOverrides(
-    from,
-    getChainInfo(chainId).aperture_uniswap_v3_automan,
-    data,
-    overrides,
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, owner),
+    ...getControllerOverrides(chainId, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      data,
+    },
     publicClient,
+    overrides,
     blockNumber,
   );
 }
@@ -500,28 +580,20 @@ export async function estimateReinvestGas(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<bigint> {
-  const data = getAutomanReinvestCalldata(
-    tokenId,
-    deadline,
-    amount0Min,
-    amount1Min,
-    feeBips,
-    undefined,
-    swapData,
-  );
-  const overrides = getNPMApprovalOverrides(chainId, owner);
-  if (from === undefined) {
-    const privateKey = generatePrivateKey();
-    const account = privateKeyToAccount(privateKey);
-    from = account.address;
-  }
-  updateIsControllerOverrides(overrides, chainId, from);
-  return await estimateGasWithOverrides(
-    from,
-    getChainInfo(chainId).aperture_uniswap_v3_automan,
-    data,
-    overrides,
-    publicClient,
-    blockNumber,
+  return hexToBigInt(
+    await requestReinvest(
+      'eth_estimateGas',
+      chainId,
+      publicClient,
+      from,
+      owner,
+      tokenId,
+      deadline,
+      amount0Min,
+      amount1Min,
+      feeBips,
+      swapData,
+      blockNumber,
+    ),
   );
 }
