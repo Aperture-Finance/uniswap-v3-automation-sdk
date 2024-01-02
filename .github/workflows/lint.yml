@@ -1,6 +1,10 @@
 name: Lint
 
-on: [pull_request] # we want the workflow to trigger on commits to PRs only
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
   lint: # Lint codebase.
