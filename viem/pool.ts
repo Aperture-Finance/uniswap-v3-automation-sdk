@@ -9,7 +9,13 @@ import {
 import { viem } from 'aperture-lens';
 import axios from 'axios';
 import JSBI from 'jsbi';
-import { Address, PublicClient, WalletClient, getContract } from 'viem';
+import {
+  Address,
+  GetContractReturnType,
+  PublicClient,
+  WalletClient,
+  getContract,
+} from 'viem';
 
 import { getChainInfo } from '../chain';
 import {
@@ -87,7 +93,10 @@ export function getPoolContract(
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
-) {
+): GetContractReturnType<
+  typeof IUniswapV3Pool__factory.abi,
+  PublicClient | WalletClient
+> {
   return getContract({
     address: computePoolAddress(
       getChainInfo(chainId).uniswap_v3_factory,
@@ -96,8 +105,7 @@ export function getPoolContract(
       fee,
     ) as Address,
     abi: IUniswapV3Pool__factory.abi,
-    publicClient,
-    walletClient,
+    client: walletClient ?? publicClient!,
   });
 }
 
@@ -453,6 +461,7 @@ async function getPopulatedTicksInRange(
     ),
     tickLower,
     tickUpper,
+    // @ts-expect-error remove after aperture-lens is updated
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
