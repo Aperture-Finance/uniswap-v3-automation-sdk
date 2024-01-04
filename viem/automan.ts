@@ -1,7 +1,9 @@
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
 import {
+  AbiStateMutability,
   Address,
-  ContractFunctionResult,
+  ContractFunctionReturnType,
+  GetContractReturnType,
   Hex,
   PublicClient,
   WalletClient,
@@ -41,7 +43,11 @@ export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof UniV3Automan__factory.abi, T>;
 
 export type GetAutomanReturnTypes<TFunctionName extends AutomanActionName> =
-  ContractFunctionResult<typeof UniV3Automan__factory.abi, TFunctionName>;
+  ContractFunctionReturnType<
+    typeof UniV3Automan__factory.abi,
+    AbiStateMutability,
+    TFunctionName
+  >;
 
 type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof INonfungiblePositionManager__factory.abi,
@@ -68,12 +74,14 @@ export function getAutomanContract(
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
-) {
+): GetContractReturnType<
+  typeof UniV3Automan__factory.abi,
+  PublicClient | WalletClient
+> {
   return getContract({
     address: getChainInfo(chainId).aperture_uniswap_v3_automan,
     abi: UniV3Automan__factory.abi,
-    publicClient,
-    walletClient,
+    client: walletClient ?? publicClient!,
   });
 }
 

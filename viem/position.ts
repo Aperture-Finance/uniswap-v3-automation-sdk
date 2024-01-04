@@ -14,12 +14,13 @@ import {
 import Big from 'big.js';
 import JSBI from 'jsbi';
 import {
+  AbiStateMutability,
   Address,
-  ContractFunctionResult,
+  ContractFunctionReturnType,
+  GetContractReturnType,
   PublicClient,
   WalletClient,
   decodeFunctionResult,
-  getAbiItem,
   getAddress,
   getContract,
 } from 'viem';
@@ -59,13 +60,15 @@ export interface CollectableTokenAmounts {
   token1Amount: CurrencyAmount<Token>;
 }
 
-type PositionStateStruct = ContractFunctionResult<
+type PositionStateStruct = ContractFunctionReturnType<
   typeof EphemeralGetPosition__factory.abi,
+  AbiStateMutability,
   'getPosition'
 >;
 
-type PositionStateArray = ContractFunctionResult<
+type PositionStateArray = ContractFunctionReturnType<
   typeof EphemeralAllPositionsByOwner__factory.abi,
+  AbiStateMutability,
   'allPositions'
 >;
 
@@ -73,12 +76,14 @@ export function getNPM(
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
-) {
+): GetContractReturnType<
+  typeof INonfungiblePositionManager__factory.abi,
+  PublicClient | WalletClient
+> {
   return getContract({
     address: getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
     abi: INonfungiblePositionManager__factory.abi,
-    publicClient,
-    walletClient,
+    client: walletClient ?? publicClient!,
   });
 }
 
@@ -157,6 +162,7 @@ export async function getAllPositions(
   const positions: PositionStateArray = await viem.getAllPositionsByOwner(
     getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
     owner,
+    // @ts-expect-error remove after aperture-lens is updated
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
@@ -241,6 +247,7 @@ export class PositionDetails implements BasicPositionInfo {
     const position = await viem.getPositionDetails(
       getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
       positionId,
+      // @ts-expect-error remove after aperture-lens is updated
       publicClient ?? getPublicClient(chainId),
       blockNumber,
     );
@@ -562,12 +569,8 @@ export async function getReinvestedPosition(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: [
-      getAbiItem({
-        abi: UniV3Automan__factory.abi,
-        name: 'reinvest',
-      }),
-    ],
+    abi: UniV3Automan__factory.abi,
+    functionName: 'reinvest',
     data: returnData,
   });
 }

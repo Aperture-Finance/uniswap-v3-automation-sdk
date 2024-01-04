@@ -31,7 +31,7 @@ export async function getToken(
   const contract = getContract({
     address: tokenAddress,
     abi: ERC20__factory.abi,
-    publicClient: publicClient ?? getPublicClient(chainId),
+    client: publicClient ?? getPublicClient(chainId),
   });
   const opts = { blockNumber };
   if (showSymbolAndName) {
