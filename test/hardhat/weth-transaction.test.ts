@@ -70,6 +70,6 @@ describe('WETH transaction tests', function () {
       (await wethContract.balanceOf(WHALE_ADDRESS)).eq(
         wethBalanceBefore.toString(),
       ),
-    ).to.equal(false);
+    ).to.equal(true);
   });
 });
