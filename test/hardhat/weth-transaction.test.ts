@@ -9,7 +9,7 @@ import {
   getToken,
   getUnwrapETHTx,
   getWrapETHTx,
-} from '../../helpers';
+} from '../../helper';
 import { ApertureSupportedChainId } from '../../interfaces';
 import { WETH__factory } from '../../typechain-types';
 
