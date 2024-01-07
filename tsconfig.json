@@ -10,7 +10,10 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "declaration": true,
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["./**/*.ts", "./typechain-types"],
   "exclude": ["./dist/**/*", "test", "hardhat.config.ts", "jest.config.ts"]
