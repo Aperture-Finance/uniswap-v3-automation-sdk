@@ -6,7 +6,7 @@ import {
   getUnwrapETHTx,
   getWrapETHTx,
 } from '../../../helper';
-import { WETH__factory } from '../../../typechain-types';
+import { WETH__factory } from '../../../index';
 import {
   WETH_ADDRESS,
   WHALE_ADDRESS,

@@ -2,7 +2,6 @@ import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
-import { getChainInfo } from '../../../chain';
 import {
   computeOperatorApprovalSlot,
   generateAccessList,
@@ -14,7 +13,8 @@ import {
 import {
   IERC20__factory,
   UniV3Automan__factory,
-} from '../../../typechain-types';
+  getChainInfo,
+} from '../../../index';
 import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
