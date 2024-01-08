@@ -5,7 +5,8 @@ export type AutomanActionName =
   | 'decreaseLiquiditySingle'
   | 'reinvest'
   | 'rebalance'
-  | 'removeLiquidity(';
+  | 'removeLiquidity('; // append '(' in order to distinguish from removeLiquiditySingle, otherwise GetAutomanFragment<removeLiquidity> will return 'removeLiquiditySingle' | 'removeLiquidity'
+
 export type AutomanFragment = {
   [K in keyof UniV3Automan['functions']]: K extends `${AutomanActionName}${string}`
     ? K
