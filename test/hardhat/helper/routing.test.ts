@@ -17,7 +17,7 @@ import {
   optimalRebalance,
   optimalZapOut,
 } from '../../../helper';
-import { ApertureSupportedChainId } from '../../../interfaces';
+import { ApertureSupportedChainId } from '../../../index';
 import { eoa, expect } from './common';
 
 describe('Helper - Routing tests', function () {
@@ -112,9 +112,7 @@ describe('Helper - Routing tests', function () {
 
   it('Test optimalRebalance', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const provider = new ethers.providers.JsonRpcProvider(
-      process.env.ARBITRUM_RPC_URL,
-    );
+    const provider = new ethers.providers.InfuraProvider(chainId);
     const tokenId = 726230;
     const { pool, position } = await PositionDetails.fromPositionId(
       chainId,
