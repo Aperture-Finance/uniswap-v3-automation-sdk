@@ -26,7 +26,7 @@ import {
   resetHardhatNetwork,
 } from './common';
 
-describe.only('Helper - State overrides tests', function () {
+describe('Helper - State overrides tests', function () {
   it('Test computeOperatorApprovalSlot', async function () {
     await resetHardhatNetwork();
     const impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
