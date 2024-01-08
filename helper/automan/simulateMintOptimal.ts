@@ -2,6 +2,7 @@ import {
   ApertureSupportedChainId,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
+  UniV3Automan,
   getChainInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
@@ -13,8 +14,11 @@ import {
   getERC20Overrides,
   staticCallWithOverrides,
 } from '../overrides';
-import { MintReturnType } from './internal-types';
+import { UnwrapPromise } from './internal';
 
+export type MintReturnType = UnwrapPromise<
+  ReturnType<UniV3Automan['callStatic']['mintOptimal']>
+>;
 /**
  * Simulate a `mintOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
