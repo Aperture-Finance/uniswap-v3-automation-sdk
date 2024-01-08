@@ -41,10 +41,28 @@ export function encodeOptimalSwapData(
     [
       getChainInfo(chainId).optimal_swap_router!,
       solidityPack(
-        // prettier-ignore
-        ['address', 'address', 'uint24', 'int24', 'int24', 'bool', 'address', 'address', 'bytes'],
-        // prettier-ignore
-        [token0, token1, fee, tickLower, tickUpper, zeroForOne, approveTarget, router, data],
+        [
+          'address',
+          'address',
+          'uint24',
+          'int24',
+          'int24',
+          'bool',
+          'address',
+          'address',
+          'bytes',
+        ],
+        [
+          token0,
+          token1,
+          fee,
+          tickLower,
+          tickUpper,
+          zeroForOne,
+          approveTarget,
+          router,
+          data,
+        ],
       ),
     ],
   );
