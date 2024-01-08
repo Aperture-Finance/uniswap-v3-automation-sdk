@@ -1,5 +1,8 @@
-import { ChainSpecificRoutingAPIInfo, getChainInfo } from '@/chain';
-import { ApertureSupportedChainId } from '@/interfaces';
+import {
+  ApertureSupportedChainId,
+  ChainSpecificRoutingAPIInfo,
+  getChainInfo,
+} from '@/index';
 import axios from 'axios';
 import { BigNumber, BigNumberish } from 'ethers';
 

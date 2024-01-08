@@ -2,6 +2,58 @@
 # yarn lockfile v1
 
 
+"@0xsequence/abi@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/abi/-/abi-1.6.2.tgz#06d1ca9771a1fe068c36ae2fb3659fb337bb02ad"
+  integrity sha512-3y0qu2wvhRPygnP1a4IFzAEC7K3aIIj8yOtqRoMnCf4Lud0I41Ry6M08Jc2HCK2BrK811jWn7rUCna0buu0UrQ==
+
+"@0xsequence/core@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/core/-/core-1.6.2.tgz#dd42e47fb2f1df464be6038776166e53b01be3c5"
+  integrity sha512-rcr7DcEEgcp8c86iNqJi9o0fbUQEuALTwnDDscRJyz75Iow+Fp+eU885Ew6pCSXD+EBu7srKbRKWTyX6nIPG9A==
+  dependencies:
+    "@0xsequence/abi" "1.6.2"
+
+"@0xsequence/indexer@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/indexer/-/indexer-1.6.2.tgz#c18e0e05d261fe1f3cceb2a4344ac2a10eb309bd"
+  integrity sha512-n/cF+ONcew5SN2voHSMMZq/SzO1X6BGRQPWol2hk8tlqx7Txu8VkiauWNcz1IFEe50aBEkvc3ZqPYuDfo/zWEw==
+
+"@0xsequence/multicall@^1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/multicall/-/multicall-1.6.2.tgz#90f8bf65c334b467626d98873ec587819c5e5c59"
+  integrity sha512-M34YwzX74WEjF0jEugS4GctigZtMCJQSXywGADWqPyY4SoJGJWssYy90vWN7mkXKH3vBjW8+SojxJZgHl5M61Q==
+  dependencies:
+    "@0xsequence/abi" "1.6.2"
+    "@0xsequence/network" "1.6.2"
+    "@0xsequence/utils" "1.6.2"
+
+"@0xsequence/network@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/network/-/network-1.6.2.tgz#d1f71d3217948b120bc98002ee678fb45750538f"
+  integrity sha512-BlBy/g2YGdtf7A0UL6F63BwPWCSxJg5EpG3/sQn/zRyaxrdyoL6Kpe7ZVxTFYH51Z67QJcMp2XoFwUj2YHl+UQ==
+  dependencies:
+    "@0xsequence/core" "1.6.2"
+    "@0xsequence/indexer" "1.6.2"
+    "@0xsequence/relayer" "1.6.2"
+    "@0xsequence/utils" "1.6.2"
+
+"@0xsequence/relayer@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/relayer/-/relayer-1.6.2.tgz#593c50c30012039a3ddf318f96db3e0ef560b079"
+  integrity sha512-lfz6ZmGptnA0tn14Qb/y6gc9hewT/biEFCu3RG++kCmZu1Nn0+Cgqo2nN/jpFax2sFUQwGeauuwGm+7aTM6/oA==
+  dependencies:
+    "@0xsequence/abi" "1.6.2"
+    "@0xsequence/core" "1.6.2"
+    "@0xsequence/utils" "1.6.2"
+
+"@0xsequence/utils@1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@0xsequence/utils/-/utils-1.6.2.tgz#7cd92672c714b691281716dbcd4066d429a22dd7"
+  integrity sha512-6u9f/Ey9nipwXrIsOjOnVMnmAYbMbLJ28hqct62fK3cCLJ/IilmDP3Z/aGMYwzrz6esZG9cEzAd2Y/hjBQ2s5A==
+  dependencies:
+    js-base64 "^3.7.2"
+
 "@aashutoshrathi/word-wrap@^1.2.3":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@aashutoshrathi/word-wrap/-/word-wrap-1.2.6.tgz#bd9154aec9983f77b3a034ecaa015c2e4201f6cf"
@@ -4893,6 +4945,11 @@ jest@^29.7.0:
     "@jest/types" "^29.6.3"
     import-local "^3.0.2"
     jest-cli "^29.7.0"
+
+js-base64@^3.7.2:
+  version "3.7.5"
+  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.7.5.tgz#21e24cf6b886f76d6f5f165bfcd69cc55b9e3fca"
+  integrity sha512-3MEt5DTINKqfScXKfJFrRbxkrnk2AxPWGBL/ycjz4dK8iqiSJ06UxD8jh8xuh6p10TX4t2+7FsBYVxxQbMg+qA==
 
 js-sdsl@^4.1.4:
   version "4.4.2"

@@ -16,7 +16,7 @@ import {
   resetHardhatNetwork,
 } from './common';
 
-describe('WETH transaction tests', function () {
+describe('Helper - WETH transaction tests', function () {
   beforeEach(async function () {
     await resetHardhatNetwork();
   });
