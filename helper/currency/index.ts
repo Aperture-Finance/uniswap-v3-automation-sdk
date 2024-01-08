@@ -1,6 +1,8 @@
-import { getChainInfo } from '@/chain';
-import { ApertureSupportedChainId } from '@/interfaces';
-import { ERC20__factory } from '@/typechain-types';
+import {
+  ApertureSupportedChainId,
+  ERC20__factory,
+  getChainInfo,
+} from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { parseFixed } from '@ethersproject/bignumber';
 import { BlockTag } from '@ethersproject/providers';
