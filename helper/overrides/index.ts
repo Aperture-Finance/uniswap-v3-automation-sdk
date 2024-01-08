@@ -10,7 +10,7 @@ import {
 } from '@ethersproject/providers';
 import { AccessList } from '@ethersproject/transactions';
 import { BigNumberish } from 'ethers';
-import { defaultAbiCoder, keccak256 } from 'ethers/lib/utils';
+import { defaultAbiCoder as DAC, keccak256 } from 'ethers/lib/utils';
 
 export type StateOverrides = {
   [address: string]: {
@@ -34,14 +34,14 @@ export function computeOperatorApprovalSlot(
   spender: string,
 ): string {
   return keccak256(
-    defaultAbiCoder.encode(
+    DAC.encode(
       ['address', 'bytes32'],
       [
         spender,
         keccak256(
-          defaultAbiCoder.encode(
+          DAC.encode(
             ['address', 'bytes32'],
-            [owner, defaultAbiCoder.encode(['uint256'], [5])],
+            [owner, DAC.encode(['uint256'], [5])],
           ),
         ),
       ],
@@ -127,7 +127,7 @@ export async function getERC20Overrides(
   if (storageKeys.length !== 2) {
     throw new Error('Invalid storage key number');
   }
-  const encodedAmount = defaultAbiCoder.encode(['uint256'], [amount]);
+  const encodedAmount = DAC.encode(['uint256'], [amount]);
   return {
     [token]: {
       stateDiff: {
@@ -137,8 +137,6 @@ export async function getERC20Overrides(
     },
   };
 }
-
-//-----
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
@@ -152,7 +150,7 @@ export function getNPMApprovalOverrides(
     [uniswap_v3_nonfungible_position_manager]: {
       stateDiff: {
         [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
-          defaultAbiCoder.encode(['bool'], [true]),
+          DAC.encode(['bool'], [true]),
       },
     },
   };
@@ -166,11 +164,11 @@ export function getAutomanWhitelistOverrides(
     [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
       stateDiff: {
         [keccak256(
-          defaultAbiCoder.encode(
+          DAC.encode(
             ['address', 'bytes32'],
-            [routerToWhitelist, defaultAbiCoder.encode(['uint256'], [3])],
+            [routerToWhitelist, DAC.encode(['uint256'], [3])],
           ),
-        )]: defaultAbiCoder.encode(['bool'], [true]),
+        )]: DAC.encode(['bool'], [true]),
       },
     },
   };
