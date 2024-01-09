@@ -319,7 +319,6 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped BNB',
     ),
     coingecko_asset_platform_id: 'binance-smart-chain',
-    infura_network_id: 'bnbsmartchain',
     rpc_url: 'https://bsc-dataseed.bnbchain.org',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/ilyamk/uniswap-v3---bnb-chain',
