@@ -1,5 +1,5 @@
 node_modules
 .aws-sam
-data
+src/data
 cache
 test/artifacts.d.ts

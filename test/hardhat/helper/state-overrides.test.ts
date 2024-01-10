@@ -3,18 +3,18 @@ import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 
 import {
+  IERC20__factory,
+  UniV3Automan__factory,
+  getChainInfo,
+} from '../../../src';
+import {
   computeOperatorApprovalSlot,
   generateAccessList,
   getERC20Overrides,
   getNPM,
   getPool,
   simulateMintOptimal,
-} from '../../../helper';
-import {
-  IERC20__factory,
-  UniV3Automan__factory,
-  getChainInfo,
-} from '../../../index';
+} from '../../../src/helper';
 import {
   WBTC_ADDRESS,
   WETH_ADDRESS,

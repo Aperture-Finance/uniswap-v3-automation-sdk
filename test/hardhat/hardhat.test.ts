@@ -31,12 +31,16 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, mainnet } from 'viem/chains';
 
-import { getChainInfo } from '../../chain';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
+  DOUBLE_TICK,
+  IERC20__factory,
+  MAX_PRICE,
+  MIN_PRICE,
   PriceConditionSchema,
+  Q192,
   RecurringConditionTypeEnum,
   RecurringPercentageAction,
   RecurringPercentageCondition,
@@ -44,32 +48,26 @@ import {
   RecurringPriceCondition,
   RecurringRatioAction,
   RecurringRatioCondition,
-} from '../../interfaces';
-import {
-  Q192,
+  UniV3Automan__factory,
+  alignPriceToClosestUsableTick,
+  convertRecurringCondition,
   fractionToBig,
+  getChainInfo,
   getRawRelativePriceFromTokenValueProportion,
   getTokenHistoricalPricesFromCoingecko,
   getTokenPriceFromCoingecko,
   getTokenPriceListFromCoingecko,
   getTokenPriceListFromCoingeckoWithAddresses,
   getTokenValueProportionFromPriceRatio,
-  priceToSqrtRatioX96,
-} from '../../price';
-import { convertRecurringCondition, normalizeTicks } from '../../rebalance';
-import {
-  DOUBLE_TICK,
-  MAX_PRICE,
-  MIN_PRICE,
-  alignPriceToClosestUsableTick,
   humanPriceToClosestTick,
+  normalizeTicks,
   priceToClosestUsableTick,
+  priceToSqrtRatioX96,
   rangeWidthRatioToTicks,
   sqrtRatioToPrice,
   tickToBigPrice,
   tickToLimitOrderRange,
-} from '../../tick';
-import { IERC20__factory, UniV3Automan__factory } from '../../typechain-types';
+} from '../../src';
 import {
   PositionDetails,
   checkPositionApprovalStatus,
@@ -97,7 +95,7 @@ import {
   isPositionInRange,
   projectRebalancedPositionAtPrice,
   simulateMintOptimal,
-} from '../../viem';
+} from '../../src/viem';
 
 dotenvConfig();
 

@@ -1,12 +1,12 @@
 import { ethers } from 'hardhat';
 
+import { WETH__factory } from '../../../src';
 import {
   getCurrencyAmount,
   getToken,
   getUnwrapETHTx,
   getWrapETHTx,
-} from '../../../helper';
-import { WETH__factory } from '../../../index';
+} from '../../../src/helper';
 import {
   WETH_ADDRESS,
   WHALE_ADDRESS,
