@@ -2,6 +2,7 @@ import { CurrencyAmount } from '@uniswap/sdk-core';
 import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
 import { ethers } from 'hardhat';
 
+import { ApertureSupportedChainId } from '../../../src';
 import {
   PositionDetails,
   checkAutomationSupportForPool,
@@ -16,8 +17,7 @@ import {
   optimalMint,
   optimalRebalance,
   optimalZapOut,
-} from '../../../helper';
-import { ApertureSupportedChainId } from '../../../index';
+} from '../../../src/helper';
 import { eoa, expect } from './common';
 
 describe('Helper - Routing tests', function () {
