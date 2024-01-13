@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId } from '@/src';
+import { ApertureSupportedChainId } from '@/index';
 import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 

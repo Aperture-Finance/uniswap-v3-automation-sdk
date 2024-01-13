@@ -4,7 +4,7 @@ import {
   IUniswapV3Pool__factory,
   getChainInfo,
   sqrtRatioToPrice,
-} from '@/src';
+} from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,

@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   INonfungiblePositionManager,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';

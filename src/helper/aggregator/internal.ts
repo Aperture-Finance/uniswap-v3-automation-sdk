@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId } from '@/src';
+import { ApertureSupportedChainId } from '@/index';
 import axios from 'axios';
 import Bottleneck from 'bottleneck';
 

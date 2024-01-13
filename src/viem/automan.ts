@@ -4,7 +4,7 @@ import {
   PermitInfo,
   UniV3Automan__factory,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
 import {
   AbiStateMutability,

@@ -5,7 +5,7 @@ import {
   CreateTriggerPayload,
   PriceCondition,
   getRawRelativePriceFromTokenValueProportion,
-} from '@/src';
+} from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import Big, { BigSource } from 'big.js';
 

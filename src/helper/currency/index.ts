@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, ERC20__factory, getChainInfo } from '@/src';
+import {
+  ApertureSupportedChainId,
+  ERC20__factory,
+  getChainInfo,
+} from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { parseFixed } from '@ethersproject/bignumber';
 import { BlockTag } from '@ethersproject/providers';

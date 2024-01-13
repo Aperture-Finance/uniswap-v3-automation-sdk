@@ -1,5 +1,5 @@
-import { INonfungiblePositionManager } from '@/src';
-import { AutomanActionName, GetAutomanFragment } from '@/src/helper';
+import { AutomanActionName, GetAutomanFragment } from '@/helper';
+import { INonfungiblePositionManager } from '@/index';
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
 
 export type AutomanCallInfo<T extends AutomanActionName> = {

@@ -1,3 +1,4 @@
+import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager,
@@ -5,8 +6,7 @@ import {
   PermitInfo,
   UniV3Automan,
   getChainInfo,
-} from '@/src';
-import { GetAutomanFragment } from '@/src/helper';
+} from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 import { splitSignature } from 'ethers/lib/utils';

@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   INonfungiblePositionManager__factory,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import { Provider } from '@ethersproject/providers';
 import { Signer } from 'ethers';
 

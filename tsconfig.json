@@ -12,7 +12,7 @@
     "declaration": true,
     "declarationDir": "dist",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["./src/**/*.ts"],

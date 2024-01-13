@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/src';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { BigNumberish, BytesLike } from 'ethers';
 import { solidityPack } from 'ethers/lib/utils';

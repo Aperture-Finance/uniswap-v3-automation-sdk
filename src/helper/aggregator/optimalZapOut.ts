@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/src';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 
