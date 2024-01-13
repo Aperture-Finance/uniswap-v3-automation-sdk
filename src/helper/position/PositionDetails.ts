@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/src';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Pool, Position, PositionLibrary } from '@uniswap/v3-sdk';

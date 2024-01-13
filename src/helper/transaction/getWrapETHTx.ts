@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, WETH__factory, getChainInfo } from '@/src';
+import { ApertureSupportedChainId, WETH__factory, getChainInfo } from '@/index';
 import { TransactionRequest } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 

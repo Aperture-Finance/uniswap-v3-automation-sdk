@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/src';
+import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
 import {
   CallExecutionError,
   Hex,

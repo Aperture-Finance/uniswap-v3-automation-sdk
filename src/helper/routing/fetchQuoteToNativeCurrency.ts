@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   ChainSpecificRoutingAPIInfo,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import axios from 'axios';
 import { BigNumber, BigNumberish } from 'ethers';
 

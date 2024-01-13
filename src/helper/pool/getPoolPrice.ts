@@ -1,4 +1,4 @@
-import { sqrtRatioToPrice } from '@/src';
+import { sqrtRatioToPrice } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import { Pool } from '@uniswap/v3-sdk';
 

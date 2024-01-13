@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, IERC20__factory, getChainInfo } from '@/src';
+import {
+  ApertureSupportedChainId,
+  IERC20__factory,
+  getChainInfo,
+} from '@/index';
 import {
   AccessList,
   Address,

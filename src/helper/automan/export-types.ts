@@ -1,4 +1,4 @@
-import { UniV3Automan } from '@/src';
+import { UniV3Automan } from '@/index';
 
 export type AutomanActionName =
   | 'decreaseLiquidity'

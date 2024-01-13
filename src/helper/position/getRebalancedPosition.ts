@@ -1,4 +1,4 @@
-import { fractionToBig, getTokenValueProportionFromPriceRatio } from '@/src';
+import { fractionToBig, getTokenValueProportionFromPriceRatio } from '@/index';
 import { Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
 

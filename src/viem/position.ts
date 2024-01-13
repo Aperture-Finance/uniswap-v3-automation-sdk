@@ -6,7 +6,7 @@ import {
   getChainInfo,
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
-} from '@/src';
+} from '@/index';
 import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,

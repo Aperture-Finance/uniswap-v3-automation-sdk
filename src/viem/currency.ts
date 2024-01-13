@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, ERC20__factory, getChainInfo } from '@/src';
+import {
+  ApertureSupportedChainId,
+  ERC20__factory,
+  getChainInfo,
+} from '@/index';
 import {
   Currency,
   CurrencyAmount,

@@ -4,7 +4,7 @@ import {
   IUniV3Automan__factory,
   UniV3Automan,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
 import { BytesLike } from 'ethers';

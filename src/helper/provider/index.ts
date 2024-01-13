@@ -1,5 +1,9 @@
 import { providers } from '@0xsequence/multicall';
-import { ApertureSupportedChainId, InfuraNetworkId, getChainInfo } from '@/src';
+import {
+  ApertureSupportedChainId,
+  InfuraNetworkId,
+  getChainInfo,
+} from '@/index';
 import { Logger } from '@ethersproject/logger';
 import { Network } from '@ethersproject/networks';
 import {

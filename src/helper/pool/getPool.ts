@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   IUniswapV3Pool__factory,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { BlockTag } from '@ethersproject/providers';
 import { Token } from '@uniswap/sdk-core';

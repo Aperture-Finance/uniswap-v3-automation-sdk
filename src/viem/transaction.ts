@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   INonfungiblePositionManager__factory,
   getChainInfo,
-} from '@/src';
+} from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
 import {
