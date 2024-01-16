@@ -1,16 +1,16 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
-import { AutomanClient } from '../../automan_client';
 import {
   ActionTypeEnum,
+  AutomanClient,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
   ConditionTypeEnum,
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
   UpdatePositionPermitRequest,
-} from '../../interfaces';
+} from '../../src';
 
 describe('Automan client test', () => {
   const mock = new MockAdapter(axios);

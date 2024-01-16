@@ -16,4 +16,7 @@ export default {
   //   '^.+\\.ts?$': 'esbuild-jest',
   // },
   clearMocks: true,
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
 };

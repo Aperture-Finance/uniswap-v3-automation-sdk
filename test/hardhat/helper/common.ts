@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
 import { ethers } from 'hardhat';
 
-import { ApertureSupportedChainId } from '../../../interfaces';
+import { ApertureSupportedChainId } from '../../../src';
 
 dotenvConfig();
 

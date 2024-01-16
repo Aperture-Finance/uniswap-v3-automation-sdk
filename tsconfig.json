@@ -12,9 +12,9 @@
     "declaration": true,
     "declarationDir": "dist",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["./**/*.ts", "./typechain-types"],
+  "include": ["./src/**/*.ts"],
   "exclude": ["./dist/**/*", "test", "hardhat.config.ts", "jest.config.ts"]
 }
