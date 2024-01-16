@@ -6,3 +6,4 @@ coverage/
 
 cache
 src/data
+dist/
