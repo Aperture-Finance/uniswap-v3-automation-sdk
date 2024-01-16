@@ -1,4 +1,3 @@
-import { sqrtRatioToPrice } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import { Pool } from '@uniswap/v3-sdk';
 
@@ -8,5 +7,5 @@ import { Pool } from '@uniswap/v3-sdk';
  * @returns The price of `token0` in terms of `token1` in the pool.
  */
 export function getPoolPrice(pool: Pool): Price<Token, Token> {
-  return sqrtRatioToPrice(pool.sqrtRatioX96, pool.token0, pool.token1);
+  return pool.token0Price;
 }

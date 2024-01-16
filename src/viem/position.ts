@@ -36,12 +36,7 @@ import {
 
 import { getAutomanReinvestCalldata } from './automan';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from './overrides';
-import {
-  getPool,
-  getPoolContract,
-  getPoolFromBasicPositionInfo,
-  getPoolPrice,
-} from './pool';
+import { getPool, getPoolContract, getPoolFromBasicPositionInfo } from './pool';
 import { getPublicClient } from './public_client';
 
 export interface BasicPositionInfo {
@@ -458,7 +453,7 @@ export function getRebalancedPosition(
   newTickLower: number,
   newTickUpper: number,
 ): Position {
-  const price = getPoolPrice(position.pool);
+  const price = position.pool.token0Price;
   // Calculate the position equity denominated in token1 before rebalance.
   const equityInToken1Before = price
     .quote(position.amount0)
