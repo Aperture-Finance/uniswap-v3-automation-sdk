@@ -1,4 +1,5 @@
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
+import Big from 'big.js';
 import {
   AbiStateMutability,
   Address,
@@ -18,6 +19,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 import { getChainInfo } from '../chain';
 import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
+import { fractionToBig } from '../price';
 import {
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
@@ -31,6 +33,8 @@ import {
   staticCallWithOverrides,
   tryRequestWithOverrides,
 } from './overrides';
+import { getPoolPrice } from './pool';
+import { getPosition } from './position';
 
 export type AutomanActionName =
   | 'mintOptimal'
@@ -604,4 +608,79 @@ export async function estimateReinvestGas(
       blockNumber,
     ),
   );
+}
+
+type IRebalanceParams = {
+  chainId: ApertureSupportedChainId;
+  publicClient: PublicClient;
+  from: Address | undefined;
+  owner: Address;
+  mintParams: MintParams;
+  tokenId: bigint;
+  feeBips?: bigint;
+  swapData?: Hex;
+  blockNumber?: bigint;
+};
+
+/**
+ * calculate the price impact of this rebalance, priceImpact = abs(exchangePrice / currentPoolPrice - 1).
+ */
+export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
+  const { chainId, publicClient, tokenId, blockNumber } = params;
+  const position = await getPosition(
+    chainId,
+    tokenId,
+    publicClient,
+    blockNumber,
+  );
+
+  const price = getPoolPrice(position.pool);
+  const currentPoolPrice = fractionToBig(price);
+
+  const exchangePrice = await getExchangePrice(params);
+
+  return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+}
+
+async function getExchangePrice(params: IRebalanceParams) {
+  const {
+    chainId,
+    publicClient,
+    owner,
+    mintParams,
+    tokenId,
+    feeBips,
+    swapData,
+    blockNumber,
+  } = params;
+  const from = getFromAddress(params.from);
+
+  const [initAmount, finalAmount] = await Promise.all([
+    simulateRemoveLiquidity(
+      chainId,
+      publicClient,
+      from,
+      owner,
+      tokenId,
+      undefined,
+      undefined,
+      feeBips,
+      blockNumber,
+    ),
+    simulateRebalance(
+      chainId,
+      publicClient,
+      from,
+      owner,
+      mintParams,
+      tokenId,
+      feeBips,
+      swapData,
+      blockNumber,
+    ),
+  ]);
+
+  return new Big(finalAmount[1])
+    .minus(initAmount[1])
+    .div(new Big(finalAmount[0]).minus(initAmount[0]));
 }
