@@ -1,3 +1,11 @@
+import {
+  ApertureSupportedChainId,
+  INonfungiblePositionManager__factory,
+  PermitInfo,
+  UniV3Automan__factory,
+  fractionToBig,
+  getChainInfo,
+} from '@/index';
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
 import Big from 'big.js';
 import {
@@ -17,13 +25,6 @@ import {
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
-import { getChainInfo } from '../chain';
-import { ApertureSupportedChainId, PermitInfo } from '../interfaces';
-import { fractionToBig } from '../price';
-import {
-  INonfungiblePositionManager__factory,
-  UniV3Automan__factory,
-} from '../typechain-types';
 import { GetAbiFunctionParamsTypes } from './generics';
 import {
   RpcReturnType,
