@@ -614,7 +614,7 @@ export async function estimateReinvestGas(
 type IRebalanceParams = {
   chainId: ApertureSupportedChainId;
   publicClient: PublicClient;
-  from: Address | undefined;
+  from?: Address;
   owner: Address;
   mintParams: MintParams;
   tokenId: bigint;
