@@ -35,6 +35,7 @@ import {
 } from './overrides';
 import { getPoolPrice } from './pool';
 import { getPosition } from './position';
+import { getPublicClient } from './public_client';
 
 export type AutomanActionName =
   | 'mintOptimal'
@@ -626,9 +627,7 @@ type IRebalanceParams = {
  * calculate the price impact of this rebalance, priceImpact = abs(exchangePrice / currentPoolPrice - 1).
  */
 export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
-  // console.log('calculateRebalancePriceImpact params', params);
   const { chainId, publicClient, tokenId, blockNumber } = params;
-
   const position = await getPosition(
     chainId,
     tokenId,
@@ -636,14 +635,12 @@ export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
     blockNumber,
   );
 
-  console.log('position', position);
   const price = getPoolPrice(position.pool);
-  const bigPrice = fractionToBig(price);
-  console.log('bigPrice', bigPrice.toString());
+  const currentPoolPrice = fractionToBig(price);
 
   const exchangePrice = await getExchangePrice(params);
 
-  console.log('exchangePrice: ', exchangePrice.toString());
+  return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
 }
 
 async function getExchangePrice(params: IRebalanceParams) {
@@ -659,10 +656,7 @@ async function getExchangePrice(params: IRebalanceParams) {
   } = params;
   const from = getFromAddress(params.from);
 
-  const [
-    { amount0: initAmount0, amount1: initAmount1 },
-    { amount0: finalAmount0, amount1: finalAmount1 },
-  ] = await Promise.all([
+  const [initAmount, finalAmount] = await Promise.all([
     simulateRemoveLiquidity(
       chainId,
       publicClient,
@@ -687,12 +681,7 @@ async function getExchangePrice(params: IRebalanceParams) {
     ),
   ]);
 
-  console.log('initAmount0: ', initAmount0);
-  console.log('initAmoutn1: ', initAmount1);
-  console.log('finalAmount0: ', finalAmount0);
-  console.log('finalAmount1: ', finalAmount1);
-
-  return new Big(finalAmount1)
-    .minus(initAmount1)
-    .div(new Big(finalAmount0).minus(initAmount0));
+  return new Big(finalAmount[1])
+    .minus(initAmount[1])
+    .div(new Big(finalAmount[0]).minus(initAmount[0]));
 }

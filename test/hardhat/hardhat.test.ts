@@ -190,6 +190,7 @@ describe('Estimate gas tests', function () {
         `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
       ),
     });
+
     const amount0Desired = 100000n;
     const amount1Desired = 1000000000000000n;
     const gas = await estimateReinvestGas(
@@ -402,14 +403,12 @@ describe('State overrides tests', function () {
 
   it('Test calculateRebalancePriceImpact', async function () {
     const blockNumber = 17975698n;
-    // const publicClient = createPublicClient({
-    //   chain: mainnet,
-    //   transport: http(
-    //     `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    //   ),
-    // });
-
-    const publicClient = getPublicClient(chainId);
+    const publicClient = createPublicClient({
+      chain: mainnet,
+      transport: http(
+        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      ),
+    });
 
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
@@ -444,7 +443,7 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    calculateRebalancePriceImpact({
+    const impact = await calculateRebalancePriceImpact({
       chainId,
       publicClient,
       from: eoa,
@@ -455,6 +454,7 @@ describe('State overrides tests', function () {
       swapData: undefined,
       blockNumber,
     });
+    expect(impact.toString()).to.equal('0.226733451673759338452326626407');
   });
 });
 
