@@ -1068,10 +1068,7 @@ describe('Price to tick conversion', function () {
   });
 
   it('Price to sqrt ratio', function () {
-    const tick = priceToClosestUsableTick(
-      alignPriceToClosestUsableTick(maxPrice, fee),
-      fee,
-    );
+    const tick = priceToClosestUsableTick(maxPrice, fee);
     const sqrtRatioX96 = TickMath.getSqrtRatioAtTick(tick);
     const price = sqrtRatioToPrice(sqrtRatioX96, token0, token1);
     expect(priceToSqrtRatioX96(fractionToBig(price)).toString()).to.equal(

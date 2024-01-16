@@ -148,9 +148,12 @@ export function tickToLimitOrderRange(
  * @returns The token0 price in terms of token1.
  */
 export function tickToBigPrice(tick: number): Big {
-  return new Big(TickMath.getSqrtRatioAtTick(tick).toString())
-    .pow(2)
-    .div(Q192.toString());
+  return new Big(
+    JSBI.exponentiate(
+      TickMath.getSqrtRatioAtTick(tick),
+      JSBI.BigInt(2),
+    ).toString(),
+  ).div(Q192.toString());
 }
 
 /**
@@ -193,7 +196,7 @@ export function rangeWidthRatioToTicks(
       .minus(b)
       .div(a.times(2));
     const sqrtRatioLowerX96 = JSBI.BigInt(
-      priceLowerSqrt.times(new Big(2).pow(96)).toFixed(0),
+      priceLowerSqrt.times(new Big(Q96.toString())).toFixed(0),
     );
     tickLower = TickMath.getTickAtSqrtRatio(sqrtRatioLowerX96);
     tickUpper = tickLower + width;

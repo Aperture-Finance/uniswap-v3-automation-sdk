@@ -2,8 +2,6 @@ import { fractionToBig, getTokenValueProportionFromPriceRatio } from '@/index';
 import { Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
 
-import { getPoolPrice } from '../pool';
-
 /**
  * Predict the position after rebalance assuming the pool price remains the same.
  * @param position Position info before rebalance.
@@ -16,7 +14,7 @@ export function getRebalancedPosition(
   newTickLower: number,
   newTickUpper: number,
 ): Position {
-  const price = getPoolPrice(position.pool);
+  const price = position.pool.token0Price;
   // Calculate the position equity denominated in token1 before rebalance.
   const equityInToken1Before = price
     .quote(position.amount0)

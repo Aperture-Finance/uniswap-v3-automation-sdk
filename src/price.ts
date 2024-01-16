@@ -1,3 +1,4 @@
+import { tickToBigPrice } from '@/tick';
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
 import { SqrtPriceMath, TickMath } from '@uniswap/v3-sdk';
 import axios, { AxiosResponse } from 'axios';
@@ -225,16 +226,16 @@ export function getRawRelativePriceFromTokenValueProportion(
       'Invalid token0ValueProportion: must be a value between 0 and 1, inclusive',
     );
   }
-  const sqrtRatioAtTickLowerX96 = TickMath.getSqrtRatioAtTick(tickLower);
-  const sqrtRatioAtTickUpperX96 = TickMath.getSqrtRatioAtTick(tickUpper);
   if (token0ValueProportion.eq(0)) {
-    return new Big(sqrtRatioAtTickUpperX96.toString()).pow(2).div(Q192);
+    return tickToBigPrice(tickUpper);
   }
   if (token0ValueProportion.eq(1)) {
-    return new Big(sqrtRatioAtTickLowerX96.toString()).pow(2).div(Q192);
+    return tickToBigPrice(tickLower);
   }
-  const L = new Big(sqrtRatioAtTickLowerX96.toString()).div(Q96);
-  const U = new Big(sqrtRatioAtTickUpperX96.toString()).div(Q96);
+  const sqrtRatioLowerX96 = TickMath.getSqrtRatioAtTick(tickLower);
+  const sqrtRatioUpperX96 = TickMath.getSqrtRatioAtTick(tickUpper);
+  const L = new Big(sqrtRatioLowerX96.toString()).div(Q96);
+  const U = new Big(sqrtRatioUpperX96.toString()).div(Q96);
   return U.minus(token0ValueProportion.times(U).times(2))
     .add(
       U.times(
@@ -274,8 +275,8 @@ export function priceToSqrtRatioX96(price: Big): JSBI {
   const sqrtRatioX96 = JSBI.BigInt(price.times(Q192).sqrt().toFixed(0));
   if (JSBI.lessThan(sqrtRatioX96, TickMath.MIN_SQRT_RATIO)) {
     return TickMath.MIN_SQRT_RATIO;
-  } else if (JSBI.greaterThanOrEqual(sqrtRatioX96, TickMath.MAX_SQRT_RATIO)) {
-    return JSBI.subtract(TickMath.MAX_SQRT_RATIO, JSBI.BigInt(1));
+  } else if (JSBI.greaterThan(sqrtRatioX96, TickMath.MAX_SQRT_RATIO)) {
+    return TickMath.MAX_SQRT_RATIO;
   } else {
     return sqrtRatioX96;
   }
@@ -309,17 +310,15 @@ export function getTokenValueProportionFromPriceRatio(
   else if (tick >= tickUpper) {
     return new Big(0);
   } else {
-    const sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(tickLower);
-    const sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(tickUpper);
     const liquidity = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
     const amount0 = SqrtPriceMath.getAmount0Delta(
       sqrtPriceX96,
-      sqrtRatioBX96,
+      TickMath.getSqrtRatioAtTick(tickUpper),
       liquidity,
       false,
     );
     const amount1 = SqrtPriceMath.getAmount1Delta(
-      sqrtRatioAX96,
+      TickMath.getSqrtRatioAtTick(tickLower),
       sqrtPriceX96,
       liquidity,
       false,
