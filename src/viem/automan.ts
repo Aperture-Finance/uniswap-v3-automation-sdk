@@ -11,6 +11,7 @@ import Big from 'big.js';
 import {
   AbiStateMutability,
   Address,
+  ContractFunctionArgs,
   ContractFunctionReturnType,
   GetContractReturnType,
   Hex,
@@ -47,12 +48,23 @@ export type AutomanActionName =
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof UniV3Automan__factory.abi, T>;
 
-export type GetAutomanReturnTypes<TFunctionName extends AutomanActionName> =
-  ContractFunctionReturnType<
+export type GetAutomanReturnTypes<
+  functionName extends AutomanActionName,
+  args extends ContractFunctionArgs<
     typeof UniV3Automan__factory.abi,
     AbiStateMutability,
-    TFunctionName
-  >;
+    functionName
+  > = ContractFunctionArgs<
+    typeof UniV3Automan__factory.abi,
+    AbiStateMutability,
+    functionName
+  >,
+> = ContractFunctionReturnType<
+  typeof UniV3Automan__factory.abi,
+  AbiStateMutability,
+  functionName,
+  args // to dedup function name
+>;
 
 type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof INonfungiblePositionManager__factory.abi,
@@ -71,9 +83,15 @@ type MintParams = GetAbiFunctionParamsTypes<
 
 type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
 
-type RemoveLiquidityReturnType = GetAutomanReturnTypes<'removeLiquidity'>;
+type RemoveLiquidityReturnType = GetAutomanReturnTypes<
+  'removeLiquidity',
+  [DecreaseLiquidityParams, bigint]
+>;
 
-type RebalanceReturnType = GetAutomanReturnTypes<'rebalance'>;
+type RebalanceReturnType = GetAutomanReturnTypes<
+  'rebalance',
+  [MintParams, bigint, bigint, Hex]
+>;
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,
@@ -680,8 +698,8 @@ async function getExchangePrice(params: IRebalanceParams) {
     ),
   ]);
 
-  const [, , finalAmount0, finalAmount1]: bigint[] = finalAmount;
-  const [initAmount0, initAmount1]: bigint[] = initAmount;
+  const [, , finalAmount0, finalAmount1] = finalAmount;
+  const [initAmount0, initAmount1] = initAmount;
   return new Big(finalAmount1.toString())
     .minus(initAmount1.toString())
     .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
