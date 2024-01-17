@@ -141,7 +141,6 @@ export function convertRecurringCondition(
   } else if (
     condition.type === RecurringConditionTypeEnum.enum.RecurringRatio
   ) {
-    const currentPrice0 = fractionToBig(pool.token0Price);
     const gteTriggerPrice = condition.lteToken0ValueProportion
       ? getRawRelativePriceFromTokenValueProportion(
           tickLower!,
@@ -149,9 +148,6 @@ export function convertRecurringCondition(
           new Big(condition.lteToken0ValueProportion),
         )
       : undefined;
-    if (gteTriggerPrice?.lte(currentPrice0)) {
-      throw new Error('gteTriggerPrice must be greater than current price');
-    }
     const lteTriggerPrice = condition.gteToken0ValueProportion
       ? getRawRelativePriceFromTokenValueProportion(
           tickLower!,
@@ -159,9 +155,6 @@ export function convertRecurringCondition(
           new Big(condition.gteToken0ValueProportion),
         )
       : undefined;
-    if (lteTriggerPrice?.gte(currentPrice0)) {
-      throw new Error('lteTriggerPrice must be less than current price');
-    }
     return {
       type: ConditionTypeEnum.enum.Price,
       durationSec: condition.durationSec,
