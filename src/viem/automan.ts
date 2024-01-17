@@ -639,7 +639,6 @@ export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
   const currentPoolPrice = fractionToBig(price);
 
   const exchangePrice = await getExchangePrice(params);
-
   return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
 }
 
@@ -656,32 +655,31 @@ async function getExchangePrice(params: IRebalanceParams) {
   } = params;
   const from = getFromAddress(params.from);
 
-  const [initAmount, finalAmount] = await Promise.all([
-    simulateRemoveLiquidity(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      tokenId,
-      undefined,
-      undefined,
-      feeBips,
-      blockNumber,
-    ),
-    simulateRebalance(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      mintParams,
-      tokenId,
-      feeBips,
-      swapData,
-      blockNumber,
-    ),
-  ]);
+  const [initAmount0, initAmount1]: bigint[] = await simulateRemoveLiquidity(
+    chainId,
+    publicClient,
+    from,
+    owner,
+    tokenId,
+    undefined,
+    undefined,
+    feeBips,
+    blockNumber,
+  );
+  const [, , finalAmount0, finalAmount1]: bigint[] = await simulateRebalance(
+    chainId,
+    publicClient,
+    from,
+    owner,
+    mintParams,
+    tokenId,
+    feeBips,
+    swapData,
+    blockNumber,
+  );
 
-  return new Big(finalAmount[1])
-    .minus(initAmount[1])
-    .div(new Big(finalAmount[0]).minus(initAmount[0]));
+  return new Big(finalAmount1.toString())
+    .minus(initAmount1.toString())
+    .div(new Big(finalAmount0.toString()).minus(initAmount0.toString()))
+    .neg();
 }

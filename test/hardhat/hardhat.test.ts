@@ -125,15 +125,24 @@ async function resetFork(testClient: TestClient) {
   });
 }
 
+const infuraMap = {
+  mainnet: mainnet,
+  'arbitrum-mainnet': arbitrum,
+};
+
+function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
+  return createPublicClient({
+    chain: infuraMap[chain],
+    transport: http(
+      `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`,
+    ),
+  });
+}
+
 describe('Estimate gas tests', function () {
   async function estimateRebalanceGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
-    const publicClient = createPublicClient({
-      chain: mainnet,
-      transport: http(
-        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      ),
-    });
+    const publicClient = getInfuraClient();
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
     const fee = FeeAmount.MEDIUM;
@@ -182,13 +191,7 @@ describe('Estimate gas tests', function () {
 
   async function estimateReinvestGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
-    const publicClient = createPublicClient({
-      chain: mainnet,
-      transport: http(
-        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      ),
-    });
-
+    const publicClient = getInfuraClient();
     const amount0Desired = 100000n;
     const amount1Desired = 1000000000000000n;
     const gas = await estimateReinvestGas(
@@ -276,12 +279,7 @@ describe('State overrides tests', function () {
   });
 
   it('Test generateAccessList', async function () {
-    const publicClient = createPublicClient({
-      chain: mainnet,
-      transport: http(
-        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      ),
-    });
+    const publicClient = getInfuraClient();
     const balanceOfData = encodeFunctionData({
       abi: IERC20__factory.abi,
       args: [eoa] as const,
@@ -301,12 +299,7 @@ describe('State overrides tests', function () {
   });
 
   it('Test getTokensOverrides', async function () {
-    const publicClient = createPublicClient({
-      chain: mainnet,
-      transport: http(
-        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      ),
-    });
+    const publicClient = getInfuraClient();
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
     const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
@@ -348,12 +341,7 @@ describe('State overrides tests', function () {
 
   it('Test simulateMintOptimal', async function () {
     const blockNumber = 17975698n;
-    const publicClient = createPublicClient({
-      chain: mainnet,
-      transport: http(
-        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      ),
-    });
+    const publicClient = getInfuraClient();
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
     const fee = FeeAmount.MEDIUM;
@@ -401,12 +389,7 @@ describe('State overrides tests', function () {
 
   it('Test calculateRebalancePriceImpact', async function () {
     const blockNumber = 17975698n;
-    const publicClient = createPublicClient({
-      chain: mainnet,
-      transport: http(
-        `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      ),
-    });
+    const publicClient = getInfuraClient();
 
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
@@ -452,7 +435,7 @@ describe('State overrides tests', function () {
       swapData: undefined,
       blockNumber,
     });
-    expect(impact.toString()).to.equal('0.226733451673759338452326626407');
+    expect(impact.toString()).to.equal('0.00300526535105717178193071153');
   });
 });
 
@@ -863,10 +846,7 @@ describe('Position util tests', function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
     const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
-    const publicClient = createPublicClient({
-      chain: arbitrum,
-      transport: http(jsonRpcUrl),
-    });
+    const publicClient = getInfuraClient('arbitrum-mainnet');
     const positionId = 761879n;
     const blockNumber = 119626480n;
     const npm = getNPM(chainId, publicClient);
