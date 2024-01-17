@@ -25,7 +25,7 @@ import {
 } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
-import { GetAbiFunctionParamsTypes } from './generics';
+import { GetAbiFunctionParamsTypes } from '../generics';
 import {
   RpcReturnType,
   getControllerOverrides,
@@ -33,9 +33,9 @@ import {
   getNPMApprovalOverrides,
   staticCallWithOverrides,
   tryRequestWithOverrides,
-} from './overrides';
-import { getPoolPrice } from './pool';
-import { getPosition } from './position';
+} from '../overrides';
+import { getPoolPrice } from '../pool';
+import { getPosition } from '../position';
 
 export type AutomanActionName =
   | 'mintOptimal'
