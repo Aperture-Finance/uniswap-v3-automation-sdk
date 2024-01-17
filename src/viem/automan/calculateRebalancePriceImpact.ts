@@ -8,7 +8,6 @@ import { IRebalanceParams, getFromAddress } from './internal';
 
 /**
  * calculate the price impact of this rebalance, priceImpact = abs(exchangePrice / currentPoolPrice - 1).
- * need to use infura client
  */
 export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
   const { chainId, publicClient, tokenId, blockNumber } = params;

@@ -70,6 +70,7 @@ import {
 } from '../../src';
 import {
   PositionDetails,
+  calculateMintOptimalPriceImpact,
   calculateRebalancePriceImpact,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
@@ -374,6 +375,18 @@ describe('State overrides tests', function () {
       recipient: eoa as Address,
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
+
+    const priceImpact = await calculateMintOptimalPriceImpact({
+      chainId,
+      publicClient,
+      from: eoa,
+      mintParams,
+      swapData: undefined,
+      blockNumber,
+    });
+
+    expect(priceImpact.toString()).to.equal('0.003010298098311076209996397317');
+
     const [, liquidity, amount0, amount1] = await simulateMintOptimal(
       chainId,
       publicClient,
