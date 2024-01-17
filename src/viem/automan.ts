@@ -655,31 +655,34 @@ async function getExchangePrice(params: IRebalanceParams) {
   } = params;
   const from = getFromAddress(params.from);
 
-  const [initAmount0, initAmount1]: bigint[] = await simulateRemoveLiquidity(
-    chainId,
-    publicClient,
-    from,
-    owner,
-    tokenId,
-    undefined,
-    undefined,
-    feeBips,
-    blockNumber,
-  );
-  const [, , finalAmount0, finalAmount1]: bigint[] = await simulateRebalance(
-    chainId,
-    publicClient,
-    from,
-    owner,
-    mintParams,
-    tokenId,
-    feeBips,
-    swapData,
-    blockNumber,
-  );
+  const [initAmount, finalAmount] = await Promise.all([
+    simulateRemoveLiquidity(
+      chainId,
+      publicClient,
+      from,
+      owner,
+      tokenId,
+      undefined,
+      undefined,
+      feeBips,
+      blockNumber,
+    ),
+    simulateRebalance(
+      chainId,
+      publicClient,
+      from,
+      owner,
+      mintParams,
+      tokenId,
+      feeBips,
+      swapData,
+      blockNumber,
+    ),
+  ]);
 
+  const [, , finalAmount0, finalAmount1]: bigint[] = finalAmount;
+  const [initAmount0, initAmount1]: bigint[] = initAmount;
   return new Big(finalAmount1.toString())
     .minus(initAmount1.toString())
-    .div(new Big(finalAmount0.toString()).minus(initAmount0.toString()))
-    .neg();
+    .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
 }
