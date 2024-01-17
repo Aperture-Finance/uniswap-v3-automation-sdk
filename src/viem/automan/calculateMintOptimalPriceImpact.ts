@@ -42,13 +42,6 @@ export async function calculateMintOptimalPriceImpact(
 
   const exchangePrice = await getExchangePrice(params);
 
-  console.log('currentPoolPrice', currentPoolPrice.toString());
-  console.log('exchangePrice', exchangePrice.toString());
-  console.log(
-    'price impact',
-    new Big(exchangePrice).div(currentPoolPrice).minus(1).abs().toString(),
-  );
-
   return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
 }
 
