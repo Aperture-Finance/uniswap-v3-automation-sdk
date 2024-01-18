@@ -37,9 +37,7 @@ export async function calculateMintOptimalPriceImpact(
     blockNumber,
   );
 
-  const price = getPoolPrice(pool);
-  const currentPoolPrice = fractionToBig(price);
-
+  const currentPoolPrice = fractionToBig(pool.token0Price);
   const exchangePrice = await getExchangePrice(params);
 
   return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();

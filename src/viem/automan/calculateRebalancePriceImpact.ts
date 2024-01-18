@@ -1,7 +1,6 @@
 import { fractionToBig } from '@/index';
 import Big from 'big.js';
 
-import { getPoolPrice } from '../pool';
 import { getPosition } from '../position';
 import { simulateRebalance, simulateRemoveLiquidity } from './automan';
 import { IRebalanceParams, getFromAddress } from './internal';
@@ -18,8 +17,7 @@ export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
     blockNumber,
   );
 
-  const price = getPoolPrice(position.pool);
-  const currentPoolPrice = fractionToBig(price);
+  const currentPoolPrice = fractionToBig(position.pool.token0Price);
 
   const exchangePrice = await getExchangePrice(params);
   return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
@@ -38,33 +36,32 @@ async function getExchangePrice(params: IRebalanceParams) {
   } = params;
   const from = getFromAddress(params.from);
 
-  const [initAmount, finalAmount] = await Promise.all([
-    simulateRemoveLiquidity(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      tokenId,
-      undefined,
-      undefined,
-      feeBips,
-      blockNumber,
-    ),
-    simulateRebalance(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      mintParams,
-      tokenId,
-      feeBips,
-      swapData,
-      blockNumber,
-    ),
-  ]);
+  const [[initAmount0, initAmount1], [, , finalAmount0, finalAmount1]] =
+    await Promise.all([
+      simulateRemoveLiquidity(
+        chainId,
+        publicClient,
+        from,
+        owner,
+        tokenId,
+        undefined,
+        undefined,
+        feeBips,
+        blockNumber,
+      ),
+      simulateRebalance(
+        chainId,
+        publicClient,
+        from,
+        owner,
+        mintParams,
+        tokenId,
+        feeBips,
+        swapData,
+        blockNumber,
+      ),
+    ]);
 
-  const [, , finalAmount0, finalAmount1]: bigint[] = finalAmount;
-  const [initAmount0, initAmount1]: bigint[] = initAmount;
   return new Big(finalAmount1.toString())
     .minus(initAmount1.toString())
     .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));

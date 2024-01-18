@@ -25,10 +25,15 @@ export type MintParams = GetAbiFunctionParamsTypes<
 
 export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
 
-export type RemoveLiquidityReturnType =
-  GetAutomanReturnTypes<'removeLiquidity'>;
+export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
+  'removeLiquidity',
+  [DecreaseLiquidityParams, bigint]
+>;
 
-export type RebalanceReturnType = GetAutomanReturnTypes<'rebalance'>;
+export type RebalanceReturnType = GetAutomanReturnTypes<
+  'rebalance',
+  [MintParams, bigint, bigint, Hex]
+>;
 
 export type IRebalanceParams = {
   chainId: ApertureSupportedChainId;
