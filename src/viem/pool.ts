@@ -1,9 +1,12 @@
 import {
+  AllV3TicksQuery,
+  FeeTierDistributionQuery,
+} from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
+import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
   getChainInfo,
-  sqrtRatioToPrice,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import {
@@ -24,10 +27,6 @@ import {
   getContract,
 } from 'viem';
 
-import {
-  AllV3TicksQuery,
-  FeeTierDistributionQuery,
-} from '../data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
@@ -180,7 +179,7 @@ export async function getPool(
  * @returns The price of `token0` in terms of `token1` in the pool.
  */
 export function getPoolPrice(pool: Pool): Price<Token, Token> {
-  return sqrtRatioToPrice(pool.sqrtRatioX96, pool.token0, pool.token1);
+  return pool.token0Price;
 }
 
 /**
@@ -484,6 +483,7 @@ export interface Liquidity {
  * @param _tickLower The lower tick to fetch liquidity for, defaults to half of the current price.
  * @param _tickUpper The upper tick to fetch liquidity for, defaults to twice of the current price.
  * @param publicClient Viem public client.
+ * @param blockNumber Optional block number to query.
  * @returns An array of liquidity objects.
  */
 export async function getLiquidityArrayForPool(
@@ -492,6 +492,7 @@ export async function getLiquidityArrayForPool(
   _tickLower = pool.tickCurrent - DOUBLE_TICK,
   _tickUpper = pool.tickCurrent + DOUBLE_TICK,
   publicClient?: PublicClient,
+  blockNumber?: bigint,
 ): Promise<Liquidity[]> {
   // The current tick must be within the specified tick range.
   const { tickCurrentAligned, tickLower, tickUpper } = normalizeTicks(
@@ -507,6 +508,7 @@ export async function getLiquidityArrayForPool(
     tickLower,
     tickUpper,
     publicClient,
+    blockNumber,
   );
   const liquidityArray = reconstructLiquidityArray(
     populatedTicks,
