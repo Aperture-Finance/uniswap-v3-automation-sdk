@@ -2,7 +2,7 @@ import { ApertureSupportedChainId, fractionToBig } from '@/index';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { getPool, getPoolPrice } from '../pool';
+import { getPool } from '../pool';
 import { simulateMintOptimal } from './automan';
 import { MintParams, getFromAddress } from './internal';
 
