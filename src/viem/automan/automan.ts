@@ -1,18 +1,12 @@
 import {
   ApertureSupportedChainId,
-  INonfungiblePositionManager__factory,
   PermitInfo,
   UniV3Automan__factory,
-  fractionToBig,
   getChainInfo,
 } from '@/index';
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
-import Big from 'big.js';
 import {
-  AbiStateMutability,
   Address,
-  ContractFunctionArgs,
-  ContractFunctionReturnType,
   GetContractReturnType,
   Hex,
   PublicClient,
@@ -24,9 +18,7 @@ import {
   hexToBigInt,
   hexToSignature,
 } from 'viem';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
-import { GetAbiFunctionParamsTypes } from './generics';
 import {
   RpcReturnType,
   getControllerOverrides,
@@ -34,64 +26,16 @@ import {
   getNPMApprovalOverrides,
   staticCallWithOverrides,
   tryRequestWithOverrides,
-} from './overrides';
-import { getPoolPrice } from './pool';
-import { getPosition } from './position';
-
-export type AutomanActionName =
-  | 'mintOptimal'
-  | 'decreaseLiquidity'
-  | 'reinvest'
-  | 'rebalance'
-  | 'removeLiquidity';
-
-export type GetAutomanParams<T extends AutomanActionName> =
-  GetAbiFunctionParamsTypes<typeof UniV3Automan__factory.abi, T>;
-
-export type GetAutomanReturnTypes<
-  functionName extends AutomanActionName,
-  args extends ContractFunctionArgs<
-    typeof UniV3Automan__factory.abi,
-    AbiStateMutability,
-    functionName
-  > = ContractFunctionArgs<
-    typeof UniV3Automan__factory.abi,
-    AbiStateMutability,
-    functionName
-  >,
-> = ContractFunctionReturnType<
-  typeof UniV3Automan__factory.abi,
-  AbiStateMutability,
-  functionName,
-  args // to dedup function name
->;
-
-type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
-  'decreaseLiquidity'
->[0];
-
-type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
-  'increaseLiquidity'
->[0];
-
-type MintParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
-  'mint'
->[0];
-
-type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
-
-type RemoveLiquidityReturnType = GetAutomanReturnTypes<
-  'removeLiquidity',
-  [DecreaseLiquidityParams, bigint]
->;
-
-type RebalanceReturnType = GetAutomanReturnTypes<
-  'rebalance',
-  [MintParams, bigint, bigint, Hex]
->;
+} from '../overrides';
+import {
+  DecreaseLiquidityParams,
+  IncreaseLiquidityParams,
+  MintParams,
+  MintReturnType,
+  RebalanceReturnType,
+  RemoveLiquidityReturnType,
+  getFromAddress,
+} from './internal';
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,
@@ -441,15 +385,6 @@ export async function simulateRemoveLiquidity(
   });
 }
 
-function getFromAddress(from?: Address) {
-  if (from === undefined) {
-    const privateKey = generatePrivateKey();
-    const account = privateKeyToAccount(privateKey);
-    from = account.address;
-  }
-  return from;
-}
-
 export async function requestRebalance<M extends keyof RpcReturnType>(
   method: M,
   chainId: ApertureSupportedChainId,
@@ -627,80 +562,4 @@ export async function estimateReinvestGas(
       blockNumber,
     ),
   );
-}
-
-type IRebalanceParams = {
-  chainId: ApertureSupportedChainId;
-  publicClient: PublicClient;
-  from?: Address;
-  owner: Address;
-  mintParams: MintParams;
-  tokenId: bigint;
-  feeBips?: bigint;
-  swapData?: Hex;
-  blockNumber?: bigint;
-};
-
-/**
- * calculate the price impact of this rebalance, priceImpact = abs(exchangePrice / currentPoolPrice - 1).
- */
-export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
-  const { chainId, publicClient, tokenId, blockNumber } = params;
-  const position = await getPosition(
-    chainId,
-    tokenId,
-    publicClient,
-    blockNumber,
-  );
-
-  const price = getPoolPrice(position.pool);
-  const currentPoolPrice = fractionToBig(price);
-
-  const exchangePrice = await getExchangePrice(params);
-  return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
-}
-
-async function getExchangePrice(params: IRebalanceParams) {
-  const {
-    chainId,
-    publicClient,
-    owner,
-    mintParams,
-    tokenId,
-    feeBips,
-    swapData,
-    blockNumber,
-  } = params;
-  const from = getFromAddress(params.from);
-
-  const [initAmount, finalAmount] = await Promise.all([
-    simulateRemoveLiquidity(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      tokenId,
-      undefined,
-      undefined,
-      feeBips,
-      blockNumber,
-    ),
-    simulateRebalance(
-      chainId,
-      publicClient,
-      from,
-      owner,
-      mintParams,
-      tokenId,
-      feeBips,
-      swapData,
-      blockNumber,
-    ),
-  ]);
-
-  const [, , finalAmount0, finalAmount1] = finalAmount;
-  const [initAmount0, initAmount1] = initAmount;
-  return new Big(finalAmount1.toString())
-    .minus(initAmount1.toString())
-    .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
 }
