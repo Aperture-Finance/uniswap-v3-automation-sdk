@@ -38,7 +38,7 @@ import {
   resetHardhatNetwork,
 } from './common';
 
-describe('Automan transaction tests', function () {
+describe('Helper - Automan transaction tests', function () {
   const positionId = 4;
   let automanContract: UniV3Automan;
   let impersonatedOwnerSigner: Signer;
