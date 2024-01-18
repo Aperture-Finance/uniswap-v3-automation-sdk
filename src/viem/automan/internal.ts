@@ -1,8 +1,5 @@
-import {
-  ApertureSupportedChainId,
-  INonfungiblePositionManager__factory,
-} from '@/index';
-import { Address, Hex, PublicClient } from 'viem';
+import { INonfungiblePositionManager__factory } from '@/index';
+import { Address, Hex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 import { GetAutomanReturnTypes } from '.';
@@ -34,18 +31,6 @@ export type RebalanceReturnType = GetAutomanReturnTypes<
   'rebalance',
   [MintParams, bigint, bigint, Hex]
 >;
-
-export type IRebalanceParams = {
-  chainId: ApertureSupportedChainId;
-  publicClient: PublicClient;
-  from?: Address;
-  owner: Address;
-  mintParams: MintParams;
-  tokenId: bigint;
-  feeBips?: bigint;
-  swapData?: Hex;
-  blockNumber?: bigint;
-};
 
 export function getFromAddress(from?: Address) {
   if (from === undefined) {

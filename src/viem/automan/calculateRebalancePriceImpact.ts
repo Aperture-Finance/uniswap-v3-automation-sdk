@@ -1,9 +1,22 @@
-import { fractionToBig } from '@/index';
+import { ApertureSupportedChainId, fractionToBig } from '@/index';
 import Big from 'big.js';
+import { Address, Hex, PublicClient } from 'viem';
 
 import { getPosition } from '../position';
 import { simulateRebalance, simulateRemoveLiquidity } from './automan';
-import { IRebalanceParams, getFromAddress } from './internal';
+import { MintParams, getFromAddress } from './internal';
+
+type IRebalanceParams = {
+  chainId: ApertureSupportedChainId;
+  publicClient: PublicClient;
+  from?: Address;
+  owner: Address;
+  mintParams: MintParams;
+  tokenId: bigint;
+  feeBips?: bigint;
+  swapData?: Hex;
+  blockNumber?: bigint;
+};
 
 /**
  * calculate the price impact of this rebalance, priceImpact = abs(exchangePrice / currentPoolPrice - 1).
