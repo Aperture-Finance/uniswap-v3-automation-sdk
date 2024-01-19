@@ -134,15 +134,11 @@ async function optimalMintPool(
     undefined,
     overrides,
   );
-  const fromTokenAddress = new Big(mintParams.amount0Desired.toString()).gt(
-    amount0.toString(),
-  )
-    ? mintParams.token0
-    : mintParams.token1;
-  const toTokenAddress =
-    fromTokenAddress === mintParams.token0
-      ? mintParams.token1
-      : mintParams.token0;
+  const [fromTokenAddress, toTokenAddress] = new Big(
+    mintParams.amount0Desired.toString(),
+  ).gt(amount0.toString())
+    ? [mintParams.token0, mintParams.token1]
+    : [mintParams.token1, mintParams.token0];
   const swapRoute: SwapRoute = [
     [
       [
