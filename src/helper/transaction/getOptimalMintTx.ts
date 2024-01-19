@@ -53,7 +53,7 @@ export async function getOptimalMintTx(
     );
     value = token1Amount.quotient.toString();
   }
-  const { liquidity, swapData } = await optimalMint(
+  const { liquidity, swapData, swapRoute } = await optimalMint(
     chainId,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
@@ -94,8 +94,11 @@ export async function getOptimalMintTx(
     [mintParams, swapData],
   );
   return {
-    to: getChainInfo(chainId).aperture_uniswap_v3_automan,
-    data,
-    value,
+    tx: {
+      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      data,
+      value,
+    },
+    swapRoute,
   };
 }

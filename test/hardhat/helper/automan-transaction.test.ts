@@ -235,7 +235,7 @@ describe('Helper - Automan transaction tests', function () {
       eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
-    const tx = await getOptimalMintTx(
+    const { tx, swapRoute } = await getOptimalMintTx(
       chainId,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
@@ -246,8 +246,13 @@ describe('Helper - Automan transaction tests', function () {
       Math.floor(Date.now() / 1000) + 60,
       0.5,
       new providers.MulticallProvider(hardhatForkProvider),
-      false,
+      true,
     );
+
+    expect(JSON.stringify(swapRoute)).to.equal(
+      '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
+    );
+
     const txReceipt = await (
       await impersonatedOwnerSigner.sendTransaction(tx)
     ).wait();

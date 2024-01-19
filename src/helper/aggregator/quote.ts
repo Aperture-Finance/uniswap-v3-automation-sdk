@@ -9,6 +9,8 @@ type SelectedProtocol = {
   toTokenAddress: string;
 };
 
+export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
+
 /**
  * Get a quote for a swap.
  * @param chainId The chain ID.
@@ -36,7 +38,7 @@ export async function quote(
     gas: string;
     gasPrice: string;
   };
-  protocols?: Array<Array<Array<SelectedProtocol>>>;
+  protocols?: SwapRoute;
 }> {
   const swapParams = {
     src,
