@@ -7,3 +7,4 @@ export * from './pool';
 export * from './automan';
 export * from './provider';
 export * from './aggregator';
+export * from './payload';
