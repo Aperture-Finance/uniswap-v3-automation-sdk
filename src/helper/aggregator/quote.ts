@@ -48,7 +48,7 @@ export async function quote(
     slippage: slippage.toString(),
     disableEstimate: 'true',
     allowPartialFill: 'false',
-    includeProtocols: includeProtocols ? 'true' : 'false',
+    includeProtocols: (!!includeProtocols).toString(),
   };
   try {
     return (

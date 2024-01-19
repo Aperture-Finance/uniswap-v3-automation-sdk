@@ -134,23 +134,43 @@ async function optimalMintPool(
     undefined,
     overrides,
   );
-  const [fromTokenAddress, toTokenAddress] = new Big(
-    mintParams.amount0Desired.toString(),
-  ).gt(amount0.toString())
-    ? [mintParams.token0, mintParams.token1]
-    : [mintParams.token1, mintParams.token0];
-  const swapRoute: SwapRoute = [
-    [
+  let swapRoute: SwapRoute = [];
+  if (mintParams.amount0Desired.toString() !== amount0.toString()) {
+    const [fromTokenAddress, toTokenAddress] = new Big(
+      mintParams.amount0Desired.toString(),
+    ).gt(amount0.toString())
+      ? [mintParams.token0, mintParams.token1]
+      : [mintParams.token1, mintParams.token0];
+    swapRoute = [
       [
-        {
-          name: 'Pool',
-          part: 100,
-          fromTokenAddress: fromTokenAddress,
-          toTokenAddress: toTokenAddress,
-        },
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
       ],
-    ],
-  ];
+    ];
+  }
+
+  // console.log(mintParams);
+  // console.log(amount0.toString());
+  // console.log(amount1.toString());
+  // console.log(
+  //   'delta amount0',
+  //   new Big(mintParams.amount0Desired.toString())
+  //     .minus(amount0.toString())
+  //     .toString(),
+  // );
+  // console.log(
+  //   'delta amount1',
+  //   new Big(mintParams.amount1Desired.toString())
+  //     .minus(amount1.toString())
+  //     .toString(),
+  // );
+
   return {
     amount0,
     amount1,

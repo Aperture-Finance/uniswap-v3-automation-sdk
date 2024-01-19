@@ -208,7 +208,7 @@ describe('Helper - Automan transaction tests', function () {
     });
   });
 
-  it('Optimal mint', async function () {
+  it('Optimal mint with 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -261,15 +261,131 @@ describe('Helper - Automan transaction tests', function () {
       txReceipt,
       eoa,
     )!;
-    expect(
-      await getBasicPositionInfo(chainId, newPositionId, hardhatForkProvider),
-    ).to.deep.contains({
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      newPositionId,
+      hardhatForkProvider,
+    );
+    expect(newPosition).to.deep.contains({
       token0: pool.token0,
       token1: pool.token1,
       fee: pool.fee,
       tickLower,
       tickUpper,
     });
+  });
+
+  it('Optimal mint without 1inch', async function () {
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      hardhatForkProvider,
+    );
+    const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
+    const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 1000,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 1000,
+      pool.tickSpacing,
+    );
+    await dealERC20(
+      chainId,
+      pool.token0.address,
+      pool.token1.address,
+      amount0,
+      amount1,
+      eoa,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+    const { tx, swapRoute } = await getOptimalMintTx(
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      Math.floor(Date.now() / 1000) + 60,
+      0.5,
+      new providers.MulticallProvider(hardhatForkProvider),
+      false,
+    );
+
+    expect(JSON.stringify(swapRoute)).to.equal(
+      '[[[{"name":"Pool","part":100,"fromTokenAddress":"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599","toTokenAddress":"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}]]]',
+    );
+
+    const txReceipt = await (
+      await impersonatedOwnerSigner.sendTransaction(tx)
+    ).wait();
+    const newPositionId = getMintedPositionIdFromTxReceipt(
+      chainId,
+      txReceipt,
+      eoa,
+    )!;
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      newPositionId,
+      hardhatForkProvider,
+    );
+
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower,
+      tickUpper,
+      liquidity: '430845571946454',
+    });
+  });
+
+  it('Optimal mint no need swap', async function () {
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      hardhatForkProvider,
+    );
+    const amount0 = BigNumber.from('53306815');
+    const amount1 = BigNumber.from('8121146724251191247');
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 1000,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 1000,
+      pool.tickSpacing,
+    );
+    await dealERC20(
+      chainId,
+      pool.token0.address,
+      pool.token1.address,
+      amount0,
+      amount1,
+      eoa,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+    const { swapRoute } = await getOptimalMintTx(
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      Math.floor(Date.now() / 1000) + 60,
+      0.5,
+      new providers.MulticallProvider(hardhatForkProvider),
+    );
+
+    // TODO: investigating why swapRoute is not empty.
+    expect(swapRoute).to.equal([]);
   });
 
   it('Test getZapOutTx', async function () {
