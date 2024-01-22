@@ -352,16 +352,17 @@ describe('Helper - Automan transaction tests', function () {
       chainId,
       hardhatForkProvider,
     );
-    const amount0 = BigNumber.from('53306815');
-    const amount1 = BigNumber.from('8121146724251191247');
+    const amount0 = BigNumber.from('97451');
+    const amount1 = BigNumber.from('16339987095914966');
     const tickLower = nearestUsableTick(
-      pool.tickCurrent - 1000,
+      pool.tickCurrent - 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
     const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 1000,
+      pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
+
     await dealERC20(
       chainId,
       pool.token0.address,
@@ -384,8 +385,7 @@ describe('Helper - Automan transaction tests', function () {
       new providers.MulticallProvider(hardhatForkProvider),
     );
 
-    // TODO: investigating why swapRoute is not empty.
-    expect(swapRoute).to.equal([]);
+    expect(swapRoute?.length).to.equal(0);
   });
 
   it('Test getZapOutTx', async function () {
