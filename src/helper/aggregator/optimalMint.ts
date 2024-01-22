@@ -155,22 +155,6 @@ async function optimalMintPool(
     ];
   }
 
-  // console.log(mintParams);
-  // console.log(amount0.toString());
-  // console.log(amount1.toString());
-  // console.log(
-  //   'delta amount0',
-  //   new Big(mintParams.amount0Desired.toString())
-  //     .minus(amount0.toString())
-  //     .toString(),
-  // );
-  // console.log(
-  //   'delta amount1',
-  //   new Big(mintParams.amount1Desired.toString())
-  //     .minus(amount1.toString())
-  //     .toString(),
-  // );
-
   return {
     amount0,
     amount1,
