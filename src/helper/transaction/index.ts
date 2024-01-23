@@ -10,4 +10,4 @@ export * from './getCollectedFeesFromReceipt';
 export * from './getCreatePositionTx';
 export * from './getRemoveLiquidityTx';
 export * from './getCreatePositionTxForLimitOrder';
-export { filterLogsByEvent } from './transaction';
+export { filterLogsByEvent, getSetApprovalForAllTx } from './transaction';

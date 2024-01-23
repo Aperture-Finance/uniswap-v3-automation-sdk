@@ -1,9 +1,13 @@
-import { ChainInfo, IUniV3Automan__factory } from '@/index';
+import { ChainInfo, IUniV3Automan__factory, getChainInfo } from '@/index';
 import { ApertureSupportedChainId } from '@/index';
 import { INonfungiblePositionManager__factory } from '@/index';
 import { EventFragment } from '@ethersproject/abi';
 import { Provider } from '@ethersproject/providers';
-import { Log, TransactionReceipt } from '@ethersproject/providers';
+import {
+  Log,
+  TransactionReceipt,
+  TransactionRequest,
+} from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { Pool, Position } from '@uniswap/v3-sdk';
@@ -123,4 +127,24 @@ export function filterLogsByEvent(
   const eventSig =
     INonfungiblePositionManager__factory.createInterface().getEventTopic(event);
   return receipt.logs.filter((log) => log.topics[0] === eventSig);
+}
+
+/**
+ * Set or revoke Aperture UniV3 Automan contract as an operator of the signer's UniV3 positions.
+ * @param chainId Chain id.
+ * @param approved True if setting approval, false if revoking approval.
+ * @returns The unsigned tx setting or revoking approval.
+ */
+export function getSetApprovalForAllTx(
+  chainId: ApertureSupportedChainId,
+  approved: boolean,
+): TransactionRequest {
+  const chainInfo = getChainInfo(chainId);
+  return getTxToNonfungiblePositionManager(
+    chainInfo,
+    INonfungiblePositionManager__factory.createInterface().encodeFunctionData(
+      'setApprovalForAll',
+      [chainInfo.aperture_uniswap_v3_automan, approved],
+    ),
+  );
 }
