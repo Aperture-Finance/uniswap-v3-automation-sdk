@@ -6,3 +6,4 @@ export * from './simulateRemoveLiquidity';
 export * from './encodeSwapData';
 export * from './simulateDecreaseLiquiditySingle';
 export * from './getAutomanReinvestCallInfo';
+export * from './getAutomanDecreaseLiquidityCallInfo';

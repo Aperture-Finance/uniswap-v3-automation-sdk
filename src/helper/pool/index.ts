@@ -1,5 +1,4 @@
 export * from './getPool';
-export * from './checkAutomationSupportForPool';
 export * from './getPoolPrice';
 export * from './getFeeTierDistribution';
 export * from './getLiquidityArrayForPool';
@@ -9,4 +8,6 @@ export {
   type LiquidityAmount,
   type TickToLiquidityMap,
   computePoolAddress,
+  readTickToLiquidityMap,
+  checkAutomationSupportForPool,
 } from './pool';
