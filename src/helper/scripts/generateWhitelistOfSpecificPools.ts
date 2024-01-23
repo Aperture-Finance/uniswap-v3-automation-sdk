@@ -1,12 +1,9 @@
-import {
-  ApertureSupportedChainId,
-  getChainInfo,
-} from '@aperture_finance/uniswap-v3-automation-sdk';
+import whitelistedPoolsEthereum from '@/data/whitelistedPools-1.json';
+import whitelistedPoolsArbitrum from '@/data/whitelistedPools-42161.json';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import axios from 'axios';
 import { writeFileSync } from 'fs';
 
-import whitelistedPoolsEthereum from '../data/whitelistedPools-1.json';
-import whitelistedPoolsArbitrum from '../data/whitelistedPools-42161.json';
 import { fetchUniV3PoolsFromGeckoTerminal } from './fetchUniV3PoolsFromGeckoTerminal';
 
 type WhitelistedPools = typeof whitelistedPoolsEthereum;

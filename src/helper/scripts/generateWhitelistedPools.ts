@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   getChainInfo,
   getTokenPriceListFromCoingecko,
-} from '@aperture_finance/uniswap-v3-automation-sdk';
+} from '@/index';
 import { Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import axios from 'axios';
