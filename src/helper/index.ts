@@ -9,3 +9,4 @@ export * from './provider';
 export * from './aggregator';
 export * from './payload';
 export * from './permission';
+export * from './whitelist';
