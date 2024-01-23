@@ -10,16 +10,15 @@ import {
   TokenTransferPartsFragment,
   TransactionStatus,
 } from '@/data/__graphql_generated__/uniswap-data-types-and-hooks';
-import { Currency } from '@uniswap/sdk-core';
-import axios from 'axios';
-import { getAddress } from 'ethers/lib/utils';
-
-import { NumberType, formatNumberOrString } from '../uniswap-conedison/format';
+import { NumberType, formatNumberOrString } from '@/uniswap-conedison/format';
 import {
   NONFUNGIBLE_POSITION_MANAGER_ADDRESSES,
   UniswapSupportedChainId,
   nativeOnChain,
-} from '../uniswap-constants';
+} from '@/uniswap-constants';
+import { Currency } from '@uniswap/sdk-core';
+import axios from 'axios';
+import { getAddress } from 'ethers/lib/utils';
 
 export type TransactionReceipt = AssetActivityPartsFragment['transaction'];
 
