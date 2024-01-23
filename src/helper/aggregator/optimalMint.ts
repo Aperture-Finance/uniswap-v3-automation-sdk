@@ -6,6 +6,7 @@ import {
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
+import Big from 'big.js';
 
 import {
   encodeOptimalSwapData,
@@ -15,7 +16,7 @@ import {
 import { StateOverrides, getERC20Overrides } from '../overrides';
 import { computePoolAddress } from '../pool';
 import { getApproveTarget } from './index';
-import { quote } from './quote';
+import { SwapRoute, quote } from './quote';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
@@ -133,11 +134,33 @@ async function optimalMintPool(
     undefined,
     overrides,
   );
+  let swapRoute: SwapRoute = [];
+  if (mintParams.amount0Desired.toString() !== amount0.toString()) {
+    const [fromTokenAddress, toTokenAddress] = new Big(
+      mintParams.amount0Desired.toString(),
+    ).gt(amount0.toString())
+      ? [mintParams.token0, mintParams.token1]
+      : [mintParams.token1, mintParams.token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+
   return {
     amount0,
     amount1,
     liquidity,
     swapData: '0x',
+    swapRoute,
   };
 }
 
@@ -149,11 +172,12 @@ async function optimalMintRouter(
   slippage: number,
   overrides?: StateOverrides,
 ) {
-  const swapData = await getOptimalMintSwapData(
+  const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
     provider,
     mintParams,
     slippage,
+    true,
   );
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
@@ -169,6 +193,7 @@ async function optimalMintRouter(
     amount1,
     liquidity,
     swapData,
+    swapRoute,
   };
 }
 
@@ -177,6 +202,7 @@ async function getOptimalMintSwapData(
   provider: JsonRpcProvider | Provider,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
   slippage: number,
+  includeRoute?: boolean,
 ) {
   const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
   const automan = getAutomanContract(chainId, provider);
@@ -195,24 +221,28 @@ async function getOptimalMintSwapData(
     mintParams.amount1Desired,
   );
   // get a quote from 1inch
-  const { tx } = await quote(
+  const { tx, protocols } = await quote(
     chainId,
     zeroForOne ? mintParams.token0 : mintParams.token1,
     zeroForOne ? mintParams.token1 : mintParams.token0,
     poolAmountIn.toString(),
     optimal_swap_router!,
     slippage * 100,
+    includeRoute,
   );
-  return encodeOptimalSwapData(
-    chainId,
-    mintParams.token0,
-    mintParams.token1,
-    mintParams.fee as FeeAmount,
-    mintParams.tickLower as number,
-    mintParams.tickUpper as number,
-    zeroForOne,
-    approveTarget,
-    tx.to,
-    tx.data,
-  );
+  return {
+    swapData: encodeOptimalSwapData(
+      chainId,
+      mintParams.token0,
+      mintParams.token1,
+      mintParams.fee as FeeAmount,
+      mintParams.tickLower as number,
+      mintParams.tickUpper as number,
+      zeroForOne,
+      approveTarget,
+      tx.to,
+      tx.data,
+    ),
+    swapRoute: protocols,
+  };
 }

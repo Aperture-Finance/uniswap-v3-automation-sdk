@@ -400,6 +400,55 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('8736560293857784398');
   });
 
+  it('Test calculateMintOptimalPriceImpact 0 price impact', async function () {
+    const blockNumber = 17975698n;
+    const publicClient = getInfuraClient();
+    const token0 = WBTC_ADDRESS;
+    const token1 = WETH_ADDRESS;
+    const fee = FeeAmount.MEDIUM;
+    const amount0Desired = 96674n;
+    const amount1Desired = 16468879195954429n;
+    const pool = await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      undefined,
+      blockNumber,
+    );
+
+    const mintParams = {
+      token0: token0 as Address,
+      token1: token1 as Address,
+      fee,
+      tickLower: nearestUsableTick(
+        pool.tickCurrent - 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      tickUpper: nearestUsableTick(
+        pool.tickCurrent + 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      recipient: eoa as Address,
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+
+    const priceImpact = await calculateMintOptimalPriceImpact({
+      chainId,
+      publicClient,
+      from: eoa,
+      mintParams,
+      swapData: undefined,
+      blockNumber,
+    });
+
+    expect(priceImpact.toString()).to.equal('0');
+  });
+
   it('Test calculateRebalancePriceImpact', async function () {
     const blockNumber = 17975698n;
     const publicClient = getInfuraClient();

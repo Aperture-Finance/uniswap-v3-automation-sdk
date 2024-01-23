@@ -2,6 +2,15 @@ import { ApertureSupportedChainId } from '@/index';
 
 import { buildRequest } from './internal';
 
+type SelectedProtocol = {
+  name: string;
+  part: number;
+  fromTokenAddress: string;
+  toTokenAddress: string;
+};
+
+export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
+
 /**
  * Get a quote for a swap.
  * @param chainId The chain ID.
@@ -18,6 +27,7 @@ export async function quote(
   amount: string,
   from: string,
   slippage: number,
+  includeProtocols?: boolean,
 ): Promise<{
   toAmount: string;
   tx: {
@@ -28,6 +38,7 @@ export async function quote(
     gas: string;
     gasPrice: string;
   };
+  protocols?: SwapRoute;
 }> {
   const swapParams = {
     src,
@@ -37,6 +48,7 @@ export async function quote(
     slippage: slippage.toString(),
     disableEstimate: 'true',
     allowPartialFill: 'false',
+    includeProtocols: (!!includeProtocols).toString(),
   };
   try {
     return (
