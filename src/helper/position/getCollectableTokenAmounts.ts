@@ -4,7 +4,7 @@ import { CurrencyAmount } from '@uniswap/sdk-core';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { getBasicPositionInfo } from './getBasicPositionInfo';
-import { getNPM } from './getNPM';
+import { getNPM } from './position';
 import { BasicPositionInfo, CollectableTokenAmounts } from './types';
 
 /**

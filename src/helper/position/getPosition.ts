@@ -4,7 +4,7 @@ import { Position } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
 
 import { getPool, getPoolFromBasicPositionInfo } from '../pool';
-import { getNPM } from './getNPM';
+import { getNPM } from './position';
 import { BasicPositionInfo } from './types';
 
 export async function getPositionFromBasicInfo(
