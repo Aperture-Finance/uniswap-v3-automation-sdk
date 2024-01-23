@@ -52,7 +52,7 @@ import {
   resetHardhatNetwork,
 } from './common';
 
-describe('Position util tests', function () {
+describe('Helper - Position util tests', function () {
   let inRangePosition: Position;
 
   beforeEach(async function () {
