@@ -421,7 +421,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
-    rpc_url: 'https://pacific-rpc.manta.network/http',
+    rpc_url: 'https://manta-pacific-aperture.calderachain.xyz/http',
     maxGasCeiling: 0.2,
     uniswap_subgraph_url:
       'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture/uniswap-v3/gn',
