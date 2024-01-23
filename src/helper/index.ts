@@ -10,3 +10,4 @@ export * from './aggregator';
 export * from './payload';
 export * from './permission';
 export * from './whitelist';
+export * from './activity';
