@@ -14,6 +14,7 @@ import {
 import { Signer } from 'ethers';
 
 import { getToken } from '../currency';
+import { BasicPositionInfo } from '../position';
 import { getPublicProvider } from '../provider';
 
 /**
@@ -120,4 +121,25 @@ export function computePoolAddress(
     ),
     fee,
   });
+}
+
+/**
+ * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
+ * @param basicInfo Basic position info.
+ * @param chainId Chain id.
+ * @param provider Ethers provider.
+ * @returns The constructed Uniswap SDK Pool object where the specified position resides.
+ */
+export async function getPoolFromBasicPositionInfo(
+  basicInfo: BasicPositionInfo,
+  chainId: ApertureSupportedChainId,
+  provider: Provider,
+): Promise<Pool> {
+  return getPool(
+    basicInfo.token0,
+    basicInfo.token1,
+    basicInfo.fee,
+    chainId,
+    provider,
+  );
 }

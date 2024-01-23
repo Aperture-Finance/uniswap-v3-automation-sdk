@@ -1,10 +1,16 @@
-import { IUniV3Automan__factory } from '@/index';
+import { ChainInfo, IUniV3Automan__factory } from '@/index';
+import { ApertureSupportedChainId } from '@/index';
+import { INonfungiblePositionManager__factory } from '@/index';
+import { EventFragment } from '@ethersproject/abi';
 import { Provider } from '@ethersproject/providers';
+import { Log, TransactionReceipt } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
+import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { Pool, Position } from '@uniswap/v3-sdk';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { AutomanFragment } from '../automan';
+import { getNativeCurrency } from '../currency';
 
 export interface SimulatedAmounts {
   amount0: BigNumber;
@@ -52,4 +58,69 @@ export async function getAmountsWithSlippage(
     amount0Min: amount0Min.toString(),
     amount1Min: amount1Min.toString(),
   };
+}
+
+export function getTxToNonfungiblePositionManager(
+  chainInfo: ChainInfo,
+  data: string,
+  value?: BigNumberish,
+) {
+  return {
+    to: chainInfo.uniswap_v3_nonfungible_position_manager,
+    data,
+    value,
+  };
+}
+
+export function convertCollectableTokenAmountToExpectedCurrencyOwed(
+  collectableTokenAmount: {
+    token0Amount: CurrencyAmount<Token>;
+    token1Amount: CurrencyAmount<Token>;
+  },
+  chainId: ApertureSupportedChainId,
+  token0: Token,
+  token1: Token,
+  receiveNativeEtherIfApplicable?: boolean,
+): {
+  expectedCurrencyOwed0: CurrencyAmount<Currency>;
+  expectedCurrencyOwed1: CurrencyAmount<Currency>;
+} {
+  let expectedCurrencyOwed0: CurrencyAmount<Currency> =
+    collectableTokenAmount.token0Amount;
+  let expectedCurrencyOwed1: CurrencyAmount<Currency> =
+    collectableTokenAmount.token1Amount;
+  if (receiveNativeEtherIfApplicable) {
+    const nativeEther = getNativeCurrency(chainId);
+    const weth = nativeEther.wrapped;
+    if (weth.equals(token0)) {
+      expectedCurrencyOwed0 = CurrencyAmount.fromRawAmount(
+        nativeEther,
+        collectableTokenAmount.token0Amount.quotient,
+      );
+    } else if (weth.equals(token1)) {
+      expectedCurrencyOwed1 = CurrencyAmount.fromRawAmount(
+        nativeEther,
+        collectableTokenAmount.token1Amount.quotient,
+      );
+    }
+  }
+  return {
+    expectedCurrencyOwed0,
+    expectedCurrencyOwed1,
+  };
+}
+
+/**
+ * Filter logs by event.
+ * @param receipt Transaction receipt.
+ * @param event Event fragment.
+ * @returns The filtered logs.
+ */
+export function filterLogsByEvent(
+  receipt: TransactionReceipt,
+  event: EventFragment,
+): Log[] {
+  const eventSig =
+    INonfungiblePositionManager__factory.createInterface().getEventTopic(event);
+  return receipt.logs.filter((log) => log.topics[0] === eventSig);
 }

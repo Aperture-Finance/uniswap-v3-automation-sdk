@@ -3,9 +3,10 @@ import {
   INonfungiblePositionManager__factory,
   getChainInfo,
 } from '@/index';
-import { EventFragment } from '@ethersproject/abi';
-import { Log, TransactionReceipt } from '@ethersproject/providers';
+import { TransactionReceipt } from '@ethersproject/providers';
 import { BigNumber } from 'ethers';
+
+import { filterLogsByEvent } from './internal';
 
 /**
  * Parses the specified transaction receipt and extracts the position id (token id) minted by NPM within the transaction.
@@ -38,19 +39,4 @@ export function getMintedPositionIdFromTxReceipt(
     }
   }
   return undefined;
-}
-
-/**
- * Filter logs by event.
- * @param receipt Transaction receipt.
- * @param event Event fragment.
- * @returns The filtered logs.
- */
-export function filterLogsByEvent(
-  receipt: TransactionReceipt,
-  event: EventFragment,
-): Log[] {
-  const eventSig =
-    INonfungiblePositionManager__factory.createInterface().getEventTopic(event);
-  return receipt.logs.filter((log) => log.topics[0] === eventSig);
 }
