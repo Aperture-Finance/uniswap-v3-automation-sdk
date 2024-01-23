@@ -70,30 +70,29 @@ export function getWhitelistedPools(
 export async function getPoolsFromSubgraph(
   chainId: ApertureSupportedChainId,
 ): Promise<Pool[]> {
-  return (
-    await axios.post(getChainInfo(chainId).uniswap_subgraph_url!, {
-      operationName: 'getAllPools',
-      query: `query getAllPools {
-                  pools {
+  const res = await axios.post(getChainInfo(chainId).uniswap_subgraph_url!, {
+    operationName: 'getAllPools',
+    query: `query getAllPools {
+                pools (subgraphError: allow) {
+                  id
+                  feeTier
+                  token0 {
                     id
-                    feeTier
-                    token0 {
-                      id
-                      symbol
-                      decimals
-                      name
-                    }
-                    token1 {
-                      id
-                      symbol
-                      decimals
-                      name
-                    }
+                    symbol
+                    decimals
+                    name
                   }
-                }`,
-      variables: {},
-    })
-  ).data.data.pools;
+                  token1 {
+                    id
+                    symbol
+                    decimals
+                    name
+                  }
+                }
+              }`,
+    variables: {},
+  });
+  return res.data.data.pools;
 }
 
 // Sample code for constructing whitelisted pools and tokens for Manta Pacific.
