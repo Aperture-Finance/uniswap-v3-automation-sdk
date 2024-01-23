@@ -14,7 +14,7 @@ import {
   getERC20Overrides,
   staticCallWithOverrides,
 } from '../overrides';
-import { UnwrapPromise } from './internal';
+import { UnwrapPromise } from './automan';
 
 export type MintReturnType = UnwrapPromise<
   ReturnType<UniV3Automan['callStatic']['mintOptimal']>
