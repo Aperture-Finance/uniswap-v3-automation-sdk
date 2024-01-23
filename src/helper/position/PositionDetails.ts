@@ -8,8 +8,8 @@ import { BigNumber, BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
 
 import { getPoolContract } from '../pool';
-import { getNPM } from './getNPM';
 import { getBasicPositionInfo } from './index';
+import { getNPM } from './position';
 import { BasicPositionInfo, CollectableTokenAmounts } from './types';
 
 /**

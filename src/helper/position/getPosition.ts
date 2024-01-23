@@ -3,8 +3,25 @@ import { BlockTag, Provider } from '@ethersproject/providers';
 import { Position } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
 
-import { getPool } from '../pool';
-import { getNPM } from './getNPM';
+import { getPool, getPoolFromBasicPositionInfo } from '../pool';
+import { getNPM } from './position';
+import { BasicPositionInfo } from './types';
+
+export async function getPositionFromBasicInfo(
+  basicInfo: BasicPositionInfo,
+  chainId: ApertureSupportedChainId,
+  provider: Provider,
+): Promise<Position> {
+  if (basicInfo.liquidity === undefined) {
+    throw 'Missing position liquidity info';
+  }
+  return new Position({
+    pool: await getPoolFromBasicPositionInfo(basicInfo, chainId, provider),
+    liquidity: basicInfo.liquidity,
+    tickLower: basicInfo.tickLower,
+    tickUpper: basicInfo.tickUpper,
+  });
+}
 
 /**
  * Get the Uniswap `Position` object for the specified position id.

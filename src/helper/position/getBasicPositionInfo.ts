@@ -3,7 +3,7 @@ import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 
 import { getToken } from '../currency';
-import { getNPM } from './getNPM';
+import { getNPM } from './position';
 import { BasicPositionInfo } from './types';
 
 export async function getBasicPositionInfo(
