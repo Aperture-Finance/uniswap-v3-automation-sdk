@@ -5,7 +5,7 @@ import { BigNumberish } from 'ethers';
 
 import { getAutomanReinvestCallInfo } from '../automan';
 import { PositionDetails } from '../position';
-import { SimulatedAmounts, getAmountsWithSlippage } from './internal';
+import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
 
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.

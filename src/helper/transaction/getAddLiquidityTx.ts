@@ -8,7 +8,7 @@ import {
 } from '@uniswap/v3-sdk';
 
 import { PositionDetails } from '../position';
-import { getTxToNonfungiblePositionManager } from './internal';
+import { getTxToNonfungiblePositionManager } from './transaction';
 
 /**
  * Generates an unsigned transaction that adds liquidity to an existing position.

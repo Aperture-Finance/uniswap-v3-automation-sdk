@@ -7,7 +7,7 @@ import {
 } from '@uniswap/v3-sdk';
 
 import { getPool } from '../pool';
-import { getTxToNonfungiblePositionManager } from './internal';
+import { getTxToNonfungiblePositionManager } from './transaction';
 
 /**
  * Generates an unsigned transaction that creates a position as specified.

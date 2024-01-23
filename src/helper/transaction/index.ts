@@ -9,4 +9,5 @@ export * from './getCollectTx';
 export * from './getCollectedFeesFromReceipt';
 export * from './getCreatePositionTx';
 export * from './getRemoveLiquidityTx';
-export { filterLogsByEvent } from './internal';
+export * from './getCreatePositionTxForLimitOrder';
+export { filterLogsByEvent } from './transaction';
