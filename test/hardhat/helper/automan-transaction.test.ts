@@ -303,7 +303,7 @@ describe('Helper - Automan transaction tests', function () {
       eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
-    const { tx, swapRoute } = await getOptimalMintTx(
+    const { tx, swapRoute, swapPath } = await getOptimalMintTx(
       chainId,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
@@ -320,6 +320,15 @@ describe('Helper - Automan transaction tests', function () {
     expect(JSON.stringify(swapRoute)).to.equal(
       '[[[{"name":"Pool","part":100,"fromTokenAddress":"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599","toTokenAddress":"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}]]]',
     );
+    expect(swapPath.tokenIn).to.eq(
+      '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    );
+    expect(swapPath.tokenOut).to.eq(
+      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    );
+    expect(swapPath.amountIn).to.eq('46683580');
+    expect(swapPath.amountOut).to.eq('7119685228216229858');
+    expect(swapPath.minAmountOut).to.eq('7084086802075148709');
 
     const txReceipt = await (
       await impersonatedOwnerSigner.sendTransaction(tx)
