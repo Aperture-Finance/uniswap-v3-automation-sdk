@@ -6,16 +6,13 @@ import {
 import { Provider } from '@ethersproject/abstract-provider';
 import { BlockTag } from '@ethersproject/providers';
 import { Token } from '@uniswap/sdk-core';
-import {
-  FeeAmount,
-  Pool,
-  computePoolAddress as _computePoolAddress,
-} from '@uniswap/v3-sdk';
+import { FeeAmount, Pool } from '@uniswap/v3-sdk';
 import { Signer } from 'ethers';
 
 import { getToken } from '../currency';
 import { BasicPositionInfo } from '../position';
 import { getPublicProvider } from '../provider';
+import { computePoolAddress } from './pool';
 
 /**
  * Constructs a Uniswap SDK Pool object for an existing and initialized pool.
@@ -91,36 +88,6 @@ export function getPoolContract(
     ),
     provider ?? getPublicProvider(chainId),
   );
-}
-
-/**
- * Computes a pool address
- * @param factoryAddress The Uniswap V3 factory address
- * @param token0 The first token of the pair, irrespective of sort order
- * @param token1 The second token of the pair, irrespective of sort order
- * @param fee The fee tier of the pool
- * @returns The pool address
- */
-export function computePoolAddress(
-  factoryAddress: string,
-  token0: Token | string,
-  token1: Token | string,
-  fee: FeeAmount,
-): string {
-  return _computePoolAddress({
-    factoryAddress,
-    tokenA: new Token(
-      1,
-      typeof token0 === 'string' ? token0 : token0.address,
-      18,
-    ),
-    tokenB: new Token(
-      1,
-      typeof token1 === 'string' ? token1 : token1.address,
-      18,
-    ),
-    fee,
-  });
 }
 
 /**

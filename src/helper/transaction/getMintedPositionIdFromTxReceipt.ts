@@ -6,7 +6,7 @@ import {
 import { TransactionReceipt } from '@ethersproject/providers';
 import { BigNumber } from 'ethers';
 
-import { filterLogsByEvent } from './internal';
+import { filterLogsByEvent } from './transaction';
 
 /**
  * Parses the specified transaction receipt and extracts the position id (token id) minted by NPM within the transaction.

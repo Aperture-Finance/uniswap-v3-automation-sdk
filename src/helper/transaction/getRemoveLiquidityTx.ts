@@ -14,7 +14,7 @@ import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import {
   convertCollectableTokenAmountToExpectedCurrencyOwed,
   getTxToNonfungiblePositionManager,
-} from './internal';
+} from './transaction';
 
 /**
  * Generates an unsigned transaction that removes partial or entire liquidity from the specified position and claim accrued fees.

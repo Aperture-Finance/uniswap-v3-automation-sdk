@@ -11,7 +11,7 @@ import {
 import {
   convertCollectableTokenAmountToExpectedCurrencyOwed,
   getTxToNonfungiblePositionManager,
-} from './internal';
+} from './transaction';
 
 /**
  * Generates an unsigned transaction that collects tokens from the specified position.

@@ -4,7 +4,7 @@ import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { BigNumber } from 'ethers';
 
 import { CollectableTokenAmounts } from '../position';
-import { filterLogsByEvent } from './internal';
+import { filterLogsByEvent } from './transaction';
 
 /**
  * Get the collected fees in the position from a transaction receipt.

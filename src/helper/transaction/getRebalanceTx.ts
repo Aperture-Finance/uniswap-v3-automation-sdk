@@ -21,7 +21,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { SimulatedAmounts } from './internal';
+import { SimulatedAmounts } from './transaction';
 
 /**
  * Generates an unsigned transaction that rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
