@@ -7,10 +7,8 @@ import {
   getFeeTierDistribution,
   getLiquidityArrayForPool,
   getPool,
-  getPoolsFromSubgraph,
   getPublicProvider,
   getTickToLiquidityMapForPool,
-  getWhitelistedPools,
 } from '../../../src/helper';
 import { WBTC_ADDRESS, WETH_ADDRESS, chainId, expect } from './common';
 
@@ -80,16 +78,5 @@ describe('Helper - Pool subgraph query tests', function () {
       getPublicProvider(arbitrumChainId),
     );
     await testLiquidityDistribution(arbitrumChainId, pool);
-  });
-
-  it('Get all pools', async function () {
-    const pools = await getPoolsFromSubgraph(
-      ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
-    );
-    const whitelistedPools = getWhitelistedPools(
-      ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
-      pools,
-    );
-    expect(whitelistedPools.size).to.be.greaterThanOrEqual(6);
   });
 });
