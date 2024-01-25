@@ -7,6 +7,8 @@ import {
 import { BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
 
+import { checkTokenLiquidityAgainstChainNativeCurrency } from '../currency';
+
 export type TickNumber = number;
 export type LiquidityAmount = JSBI;
 export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
@@ -106,4 +108,47 @@ export function computePoolAddress(
     ),
     fee,
   });
+}
+
+/**
+ * Returns the liquidity amount at the specified tick.
+ * @param tickToLiquidityMap Sorted map from tick to liquidity amount.
+ * @param tick The tick to query.
+ * @returns The liquidity amount at the specified tick.
+ */
+export function readTickToLiquidityMap(
+  tickToLiquidityMap: TickToLiquidityMap,
+  tick: TickNumber,
+): LiquidityAmount {
+  if (tickToLiquidityMap.get(tick) !== undefined) {
+    return tickToLiquidityMap.get(tick)!;
+  } else {
+    const key = [...tickToLiquidityMap.keys()].findIndex((t) => t > tick) - 1;
+    if (key >= 0) {
+      return tickToLiquidityMap.get(key)!;
+    }
+  }
+  return JSBI.BigInt(0);
+}
+
+/**
+ * Checks whether the specified pool is supported by Aperture automation, i.e. pre-scheduled position close, rebalance, auto-compound, etc.
+ * @param tokenA One of the tokens in the pool.
+ * @param tokenB The other token in the pool.
+ */
+export async function checkAutomationSupportForPool(
+  tokenA: Token,
+  tokenB: Token,
+): Promise<boolean> {
+  const [quoteA, quoteB] = await Promise.all([
+    checkTokenLiquidityAgainstChainNativeCurrency(
+      tokenA.chainId,
+      tokenA.address,
+    ),
+    checkTokenLiquidityAgainstChainNativeCurrency(
+      tokenB.chainId,
+      tokenB.address,
+    ),
+  ]);
+  return quoteA !== '-1' && quoteB !== '-1';
 }
