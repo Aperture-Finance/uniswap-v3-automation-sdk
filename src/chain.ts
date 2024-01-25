@@ -150,6 +150,7 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'ethereum',
     infura_network_id: 'mainnet',
+    rpc_url: 'https://ethereum.publicnode.com',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
     maxGasCeiling: 0.5,

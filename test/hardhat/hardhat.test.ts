@@ -154,7 +154,7 @@ describe('Estimate gas tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      publicClient,
       blockNumber,
     );
     const mintParams = {
@@ -353,7 +353,7 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      publicClient,
       blockNumber,
     );
     const mintParams = {
@@ -413,7 +413,7 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      publicClient,
       blockNumber,
     );
 
@@ -463,7 +463,7 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      publicClient,
       blockNumber,
     );
     const mintParams = {
@@ -902,6 +902,18 @@ describe('Position util tests', function () {
       expect(position?.tickLower).to.equal(pos.tickLower);
       expect(position?.tickUpper).to.equal(pos.tickUpper);
     }
+  });
+
+  it('Test getAllPositions with large balances', async function () {
+    const publicClient = getPublicClient(1);
+    // An address with 7000+ positions on mainnet.
+    const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
+    const positionDetails = await getAllPositions(
+      address,
+      chainId,
+      publicClient,
+    );
+    expect(positionDetails.size).to.greaterThan(7000);
   });
 
   it('Test getReinvestedPosition', async function () {

@@ -22,9 +22,11 @@ import {
 } from 'aperture-lens';
 import Big from 'big.js';
 import JSBI from 'jsbi';
+import { chunk, flatten } from 'lodash';
 import {
   AbiStateMutability,
   Address,
+  CallExecutionErrorType,
   ContractFunctionReturnType,
   GetContractReturnType,
   PublicClient,
@@ -152,12 +154,55 @@ export async function getAllPositions(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
-  const positions: PositionStateArray = await viem.getAllPositionsByOwner(
-    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
-    owner,
-    publicClient ?? getPublicClient(chainId),
-    blockNumber,
-  );
+  let positions: PositionStateArray;
+  if (publicClient === undefined) {
+    publicClient = getPublicClient(chainId);
+  }
+  try {
+    positions = await viem.getAllPositionsByOwner(
+      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      owner,
+      publicClient,
+      blockNumber,
+    );
+  } catch (e) {
+    const error = e as CallExecutionErrorType;
+    // If out of gas, fallback to the following logic:
+    //   - Get the number of positions owned by the owner.
+    //   - Batch fetch token ids.
+    //   - Batch fetch position details using token ids.
+    if (error.details === 'out of gas') {
+      const npm = getNPM(chainId, publicClient);
+      const numPositions = await npm.read.balanceOf([owner], { blockNumber });
+      const tokenIdsPromise: Promise<bigint>[] = [];
+      for (let i = 0; i < numPositions; i++) {
+        tokenIdsPromise.push(
+          npm.read.tokenOfOwnerByIndex([owner, BigInt(i)], {
+            blockNumber,
+          }),
+        );
+      }
+      const tokenIds = await Promise.all(tokenIdsPromise);
+
+      // Fetch position state.
+      positions = flatten(
+        await Promise.all(
+          chunk(tokenIds, 500).map((tokenIdsChunk) => {
+            return viem.getPositions(
+              npm.address,
+              tokenIdsChunk,
+              publicClient!,
+              blockNumber,
+            );
+          }),
+        ),
+      );
+    } else {
+      // Other type of error. Keep throwing.
+      throw e;
+    }
+  }
+
   return new Map(
     positions.map(
       (pos) =>
