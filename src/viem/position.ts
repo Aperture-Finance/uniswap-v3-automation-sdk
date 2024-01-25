@@ -31,9 +31,11 @@ import {
   GetContractReturnType,
   PublicClient,
   WalletClient,
+  createPublicClient,
   decodeFunctionResult,
   getAddress,
   getContract,
+  http,
 } from 'viem';
 
 import { getAutomanReinvestCalldata } from './automan';
@@ -155,9 +157,16 @@ export async function getAllPositions(
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
   let positions: PositionStateArray;
-  if (publicClient === undefined) {
-    publicClient = getPublicClient(chainId);
-  }
+  // Override to use a new client with known node endpoint and multicall config.
+  publicClient = createPublicClient({
+    batch: {
+      multicall: {
+        batchSize: 2_048,
+      },
+    },
+    chain: getChainInfo(chainId).chain,
+    transport: http(getChainInfo(chainId).rpc_url),
+  });
   try {
     positions = await viem.getAllPositionsByOwner(
       getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
