@@ -15,7 +15,7 @@ import {
   getNPMApprovalOverrides,
   tryStaticCallWithOverrides,
 } from '../overrides';
-import { AutomanCallInfo, UnwrapPromise } from './internal';
+import { AutomanCallInfo, UnwrapPromise } from './automan';
 
 type RemoveLiquidityReturnType = UnwrapPromise<
   ReturnType<UniV3Automan['callStatic'][GetAutomanFragment<'removeLiquidity('>]>
