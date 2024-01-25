@@ -866,7 +866,7 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const publicClient = getPublicClient(5);
+    const publicClient = getPublicClient(1);
     // an address with 90+ positions
     const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
     const positionDetails = await getAllPositions(
