@@ -109,8 +109,8 @@ export async function getOptimalMintTx(
     },
     swapRoute,
     swapPath: getSwapPath(
-      token0Amount,
-      token1Amount,
+      token0Amount as CurrencyAmount<Token>,
+      token1Amount as CurrencyAmount<Token>,
       expectedAmount0,
       expectedAmount1,
       slippage,
@@ -127,8 +127,8 @@ type SwapPath = {
 };
 
 const getSwapPath = (
-  token0: CurrencyAmount<Currency>,
-  token1: CurrencyAmount<Currency>,
+  token0: CurrencyAmount<Token>,
+  token1: CurrencyAmount<Token>,
   finalToken0Amount: BigNumber,
   finalToken1Amount: BigNumber,
   slippage: number,
@@ -152,8 +152,8 @@ const getSwapPath = (
       ];
 
   return {
-    tokenIn: (tokenIn as Token).address as Address,
-    tokenOut: (tokenOut as Token).address as Address,
+    tokenIn: tokenIn.address as Address,
+    tokenOut: tokenOut.address as Address,
     amountIn: amountIn.toString(),
     amountOut: amountOut.toString(),
     minAmountOut: new Big(amountOut.toString())
