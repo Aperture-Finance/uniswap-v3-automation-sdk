@@ -31,11 +31,9 @@ import {
   GetContractReturnType,
   PublicClient,
   WalletClient,
-  createPublicClient,
   decodeFunctionResult,
   getAddress,
   getContract,
-  http,
 } from 'viem';
 
 import { getAutomanReinvestCalldata } from './automan';
