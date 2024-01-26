@@ -157,16 +157,7 @@ export async function getAllPositions(
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
   let positions: PositionStateArray;
-  // Override to use a new client with known node endpoint and multicall config.
-  publicClient = createPublicClient({
-    batch: {
-      multicall: {
-        batchSize: 2_048,
-      },
-    },
-    chain: getChainInfo(chainId).chain,
-    transport: http(getChainInfo(chainId).rpc_url),
-  });
+  publicClient = publicClient ?? getPublicClient(chainId);
   try {
     positions = await viem.getAllPositionsByOwner(
       getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
@@ -183,27 +174,32 @@ export async function getAllPositions(
     if (error.details === 'out of gas') {
       const npm = getNPM(chainId, publicClient);
       const numPositions = await npm.read.balanceOf([owner], { blockNumber });
-      const tokenIdsPromise: Promise<bigint>[] = [];
-      for (let i = 0; i < numPositions; i++) {
-        tokenIdsPromise.push(
-          npm.read.tokenOfOwnerByIndex([owner, BigInt(i)], {
-            blockNumber,
+      const tokenIds = (
+        await publicClient.multicall({
+          contracts: [...Array(Number(numPositions)).keys()].map((i) => {
+            return {
+              address: npm.address,
+              abi: npm.abi,
+              functionName: 'tokenOfOwnerByIndex',
+              args: [owner, BigInt(i)],
+            };
           }),
-        );
-      }
-      const tokenIds = await Promise.all(tokenIdsPromise);
+          allowFailure: false,
+          batchSize: 2_048,
+        })
+      ).map((i) => BigInt(i));
 
       // Fetch position state.
       positions = flatten(
         await Promise.all(
-          chunk(tokenIds, 500).map((tokenIdsChunk) => {
-            return viem.getPositions(
+          chunk(tokenIds, 500).map((tokenIdsChunk) =>
+            viem.getPositions(
               npm.address,
               tokenIdsChunk,
               publicClient!,
               blockNumber,
-            );
-          }),
+            ),
+          ),
         ),
       );
     } else {
