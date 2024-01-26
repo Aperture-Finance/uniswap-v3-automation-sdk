@@ -208,6 +208,7 @@ describe('Helper - Automan transaction tests', function () {
     });
   });
 
+  // This test is known to be flaky.
   it('Optimal mint with 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
