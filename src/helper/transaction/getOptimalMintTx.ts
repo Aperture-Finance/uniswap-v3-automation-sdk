@@ -6,7 +6,9 @@ import {
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Position } from '@uniswap/v3-sdk';
-import { BigNumberish } from 'ethers';
+import Big from 'big.js';
+import { BigNumber, BigNumberish } from 'ethers';
+import { Address } from 'viem';
 
 import { optimalMint } from '../aggregator';
 import { getNativeCurrency } from '../currency';
@@ -53,7 +55,13 @@ export async function getOptimalMintTx(
     );
     value = token1Amount.quotient.toString();
   }
-  const { liquidity, swapData, swapRoute } = await optimalMint(
+  const {
+    amount0: expectedAmount0,
+    amount1: expectedAmount1,
+    liquidity,
+    swapData,
+    swapRoute,
+  } = await optimalMint(
     chainId,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
@@ -100,5 +108,56 @@ export async function getOptimalMintTx(
       value,
     },
     swapRoute,
+    swapPath: getSwapPath(
+      token0Amount as CurrencyAmount<Token>,
+      token1Amount as CurrencyAmount<Token>,
+      expectedAmount0,
+      expectedAmount1,
+      slippage,
+    ),
   };
 }
+
+type SwapPath = {
+  tokenIn: Address;
+  tokenOut: Address;
+  amountIn: string;
+  amountOut: string;
+  minAmountOut: string;
+};
+
+const getSwapPath = (
+  token0: CurrencyAmount<Token>,
+  token1: CurrencyAmount<Token>,
+  finalToken0Amount: BigNumber,
+  finalToken1Amount: BigNumber,
+  slippage: number,
+): SwapPath => {
+  const initToken0Amount = token0.quotient.toString();
+  const initToken1Amount = token1.quotient.toString();
+  const [tokenIn, tokenOut, amountIn, amountOut] = finalToken0Amount.gt(
+    initToken0Amount,
+  )
+    ? [
+        token1.currency,
+        token0.currency,
+        finalToken1Amount.sub(initToken1Amount).abs(),
+        finalToken0Amount.sub(initToken0Amount),
+      ]
+    : [
+        token0.currency,
+        token1.currency,
+        finalToken0Amount.sub(initToken0Amount).abs(),
+        finalToken1Amount.sub(initToken1Amount),
+      ];
+
+  return {
+    tokenIn: tokenIn.address as Address,
+    tokenOut: tokenOut.address as Address,
+    amountIn: amountIn.toString(),
+    amountOut: amountOut.toString(),
+    minAmountOut: new Big(amountOut.toString())
+      .times(1 - slippage * 0.01)
+      .toFixed(0),
+  };
+};
