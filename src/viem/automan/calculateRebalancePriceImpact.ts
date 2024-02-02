@@ -4,7 +4,8 @@ import { Address, Hex, PublicClient } from 'viem';
 
 import { getPosition } from '../position';
 import { simulateRebalance, simulateRemoveLiquidity } from './automan';
-import { MintParams, getFromAddress } from './internal';
+import { getFromAddress } from './internal';
+import { MintParams } from './types';
 
 type IRebalanceParams = {
   chainId: ApertureSupportedChainId;

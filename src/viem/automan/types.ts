@@ -1,4 +1,7 @@
-import { UniV3Automan__factory } from '@/index';
+import {
+  INonfungiblePositionManager__factory,
+  UniV3Automan__factory,
+} from '@/index';
 import {
   AbiStateMutability,
   ContractFunctionArgs,
@@ -34,3 +37,8 @@ export type GetAutomanReturnTypes<
   functionName,
   args // to dedup function name
 >;
+
+export type MintParams = GetAbiFunctionParamsTypes<
+  typeof INonfungiblePositionManager__factory.abi,
+  'mint'
+>[0];
