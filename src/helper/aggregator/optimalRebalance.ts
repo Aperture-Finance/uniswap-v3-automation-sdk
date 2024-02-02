@@ -28,6 +28,7 @@ export async function optimalRebalance(
   fromAddress: string,
   slippage: number,
   provider: JsonRpcProvider | Provider,
+  blockNumber?: number,
 ) {
   const position = await PositionDetails.fromPositionId(
     chainId,
@@ -44,6 +45,7 @@ export async function optimalRebalance(
       0,
       0,
       feeBips,
+      blockNumber,
     );
   const mintParams: INonfungiblePositionManager.MintParamsStruct = {
     token0: position.token0.address,
@@ -61,6 +63,7 @@ export async function optimalRebalance(
   let swapData = '0x';
   if (!usePool) {
     try {
+      // can't get swap data using blockNumber?
       swapData = await getOptimalMintSwapData(
         chainId,
         provider,
@@ -80,6 +83,7 @@ export async function optimalRebalance(
     positionId,
     feeBips,
     swapData,
+    blockNumber,
   );
   return {
     amount0,
