@@ -4,7 +4,8 @@ import { Address, Hex, PublicClient } from 'viem';
 
 import { getPool } from '../pool';
 import { simulateMintOptimal } from './automan';
-import { MintParams, getFromAddress } from './internal';
+import { getFromAddress } from './internal';
+import { MintParams } from './types';
 
 type IMintOptimalParams = {
   chainId: ApertureSupportedChainId;
