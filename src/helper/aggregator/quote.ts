@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 
-import { buildRequest } from './internal';
+import { buildRequest } from './aggregator';
 
 type SelectedProtocol = {
   name: string;

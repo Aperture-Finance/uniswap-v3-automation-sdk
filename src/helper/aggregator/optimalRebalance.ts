@@ -15,7 +15,7 @@ import {
 } from '../automan';
 import { computePoolAddress } from '../pool';
 import { PositionDetails } from '../position';
-import { getApproveTarget } from './index';
+import { getApproveTarget } from './aggregator';
 import { quote } from './quote';
 
 export async function optimalRebalance(

@@ -15,7 +15,7 @@ import {
 } from '../automan';
 import { StateOverrides, getERC20Overrides } from '../overrides';
 import { computePoolAddress } from '../pool';
-import { getApproveTarget } from './index';
+import { getApproveTarget } from './aggregator';
 import { SwapRoute, quote } from './quote';
 
 /**

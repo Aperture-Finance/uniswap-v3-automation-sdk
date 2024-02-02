@@ -8,7 +8,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { getApproveTarget } from './index';
+import { getApproveTarget } from './aggregator';
 import { quote } from './quote';
 
 /**
