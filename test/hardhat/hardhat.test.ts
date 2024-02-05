@@ -95,6 +95,7 @@ import {
   getToken,
   getTokenSvg,
   isPositionInRange,
+  optimalRebalance,
   projectRebalancedPositionAtPrice,
   simulateMintOptimal,
 } from '../../src/viem';
@@ -1408,5 +1409,50 @@ describe('Recurring rebalance tests', function () {
       expect(tickUpper).to.be.greaterThan(pool.tickCurrent);
       expect(tickUpper - tickLower).to.equal(action.tickRangeWidth);
     }
+  });
+});
+
+describe('Routing tests', function () {
+  it('Test optimalRebalance', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const tokenId = 726230n;
+    const blockNumber = 119626480n;
+    const { pool, position } = await PositionDetails.fromPositionId(
+      chainId,
+      tokenId,
+      publicClient,
+      blockNumber,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const owner = await getNPM(chainId, publicClient).read.ownerOf([tokenId]);
+    const { liquidity } = await optimalRebalance(
+      chainId,
+      tokenId,
+      tickLower,
+      tickUpper,
+      0n,
+      true,
+      owner,
+      0.1,
+      publicClient,
+      blockNumber,
+    );
+    const { liquidity: predictedLiquidity } = getRebalancedPosition(
+      position,
+      tickLower,
+      tickUpper,
+    );
+    expect(Number(liquidity.toString())).to.be.closeTo(
+      Number(predictedLiquidity.toString()),
+      Number(predictedLiquidity.toString()) * 0.1,
+    );
   });
 });
