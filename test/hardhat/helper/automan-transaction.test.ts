@@ -236,7 +236,7 @@ describe('Helper - Automan transaction tests', function () {
       eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
-    const { tx, swapRoute } = await getOptimalMintTx(
+    const { tx } = await getOptimalMintTx(
       chainId,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
@@ -248,10 +248,6 @@ describe('Helper - Automan transaction tests', function () {
       0.5,
       new providers.MulticallProvider(hardhatForkProvider),
       true,
-    );
-
-    expect(JSON.stringify(swapRoute)).to.equal(
-      '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
     );
 
     const txReceipt = await (
@@ -303,7 +299,7 @@ describe('Helper - Automan transaction tests', function () {
       eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
-    const { tx, swapRoute, swapPath } = await getOptimalMintTx(
+    const { tx } = await getOptimalMintTx(
       chainId,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
@@ -316,19 +312,6 @@ describe('Helper - Automan transaction tests', function () {
       new providers.MulticallProvider(hardhatForkProvider),
       false,
     );
-
-    expect(JSON.stringify(swapRoute)).to.equal(
-      '[[[{"name":"Pool","part":100,"fromTokenAddress":"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599","toTokenAddress":"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}]]]',
-    );
-    expect(swapPath.tokenIn).to.eq(
-      '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-    );
-    expect(swapPath.tokenOut).to.eq(
-      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    );
-    expect(swapPath.amountIn).to.eq('46683580');
-    expect(swapPath.amountOut).to.eq('7119685228216229858');
-    expect(swapPath.minAmountOut).to.eq('7084086802075148709');
 
     const txReceipt = await (
       await impersonatedOwnerSigner.sendTransaction(tx)
@@ -352,50 +335,6 @@ describe('Helper - Automan transaction tests', function () {
       tickUpper,
       liquidity: '430845571946454',
     });
-  });
-
-  it('Optimal mint no need swap', async function () {
-    const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
-      chainId,
-      hardhatForkProvider,
-    );
-    const amount0 = BigNumber.from('97451');
-    const amount1 = BigNumber.from('16339987095914966');
-    const tickLower = nearestUsableTick(
-      pool.tickCurrent - 10 * pool.tickSpacing,
-      pool.tickSpacing,
-    );
-    const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 10 * pool.tickSpacing,
-      pool.tickSpacing,
-    );
-
-    await dealERC20(
-      chainId,
-      pool.token0.address,
-      pool.token1.address,
-      amount0,
-      amount1,
-      eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
-    );
-    const { swapRoute } = await getOptimalMintTx(
-      chainId,
-      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
-      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      FeeAmount.MEDIUM,
-      tickLower,
-      tickUpper,
-      eoa,
-      Math.floor(Date.now() / 1000) + 60,
-      0.5,
-      new providers.MulticallProvider(hardhatForkProvider),
-    );
-
-    expect(swapRoute?.length).to.equal(0);
   });
 
   it('Test getZapOutTx', async function () {

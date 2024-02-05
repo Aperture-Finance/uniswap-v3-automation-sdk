@@ -1,4 +1,5 @@
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
+import { CurrencyAmount } from '@uniswap/smart-order-router';
 import {
   FeeAmount,
   Pool,
@@ -85,6 +86,7 @@ import {
   getFeeTierDistribution,
   getLiquidityArrayForPool,
   getNPM,
+  getOptimalMintSwapInfo,
   getPool,
   getPosition,
   getPositionAtPrice,
@@ -1408,5 +1410,143 @@ describe('Recurring rebalance tests', function () {
       expect(tickUpper).to.be.greaterThan(pool.tickCurrent);
       expect(tickUpper - tickLower).to.equal(action.tickRangeWidth);
     }
+  });
+});
+
+describe('Automan transaction tests', function () {
+  async function dealERC20(
+    token0: Address,
+    token1: Address,
+    amount0: bigint,
+    amount1: bigint,
+    from: Address,
+    to: Address,
+  ) {
+    const provider = getInfuraClient();
+    const [token0Overrides, token1Overrides] = await Promise.all([
+      getERC20Overrides(token0, from, to, amount0, provider),
+      getERC20Overrides(token1, from, to, amount1, provider),
+    ]);
+    // TODO: not sure how to implement
+
+    // for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
+    //   await hardhatForkProvider.send('hardhat_setStorageAt', [
+    //     token0,
+    //     slot,
+    //     defaultAbiCoder.encode(['uint256'], [amount0]),
+    //   ]);
+    // }
+    // for (const slot of Object.keys(token1Overrides[token1].stateDiff!)) {
+    //   await hardhatForkProvider.send('hardhat_setStorageAt', [
+    //     token1,
+    //     slot,
+    //     defaultAbiCoder.encode(['uint256'], [amount1]),
+    //   ]);
+    // }
+  }
+  // This test is known to be flaky.
+  it('Optimal mint with 1inch', async function () {
+    const publicClient = getInfuraClient();
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      publicClient,
+    );
+    const amount0 = BigInt(new Big(10).pow(pool.token0.decimals).toFixed());
+    const amount1 = BigInt(new Big(10).pow(pool.token1.decimals).toFixed());
+
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 1000,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 1000,
+      pool.tickSpacing,
+    );
+    //
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      amount0,
+      amount1,
+      eoa as Address,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+    const { swapPath, swapRoute, priceImpact } = await getOptimalMintSwapInfo(
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      BigInt(Math.floor(Date.now() / 1000) + 60),
+      0.5,
+      publicClient,
+      true,
+    );
+
+    // console.log('priceImpact', priceImpact.toString());
+
+    expect(JSON.stringify(swapRoute)).to.equal(
+      '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
+    );
+
+    expect(swapPath.tokenIn).to.eq(
+      '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    );
+    expect(swapPath.tokenOut).to.eq(
+      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    );
+    expect(swapPath.amountIn).to.eq('46683580');
+    expect(swapPath.amountOut).to.eq('7119685228216229858');
+    expect(swapPath.minAmountOut).to.eq('7084086802075148709');
+  });
+
+  it('Optimal mint no need swap', async function () {
+    const publicClient = getInfuraClient();
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      publicClient,
+    );
+    const amount0 = 97451n;
+    const amount1 = 16339987095914966n;
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      amount0,
+      amount1,
+      eoa as Address,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+    const { swapRoute } = await getOptimalMintSwapInfo(
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      BigInt(Math.floor(Date.now() / 1000) + 60),
+      0.5,
+      publicClient,
+      true,
+    );
+
+    expect(swapRoute?.length).to.equal(0);
   });
 });
