@@ -13,7 +13,8 @@ import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
-import hre from 'hardhat';
+import { defaultAbiCoder } from 'ethers/lib/utils';
+import hre, { ethers } from 'hardhat';
 import JSBI from 'jsbi';
 import {
   Address,
@@ -1461,6 +1462,7 @@ describe('Routing tests', function () {
 
 describe('Automan transaction tests', function () {
   async function dealERC20(
+    chainId: ApertureSupportedChainId,
     token0: Address,
     token1: Address,
     amount0: bigint,
@@ -1468,31 +1470,30 @@ describe('Automan transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const provider = getInfuraClient();
+    const provider = new ethers.providers.InfuraProvider(chainId);
     const [token0Overrides, token1Overrides] = await Promise.all([
       getERC20Overrides(token0, from, to, amount0, provider),
       getERC20Overrides(token1, from, to, amount1, provider),
     ]);
-    // TODO: not sure how to implement
-
-    // for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
-    //   await hardhatForkProvider.send('hardhat_setStorageAt', [
-    //     token0,
-    //     slot,
-    //     defaultAbiCoder.encode(['uint256'], [amount0]),
-    //   ]);
-    // }
-    // for (const slot of Object.keys(token1Overrides[token1].stateDiff!)) {
-    //   await hardhatForkProvider.send('hardhat_setStorageAt', [
-    //     token1,
-    //     slot,
-    //     defaultAbiCoder.encode(['uint256'], [amount1]),
-    //   ]);
-    // }
+    const hardhatForkProvider = ethers.provider;
+    for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
+      await hardhatForkProvider.send('hardhat_setStorageAt', [
+        token0,
+        slot,
+        defaultAbiCoder.encode(['uint256'], [amount0]),
+      ]);
+    }
+    for (const slot of Object.keys(token1Overrides[token1].stateDiff!)) {
+      await hardhatForkProvider.send('hardhat_setStorageAt', [
+        token1,
+        slot,
+        defaultAbiCoder.encode(['uint256'], [amount1]),
+      ]);
+    }
   }
   // This test is known to be flaky.
   it('Optimal mint with 1inch', async function () {
-    const publicClient = getInfuraClient();
+    const publicClient = hre.viem.getPublicClient();
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1500,6 +1501,7 @@ describe('Automan transaction tests', function () {
       chainId,
       publicClient,
     );
+
     const amount0 = BigInt(new Big(10).pow(pool.token0.decimals).toFixed());
     const amount1 = BigInt(new Big(10).pow(pool.token1.decimals).toFixed());
 
@@ -1511,8 +1513,8 @@ describe('Automan transaction tests', function () {
       pool.tickCurrent + 1000,
       pool.tickSpacing,
     );
-    //
     await dealERC20(
+      chainId,
       pool.token0.address as Address,
       pool.token1.address as Address,
       amount0,
@@ -1534,7 +1536,8 @@ describe('Automan transaction tests', function () {
       true,
     );
 
-    // console.log('priceImpact', priceImpact.toString());
+    // test price impact
+    console.log('priceImpact', priceImpact.toString());
 
     expect(JSON.stringify(swapRoute)).to.equal(
       '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
@@ -1572,6 +1575,7 @@ describe('Automan transaction tests', function () {
     );
 
     await dealERC20(
+      chainId,
       pool.token0.address as Address,
       pool.token1.address as Address,
       amount0,
