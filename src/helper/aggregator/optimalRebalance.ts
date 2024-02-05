@@ -34,6 +34,7 @@ export async function optimalRebalance(
     chainId,
     positionId,
     provider,
+    blockNumber,
   );
   const { amount0: receive0, amount1: receive1 } =
     await simulateRemoveLiquidity(
@@ -68,6 +69,7 @@ export async function optimalRebalance(
         provider,
         mintParams,
         slippage,
+        blockNumber,
       );
     } catch (e) {
       console.error(`Failed to get swap data: ${e}`);
@@ -97,6 +99,7 @@ async function getOptimalMintSwapData(
   provider: JsonRpcProvider | Provider,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
   slippage: number,
+  blockNumber?: number,
 ) {
   const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
   const automan = getAutomanContract(chainId, provider);
@@ -113,6 +116,9 @@ async function getOptimalMintSwapData(
     mintParams.tickUpper,
     mintParams.amount0Desired,
     mintParams.amount1Desired,
+    {
+      blockTag: blockNumber,
+    },
   );
   // get a quote from 1inch
   const { tx } = await quote(
