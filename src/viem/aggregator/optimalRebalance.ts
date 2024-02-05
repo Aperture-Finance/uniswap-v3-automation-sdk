@@ -14,7 +14,6 @@ import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
 import { quote } from './quote';
 
-//TODO: add test for it
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
   positionId: bigint,
@@ -26,7 +25,12 @@ export async function optimalRebalance(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-) {
+): Promise<{
+  amount0: bigint;
+  amount1: bigint;
+  liquidity: bigint;
+  swapData: Hex;
+}> {
   const position = await PositionDetails.fromPositionId(
     chainId,
     positionId,
@@ -122,7 +126,7 @@ async function getOptimalMintSwapData(
     },
   );
   // get a quote from 1inch
-  // seems can't use block number to stabilize the result here
+  // can't use block number to fetch 1inch swap data
   const { tx, protocols } = await quote(
     chainId,
     zeroForOne ? mintParams.token0 : mintParams.token1,

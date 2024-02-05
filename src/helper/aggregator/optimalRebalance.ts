@@ -63,7 +63,6 @@ export async function optimalRebalance(
   let swapData = '0x';
   if (!usePool) {
     try {
-      // can't get swap data using blockNumber?
       swapData = await getOptimalMintSwapData(
         chainId,
         provider,
