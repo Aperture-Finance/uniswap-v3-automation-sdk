@@ -30,12 +30,12 @@ import {
 import {
   DecreaseLiquidityParams,
   IncreaseLiquidityParams,
-  MintParams,
   MintReturnType,
   RebalanceReturnType,
   RemoveLiquidityReturnType,
   getFromAddress,
 } from './internal';
+import { MintParams } from './types';
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,
@@ -84,7 +84,7 @@ export function encodeOptimalSwapData(
   approveTarget: Address,
   router: Address,
   data: Hex,
-): string {
+): Hex {
   return encodePacked(
     ['address', 'bytes'],
     [

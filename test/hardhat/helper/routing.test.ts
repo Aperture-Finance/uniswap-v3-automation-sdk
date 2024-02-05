@@ -114,10 +114,12 @@ describe('Helper - Routing tests', function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const tokenId = 726230;
+    const blockNumber = 119626480;
     const { pool, position } = await PositionDetails.fromPositionId(
       chainId,
       tokenId,
       provider,
+      blockNumber,
     );
     const tickLower = nearestUsableTick(
       pool.tickCurrent - 10 * pool.tickSpacing,
@@ -137,6 +139,7 @@ describe('Helper - Routing tests', function () {
       await getNPM(chainId, provider).ownerOf(tokenId),
       0.1,
       provider,
+      blockNumber,
     );
     const { liquidity: predictedLiquidity } = getRebalancedPosition(
       position,
