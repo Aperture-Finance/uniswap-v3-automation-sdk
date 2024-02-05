@@ -15,7 +15,7 @@ import { Address, PublicClient } from 'viem';
 import { MintParams } from './internal';
 
 /**
- * Generates an unsigned transaction that mints the optimal amount of liquidity for the specified token amounts and price range.
+ * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
  * @param chainId The chain ID.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.

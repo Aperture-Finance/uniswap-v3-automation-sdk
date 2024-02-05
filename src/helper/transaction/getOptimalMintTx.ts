@@ -77,8 +77,8 @@ export async function getOptimalMintTx(
     new Percent(Math.floor(slippage * 1e6), 1e6),
   );
   const mintParams = {
-    token0: token0,
-    token1: token1,
+    token0,
+    token1,
     fee,
     tickLower,
     tickUpper,
@@ -86,7 +86,7 @@ export async function getOptimalMintTx(
     amount1Desired: token1Amount.quotient.toString(),
     amount0Min: amount0.toString(),
     amount1Min: amount1.toString(),
-    recipient: recipient,
+    recipient,
     deadline,
   };
   const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
