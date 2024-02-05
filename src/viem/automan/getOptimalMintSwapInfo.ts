@@ -2,6 +2,7 @@
 import { optimalMint } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
 import {
+  MintParams,
   calculateMintOptimalPriceImpact,
   getPool,
   publicClientToProvider,
@@ -11,8 +12,6 @@ import { FeeAmount, Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
 import { BigNumber } from 'ethers';
 import { Address, PublicClient } from 'viem';
-
-import { MintParams } from './internal';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
