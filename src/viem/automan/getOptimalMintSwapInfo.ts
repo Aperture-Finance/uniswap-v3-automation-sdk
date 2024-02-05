@@ -47,7 +47,7 @@ export async function getOptimalMintSwapInfo(
     swapData,
     swapRoute,
   } =
-    // migrate to viem version
+    // TODO: migrate to viem version
     await optimalMint(
       chainId,
       token0Amount as CurrencyAmount<Token>,

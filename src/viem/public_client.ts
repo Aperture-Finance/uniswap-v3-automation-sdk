@@ -33,5 +33,6 @@ export function publicClientToProvider(client: PublicClient) {
         ({ value }) => new providers.JsonRpcProvider(value?.url, network),
       ),
     );
-  return new providers.JsonRpcProvider(transport.url, network);
+
+  return new providers.StaticJsonRpcProvider(transport.url, network);
 }
