@@ -1,12 +1,8 @@
 // TODO: migrate optimalMint to viem version
 import { optimalMint } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import {
-  MintParams,
-  calculateMintOptimalPriceImpact,
-  getPool,
-  publicClientToProvider,
-} from '@/viem';
+import { MintParams, calculateMintOptimalPriceImpact, getPool } from '@/viem';
+import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
@@ -38,8 +34,10 @@ export async function getOptimalMintSwapInfo(
   deadline: bigint,
   slippage: number,
   publicClient: PublicClient,
+  provider: JsonRpcProvider | Provider,
   use1inch?: boolean,
 ) {
+  console.log('TTTTTTTTTTTT');
   const {
     amount0: expectedAmount0,
     amount1: expectedAmount1,
@@ -57,9 +55,10 @@ export async function getOptimalMintSwapInfo(
       tickUpper,
       recipient,
       slippage,
-      publicClientToProvider(publicClient),
+      provider,
       !use1inch,
     );
+  console.log('WWWWWWWWWWWW');
   const token0 = (token0Amount.currency as Token).address as Address;
   const token1 = (token1Amount.currency as Token).address as Address;
   const position = new Position({
@@ -85,6 +84,7 @@ export async function getOptimalMintSwapInfo(
     deadline,
   };
 
+  console.log('PPPPPPPPPPPPP');
   const priceImpact = await calculateMintOptimalPriceImpact({
     chainId,
     swapData: swapData as `0x${string}`,
@@ -92,6 +92,7 @@ export async function getOptimalMintSwapInfo(
     mintParams,
     publicClient,
   });
+  console.log('QQQQQQQQQQQQQ');
   return {
     swapRoute,
     swapPath: getSwapPath(

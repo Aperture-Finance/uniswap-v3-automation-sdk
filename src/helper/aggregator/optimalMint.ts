@@ -63,6 +63,7 @@ export async function optimalMint(
     getChainInfo(chainId);
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
+    // console.log('provider is JsonRpcProvider');
     // forge token approvals and balances
     const [token0Overrides, token1Overrides] = await Promise.all([
       getERC20Overrides(
