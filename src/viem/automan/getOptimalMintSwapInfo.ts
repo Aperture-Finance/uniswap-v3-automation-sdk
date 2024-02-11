@@ -1,12 +1,8 @@
 // TODO: migrate optimalMint to viem version
 import { optimalMint } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import {
-  MintParams,
-  calculateMintOptimalPriceImpact,
-  getPool,
-  publicClientToProvider,
-} from '@/viem';
+import { MintParams, calculateMintOptimalPriceImpact, getPool } from '@/viem';
+import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
@@ -25,6 +21,7 @@ import { Address, PublicClient } from 'viem';
  * @param deadline The deadline in seconds before which the transaction must be mined.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
+ * @param provider A JSON RPC provider or a base provider.
  * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  */
 export async function getOptimalMintSwapInfo(
@@ -38,6 +35,7 @@ export async function getOptimalMintSwapInfo(
   deadline: bigint,
   slippage: number,
   publicClient: PublicClient,
+  provider: JsonRpcProvider | Provider,
   use1inch?: boolean,
 ) {
   const {
@@ -57,7 +55,7 @@ export async function getOptimalMintSwapInfo(
       tickUpper,
       recipient,
       slippage,
-      publicClientToProvider(publicClient),
+      provider,
       !use1inch,
     );
   const token0 = (token0Amount.currency as Token).address as Address;

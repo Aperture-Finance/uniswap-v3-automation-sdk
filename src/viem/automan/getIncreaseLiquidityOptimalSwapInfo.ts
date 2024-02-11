@@ -1,11 +1,8 @@
 // TODO: migrate increaseLiquidityOptimal to viem version
 import { increaseLiquidityOptimal } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import {
-  calculateIncreaseLiquidityOptimalPriceImpact,
-  getPool,
-  publicClientToProvider,
-} from '@/viem';
+import { calculateIncreaseLiquidityOptimalPriceImpact, getPool } from '@/viem';
+import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
@@ -22,6 +19,7 @@ import { PositionDetails } from '../position';
  * @param token1Amount The token1 amount.
  * @param recipient The recipient address.
  * @param publicClient Viem public client.
+ * @param provider A JSON RPC provider or a base provider.
  * @param position The current position to simulate the call from.
  * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  */
@@ -32,6 +30,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   token1Amount: CurrencyAmount<Currency>,
   recipient: Address,
   publicClient: PublicClient,
+  provider: JsonRpcProvider | Provider,
   position?: Position,
   use1inch?: boolean,
 ) {
@@ -53,7 +52,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     // TODO: migrate to viem version
     await increaseLiquidityOptimal(
       chainId,
-      publicClientToProvider(publicClient),
+      provider,
       position,
       increaseOptions,
       token0Amount as CurrencyAmount<Token>,

@@ -99,5 +99,9 @@ export async function getOptimalMintTx(
       data,
       value,
     },
+    amounts: {
+      amount0Min: amount0.toString(),
+      amount1Min: amount1.toString(),
+    },
   };
 }
