@@ -1,3 +1,4 @@
+import { providers } from '@0xsequence/multicall';
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
 import {
@@ -14,7 +15,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
 import { defaultAbiCoder } from 'ethers/lib/utils';
-import hre, { ethers } from 'hardhat';
+import hre from 'hardhat';
 import JSBI from 'jsbi';
 import {
   Address,
@@ -102,6 +103,7 @@ import {
   projectRebalancedPositionAtPrice,
   simulateMintOptimal,
 } from '../../src/viem';
+import { hardhatForkProvider } from './helper/common';
 
 dotenvConfig();
 
@@ -123,9 +125,9 @@ const deadline = '4093484400';
 const TEST_WALLET_PRIVATE_KEY =
   '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
-async function resetFork(testClient: TestClient) {
+async function resetFork(testClient: TestClient, blockNumber = 19210000n) {
   await testClient.reset({
-    blockNumber: 17188000n,
+    blockNumber,
     jsonRpcUrl: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
   });
 }
@@ -265,7 +267,7 @@ describe('State overrides tests', function () {
     const npm = getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
     const slot = computeOperatorApprovalSlot(eoa, automanAddress);
     expect(slot).to.equal(
-      '0x51156c1de32f203e86d75e4e57e423f7f92397e1c16780f885a8a97775f56b6a',
+      '0xaf12655eb680e77b7549c03375fd65c7a46c2854e913a071f6412c5b3d693f31',
     );
     expect(await publicClient.getStorageAt({ address: npm, slot })).to.equal(
       encodeAbiParameters(parseAbiParameters('bool'), [false]),
@@ -513,7 +515,7 @@ describe('Position util tests', function () {
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
+    await resetFork(testClient, 17188000n);
     inRangePosition = await getPosition(chainId, 4n, publicClient);
   });
 
@@ -1462,7 +1464,6 @@ describe('Routing tests', function () {
 
 describe('Automan transaction tests', function () {
   async function dealERC20(
-    chainId: ApertureSupportedChainId,
     token0: Address,
     token1: Address,
     amount0: bigint,
@@ -1470,12 +1471,11 @@ describe('Automan transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const provider = new ethers.providers.InfuraProvider(chainId);
+    const infuraClient = getInfuraClient();
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, provider),
-      getERC20Overrides(token1, from, to, amount1, provider),
+      getERC20Overrides(token0, from, to, amount0, infuraClient),
+      getERC20Overrides(token1, from, to, amount1, infuraClient),
     ]);
-    const hardhatForkProvider = ethers.provider;
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
         token0,
@@ -1491,9 +1491,11 @@ describe('Automan transaction tests', function () {
       ]);
     }
   }
-  // This test is known to be flaky.
+
   it('Optimal mint with 1inch', async function () {
-    const publicClient = hre.viem.getPublicClient();
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1514,12 +1516,11 @@ describe('Automan transaction tests', function () {
       pool.tickSpacing,
     );
     await dealERC20(
-      chainId,
       pool.token0.address as Address,
       pool.token1.address as Address,
       amount0,
       amount1,
-      eoa as Address,
+      eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
     const { swapPath, swapRoute, priceImpact } = await getOptimalMintSwapInfo(
@@ -1533,29 +1534,27 @@ describe('Automan transaction tests', function () {
       BigInt(Math.floor(Date.now() / 1000) + 60),
       0.5,
       publicClient,
+      new providers.MulticallProvider(hardhatForkProvider),
       true,
     );
-
-    // test price impact
-    console.log('priceImpact', priceImpact.toString());
 
     expect(JSON.stringify(swapRoute)).to.equal(
       '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
     );
 
-    expect(swapPath.tokenIn).to.eq(
-      '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-    );
-    expect(swapPath.tokenOut).to.eq(
-      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-    );
-    expect(swapPath.amountIn).to.eq('46683580');
-    expect(swapPath.amountOut).to.eq('7119685228216229858');
-    expect(swapPath.minAmountOut).to.eq('7084086802075148709');
+    expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
+    expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
+    expect(swapPath.amountIn).to.eq('47404450');
+    expect(swapPath.amountOut).to.eq('9102298520339590309');
+    expect(swapPath.minAmountOut).to.eq('9056787027737892357');
+
+    expect(priceImpact.toFixed(6)).to.equal('0.000842');
   });
 
-  it('Optimal mint no need swap', async function () {
-    const publicClient = getInfuraClient();
+  it.only('Optimal mint no need swap', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1563,8 +1562,6 @@ describe('Automan transaction tests', function () {
       chainId,
       publicClient,
     );
-    const amount0 = 97451n;
-    const amount1 = 16339987095914966n;
     const tickLower = nearestUsableTick(
       pool.tickCurrent - 10 * pool.tickSpacing,
       pool.tickSpacing,
@@ -1573,20 +1570,25 @@ describe('Automan transaction tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
+    const hypotheticalPosition = new Position({
+      pool,
+      liquidity: '10000000000000000',
+      tickLower,
+      tickUpper,
+    });
 
     await dealERC20(
-      chainId,
       pool.token0.address as Address,
       pool.token1.address as Address,
-      amount0,
-      amount1,
-      eoa as Address,
+      BigInt(hypotheticalPosition.amount0.quotient.toString()),
+      BigInt(hypotheticalPosition.amount1.quotient.toString()),
+      eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
     const { swapRoute } = await getOptimalMintSwapInfo(
       chainId,
-      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
-      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      hypotheticalPosition.amount0,
+      hypotheticalPosition.amount1,
       FeeAmount.MEDIUM,
       tickLower,
       tickUpper,
@@ -1594,7 +1596,9 @@ describe('Automan transaction tests', function () {
       BigInt(Math.floor(Date.now() / 1000) + 60),
       0.5,
       publicClient,
-      true,
+      new providers.MulticallProvider(hardhatForkProvider),
+      // 1inch quote currently doesn't support the no-swap case.
+      false,
     );
 
     expect(swapRoute?.length).to.equal(0);
