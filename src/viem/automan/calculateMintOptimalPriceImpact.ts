@@ -64,15 +64,9 @@ async function getExchangePrice(params: IMintOptimalParams) {
     blockNumber,
   );
 
-  const deltaAmount1 = new Big(finalAmount1.toString()).minus(
-    initAmount1.toString(),
-  );
+  if (initAmount0 === finalAmount0) return new Big(0);
 
-  if (deltaAmount1.eq(0)) {
-    return deltaAmount1;
-  }
-
-  return deltaAmount1.div(
-    new Big(initAmount0.toString()).minus(finalAmount0.toString()),
-  );
+  return new Big(finalAmount1.toString())
+    .minus(initAmount1.toString())
+    .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
 }

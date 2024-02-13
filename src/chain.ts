@@ -185,6 +185,7 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'arbitrum-one',
     infura_network_id: 'arbitrum',
+    rpc_url: 'https://arbitrum-one.publicnode.com',
     uniswap_subgraph_url:
       'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
     maxGasCeiling: 0.2,
