@@ -1551,7 +1551,7 @@ describe('Automan transaction tests', function () {
     expect(priceImpact.toFixed(6)).to.equal('0.000842');
   });
 
-  it.only('Optimal mint no need swap', async function () {
+  it('Optimal mint no need swap', async function () {
     const testClient = await hre.viem.getTestClient();
     const publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient);

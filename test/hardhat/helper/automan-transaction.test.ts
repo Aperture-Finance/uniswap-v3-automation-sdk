@@ -299,7 +299,6 @@ describe('Helper - Automan transaction tests', function () {
       eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
-    console.log(tickLower, tickUpper);
     const { tx } = await getOptimalMintTx(
       chainId,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
