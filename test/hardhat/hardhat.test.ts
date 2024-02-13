@@ -1523,7 +1523,8 @@ describe('Automan transaction tests', function () {
       eoa,
       getChainInfo(chainId).aperture_uniswap_v3_automan,
     );
-    const { swapPath, swapRoute, priceImpact } = await getOptimalMintSwapInfo(
+    // const { swapPath, swapRoute, priceImpact } = await getOptimalMintSwapInfo(
+    const { swapPath, priceImpact } = await getOptimalMintSwapInfo(
       chainId,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
