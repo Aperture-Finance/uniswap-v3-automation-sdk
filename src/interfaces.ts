@@ -29,6 +29,21 @@ const ClientTypeSchema = z.object({
   clientType: ClientTypeEnum.optional().describe('The type of the client.'),
 });
 
+export const WalletTypeEnum = z.enum([
+  'METAMASK',
+  'WALLETCONNECT',
+  'OKX',
+  'COINBASE',
+  'RABBY',
+  'HALO',
+]);
+export const WalletConnectSubtypeEnum = z.enum([
+  'HALO',
+  'SAFE',
+  'METAMASK',
+  'UNKNOWN',
+]);
+
 const ApertureSupportedChainIdEnum = z
   .nativeEnum(ApertureSupportedChainId)
   .describe(
@@ -834,3 +849,11 @@ export const GetStrategiesDetailResponseSchema = z.array(
 export type GetStrategiesDetailResponse = z.infer<
   typeof GetStrategiesDetailResponseSchema
 >;
+
+export const WalletTrackingRequestSchema = z.object({
+  chainId: ApertureSupportedChainIdEnum,
+  address: AddressSchema,
+  timestamp_secs: z.number().int().positive(),
+  walletClient: WalletTypeEnum,
+  walletConnectSubtype: WalletConnectSubtypeEnum.optional(),
+});
