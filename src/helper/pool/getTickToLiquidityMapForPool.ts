@@ -44,7 +44,7 @@ export async function getTickToLiquidityMapForPool(
       variables: {},
       query: `
             query PoolLiquidity {
-              pool(id: "${poolAddress}") {
+              pool(id: "${poolAddress}", subgraphError: allow) {
                 liquidity
                 tick
               }
@@ -73,7 +73,7 @@ export async function getTickToLiquidityMapForPool(
         },
         query: `
             query AllV3Ticks($poolAddress: String, $skip: Int!, $tickLower: Int!, $tickUpper: Int!) {
-              ticks(first: 1000, skip: $skip, where: { poolAddress: $poolAddress, tickIdx_gte: $tickLower, tickIdx_lte: $tickUpper }, orderBy: tickIdx) {
+              ticks(first: 1000, skip: $skip, where: { poolAddress: $poolAddress, tickIdx_gte: $tickLower, tickIdx_lte: $tickUpper }, orderBy: tickIdx, subgraphError: allow) {
                 tick: tickIdx
                 liquidityNet
               }

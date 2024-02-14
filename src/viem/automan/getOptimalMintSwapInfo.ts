@@ -1,5 +1,5 @@
 // TODO: migrate optimalMint to viem version
-import { optimalMint } from '@/helper/aggregator';
+import { SwapRoute, optimalMint } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
 import { MintParams, calculateMintOptimalPriceImpact, getPool } from '@/viem';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
@@ -37,7 +37,11 @@ export async function getOptimalMintSwapInfo(
   publicClient: PublicClient,
   provider: JsonRpcProvider | Provider,
   use1inch?: boolean,
-) {
+): Promise<{
+  swapRoute: SwapRoute | undefined;
+  swapPath: SwapPath;
+  priceImpact: Big.Big;
+}> {
   const {
     amount0: expectedAmount0,
     amount1: expectedAmount1,

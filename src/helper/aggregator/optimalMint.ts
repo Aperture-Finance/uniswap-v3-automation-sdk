@@ -221,6 +221,7 @@ async function getOptimalMintSwapData(
     mintParams.amount1Desired,
   );
   // get a quote from 1inch
+  // TODO: If `poolAmountIn` is zero, do not call `quote()` as 1inch server will return an error; instead, simply return empty swap data and route indicating no need to swap.
   const { tx, protocols } = await quote(
     chainId,
     zeroForOne ? mintParams.token0 : mintParams.token1,
