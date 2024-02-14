@@ -857,3 +857,4 @@ export const WalletTrackingRequestSchema = z.object({
   walletClient: WalletTypeEnum,
   walletConnectSubtype: WalletConnectSubtypeEnum.optional(),
 });
+export type WalletTrackingRequest = z.infer<typeof WalletTrackingRequestSchema>;
