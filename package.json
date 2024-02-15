@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "2.3.7",
+  "version": "2.4.0",
   "description": "SDK for Aperture's Uniswap V3 automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
@@ -44,14 +44,15 @@
     "@uniswap/permit2-sdk": "^1.2.0",
     "@uniswap/smart-order-router": "^3.22.0",
     "@uniswap/v3-sdk": "^3.10.0",
-    "aperture-lens": "^0.4.0",
+    "aperture-lens": "^0.6.0",
     "axios": "^1.6.5",
     "big.js": "^6.2.1",
     "bottleneck": "^2.19.5",
     "ethers": "5.7.2",
+    "jsbi": "^3.2.0",
     "json-stable-stringify": "^1.1.1",
     "lodash": "^4.17.21",
-    "viem": "^2.7.8",
+    "viem": "^2.7.9",
     "zod": "^3.22.4"
   },
   "devDependencies": {
