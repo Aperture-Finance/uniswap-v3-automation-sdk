@@ -11,6 +11,7 @@ import {
 import { AccessList } from '@ethersproject/transactions';
 import { BigNumberish } from 'ethers';
 import { defaultAbiCoder as DAC, keccak256 } from 'ethers/lib/utils';
+import { zeroAddress } from 'viem';
 
 export type StateOverrides = {
   [address: string]: {
@@ -59,7 +60,6 @@ export async function generateAccessList(
       {
         ...tx,
         gas: '0x11E1A300',
-        gasPrice: '0x0',
       },
       // hexlify the block number.
       blockNumber ? '0x' + blockNumber.toString(16) : 'latest',
@@ -91,7 +91,7 @@ export async function getERC20Overrides(
   const [balanceOfAccessList, allowanceAccessList] = await Promise.all([
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: balanceOfData,
       },
@@ -99,7 +99,7 @@ export async function getERC20Overrides(
     ),
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: allowanceData,
       },
