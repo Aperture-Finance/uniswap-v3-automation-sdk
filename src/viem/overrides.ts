@@ -15,6 +15,7 @@ import {
   keccak256,
   parseAbiParameters,
   toHex,
+  zeroAddress,
 } from 'viem';
 
 type StateOverrides = {
@@ -152,7 +153,7 @@ export async function getERC20Overrides(
   const [balanceOfAccessList, allowanceAccessList] = await Promise.all([
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: balanceOfData,
       },
@@ -160,7 +161,7 @@ export async function getERC20Overrides(
     ),
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: allowanceData,
       },
@@ -259,11 +260,9 @@ export async function generateAccessList(
   try {
     return await requestWithOverrides(
       'eth_createAccessList',
-      // @ts-expect-error viem doesn't include 'eth_createAccessList'
       {
         ...tx,
         gas: '0x11E1A300',
-        gasPrice: '0x0',
       },
       publicClient,
       undefined,

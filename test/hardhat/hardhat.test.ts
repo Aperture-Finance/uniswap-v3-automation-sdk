@@ -1,4 +1,5 @@
 import { providers } from '@0xsequence/multicall';
+import '@nomicfoundation/hardhat-viem';
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
 import {
@@ -30,6 +31,7 @@ import {
   http,
   parseAbiParameters,
   walletActions,
+  zeroAddress,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, mainnet } from 'viem/chains';
@@ -219,22 +221,22 @@ describe('Estimate gas tests', function () {
 
   it('Test estimateRebalanceGas with owner', async function () {
     const gas = await estimateRebalanceGasWithFrom(eoa);
-    expect(gas).to.equal(775010n);
+    expect(gas).to.equal(779808n);
   });
 
   it('Test estimateRebalanceGas with whale', async function () {
     const gas = await estimateRebalanceGasWithFrom(undefined);
-    expect(gas).to.equal(777510n);
+    expect(gas).to.equal(782346n);
   });
 
   it('Test estimateReinvestGas with owner', async function () {
     const gas = await estimateReinvestGasWithFrom(eoa);
-    expect(gas).to.equal(528206n);
+    expect(gas).to.equal(530653n);
   });
 
   it('Test estimateReinvestGas with whale', async function () {
     const gas = await estimateReinvestGasWithFrom(undefined);
-    expect(gas).to.equal(528206n);
+    expect(gas).to.equal(530653n);
   });
 });
 
@@ -294,7 +296,7 @@ describe('State overrides tests', function () {
     });
     const { accessList } = await generateAccessList(
       {
-        from: eoa,
+        from: zeroAddress,
         to: WETH_ADDRESS,
         data: balanceOfData,
       },

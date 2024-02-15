@@ -1,6 +1,8 @@
+import '@nomiclabs/hardhat-ethers';
 import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
+import { zeroAddress } from 'viem';
 
 import {
   IERC20__factory,
@@ -63,7 +65,7 @@ describe('Helper - State overrides tests', function () {
     );
     const { accessList } = await generateAccessList(
       {
-        from: eoa,
+        from: zeroAddress,
         to: WETH_ADDRESS,
         data: balanceOfData,
       },
