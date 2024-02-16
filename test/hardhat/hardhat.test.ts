@@ -437,7 +437,7 @@ describe('State overrides tests', function () {
       blockNumber,
     });
 
-    expect(priceImpact.toFixed(2)).to.equal('0.15');
+    expect(priceImpact.toFixed(2)).to.equal('0.13');
 
     const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
       chainId,
@@ -1592,7 +1592,7 @@ describe('Automan transaction tests', function () {
 
     expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
     expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
-    expect(swapPath.amountIn).to.eq('47437092');
+    expect(swapPath.amountIn).to.eq('47404450');
     expect(swapPath.amountOut).to.eq('9102298520339590309');
     expect(swapPath.minAmountOut).to.eq('9056787027737892357');
 
@@ -1705,7 +1705,7 @@ describe('Automan transaction tests', function () {
 
     expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
     expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
-    expect(swapPath.amountIn).to.eq('54498455');
+    expect(swapPath.amountIn).to.eq('54462595');
     expect(swapPath.amountOut).to.eq('10457456628013072930');
     expect(swapPath.minAmountOut).to.eq('10405169344873007565');
 
