@@ -417,7 +417,7 @@ describe('State overrides tests', function () {
     const publicClient = getInfuraClient();
     const amount0Desired = 100000000n;
     const amount1Desired = 1000000000000000000n;
-    const position = await getPosition(chainId, 4n, publicClient);
+    const position = await getPosition(chainId, 4n, publicClient, blockNumber);
     const increaseParams = {
       tokenId: positionId,
       amount0Desired,
@@ -437,7 +437,7 @@ describe('State overrides tests', function () {
       blockNumber,
     });
 
-    expect(priceImpact.toFixed(2)).to.equal('0.13');
+    expect(priceImpact.toString()).to.equal('0.00300826277866017098015215935');
 
     const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
       chainId,
