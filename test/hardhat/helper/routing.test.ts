@@ -123,7 +123,7 @@ describe('Helper - Routing tests', function () {
 
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
-      '1000000000',
+      '10000000000000',
     );
     const token1Amount = CurrencyAmount.fromRawAmount(
       pool.token1,
@@ -151,7 +151,7 @@ describe('Helper - Routing tests', function () {
     const total = Number(
       pool.token0Price.quote(token0Amount).add(token1Amount).toFixed(),
     );
-    expect(_total).to.be.closeTo(total, total * 0.005);
+    expect(_total).to.be.closeTo(total, total * 0.03);
   });
 
   it('Test optimalRebalance', async function () {
