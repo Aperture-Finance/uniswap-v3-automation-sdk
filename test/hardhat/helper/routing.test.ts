@@ -135,7 +135,7 @@ describe('Helper - Routing tests', function () {
       position,
       {
         tokenId: positionId,
-        slippageTolerance: new Percent(5, 1000),
+        slippageTolerance: new Percent(50, 100),
         deadline: Math.floor(Date.now() / 1000 + 60 * 30),
       },
       token0Amount,

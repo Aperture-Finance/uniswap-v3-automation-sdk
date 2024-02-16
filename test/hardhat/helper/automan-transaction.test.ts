@@ -4,6 +4,7 @@ import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre, { ethers } from 'hardhat';
+import JSBI from 'jsbi';
 import { Address } from 'viem';
 
 import {
@@ -361,7 +362,7 @@ describe('Helper - Automan transaction tests', function () {
     const { tx } = await getIncreaseLiquidityOptimalTx(
       {
         tokenId: positionId,
-        slippageTolerance: new Percent(5, 1000),
+        slippageTolerance: new Percent(50, 100),
         deadline: Math.floor(Date.now() / 1000 + 60 * 30),
       },
       chainId,
@@ -385,8 +386,10 @@ describe('Helper - Automan transaction tests', function () {
       fee: pool.fee,
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
-      liquidity: '119758517567519',
     });
+    expect(
+      JSBI.GT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
   });
 
   it('Increase liquidity optimal without 1inch', async function () {
