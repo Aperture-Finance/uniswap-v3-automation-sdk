@@ -16,7 +16,6 @@ import {
   getERC20Overrides,
   getNPM,
   getPool,
-  getPublicProvider,
   simulateMintOptimal,
   simulateRemoveLiquidity,
 } from '../../../src/helper';
