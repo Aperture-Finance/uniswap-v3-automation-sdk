@@ -1,7 +1,6 @@
 import { providers } from '@0xsequence/multicall';
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
-import { CurrencyAmount } from '@uniswap/smart-order-router';
 import {
   FeeAmount,
   Pool,
