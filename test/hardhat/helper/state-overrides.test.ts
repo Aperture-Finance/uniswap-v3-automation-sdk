@@ -16,6 +16,7 @@ import {
   getERC20Overrides,
   getNPM,
   getPool,
+  getPublicProvider,
   simulateMintOptimal,
   simulateRemoveLiquidity,
 } from '../../../src/helper';
@@ -169,7 +170,12 @@ describe('Helper - State overrides tests', function () {
 
   it('Test simulateRemoveLiquidity', async function () {
     const blockNumber = 19142000;
+
+    // will fail due to "Not approved"
+    // const provider = getPublicProvider(chainId);
+
     const provider = new ethers.providers.InfuraProvider(chainId);
+
     const positionId = 655629;
 
     const position = await PositionDetails.fromPositionId(
