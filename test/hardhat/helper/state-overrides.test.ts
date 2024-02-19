@@ -191,9 +191,6 @@ describe('Helper - State overrides tests', function () {
       blockNumber,
     );
 
-    console.log('amount0', amount0.toString());
-    console.log('amount1', amount1.toString());
-
     expect(amount0.toString()).to.equal('908858032032850671014');
     expect(amount1.toString()).to.equal('3098315727923109118');
   });
