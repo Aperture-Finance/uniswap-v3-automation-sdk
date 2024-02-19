@@ -16,6 +16,7 @@ import {
   getERC20Overrides,
   getNPM,
   getPool,
+  getPublicProvider,
   simulateMintOptimal,
   simulateRemoveLiquidity,
 } from '../../../src/helper';
@@ -169,7 +170,7 @@ describe('Helper - State overrides tests', function () {
 
   it('Test simulateRemoveLiquidity', async function () {
     const blockNumber = 19142000;
-    const provider = new ethers.providers.InfuraProvider(chainId);
+    const provider = getPublicProvider(chainId);
     const positionId = 655629;
 
     const position = await PositionDetails.fromPositionId(
@@ -182,7 +183,7 @@ describe('Helper - State overrides tests', function () {
     const { amount0, amount1 } = await simulateRemoveLiquidity(
       chainId,
       provider,
-      eoa,
+      position.owner,
       position.owner,
       position.tokenId,
       0,
