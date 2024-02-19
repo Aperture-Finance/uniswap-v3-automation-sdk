@@ -8,15 +8,10 @@ import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import Big from 'big.js';
 
-import {
-  encodeOptimalSwapData,
-  getAutomanContract,
-  simulateMintOptimal,
-} from '../automan';
+import { simulateMintOptimal } from '../automan';
 import { StateOverrides, getERC20Overrides } from '../overrides';
-import { computePoolAddress } from '../pool';
-import { getApproveTarget } from './index';
-import { SwapRoute, quote } from './quote';
+import { getOptimalMintSwapData } from './internal';
+import { SwapRoute } from './quote';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
@@ -177,7 +172,8 @@ async function optimalMintRouter(
     provider,
     mintParams,
     slippage,
-    true,
+    /** blockNumber= */ undefined,
+    /** includeRoute= */ true,
   );
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
@@ -194,56 +190,5 @@ async function optimalMintRouter(
     liquidity,
     swapData,
     swapRoute,
-  };
-}
-
-async function getOptimalMintSwapData(
-  chainId: ApertureSupportedChainId,
-  provider: JsonRpcProvider | Provider,
-  mintParams: INonfungiblePositionManager.MintParamsStruct,
-  slippage: number,
-  includeRoute?: boolean,
-) {
-  const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-  const automan = getAutomanContract(chainId, provider);
-  const approveTarget = await getApproveTarget(chainId);
-  // get swap amounts using the same pool
-  const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
-    computePoolAddress(
-      uniswap_v3_factory,
-      mintParams.token0,
-      mintParams.token1,
-      mintParams.fee as FeeAmount,
-    ),
-    mintParams.tickLower,
-    mintParams.tickUpper,
-    mintParams.amount0Desired,
-    mintParams.amount1Desired,
-  );
-  // get a quote from 1inch
-  // TODO: If `poolAmountIn` is zero, do not call `quote()` as 1inch server will return an error; instead, simply return empty swap data and route indicating no need to swap.
-  const { tx, protocols } = await quote(
-    chainId,
-    zeroForOne ? mintParams.token0 : mintParams.token1,
-    zeroForOne ? mintParams.token1 : mintParams.token0,
-    poolAmountIn.toString(),
-    optimal_swap_router!,
-    slippage * 100,
-    includeRoute,
-  );
-  return {
-    swapData: encodeOptimalSwapData(
-      chainId,
-      mintParams.token0,
-      mintParams.token1,
-      mintParams.fee as FeeAmount,
-      mintParams.tickLower as number,
-      mintParams.tickUpper as number,
-      zeroForOne,
-      approveTarget,
-      tx.to,
-      tx.data,
-    ),
-    swapRoute: protocols,
   };
 }

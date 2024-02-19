@@ -136,7 +136,6 @@ async function getZapOutSwapData(
   zeroForOne: boolean,
   slippage: number,
 ) {
-  let swapData = '0x';
   try {
     const { amount0, amount1 } = await simulateRemoveLiquidity(
       chainId,
@@ -165,7 +164,7 @@ async function getZapOutSwapData(
       slippage * 100,
     );
     const approveTarget = await getApproveTarget(chainId);
-    swapData = encodeSwapData(
+    return encodeSwapData(
       chainId,
       tx.to,
       approveTarget,
@@ -177,5 +176,5 @@ async function getZapOutSwapData(
   } catch (e) {
     console.error(`Failed to get swap data: ${e}`);
   }
-  return swapData;
+  return '0x';
 }
