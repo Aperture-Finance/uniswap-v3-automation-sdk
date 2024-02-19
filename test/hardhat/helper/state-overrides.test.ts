@@ -170,7 +170,7 @@ describe('Helper - State overrides tests', function () {
 
   it('Test simulateRemoveLiquidity', async function () {
     const blockNumber = 19142000;
-    const provider = getPublicProvider(chainId);
+    const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 655629;
 
     const position = await PositionDetails.fromPositionId(
@@ -195,8 +195,7 @@ describe('Helper - State overrides tests', function () {
     console.log('amount0', amount0.toString());
     console.log('amount1', amount1.toString());
 
-    // expect(liquidity.toString()).to.equal('716894157038546');
-    // expect(amount0.toString()).to.equal('51320357');
-    // expect(amount1.toString()).to.equal('8736560293857784398');
+    expect(amount0.toString()).to.equal('908858032032850671014');
+    expect(amount1.toString()).to.equal('3098315727923109118');
   });
 });
