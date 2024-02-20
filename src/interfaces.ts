@@ -877,3 +877,4 @@ export const GetHaloUsersResponseSchema = z.object({
     }),
   ),
 });
+export type GetHaloUsersResponse = z.infer<typeof GetHaloUsersResponseSchema>;
