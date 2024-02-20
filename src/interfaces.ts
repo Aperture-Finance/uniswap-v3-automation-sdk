@@ -858,3 +858,22 @@ export const WalletTrackingRequestSchema = z.object({
   walletConnectSubtype: WalletConnectSubtypeEnum.optional(),
 });
 export type WalletTrackingRequest = z.infer<typeof WalletTrackingRequestSchema>;
+
+export const GetHaloUsersRequestSchema = z.object({
+  utcDateString: z.coerce.date().describe('The date in UTC.'),
+});
+export type GetHaloUsersRequest = z.infer<typeof GetHaloUsersRequestSchema>;
+
+export const GetHaloUsersResponseSchema = z.object({
+  users: z.array(
+    z.object({
+      address: AddressSchema,
+      utcDateString: z.coerce.date().describe('The date in UTC.'),
+      didSwap: z.boolean().describe('True if the user did a swap.'),
+      didRebalance: z.boolean().describe('True if the user did a rebalance.'),
+      didOpenPosition: z
+        .boolean()
+        .describe('True if the user opened a position.'),
+    }),
+  ),
+});
