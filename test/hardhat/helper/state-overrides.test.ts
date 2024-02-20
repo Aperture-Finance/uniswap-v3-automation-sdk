@@ -200,7 +200,7 @@ describe('Helper - State overrides tests', function () {
     expect(amount0.toString()).to.equal('908858032032850671014');
     expect(amount1.toString()).to.equal('3098315727923109118');
   });
-     
+
   it('Test simulateIncreaseLiquidityOptimal', async function () {
     const blockNumber = 17975698;
     const provider = new ethers.providers.InfuraProvider(chainId);
