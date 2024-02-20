@@ -579,9 +579,10 @@ export type UpdatePositionPermitRequest = z.infer<
   typeof UpdatePositionPermitRequestSchema
 >;
 
-const PayloadSignatureSchema = z.object({
+export const PayloadSignatureSchema = z.object({
   payloadSignature: SignatureSchema.describe('Signature of the payload.'),
 });
+
 export const CreateTriggerRequestSchema = PayloadSignatureSchema.extend({
   payload: CreateTriggerPayloadSchema,
   permitInfo: PermitInfoSchema.optional().describe(
@@ -750,7 +751,7 @@ export type GetStrategyDetailRequest = z.infer<
   typeof GetStrategyDetailRequestSchema
 >;
 
-export const StrategyDetailItemSechema = TriggerItemSchema.omit({
+export const StrategyDetailItemSchema = TriggerItemSchema.omit({
   limitOrderInfo: true,
 }).extend({
   gas_fee: z.number().nonnegative().optional(),
@@ -819,7 +820,7 @@ export const StrategyDetailItemSechema = TriggerItemSchema.omit({
     ),
 });
 
-export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSechema>;
+export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSchema>;
 
 export const GetStrategyDetailResponseSchema = z.object({
   executed: z
@@ -833,10 +834,10 @@ export const GetStrategyDetailResponseSchema = z.object({
     feeCollectedToken1UsdValue: z.number(),
   }),
   current: z
-    .array(StrategyDetailItemSechema)
+    .array(StrategyDetailItemSchema)
     .describe('Current strategy trigger.'),
   history: z
-    .array(StrategyDetailItemSechema)
+    .array(StrategyDetailItemSchema)
     .describe('History of strategy triggers.'),
 });
 export type GetStrategyDetailResponse = z.infer<
@@ -858,3 +859,10 @@ export const WalletTrackingRequestSchema = z.object({
   walletConnectSubtype: WalletConnectSubtypeEnum.optional(),
 });
 export type WalletTrackingRequest = z.infer<typeof WalletTrackingRequestSchema>;
+
+export const GeneralResponseSchema = z.object({
+  error: z.boolean().optional().describe('True if an error occurred.'),
+  errorMessage: z.string().optional().describe('The error message.'),
+});
+
+export type GeneralResponse = z.infer<typeof GeneralResponseSchema>;
