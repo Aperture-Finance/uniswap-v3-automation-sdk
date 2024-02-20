@@ -4,41 +4,44 @@ import {
   getChainInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { FeeAmount, Position } from '@uniswap/v3-sdk';
+import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
 
-import { optimalMint } from '../aggregator';
+import { increaseLiquidityOptimal } from '../aggregator';
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
+import { PositionDetails } from '../position';
 
 /**
- * Generates an unsigned transaction that mints the optimal amount of liquidity for the specified token amounts and price range.
+ * Generates an unsigned transaction that increase the optimal amount of liquidity for the specified token amounts and position.
+ * @param increaseOptions Increase liquidity options.
  * @param chainId The chain ID.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fee The pool fee tier.
- * @param tickLower The lower tick of the range.
- * @param tickUpper The upper tick of the range.
  * @param recipient The recipient address.
- * @param deadline The deadline in seconds before which the transaction must be mined.
- * @param slippage The slippage tolerance.
  * @param provider A JSON RPC provider or a base provider.
+ * @param position The current position to simulate the call from.
  * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  */
-export async function getOptimalMintTx(
+export async function getIncreaseLiquidityOptimalTx(
+  increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  fee: FeeAmount,
-  tickLower: number,
-  tickUpper: number,
   recipient: string,
-  deadline: BigNumberish,
-  slippage: number,
   provider: JsonRpcProvider | Provider,
+  position?: Position,
   use1inch?: boolean,
 ) {
+  if (position === undefined) {
+    ({ position } = await PositionDetails.fromPositionId(
+      chainId,
+      increaseOptions.tokenId.toString(),
+      provider,
+    ));
+  }
+
   let value: BigNumberish | undefined;
   if (token0Amount.currency.isNative) {
     token0Amount = CurrencyAmount.fromRawAmount(
@@ -53,45 +56,41 @@ export async function getOptimalMintTx(
     );
     value = token1Amount.quotient.toString();
   }
-  const { liquidity, swapData } = await optimalMint(
+
+  const { liquidity, swapData } = await increaseLiquidityOptimal(
     chainId,
+    provider,
+    position,
+    increaseOptions,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
-    fee,
-    tickLower,
-    tickUpper,
     recipient,
-    slippage,
-    provider,
     !use1inch,
   );
   const token0 = (token0Amount.currency as Token).address;
   const token1 = (token1Amount.currency as Token).address;
-  const position = new Position({
-    pool: await getPool(token0, token1, fee, chainId, provider),
+
+  // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
+  const incrementalPosition = new Position({
+    pool: await getPool(token0, token1, position.pool.fee, chainId, provider),
     liquidity: liquidity.toString(),
-    tickLower,
-    tickUpper,
+    tickLower: position.tickLower,
+    tickUpper: position.tickUpper,
   });
-  const { amount0, amount1 } = position.mintAmountsWithSlippage(
-    new Percent(Math.floor(slippage * 1e6), 1e6),
+  const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
+    increaseOptions.slippageTolerance,
   );
-  const mintParams = {
-    token0,
-    token1,
-    fee,
-    tickLower,
-    tickUpper,
+  const increaseParams = {
+    tokenId: increaseOptions.tokenId as BigNumberish,
     amount0Desired: token0Amount.quotient.toString(),
     amount1Desired: token1Amount.quotient.toString(),
     amount0Min: amount0.toString(),
     amount1Min: amount1.toString(),
-    recipient,
-    deadline,
+    deadline: Math.floor(Date.now() / 1000 + 86400),
   };
   const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
-    'mintOptimal',
-    [mintParams, swapData],
+    'increaseLiquidityOptimal',
+    [increaseParams, swapData],
   );
   return {
     tx: {

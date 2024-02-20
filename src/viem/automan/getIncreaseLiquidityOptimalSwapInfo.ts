@@ -1,47 +1,47 @@
-// TODO: migrate optimalMint to viem version
-import { SwapRoute, optimalMint } from '@/helper/aggregator';
+// TODO: migrate increaseLiquidityOptimal to viem version
+import { increaseLiquidityOptimal } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import { MintParams, calculateMintOptimalPriceImpact, getPool } from '@/viem';
+import { calculateIncreaseLiquidityOptimalPriceImpact, getPool } from '@/viem';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { FeeAmount, Position } from '@uniswap/v3-sdk';
+import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
 import Big from 'big.js';
 import { BigNumber } from 'ethers';
 import { Address, PublicClient } from 'viem';
 
+import { PositionDetails } from '../position';
+
 /**
- * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
+ * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
+ * @param increaseOptions Increase liquidity options.
  * @param chainId The chain ID.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fee The pool fee tier.
- * @param tickLower The lower tick of the range.
- * @param tickUpper The upper tick of the range.
  * @param recipient The recipient address.
- * @param deadline The deadline in seconds before which the transaction must be mined.
- * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param provider A JSON RPC provider or a base provider.
+ * @param position The current position to simulate the call from.
  * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  */
-export async function getOptimalMintSwapInfo(
+export async function getIncreaseLiquidityOptimalSwapInfo(
+  increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  fee: FeeAmount,
-  tickLower: number,
-  tickUpper: number,
   recipient: Address,
-  deadline: bigint,
-  slippage: number,
   publicClient: PublicClient,
   provider: JsonRpcProvider | Provider,
+  position?: Position,
   use1inch?: boolean,
-): Promise<{
-  swapRoute: SwapRoute | undefined;
-  swapPath: SwapPath;
-  priceImpact: Big.Big;
-}> {
+) {
+  if (position === undefined) {
+    ({ position } = await PositionDetails.fromPositionId(
+      chainId,
+      BigInt(increaseOptions.tokenId.toString()),
+      publicClient,
+    ));
+  }
+
   const {
     amount0: expectedAmount0,
     amount1: expectedAmount1,
@@ -50,48 +50,50 @@ export async function getOptimalMintSwapInfo(
     swapRoute,
   } =
     // TODO: migrate to viem version
-    await optimalMint(
+    await increaseLiquidityOptimal(
       chainId,
+      provider,
+      position,
+      increaseOptions,
       token0Amount as CurrencyAmount<Token>,
       token1Amount as CurrencyAmount<Token>,
-      fee,
-      tickLower,
-      tickUpper,
       recipient,
-      slippage,
-      provider,
       !use1inch,
     );
   const token0 = (token0Amount.currency as Token).address as Address;
   const token1 = (token1Amount.currency as Token).address as Address;
-  const position = new Position({
-    pool: await getPool(token0, token1, fee, chainId, publicClient),
+
+  // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
+  const incrementalPosition = new Position({
+    pool: await getPool(
+      token0,
+      token1,
+      position.pool.fee,
+      chainId,
+      publicClient,
+    ),
     liquidity: liquidity.toString(),
-    tickLower,
-    tickUpper,
+    tickLower: position.tickLower,
+    tickUpper: position.tickUpper,
   });
-  const { amount0, amount1 } = position.mintAmountsWithSlippage(
-    new Percent(Math.floor(slippage * 1e6), 1e6),
+  const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
+    increaseOptions.slippageTolerance,
   );
-  const mintParams: MintParams = {
-    token0,
-    token1,
-    fee,
-    tickLower,
-    tickUpper,
+  const increaseParams = {
+    tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: BigInt(amount0.toString()),
     amount1Min: BigInt(amount1.toString()),
-    recipient: recipient,
-    deadline,
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
-  const priceImpact = await calculateMintOptimalPriceImpact({
+  const priceImpact = await calculateIncreaseLiquidityOptimalPriceImpact({
     chainId,
     swapData: swapData as `0x${string}`,
     from: recipient as `0x${string}`,
-    mintParams,
+    position,
+    increaseParams,
     publicClient,
   });
   return {
@@ -101,7 +103,7 @@ export async function getOptimalMintSwapInfo(
       token1Amount as CurrencyAmount<Token>,
       expectedAmount0,
       expectedAmount1,
-      slippage,
+      increaseOptions.slippageTolerance,
     ),
     priceImpact,
   };
@@ -120,7 +122,7 @@ const getSwapPath = (
   token1: CurrencyAmount<Token>,
   finalToken0Amount: BigNumber,
   finalToken1Amount: BigNumber,
-  slippage: number,
+  slippage: Percent,
 ): SwapPath => {
   const initToken0Amount = token0.quotient.toString();
   const initToken1Amount = token1.quotient.toString();
@@ -146,7 +148,7 @@ const getSwapPath = (
     amountIn: amountIn.toString(),
     amountOut: amountOut.toString(),
     minAmountOut: new Big(amountOut.toString())
-      .times(1 - slippage * 0.01)
+      .times(1 - Number(slippage.toFixed()) * 0.01)
       .toFixed(0),
   };
 };

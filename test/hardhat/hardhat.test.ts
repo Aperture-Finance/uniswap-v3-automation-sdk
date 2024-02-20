@@ -1,6 +1,6 @@
 import { providers } from '@0xsequence/multicall';
 import '@nomicfoundation/hardhat-viem';
-import { Fraction, Price, Token } from '@uniswap/sdk-core';
+import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
 import {
   FeeAmount,
@@ -75,6 +75,7 @@ import {
 } from '../../src';
 import {
   PositionDetails,
+  calculateIncreaseLiquidityOptimalPriceImpact,
   calculateMintOptimalPriceImpact,
   calculateRebalancePriceImpact,
   checkPositionApprovalStatus,
@@ -88,6 +89,7 @@ import {
   getAutomanReinvestCalldata,
   getERC20Overrides,
   getFeeTierDistribution,
+  getIncreaseLiquidityOptimalSwapInfo,
   getLiquidityArrayForPool,
   getNPM,
   getOptimalMintSwapInfo,
@@ -103,6 +105,7 @@ import {
   isPositionInRange,
   optimalRebalance,
   projectRebalancedPositionAtPrice,
+  simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
 } from '../../src/viem';
 import { hardhatForkProvider } from './helper/common';
@@ -406,6 +409,47 @@ describe('State overrides tests', function () {
     expect(liquidity.toString()).to.equal('716894157038546');
     expect(amount0.toString()).to.equal('51320357');
     expect(amount1.toString()).to.equal('8736560293857784398');
+  });
+
+  it('Test simulateIncreaseLiquidityOptimal', async function () {
+    const blockNumber = 17975698n;
+    const positionId = 4n;
+    const publicClient = getInfuraClient();
+    const amount0Desired = 100000000n;
+    const amount1Desired = 1000000000000000000n;
+    const position = await getPosition(chainId, 4n, publicClient, blockNumber);
+    const increaseParams = {
+      tokenId: positionId,
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+
+    const priceImpact = await calculateIncreaseLiquidityOptimalPriceImpact({
+      chainId,
+      publicClient,
+      from: eoa,
+      position,
+      increaseParams,
+      swapData: undefined,
+      blockNumber,
+    });
+
+    expect(priceImpact.toString()).to.equal('0.00300826277866017098015215935');
+
+    const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
+      chainId,
+      publicClient,
+      eoa as Address,
+      position,
+      increaseParams,
+      undefined,
+      blockNumber,
+    );
+    expect(amount0.toString()).to.equal('61259538');
+    expect(amount1.toString()).to.equal('7156958298534991565');
   });
 
   it('Test calculateMintOptimalPriceImpact 0 price impact', async function () {
@@ -1601,6 +1645,119 @@ describe('Automan transaction tests', function () {
       0.5,
       publicClient,
       new providers.MulticallProvider(hardhatForkProvider),
+      // 1inch quote currently doesn't support the no-swap case.
+      false,
+    );
+
+    expect(swapRoute?.length).to.equal(0);
+  });
+
+  it('Increase liquidity optimal with 1inch', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      publicClient,
+    );
+    const positionId = 4;
+    const position = await getPosition(
+      chainId,
+      BigInt(positionId),
+      publicClient,
+    );
+
+    const amount0 = BigInt(new Big(10).pow(pool.token0.decimals).toFixed());
+    const amount1 = BigInt(new Big(10).pow(pool.token1.decimals).toFixed());
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      amount0,
+      amount1,
+      eoa,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+
+    // const { swapPath, swapRoute, priceImpact } = await getIncreaseLiquidityOptimalSwapInfo(
+    const { swapPath, priceImpact } = await getIncreaseLiquidityOptimalSwapInfo(
+      {
+        tokenId: positionId,
+        slippageTolerance: new Percent(5, 1000),
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      eoa as Address,
+      publicClient,
+      new providers.MulticallProvider(hardhatForkProvider),
+      position,
+      true,
+    );
+
+    // TODO: can't garantee the route is from 1inch stably, find a better test case later
+    // expect(JSON.stringify(swapRoute)).to.equal(
+    //   '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
+    // );
+
+    expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
+    expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
+    expect(swapPath.amountIn).to.eq('54462595');
+    expect(swapPath.amountOut).to.eq('10457456628013072930');
+    expect(swapPath.minAmountOut).to.eq('10405169344873007565');
+
+    expect(priceImpact.toFixed(6)).to.equal('0.000852');
+  });
+
+  it('Increase liquidity optimal no need swap', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      publicClient,
+    );
+    const positionId = 4;
+    const [, , , , , tickLower, tickUpper] = await getNPM(
+      chainId,
+      publicClient,
+    ).read.positions([BigInt(positionId)]);
+
+    const hypotheticalPosition = new Position({
+      pool,
+      liquidity: '10000000000000000',
+      tickLower,
+      tickUpper,
+    });
+
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      BigInt(hypotheticalPosition.amount0.quotient.toString()),
+      BigInt(hypotheticalPosition.amount1.quotient.toString()),
+      eoa,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+
+    const { swapRoute } = await getIncreaseLiquidityOptimalSwapInfo(
+      {
+        tokenId: positionId,
+        slippageTolerance: new Percent(5, 1000),
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      chainId,
+      hypotheticalPosition.amount0,
+      hypotheticalPosition.amount1,
+      eoa as Address,
+      publicClient,
+      new providers.MulticallProvider(hardhatForkProvider),
+      hypotheticalPosition,
       // 1inch quote currently doesn't support the no-swap case.
       false,
     );

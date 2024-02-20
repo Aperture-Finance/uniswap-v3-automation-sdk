@@ -12,6 +12,7 @@ import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type AutomanActionName =
   | 'mintOptimal'
+  | 'increaseLiquidityOptimal'
   | 'decreaseLiquidity'
   | 'reinvest'
   | 'rebalance'
