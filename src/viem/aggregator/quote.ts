@@ -41,6 +41,9 @@ export async function quote(
   };
   protocols?: SwapRoute;
 }> {
+  if (amount === '0') {
+    throw new Error('amount should greater than 0');
+  }
   const swapParams = {
     src,
     dst,

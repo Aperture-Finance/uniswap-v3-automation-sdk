@@ -12,7 +12,7 @@ import {
 import { computePoolAddress } from '../pool';
 import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
-import { quote } from './quote';
+import { SwapRoute, quote } from './quote';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
@@ -63,19 +63,15 @@ export async function optimalRebalance(
   };
   let swapData: Hex = '0x';
   if (!usePool) {
-    try {
-      swapData = (
-        await getOptimalMintSwapData(
-          chainId,
-          publicClient,
-          mintParams,
-          slippage,
-          blockNumber,
-        )
-      ).swapData;
-    } catch (e) {
-      console.error(`Failed to get swap data: ${e}`);
-    }
+    swapData = (
+      await getOptimalMintSwapData(
+        chainId,
+        publicClient,
+        mintParams,
+        slippage,
+        blockNumber,
+      )
+    ).swapData;
   }
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
@@ -103,7 +99,10 @@ async function getOptimalMintSwapData(
   slippage: number,
   blockNumber?: bigint,
   includeRoute?: boolean,
-) {
+): Promise<{
+  swapData: Hex;
+  swapRoute?: SwapRoute;
+}> {
   const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
   const automan = getAutomanContract(chainId, publicClient);
   const approveTarget = await getApproveTarget(chainId);
@@ -125,30 +124,37 @@ async function getOptimalMintSwapData(
       blockNumber,
     },
   );
-  // get a quote from 1inch
-  // can't use block number to fetch 1inch swap data
-  const { tx, protocols } = await quote(
-    chainId,
-    zeroForOne ? mintParams.token0 : mintParams.token1,
-    zeroForOne ? mintParams.token1 : mintParams.token0,
-    poolAmountIn.toString(),
-    optimal_swap_router!,
-    slippage * 100,
-    includeRoute,
-  );
-  return {
-    swapData: encodeOptimalSwapData(
+
+  try {
+    // get a quote from 1inch
+    const { tx, protocols } = await quote(
       chainId,
-      mintParams.token0,
-      mintParams.token1,
-      mintParams.fee as FeeAmount,
-      mintParams.tickLower,
-      mintParams.tickUpper,
-      zeroForOne,
-      approveTarget,
-      tx.to,
-      tx.data,
-    ),
-    swapRoute: protocols,
+      zeroForOne ? mintParams.token0 : mintParams.token1,
+      zeroForOne ? mintParams.token1 : mintParams.token0,
+      poolAmountIn.toString(),
+      optimal_swap_router!,
+      slippage * 100,
+      includeRoute,
+    );
+    return {
+      swapData: encodeOptimalSwapData(
+        chainId,
+        mintParams.token0,
+        mintParams.token1,
+        mintParams.fee as FeeAmount,
+        mintParams.tickLower,
+        mintParams.tickUpper,
+        zeroForOne,
+        approveTarget,
+        tx.to,
+        tx.data,
+      ),
+      swapRoute: protocols,
+    };
+  } catch (e) {
+    console.error(`Failed to get swap data: ${e}`);
+  }
+  return {
+    swapData: '0x',
   };
 }
