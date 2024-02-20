@@ -4,6 +4,8 @@ import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre, { ethers } from 'hardhat';
+import JSBI from 'jsbi';
+import { Address } from 'viem';
 
 import {
   ActionTypeEnum,
@@ -18,6 +20,7 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
+  getIncreaseLiquidityOptimalTx,
   getMintedPositionIdFromTxReceipt,
   getNPM,
   getOptimalMintTx,
@@ -334,6 +337,108 @@ describe('Helper - Automan transaction tests', function () {
       tickLower,
       tickUpper,
       liquidity: '430845571946454',
+    });
+  });
+
+  it('Increase liquidity optimal with 1inch', async function () {
+    const existingPosition = await getPosition(
+      chainId,
+      positionId,
+      hardhatForkProvider,
+    );
+    const pool = existingPosition.pool;
+    const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
+    const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
+    await dealERC20(
+      chainId,
+      pool.token0.address,
+      pool.token1.address,
+      amount0,
+      amount1,
+      eoa,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+
+    const { tx } = await getIncreaseLiquidityOptimalTx(
+      {
+        tokenId: positionId,
+        slippageTolerance: new Percent(50, 100),
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      eoa as Address,
+      new providers.MulticallProvider(hardhatForkProvider),
+      existingPosition,
+      true,
+    );
+
+    await (await impersonatedOwnerSigner.sendTransaction(tx)).wait();
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      positionId,
+      hardhatForkProvider,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.GT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
+  });
+
+  it('Increase liquidity optimal without 1inch', async function () {
+    const existingPosition = await getPosition(
+      chainId,
+      positionId,
+      hardhatForkProvider,
+    );
+    const pool = existingPosition.pool;
+    const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
+    const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
+    await dealERC20(
+      chainId,
+      pool.token0.address,
+      pool.token1.address,
+      amount0,
+      amount1,
+      eoa,
+      getChainInfo(chainId).aperture_uniswap_v3_automan,
+    );
+    const { tx } = await getIncreaseLiquidityOptimalTx(
+      {
+        tokenId: positionId,
+        slippageTolerance: new Percent(5, 1000),
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      chainId,
+      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
+      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
+      eoa as Address,
+      new providers.MulticallProvider(hardhatForkProvider),
+      existingPosition,
+      false,
+    );
+
+    await (await impersonatedOwnerSigner.sendTransaction(tx)).wait();
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      positionId,
+      hardhatForkProvider,
+    );
+
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+      liquidity: '119758517567519',
     });
   });
 

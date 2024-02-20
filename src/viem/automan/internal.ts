@@ -17,6 +17,9 @@ export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
 
 export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
 
+export type IncreaseLiquidityReturnType =
+  GetAutomanReturnTypes<'increaseLiquidityOptimal'>;
+
 export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
   'removeLiquidity',
   [DecreaseLiquidityParams, bigint]

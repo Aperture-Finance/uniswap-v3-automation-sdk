@@ -4,7 +4,12 @@ import {
   UniV3Automan__factory,
   getChainInfo,
 } from '@/index';
-import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
+import {
+  FeeAmount,
+  Position,
+  TICK_SPACINGS,
+  nearestUsableTick,
+} from '@uniswap/v3-sdk';
 import {
   Address,
   GetContractReturnType,
@@ -30,6 +35,7 @@ import {
 import {
   DecreaseLiquidityParams,
   IncreaseLiquidityParams,
+  IncreaseLiquidityReturnType,
   MintReturnType,
   RebalanceReturnType,
   RemoveLiquidityReturnType,
@@ -107,6 +113,17 @@ export function getAutomanMintOptimalCalldata(
     abi: UniV3Automan__factory.abi,
     args: [mintParams, swapData] as const,
     functionName: 'mintOptimal',
+  });
+}
+
+export function getAutomanIncreaseLiquidityOptimalCallData(
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+): Hex {
+  return encodeFunctionData({
+    abi: UniV3Automan__factory.abi,
+    args: [increaseParams, swapData] as const,
+    functionName: 'increaseLiquidityOptimal',
   });
 }
 
@@ -335,6 +352,81 @@ export async function simulateMintOptimal(
     abi: UniV3Automan__factory.abi,
     data: returnData,
     functionName: 'mintOptimal',
+  });
+}
+
+/**
+ * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
+ * @param chainId The chain ID.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param position The current position to simulate the call from.
+ * @param increaseParams The increase liquidity parameters.
+ * @param swapData The swap data if using a router.
+ * @param blockNumber Optional block number to query.
+ * @returns {tokenId, liquidity, amount0, amount1}
+ */
+export async function simulateIncreaseLiquidityOptimal(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<IncreaseLiquidityReturnType> {
+  const data = getAutomanIncreaseLiquidityOptimalCallData(
+    increaseParams,
+    swapData,
+  );
+  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const tx = {
+    from,
+    to: aperture_uniswap_v3_automan,
+    data,
+  };
+  let returnData: Hex;
+  try {
+    // forge token approvals and balances
+    const [token0Overrides, token1Overrides] = await Promise.all([
+      getERC20Overrides(
+        position.pool.token0.address as Address,
+        from,
+        aperture_uniswap_v3_automan,
+        increaseParams.amount0Desired,
+        publicClient,
+      ),
+      getERC20Overrides(
+        position.pool.token1.address as Address,
+        from,
+        aperture_uniswap_v3_automan,
+        increaseParams.amount1Desired,
+        publicClient,
+      ),
+    ]);
+    returnData = await staticCallWithOverrides(
+      tx,
+      {
+        ...token0Overrides,
+        ...token1Overrides,
+      },
+      publicClient,
+      blockNumber,
+    );
+  } catch (e) {
+    returnData = (
+      await publicClient.call({
+        account: from,
+        data: tx.data,
+        to: tx.to,
+        blockNumber,
+      })
+    ).data!;
+  }
+  return decodeFunctionResult({
+    abi: UniV3Automan__factory.abi,
+    data: returnData,
+    functionName: 'increaseLiquidityOptimal',
   });
 }
 
