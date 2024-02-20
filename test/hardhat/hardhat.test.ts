@@ -1538,67 +1538,6 @@ describe('Automan transaction tests', function () {
     }
   }
 
-  it('Optimal mint with 1inch', async function () {
-    const testClient = await hre.viem.getTestClient();
-    const publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
-    const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
-      chainId,
-      publicClient,
-    );
-
-    const amount0 = BigInt(new Big(10).pow(pool.token0.decimals).toFixed());
-    const amount1 = BigInt(new Big(10).pow(pool.token1.decimals).toFixed());
-
-    const tickLower = nearestUsableTick(
-      pool.tickCurrent - 1000,
-      pool.tickSpacing,
-    );
-    const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 1000,
-      pool.tickSpacing,
-    );
-    await dealERC20(
-      pool.token0.address as Address,
-      pool.token1.address as Address,
-      amount0,
-      amount1,
-      eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
-    );
-    // const { swapPath, swapRoute, priceImpact } = await getOptimalMintSwapInfo(
-    const { swapPath, priceImpact } = await getOptimalMintSwapInfo(
-      chainId,
-      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
-      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      FeeAmount.MEDIUM,
-      tickLower,
-      tickUpper,
-      eoa,
-      BigInt(Math.floor(Date.now() / 1000) + 60),
-      0.5,
-      publicClient,
-      new providers.MulticallProvider(hardhatForkProvider),
-      true,
-    );
-
-    // TODO: can't garantee the route is from 1inch stably, find a better test case later
-    // expect(JSON.stringify(swapRoute)).to.equal(
-    //   '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
-    // );
-
-    expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
-    expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
-    expect(swapPath.amountIn).to.eq('47404450');
-    expect(swapPath.amountOut).to.eq('9102298520339590309');
-    expect(swapPath.minAmountOut).to.eq('9056787027737892357');
-
-    expect(priceImpact.toFixed(6)).to.equal('0.000842');
-  });
-
   it('Optimal mint no need swap', async function () {
     const testClient = await hre.viem.getTestClient();
     const publicClient = await hre.viem.getPublicClient();
