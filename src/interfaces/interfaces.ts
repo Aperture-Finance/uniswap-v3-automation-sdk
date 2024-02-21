@@ -579,9 +579,10 @@ export type UpdatePositionPermitRequest = z.infer<
   typeof UpdatePositionPermitRequestSchema
 >;
 
-const PayloadSignatureSchema = z.object({
+export const PayloadSignatureSchema = z.object({
   payloadSignature: SignatureSchema.describe('Signature of the payload.'),
 });
+
 export const CreateTriggerRequestSchema = PayloadSignatureSchema.extend({
   payload: CreateTriggerPayloadSchema,
   permitInfo: PermitInfoSchema.optional().describe(
@@ -858,6 +859,13 @@ export const WalletTrackingRequestSchema = z.object({
   walletConnectSubtype: WalletConnectSubtypeEnum.optional(),
 });
 export type WalletTrackingRequest = z.infer<typeof WalletTrackingRequestSchema>;
+
+export const GeneralResponseSchema = z.object({
+  error: z.boolean().optional().describe('True if an error occurred.'),
+  errorMessage: z.string().optional().describe('The error message.'),
+});
+
+export type GeneralResponse = z.infer<typeof GeneralResponseSchema>;
 
 export const GetHaloUsersRequestSchema = z.object({
   utcDateString: z.coerce.date().describe('The date in UTC.'),
