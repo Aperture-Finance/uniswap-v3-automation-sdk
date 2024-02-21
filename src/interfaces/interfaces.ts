@@ -886,3 +886,34 @@ export const GetHaloUsersResponseSchema = z.object({
   ),
 });
 export type GetHaloUsersResponse = z.infer<typeof GetHaloUsersResponseSchema>;
+
+export const UserActivityTrackingRequestSchema = z.object({
+  userAddress: AddressSchema,
+  clientTimestampSecs: z.number().int().positive(),
+  chainId: ApertureSupportedChainIdEnum,
+  activityType: z.enum([
+    'SWAP',
+    'REBALANCE',
+    'REINVEST',
+    'OPEN_POSITION',
+    'ADD_LIQUIDITY',
+    'REMOVE_LIQUIDITY',
+  ]),
+  txHash: HexSchema.length(66),
+  walletType: z
+    .string()
+    .min(1)
+    .describe(
+      'The type of the wallet client, such as WalletConnect and Halo, through which the activity is performed.',
+    ),
+  walletSubType: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      '(Optional) The subtype of the wallet client, e.g. Metamask iOS app behind WalletConnect.',
+    ),
+});
+export type UserActivityTrackingRequest = z.infer<
+  typeof UserActivityTrackingRequestSchema
+>;
