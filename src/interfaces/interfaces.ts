@@ -750,7 +750,7 @@ export type GetStrategyDetailRequest = z.infer<
   typeof GetStrategyDetailRequestSchema
 >;
 
-export const StrategyDetailItemSechema = TriggerItemSchema.omit({
+export const StrategyDetailItemSchema = TriggerItemSchema.omit({
   limitOrderInfo: true,
 }).extend({
   gas_fee: z.number().nonnegative().optional(),
@@ -819,7 +819,7 @@ export const StrategyDetailItemSechema = TriggerItemSchema.omit({
     ),
 });
 
-export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSechema>;
+export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSchema>;
 
 export const GetStrategyDetailResponseSchema = z.object({
   executed: z
@@ -833,10 +833,10 @@ export const GetStrategyDetailResponseSchema = z.object({
     feeCollectedToken1UsdValue: z.number(),
   }),
   current: z
-    .array(StrategyDetailItemSechema)
+    .array(StrategyDetailItemSchema)
     .describe('Current strategy trigger.'),
   history: z
-    .array(StrategyDetailItemSechema)
+    .array(StrategyDetailItemSchema)
     .describe('History of strategy triggers.'),
 });
 export type GetStrategyDetailResponse = z.infer<
