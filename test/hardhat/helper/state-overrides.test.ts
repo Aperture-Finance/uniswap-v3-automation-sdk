@@ -18,6 +18,7 @@ import {
   getPool,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
+  simulateRemoveLiquidity,
 } from '../../../src/helper';
 import {
   WBTC_ADDRESS,
@@ -165,6 +166,39 @@ describe('Helper - State overrides tests', function () {
     expect(liquidity.toString()).to.equal('716894157038546');
     expect(amount0.toString()).to.equal('51320357');
     expect(amount1.toString()).to.equal('8736560293857784398');
+  });
+
+  it('Test simulateRemoveLiquidity', async function () {
+    const blockNumber = 19142000;
+
+    // will fail due to "Not approved"
+    // const provider = getPublicProvider(chainId);
+
+    const provider = new ethers.providers.InfuraProvider(chainId);
+
+    const positionId = 655629;
+
+    const position = await PositionDetails.fromPositionId(
+      chainId,
+      positionId,
+      provider,
+      blockNumber,
+    );
+
+    const { amount0, amount1 } = await simulateRemoveLiquidity(
+      chainId,
+      provider,
+      position.owner,
+      position.owner,
+      position.tokenId,
+      0,
+      0,
+      0,
+      blockNumber,
+    );
+
+    expect(amount0.toString()).to.equal('908858032032850671014');
+    expect(amount1.toString()).to.equal('3098315727923109118');
   });
 
   it('Test simulateIncreaseLiquidityOptimal', async function () {
