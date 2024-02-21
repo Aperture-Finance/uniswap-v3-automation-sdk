@@ -10,12 +10,15 @@ import {
   getChainInfo,
 } from '../../../src';
 import {
+  PositionDetails,
   computeOperatorApprovalSlot,
   generateAccessList,
   getERC20Overrides,
   getNPM,
   getPool,
+  simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
+  simulateRemoveLiquidity,
 } from '../../../src/helper';
 import {
   WBTC_ADDRESS,
@@ -163,5 +166,70 @@ describe('Helper - State overrides tests', function () {
     expect(liquidity.toString()).to.equal('716894157038546');
     expect(amount0.toString()).to.equal('51320357');
     expect(amount1.toString()).to.equal('8736560293857784398');
+  });
+
+  it('Test simulateRemoveLiquidity', async function () {
+    const blockNumber = 19142000;
+
+    // will fail due to "Not approved"
+    // const provider = getPublicProvider(chainId);
+
+    const provider = new ethers.providers.InfuraProvider(chainId);
+
+    const positionId = 655629;
+
+    const position = await PositionDetails.fromPositionId(
+      chainId,
+      positionId,
+      provider,
+      blockNumber,
+    );
+
+    const { amount0, amount1 } = await simulateRemoveLiquidity(
+      chainId,
+      provider,
+      position.owner,
+      position.owner,
+      position.tokenId,
+      0,
+      0,
+      0,
+      blockNumber,
+    );
+
+    expect(amount0.toString()).to.equal('908858032032850671014');
+    expect(amount1.toString()).to.equal('3098315727923109118');
+  });
+
+  it('Test simulateIncreaseLiquidityOptimal', async function () {
+    const blockNumber = 17975698;
+    const provider = new ethers.providers.InfuraProvider(chainId);
+    const amount0Desired = '100000000';
+    const amount1Desired = '1000000000000000000';
+    const positionId = 4;
+    const { position } = await PositionDetails.fromPositionId(
+      chainId,
+      positionId,
+      provider,
+    );
+    const increaseParams = {
+      tokenId: positionId,
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+    const { amount0, amount1 } = await simulateIncreaseLiquidityOptimal(
+      chainId,
+      provider,
+      eoa,
+      position,
+      increaseParams,
+      undefined,
+      blockNumber,
+    );
+    expect(amount0.toString()).to.equal('61259538');
+    expect(amount1.toString()).to.equal('7156958298534991565');
   });
 });
