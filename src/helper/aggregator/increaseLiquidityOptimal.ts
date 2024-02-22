@@ -222,29 +222,37 @@ async function getIncreaseLiquidityOptimalSwapData(
     increaseParams.amount0Desired,
     increaseParams.amount1Desired,
   );
-  // get a quote from 1inch
-  const { tx, protocols } = await quote(
-    chainId,
-    zeroForOne ? position.pool.token0.address : position.pool.token1.address,
-    zeroForOne ? position.pool.token1.address : position.pool.token0.address,
-    poolAmountIn.toString(),
-    optimal_swap_router!,
-    Number(slippage.toFixed()),
-    includeRoute,
-  );
-  return {
-    swapData: encodeOptimalSwapData(
+
+  try {
+    // get a quote from 1inch
+    const { tx, protocols } = await quote(
       chainId,
-      position.pool.token0.address,
-      position.pool.token1.address,
-      position.pool.fee,
-      position.tickLower,
-      position.tickUpper,
-      zeroForOne,
-      approveTarget,
-      tx.to,
-      tx.data,
-    ),
-    swapRoute: protocols,
+      zeroForOne ? position.pool.token0.address : position.pool.token1.address,
+      zeroForOne ? position.pool.token1.address : position.pool.token0.address,
+      poolAmountIn.toString(),
+      optimal_swap_router!,
+      Number(slippage.toFixed()),
+      includeRoute,
+    );
+    return {
+      swapData: encodeOptimalSwapData(
+        chainId,
+        position.pool.token0.address,
+        position.pool.token1.address,
+        position.pool.fee,
+        position.tickLower,
+        position.tickUpper,
+        zeroForOne,
+        approveTarget,
+        tx.to,
+        tx.data,
+      ),
+      swapRoute: protocols,
+    };
+  } catch (e) {
+    console.error(`Failed to get swap data: ${e}`);
+  }
+  return {
+    swapData: '0x',
   };
 }
