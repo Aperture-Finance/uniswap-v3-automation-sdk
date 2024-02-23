@@ -187,17 +187,18 @@ export async function getERC20Overrides(
     filteredAllowanceAccessList[0].storageKeys,
   );
   if (storageKeys.length !== 2) {
-    throw new Error('Invalid storage key number');
+    console.error('Invalid storage key number');
   }
   const encodedAmount = encodeAbiParameters(parseAbiParameters('uint256'), [
     amount,
   ]);
+  const stateDiff: {
+    [key: `0x${string}`]: `0x${string}`;
+  } = {};
+  storageKeys.forEach((storageKey) => (stateDiff[storageKey] = encodedAmount));
   return {
     [token]: {
-      stateDiff: {
-        [storageKeys[0]]: encodedAmount,
-        [storageKeys[1]]: encodedAmount,
-      },
+      stateDiff,
     },
   };
 }

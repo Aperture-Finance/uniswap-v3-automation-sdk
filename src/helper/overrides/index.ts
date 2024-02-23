@@ -125,15 +125,16 @@ export async function getERC20Overrides(
     filteredAllowanceAccessList[0].storageKeys,
   );
   if (storageKeys.length !== 2) {
-    throw new Error('Invalid storage key number');
+    console.error('Invalid storage key number');
   }
   const encodedAmount = DAC.encode(['uint256'], [amount]);
+  const stateDiff: {
+    [key: string]: string;
+  } = {};
+  storageKeys.forEach((storageKey) => (stateDiff[storageKey] = encodedAmount));
   return {
     [token]: {
-      stateDiff: {
-        [storageKeys[0]]: encodedAmount,
-        [storageKeys[1]]: encodedAmount,
-      },
+      stateDiff,
     },
   };
 }
