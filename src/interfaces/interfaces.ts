@@ -895,8 +895,14 @@ export const UserActivityTrackingRequestSchema = z.object({
   userAddress: AddressSchema,
   clientTimestampSecs: z.number().int().positive(),
   chainId: ApertureSupportedChainIdEnum,
-  // In the user activity DynamoDB table, action type can also be 'CreateTrigger' or 'ExecuteTrigger'; these two are added to the table by the backend trigger handlers as appropriate.
-  actionType: z.enum(['Swap', 'OpenPosition', 'AddLiquidity']),
+  // In the user activity DynamoDB table, in addition to the five "instant" action types below, the action type value can also be 'CreateTrigger' or 'ExecuteTrigger'; these two are added to the table by the backend trigger handlers as appropriate.
+  actionType: z.enum([
+    'Swap',
+    'OpenPosition',
+    'AddLiquidity',
+    'Rebalance',
+    'Reinvest',
+  ]),
   txHash: TxHashSchema,
   walletType: WalletTypeEnum,
   walletSubType: WalletConnectSubtypeEnum.optional(),
