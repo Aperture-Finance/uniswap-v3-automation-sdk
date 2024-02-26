@@ -16,7 +16,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
 import { defaultAbiCoder } from 'ethers/lib/utils';
-import hre from 'hardhat';
+import hre, { ethers } from 'hardhat';
 import JSBI from 'jsbi';
 import {
   Address,
@@ -87,16 +87,19 @@ import {
   generateTypedDataForPermit,
   getAllPositions,
   getAutomanReinvestCalldata,
+  getBasicPositionInfo,
   getERC20Overrides,
   getFeeTierDistribution,
   getIncreaseLiquidityOptimalSwapInfo,
   getLiquidityArrayForPool,
+  getMintedPositionIdFromTxReceipt,
   getNPM,
   getOptimalMintSwapInfo,
   getPool,
   getPosition,
   getPositionAtPrice,
   getPublicClient,
+  getRebalanceTx,
   getRebalancedPosition,
   getReinvestedPosition,
   getTickToLiquidityMapForPool,
@@ -1702,5 +1705,49 @@ describe('Automan transaction tests', function () {
     );
 
     expect(swapRoute?.length).to.equal(0);
+  });
+
+  it.only('Rebalance', async function () {
+    // TODO: deploy contract
+    const positionId = 4n;
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient, 17188000n);
+    const existingPosition = await getPosition(
+      chainId,
+      positionId,
+      publicClient,
+    );
+    const { tx: txRequest } = await getRebalanceTx(
+      chainId,
+      eoa,
+      positionId,
+      240000,
+      300000,
+      /*slippageTolerance=*/ 0.5,
+      /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
+      publicClient,
+      existingPosition,
+    );
+    const impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
+
+    const txReceipt = await (
+      await impersonatedOwnerSigner.sendTransaction(txRequest)
+    ).wait();
+    const newPositionId = getMintedPositionIdFromTxReceipt(
+      chainId,
+      txReceipt,
+      eoa,
+    )!;
+    expect(
+      await getBasicPositionInfo(chainId, newPositionId, publicClient),
+    ).to.deep.equal({
+      token0: existingPosition.pool.token0,
+      token1: existingPosition.pool.token1,
+      fee: existingPosition.pool.fee,
+      liquidity: '13291498909567',
+      tickLower: 240000,
+      tickUpper: 300000,
+    });
   });
 });

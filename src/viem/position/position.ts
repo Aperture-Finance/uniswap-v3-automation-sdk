@@ -36,10 +36,14 @@ import {
   getContract,
 } from 'viem';
 
-import { getAutomanReinvestCalldata } from './automan';
-import { getNPMApprovalOverrides, staticCallWithOverrides } from './overrides';
-import { getPool, getPoolContract, getPoolFromBasicPositionInfo } from './pool';
-import { getPublicClient } from './public_client';
+import { getAutomanReinvestCalldata } from '../automan';
+import { getNPMApprovalOverrides, staticCallWithOverrides } from '../overrides';
+import {
+  getPool,
+  getPoolContract,
+  getPoolFromBasicPositionInfo,
+} from '../pool';
+import { getPublicClient } from '../public_client';
 
 export interface BasicPositionInfo {
   token0: Token;
