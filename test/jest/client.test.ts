@@ -218,17 +218,14 @@ describe('Automan client test', () => {
       walletClient: WalletTypeEnum['HALO'],
     };
 
-    const responseData = {};
-    mock.onGet(`${url}/trackWallet`).reply(200, responseData);
+    const responseData = 'Success';
+    mock.onPost(`${url}/trackWallet`).reply(200, responseData);
 
     const response = await client.trackWallet(request);
     expect(response).toEqual(responseData);
-
-    // Expect to call get once.
-    expect(mock.history.get.length).toEqual(1);
-    // Expect request params to match input request.
-    expect(JSON.parse(mock.history.get[0].params.get('request'))).toEqual(
-      request,
-    );
+    // Expect to call post once.
+    expect(mock.history.post.length).toEqual(1);
+    // Expect request params to match.
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 });

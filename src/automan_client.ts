@@ -27,7 +27,6 @@ async function buildAxiosGetRequest(
     | CheckUserLimitRequest
     | GetStrategyDetailRequest
     | HasSignedPrivateBetaAgreementRequest
-    | WalletTrackingRequest
   >,
 ) {
   return axios.get(url.toString(), {
@@ -45,6 +44,7 @@ async function buildAxiosPostRequest(
     | DeleteTriggerRequest
     | UpdatePositionPermitRequest
     | SignPrivateBetaAgreementRequest
+    | WalletTrackingRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -134,6 +134,6 @@ export class AutomanClient {
 
   async trackWallet(request: Readonly<WalletTrackingRequest>): Promise<string> {
     const url = new URL('/trackWallet', this.endpoint);
-    return (await buildAxiosGetRequest(url, request)).data;
+    return (await buildAxiosPostRequest(url, request)).data;
   }
 }
