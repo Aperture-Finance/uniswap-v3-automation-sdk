@@ -74,6 +74,16 @@ export const ActionTypeEnum = z
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
 
+// A more generic action type that includes action types beyond existing
+// automation offerings.
+export const GenericActionEnum = z.enum([
+  ...ActionTypeEnum.options,
+  'Swap',
+  'OpenPosition',
+  'AddLiquidity',
+]);
+export type GenericActionEnum = z.infer<typeof GenericActionEnum>;
+
 // TODO: Create a constant for the maximum allowed `maxGasProportion` that matches Automan setting and use it here.
 const MaxGasProportionSchema = z
   .number()
@@ -108,6 +118,10 @@ export const HexSchema = z
 
 export const AddressSchema = HexSchema.length(42).describe(
   'A hexadecimal address.',
+);
+
+export const TxHashSchema = HexSchema.length(66).describe(
+  'A transaction hash.',
 );
 
 export const SignatureSchema = HexSchema.min(132).describe(
@@ -891,28 +905,10 @@ export const UserActivityTrackingRequestSchema = z.object({
   userAddress: AddressSchema,
   clientTimestampSecs: z.number().int().positive(),
   chainId: ApertureSupportedChainIdEnum,
-  activityType: z.enum([
-    'SWAP',
-    'REBALANCE',
-    'REINVEST',
-    'OPEN_POSITION',
-    'ADD_LIQUIDITY',
-    'REMOVE_LIQUIDITY',
-  ]),
-  txHash: HexSchema.length(66),
-  walletType: z
-    .string()
-    .min(1)
-    .describe(
-      'The type of the wallet client, such as WalletConnect and Halo, through which the activity is performed.',
-    ),
-  walletSubType: z
-    .string()
-    .min(1)
-    .optional()
-    .describe(
-      '(Optional) The subtype of the wallet client, e.g. Metamask iOS app behind WalletConnect.',
-    ),
+  actionType: GenericActionEnum,
+  txHash: TxHashSchema,
+  walletType: WalletTypeEnum,
+  walletSubType: WalletConnectSubtypeEnum.optional(),
 });
 export type UserActivityTrackingRequest = z.infer<
   typeof UserActivityTrackingRequestSchema
