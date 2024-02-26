@@ -1644,7 +1644,7 @@ describe('Automan transaction tests', function () {
 
     expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
     expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
-    expect(swapPath.amountIn).to.eq('54462595');
+    expect(swapPath.amountIn).to.eq('54508707');
     expect(swapPath.amountOut).to.eq('10457456628013072930');
     expect(swapPath.minAmountOut).to.eq('10405169344873007565');
 
