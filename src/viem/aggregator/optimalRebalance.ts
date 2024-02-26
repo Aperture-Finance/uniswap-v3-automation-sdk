@@ -67,15 +67,13 @@ export async function optimalRebalance(
   let swapData: Hex = '0x';
   let swapRoute: SwapRoute | undefined;
   if (!usePool) {
-    const res = await getOptimalMintSwapData(
+    ({ swapData, swapRoute } = await getOptimalMintSwapData(
       chainId,
       publicClient,
       mintParams,
       slippage,
       blockNumber,
-    );
-    swapData = res.swapData;
-    swapRoute = res.swapRoute;
+    ));
   }
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
