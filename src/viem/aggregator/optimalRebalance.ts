@@ -28,8 +28,11 @@ export async function optimalRebalance(
 ): Promise<{
   amount0: bigint;
   amount1: bigint;
+  receive0: bigint;
+  receive1: bigint;
   liquidity: bigint;
   swapData: Hex;
+  swapRoute?: SwapRoute;
 }> {
   const position = await PositionDetails.fromPositionId(
     chainId,
@@ -62,16 +65,17 @@ export async function optimalRebalance(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
   let swapData: Hex = '0x';
+  let swapRoute: SwapRoute | undefined;
   if (!usePool) {
-    swapData = (
-      await getOptimalMintSwapData(
-        chainId,
-        publicClient,
-        mintParams,
-        slippage,
-        blockNumber,
-      )
-    ).swapData;
+    const res = await getOptimalMintSwapData(
+      chainId,
+      publicClient,
+      mintParams,
+      slippage,
+      blockNumber,
+    );
+    swapData = res.swapData;
+    swapRoute = res.swapRoute;
   }
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
@@ -87,8 +91,11 @@ export async function optimalRebalance(
   return {
     amount0,
     amount1,
+    receive0,
+    receive1,
     liquidity,
     swapData,
+    swapRoute,
   };
 }
 
