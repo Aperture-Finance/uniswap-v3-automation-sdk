@@ -10,6 +10,7 @@ import {
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
   UpdatePositionPermitRequest,
+  WalletTypeEnum,
 } from '../../src';
 
 describe('Automan client test', () => {
@@ -204,6 +205,28 @@ describe('Automan client test', () => {
     // Expect to call get once.
     expect(mock.history.get.length).toEqual(1);
     // Expect request params to match.
+    expect(JSON.parse(mock.history.get[0].params.get('request'))).toEqual(
+      request,
+    );
+  });
+
+  it('Should call tract wallet', async () => {
+    const request = {
+      chainId: 5,
+      address: '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
+      timestamp_secs: 1708938824,
+      walletClient: WalletTypeEnum['HALO'],
+    };
+
+    const responseData = {};
+    mock.onGet(`${url}/trackWallet`).reply(200, responseData);
+
+    const response = await client.trackWallet(request);
+    expect(response).toEqual(responseData);
+
+    // Expect to call get once.
+    expect(mock.history.get.length).toEqual(1);
+    // Expect request params to match input request.
     expect(JSON.parse(mock.history.get[0].params.get('request'))).toEqual(
       request,
     );

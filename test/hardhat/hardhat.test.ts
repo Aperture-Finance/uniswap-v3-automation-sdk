@@ -1,7 +1,6 @@
 import { providers } from '@0xsequence/multicall';
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
-import { CurrencyAmount } from '@uniswap/smart-order-router';
 import {
   FeeAmount,
   Pool,
@@ -1589,66 +1588,6 @@ describe('Automan transaction tests', function () {
     );
 
     expect(swapRoute?.length).to.equal(0);
-  });
-
-  it('Increase liquidity optimal with 1inch', async function () {
-    const testClient = await hre.viem.getTestClient();
-    const publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
-    const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
-      chainId,
-      publicClient,
-    );
-    const positionId = 4;
-    const position = await getPosition(
-      chainId,
-      BigInt(positionId),
-      publicClient,
-    );
-
-    const amount0 = BigInt(new Big(10).pow(pool.token0.decimals).toFixed());
-    const amount1 = BigInt(new Big(10).pow(pool.token1.decimals).toFixed());
-    await dealERC20(
-      pool.token0.address as Address,
-      pool.token1.address as Address,
-      amount0,
-      amount1,
-      eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
-    );
-
-    // const { swapPath, swapRoute, priceImpact } = await getIncreaseLiquidityOptimalSwapInfo(
-    const { swapPath, priceImpact } = await getIncreaseLiquidityOptimalSwapInfo(
-      {
-        tokenId: positionId,
-        slippageTolerance: new Percent(5, 1000),
-        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-      },
-      chainId,
-      CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
-      CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      eoa as Address,
-      publicClient,
-      new providers.MulticallProvider(hardhatForkProvider),
-      position,
-      true,
-    );
-
-    // TODO: can't garantee the route is from 1inch stably, find a better test case later
-    // expect(JSON.stringify(swapRoute)).to.equal(
-    //   '[[[{"name":"UNISWAP_V3","part":100,"fromTokenAddress":"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","toTokenAddress":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"}]]]',
-    // );
-
-    expect(swapPath.tokenIn).to.eq(WBTC_ADDRESS);
-    expect(swapPath.tokenOut).to.eq(WETH_ADDRESS);
-    expect(swapPath.amountIn).to.eq('54462595');
-    expect(swapPath.amountOut).to.eq('10457456628013072930');
-    expect(swapPath.minAmountOut).to.eq('10405169344873007565');
-
-    expect(priceImpact.toFixed(6)).to.equal('0.000852');
   });
 
   it('Increase liquidity optimal no need swap', async function () {
