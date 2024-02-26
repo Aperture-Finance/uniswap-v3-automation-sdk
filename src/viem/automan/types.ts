@@ -4,10 +4,12 @@ import {
 } from '@/index';
 import {
   AbiStateMutability,
+  Address,
   ContractFunctionArgs,
   ContractFunctionReturnType,
 } from 'viem';
 
+import { SwapRoute } from '../aggregator';
 import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type AutomanActionName =
@@ -43,3 +45,17 @@ export type MintParams = GetAbiFunctionParamsTypes<
   typeof INonfungiblePositionManager__factory.abi,
   'mint'
 >[0];
+
+export type SwapPath = {
+  tokenIn: Address;
+  tokenOut: Address;
+  amountIn: string;
+  amountOut: string;
+  minAmountOut: string;
+};
+
+export type SwapInfo = {
+  swapRoute?: SwapRoute;
+  swapPath: SwapPath;
+  priceImpact: Big.Big;
+};

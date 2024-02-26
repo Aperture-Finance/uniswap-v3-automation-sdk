@@ -25,3 +25,4 @@ coverage/
 .idea
 dist
 test/artifacts.d.ts
+rsync.sh
