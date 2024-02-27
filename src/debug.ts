@@ -15,7 +15,7 @@ async function main() {
   const publicClient = createPublicClient({
     chain: getChainInfo(chainId).chain,
     transport: http(
-      'https://polygon-mainnet.infura.io/v3/ed76135a4bf344ad9e001278b776d5c0',
+      'https://polygon-mainnet.infura.io/v3/[api key]',
     ),
   });
   const provider = new CustomInfuraProvider(chainId);
@@ -52,7 +52,6 @@ async function main() {
     0.05,
     publicClient,
     provider,
-    // 1inch quote currently doesn't support the no-swap case.
     true,
   );
   console.log(t);
