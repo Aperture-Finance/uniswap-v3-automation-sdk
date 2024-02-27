@@ -10,6 +10,8 @@ import {
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
   UpdatePositionPermitRequest,
+  UserActivityTrackingRequest,
+  WalletConnectSubtypeEnum,
   WalletTypeEnum,
 } from '../../src';
 
@@ -222,6 +224,29 @@ describe('Automan client test', () => {
     mock.onPost(`${url}/trackWallet`).reply(200, responseData);
 
     const response = await client.trackWallet(request);
+    expect(response).toEqual(responseData);
+    // Expect to call post once.
+    expect(mock.history.post.length).toEqual(1);
+    // Expect request params to match.
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
+  });
+
+  it('Should call tract user activity', async () => {
+    const request: UserActivityTrackingRequest = {
+      chainId: 5,
+      userAddress: '0xeb5105f298DbDfeD3B317E8176949e432C997C4b',
+      clientTimestampSecs: 1708990541,
+      actionType: 'Swap',
+      txHash:
+        '0x068bef573409c6b6f34b95e3e9be08a85a494c3ff83d3632cb3eee9174c4dda3',
+      walletType: WalletTypeEnum['WALLETCONNECT'],
+      walletSubType: WalletConnectSubtypeEnum['METAMASK'],
+    };
+
+    const responseData = 'Success';
+    mock.onPost(`${url}/trackUserActivity`).reply(200, responseData);
+
+    const response = await client.trackUserActivity(request);
     expect(response).toEqual(responseData);
     // Expect to call post once.
     expect(mock.history.post.length).toEqual(1);
