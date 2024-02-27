@@ -16,6 +16,7 @@ import {
   SignPrivateBetaAgreementRequest,
   UpdatePositionPermitRequest,
   UpdateTriggerRequest,
+  UserActivityTrackingRequest,
   WalletTrackingRequest,
 } from './interfaces';
 
@@ -45,6 +46,7 @@ async function buildAxiosPostRequest(
     | UpdatePositionPermitRequest
     | SignPrivateBetaAgreementRequest
     | WalletTrackingRequest
+    | UserActivityTrackingRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -134,6 +136,13 @@ export class AutomanClient {
 
   async trackWallet(request: Readonly<WalletTrackingRequest>): Promise<string> {
     const url = new URL('/trackWallet', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async trackUserActivity(
+    request: Readonly<UserActivityTrackingRequest>,
+  ): Promise<string> {
+    const url = new URL('/trackUserActivity', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 }
