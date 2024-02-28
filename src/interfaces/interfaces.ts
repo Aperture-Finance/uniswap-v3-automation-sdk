@@ -900,6 +900,7 @@ export const UserActivityTrackingRequestSchema = z.object({
     'Swap',
     'OpenPosition',
     'AddLiquidity',
+    'RemoveLiquidity',
     'Rebalance',
     'Reinvest',
   ]),
