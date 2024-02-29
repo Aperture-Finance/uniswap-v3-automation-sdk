@@ -288,6 +288,7 @@ export async function staticCallWithOverrides(
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<Hex> {
+  console.log('viem/overrides.ts staticCallWithOverrides line 291', overrides);
   return requestWithOverrides(
     'eth_call',
     tx,
@@ -338,6 +339,10 @@ export async function tryStaticCallWithOverrides(
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<Hex> {
+  console.log(
+    'viem/overrides.ts tryStaticCallWithOverrides line 342',
+    overrides,
+  );
   return tryRequestWithOverrides(
     'eth_call',
     {

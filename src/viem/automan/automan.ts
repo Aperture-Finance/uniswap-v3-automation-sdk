@@ -470,6 +470,10 @@ export async function simulateRemoveLiquidity(
     amount1Min,
     feeBips,
   );
+  console.log(
+    'viem/automan.ts simulateRemoveLiquidity line 473',
+    getNPMApprovalOverrides(chainId, owner),
+  );
   return decodeFunctionResult({
     abi: UniV3Automan__factory.abi,
     data: await tryRequestWithOverrides(
@@ -548,6 +552,10 @@ export async function simulateRebalance(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RebalanceReturnType> {
+  console.log('viem/automan.ts simulateRebalance line 555', {
+    ...getNPMApprovalOverrides(chainId, owner),
+    ...getControllerOverrides(chainId, getFromAddress(from)),
+  });
   const data = await requestRebalance(
     'eth_call',
     chainId,
