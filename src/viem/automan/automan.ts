@@ -331,8 +331,13 @@ export async function simulateMintOptimal(
     ]);
     console.log(
       'automan line 332 simulateMintOptimal: ',
-      token0Overrides,
-      token1Overrides,
+      tx,
+      {
+        ...token0Overrides,
+        ...token1Overrides,
+      },
+      publicClient,
+      blockNumber,
     );
     returnData = await staticCallWithOverrides(
       tx,
@@ -344,7 +349,7 @@ export async function simulateMintOptimal(
       blockNumber,
     );
   } catch (e) {
-    console.log('debug automan.ts line 389: no overrides');
+    console.log('debug automan.ts line 352: no overrides');
     returnData = (
       await publicClient.call({
         account: from,
