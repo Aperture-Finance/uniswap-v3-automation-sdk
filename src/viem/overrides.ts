@@ -386,6 +386,7 @@ export async function tryRequestWithOverrides<M extends keyof RpcReturnType>(
     );
   } catch (e) {
     const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
+    console.log('overrides.ts line 389: no overrides');
     return await publicClient.request({
       // @ts-expect-error viem doesn't include 'eth_createAccessList'
       method,
