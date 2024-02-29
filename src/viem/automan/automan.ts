@@ -312,6 +312,13 @@ export async function simulateMintOptimal(
   };
   let returnData: Hex;
   try {
+    console.log(
+      'automan line 315 simulateMintOptimal: ',
+      mintParams,
+      from,
+      aperture_uniswap_v3_automan,
+      publicClient,
+    );
     // forge token approvals and balances
     const [token0Overrides, token1Overrides] = await Promise.all([
       getERC20Overrides(
@@ -330,7 +337,7 @@ export async function simulateMintOptimal(
       ),
     ]);
     console.log(
-      'automan line 332 simulateMintOptimal: ',
+      'automan line 340 simulateMintOptimal: ',
       tx,
       {
         ...token0Overrides,
@@ -349,7 +356,7 @@ export async function simulateMintOptimal(
       blockNumber,
     );
   } catch (e) {
-    console.log('debug automan.ts line 352: no overrides');
+    console.log('debug automan.ts line 359: no overrides', e);
     returnData = (
       await publicClient.call({
         account: from,
