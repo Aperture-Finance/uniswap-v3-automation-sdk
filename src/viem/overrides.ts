@@ -191,6 +191,7 @@ export async function getERC20Overrides(
     'viem/overrides.ts getERC20Overrides(): filteredAllowanceAccessList: ',
     filteredAllowanceAccessList,
   );
+  /*
   if (
     filteredBalanceOfAccessList.length < 1 ||
     filteredAllowanceAccessList.length < 1
@@ -199,10 +200,15 @@ export async function getERC20Overrides(
       'Empty filteredBalanceOfAccessList or filteredAllowanceAccessList',
     );
   }
+  */
   // get rid of the storage key of implementation address
   const storageKeys = symmetricDifference(
-    filteredBalanceOfAccessList[0].storageKeys,
-    filteredAllowanceAccessList[0].storageKeys,
+    filteredBalanceOfAccessList.length > 0
+      ? filteredBalanceOfAccessList[0].storageKeys
+      : [],
+    filteredAllowanceAccessList.length > 0
+      ? filteredAllowanceAccessList[0].storageKeys
+      : [],
   );
   if (storageKeys.length !== 2) {
     console.log('Invalid storage key number');

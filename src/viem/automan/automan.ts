@@ -302,6 +302,8 @@ export async function simulateMintOptimal(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
+  console.log(`simulateMintOptimal mintParams: ${mintParams}`);
+  console.log(`simulateMintOptimal blockNumber: ${blockNumber}`);
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
   const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
