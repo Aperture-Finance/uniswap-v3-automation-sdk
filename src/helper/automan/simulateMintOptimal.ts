@@ -51,6 +51,7 @@ export async function simulateMintOptimal(
     data,
   };
   let returnData: string;
+  console.log('simulateMintOptimal line 54: ', overrides);
   if (provider instanceof JsonRpcProvider) {
     if (overrides === undefined) {
       // forge token approvals and balances
@@ -74,7 +75,9 @@ export async function simulateMintOptimal(
         ...token0Overrides,
         ...token1Overrides,
       };
+      console.log('simulateMintOptimal line 78: ', overrides);
     }
+    console.log('simulateMintOptimal line 80: ', overrides);
     returnData = await staticCallWithOverrides(
       tx,
       overrides,

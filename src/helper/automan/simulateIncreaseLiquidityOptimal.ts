@@ -52,6 +52,7 @@ export async function simulateIncreaseLiquidityOptimal(
     data,
   };
   let returnData: string;
+  console.log('simulateIncreaseLiquidityOptimal line 55: ', overrides);
   if (provider instanceof JsonRpcProvider) {
     if (overrides === undefined) {
       // forge token approvals and balances
@@ -75,7 +76,9 @@ export async function simulateIncreaseLiquidityOptimal(
         ...token0Overrides,
         ...token1Overrides,
       };
+      console.log('simulateIncreaseLiquidityOptimal line 79: ', overrides);
     }
+    console.log('simulateIncreaseLiquidityOptimal line 81: ', overrides);
     returnData = await staticCallWithOverrides(
       tx,
       overrides,

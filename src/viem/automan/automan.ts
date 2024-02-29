@@ -329,6 +329,11 @@ export async function simulateMintOptimal(
         publicClient,
       ),
     ]);
+    console.log(
+      'automan line 332 simulateMintOptimal: ',
+      token0Overrides,
+      token1Overrides,
+    );
     returnData = await staticCallWithOverrides(
       tx,
       {
@@ -404,6 +409,11 @@ export async function simulateIncreaseLiquidityOptimal(
         publicClient,
       ),
     ]);
+    console.log(
+      'automan line 412 simulateIncreaseLiquidityOptimal: ',
+      token0Overrides,
+      token1Overrides,
+    );
     returnData = await staticCallWithOverrides(
       tx,
       {
