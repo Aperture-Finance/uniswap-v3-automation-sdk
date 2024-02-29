@@ -195,6 +195,10 @@ export async function staticCallWithOverrides(
   provider: JsonRpcProvider,
   blockNumber?: number,
 ): Promise<string> {
+  console.log(
+    'helper/overrides/index.ts staticCallWithOverrides line 198',
+    overrides,
+  );
   return await provider.send('eth_call', [
     tx,
     // hexlify the block number.

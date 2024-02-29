@@ -168,6 +168,14 @@ export async function getERC20Overrides(
       publicClient,
     ),
   ]);
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): balanceOfAccessList: ',
+    balanceOfAccessList,
+  );
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): allowanceAccessList: ',
+    allowanceAccessList,
+  );
   // tokens on L2 and those with a proxy will have more than one access list entry
   const filteredBalanceOfAccessList = balanceOfAccessList.accessList.filter(
     ({ address }) => address.toLowerCase() === token.toLowerCase(),
@@ -175,16 +183,32 @@ export async function getERC20Overrides(
   const filteredAllowanceAccessList = allowanceAccessList.accessList.filter(
     ({ address }) => address.toLowerCase() === token.toLowerCase(),
   );
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): filteredBalanceOfAccessList: ',
+    filteredBalanceOfAccessList,
+  );
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): filteredAllowanceAccessList: ',
+    filteredAllowanceAccessList,
+  );
+  /*
   if (
-    filteredBalanceOfAccessList.length !== 1 ||
-    filteredAllowanceAccessList.length !== 1
+    filteredBalanceOfAccessList.length < 1 ||
+    filteredAllowanceAccessList.length < 1
   ) {
-    throw new Error('Invalid access list length');
+    throw new Error(
+      'Empty filteredBalanceOfAccessList or filteredAllowanceAccessList',
+    );
   }
+  */
   // get rid of the storage key of implementation address
   const storageKeys = symmetricDifference(
-    filteredBalanceOfAccessList[0].storageKeys,
-    filteredAllowanceAccessList[0].storageKeys,
+    filteredBalanceOfAccessList.length > 0
+      ? filteredBalanceOfAccessList[0].storageKeys
+      : [],
+    filteredAllowanceAccessList.length > 0
+      ? filteredAllowanceAccessList[0].storageKeys
+      : [],
   );
   if (storageKeys.length !== 2) {
     console.log('Invalid storage key number');
@@ -233,6 +257,7 @@ export async function requestWithOverrides<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
+  console.log('overrides.ts requestWithOverrides line 236', method, overrides);
   const params = overrides ? [tx, blockTag, overrides] : [tx, blockTag];
   return await publicClient.request({
     // @ts-expect-error viem doesn't include 'eth_createAccessList'
@@ -288,6 +313,7 @@ export async function staticCallWithOverrides(
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<Hex> {
+  console.log('viem/overrides.ts staticCallWithOverrides line 291', overrides);
   return requestWithOverrides(
     'eth_call',
     tx,
@@ -338,6 +364,10 @@ export async function tryStaticCallWithOverrides(
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<Hex> {
+  console.log(
+    'viem/overrides.ts tryStaticCallWithOverrides line 342',
+    overrides,
+  );
   return tryRequestWithOverrides(
     'eth_call',
     {
@@ -380,6 +410,7 @@ export async function tryRequestWithOverrides<M extends keyof RpcReturnType>(
     );
   } catch (e) {
     const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
+    console.log('overrides.ts line 389: no overrides');
     return await publicClient.request({
       // @ts-expect-error viem doesn't include 'eth_createAccessList'
       method,
