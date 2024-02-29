@@ -234,7 +234,30 @@ export async function requestWithOverrides<M extends keyof RpcReturnType>(
 ): Promise<RpcReturnType[M]> {
   const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
   console.log('overrides.ts requestWithOverrides line 236', method, overrides);
-  const params = overrides ? [tx, blockTag, overrides] : [tx, blockTag];
+  const params = overrides
+    ? [tx, blockTag, overrides]
+    : [
+        tx,
+        blockTag,
+        {
+          '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7': {
+            stateDiff: {
+              '0x4598affe0d4736374c53f68d404a7b425536ee6389f8c9c694e14622cbd7ce27':
+                '0x00000000000000000000000000000000000000000000000002c68af0bb140000',
+              '0x8d87900d0b8afbfdc4258ad7e6fb22f18f7d805f8b566aba4dd943d3d03a8f79':
+                '0x00000000000000000000000000000000000000000000000002c68af0bb140000',
+            },
+          },
+          '0xd586E7F844cEa2F87f50152665BCbc2C279D8d70': {
+            stateDiff: {
+              '0x08a6053bd3ab9f424bfe02369158e7f417e2230e9cf60a083e6bdd9657a12c1b':
+                '0x0000000000000000000000000000000000000000000000000000000000000000',
+              '0x3ef80221440bab85e5f9b1a17c534282075497ffd9a1a6a3bab4352029676c88':
+                '0x0000000000000000000000000000000000000000000000000000000000000000',
+            },
+          },
+        },
+      ];
   return await publicClient.request({
     // @ts-expect-error viem doesn't include 'eth_createAccessList'
     method,
