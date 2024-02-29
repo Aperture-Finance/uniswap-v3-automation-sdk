@@ -168,6 +168,14 @@ export async function getERC20Overrides(
       publicClient,
     ),
   ]);
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): balanceOfAccessList: ',
+    balanceOfAccessList,
+  );
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): allowanceAccessList: ',
+    allowanceAccessList,
+  );
   // tokens on L2 and those with a proxy will have more than one access list entry
   const filteredBalanceOfAccessList = balanceOfAccessList.accessList.filter(
     ({ address }) => address.toLowerCase() === token.toLowerCase(),
@@ -175,11 +183,21 @@ export async function getERC20Overrides(
   const filteredAllowanceAccessList = allowanceAccessList.accessList.filter(
     ({ address }) => address.toLowerCase() === token.toLowerCase(),
   );
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): filteredBalanceOfAccessList: ',
+    filteredBalanceOfAccessList,
+  );
+  console.log(
+    'viem/overrides.ts getERC20Overrides(): filteredAllowanceAccessList: ',
+    filteredAllowanceAccessList,
+  );
   if (
-    filteredBalanceOfAccessList.length !== 1 ||
-    filteredAllowanceAccessList.length !== 1
+    filteredBalanceOfAccessList.length < 1 ||
+    filteredAllowanceAccessList.length < 1
   ) {
-    throw new Error('Invalid access list length');
+    throw new Error(
+      'Empty filteredBalanceOfAccessList or filteredAllowanceAccessList',
+    );
   }
   // get rid of the storage key of implementation address
   const storageKeys = symmetricDifference(
