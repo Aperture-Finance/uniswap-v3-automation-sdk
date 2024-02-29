@@ -233,7 +233,7 @@ export async function requestWithOverrides<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
-  console.log('overrides.ts requestWithOverrides line 236', overrides);
+  console.log('overrides.ts requestWithOverrides line 236', method, overrides);
   const params = overrides ? [tx, blockTag, overrides] : [tx, blockTag];
   return await publicClient.request({
     // @ts-expect-error viem doesn't include 'eth_createAccessList'
