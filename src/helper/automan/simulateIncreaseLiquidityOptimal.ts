@@ -86,6 +86,9 @@ export async function simulateIncreaseLiquidityOptimal(
       blockNumber,
     );
   } else {
+    console.log(
+      'debug simulateIncreaseLiquidityOptimal line 89 provider issue',
+    );
     returnData = await provider.call(tx, blockNumber);
   }
   return IUniV3Automan__factory.createInterface().decodeFunctionResult(

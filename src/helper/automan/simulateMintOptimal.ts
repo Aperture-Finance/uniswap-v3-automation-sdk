@@ -85,6 +85,7 @@ export async function simulateMintOptimal(
       blockNumber,
     );
   } else {
+    console.log('debug simulateMintOptimal line 88 provider issue');
     returnData = await provider.call(tx, blockNumber);
   }
   return IUniV3Automan__factory.createInterface().decodeFunctionResult(

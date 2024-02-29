@@ -344,6 +344,7 @@ export async function simulateMintOptimal(
       blockNumber,
     );
   } catch (e) {
+    console.log('debug automan.ts line 389: no overrides');
     returnData = (
       await publicClient.call({
         account: from,
@@ -424,6 +425,7 @@ export async function simulateIncreaseLiquidityOptimal(
       blockNumber,
     );
   } catch (e) {
+    console.log('debug automan.ts line 428: no overrides');
     returnData = (
       await publicClient.call({
         account: from,
