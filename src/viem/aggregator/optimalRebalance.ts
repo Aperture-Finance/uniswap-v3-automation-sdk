@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
+import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
@@ -34,6 +35,7 @@ export async function optimalRebalance(
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
+  const { optimal_swap_router } = getChainInfo(chainId);
   const position = await PositionDetails.fromPositionId(
     chainId,
     positionId,
@@ -64,24 +66,133 @@ export async function optimalRebalance(
     recipient: fromAddress, // Param value ignored by Automan for rebalance.
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  let swapData: Hex = '0x';
-  let swapRoute: SwapRoute | undefined;
+
+  const poolPromise = optimalMintPool(
+    chainId,
+    publicClient,
+    fromAddress,
+    mintParams,
+    positionId,
+    position.owner,
+    feeBips,
+    blockNumber,
+  );
   if (!usePool) {
-    const res = await getOptimalMintSwapData(
-      chainId,
-      publicClient,
-      mintParams,
-      slippage,
-      blockNumber,
-    );
-    swapData = res.swapData;
-    swapRoute = res.swapRoute;
+    if (optimal_swap_router === undefined) {
+      return { ...(await poolPromise), receive0, receive1 };
+    }
+    const [poolEstimate, routerEstimate] = await Promise.all([
+      poolPromise,
+      optimalMintRouter(
+        chainId,
+        publicClient,
+        fromAddress,
+        mintParams,
+        slippage,
+        positionId,
+        position.owner,
+        feeBips,
+        blockNumber,
+      ),
+    ]);
+    // use the same pool if the quote isn't better
+    if (poolEstimate.liquidity > routerEstimate.liquidity) {
+      return { ...poolEstimate, receive0, receive1 };
+    } else {
+      return { ...routerEstimate, receive0, receive1 };
+    }
+  } else {
+    return { ...(await poolPromise), receive0, receive1 };
   }
+}
+
+async function optimalMintPool(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  fromAddress: Address,
+  mintParams: MintParams,
+  positionId: bigint,
+  positionOwner: Address,
+  feeBips: bigint,
+  blockNumber?: bigint,
+): Promise<{
+  amount0: bigint;
+  amount1: bigint;
+  liquidity: bigint;
+  swapData: Hex;
+  swapRoute?: SwapRoute;
+}> {
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
     publicClient,
     fromAddress,
-    position.owner,
+    positionOwner,
+    mintParams,
+    positionId,
+    feeBips,
+    undefined,
+    blockNumber,
+  );
+  let swapRoute: SwapRoute = [];
+  if (mintParams.amount0Desired.toString() !== amount0.toString()) {
+    const [fromTokenAddress, toTokenAddress] = new Big(
+      mintParams.amount0Desired.toString(),
+    ).gt(amount0.toString())
+      ? [mintParams.token0, mintParams.token1]
+      : [mintParams.token1, mintParams.token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+
+  return {
+    amount0,
+    amount1,
+    liquidity,
+    swapData: '0x',
+    swapRoute,
+  };
+}
+
+async function optimalMintRouter(
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  fromAddress: Address,
+  mintParams: MintParams,
+  slippage: number,
+  positionId: bigint,
+  positionOwner: Address,
+  feeBips: bigint,
+  blockNumber?: bigint,
+): Promise<{
+  amount0: bigint;
+  amount1: bigint;
+  liquidity: bigint;
+  swapData: Hex;
+  swapRoute?: SwapRoute;
+}> {
+  const { swapData, swapRoute } = await getOptimalMintSwapData(
+    chainId,
+    publicClient,
+    mintParams,
+    slippage,
+    /** blockNumber= */ undefined,
+    /** includeRoute= */ true,
+  );
+  const [, liquidity, amount0, amount1] = await simulateRebalance(
+    chainId,
+    publicClient,
+    fromAddress,
+    positionOwner,
     mintParams,
     positionId,
     feeBips,
@@ -91,8 +202,6 @@ export async function optimalRebalance(
   return {
     amount0,
     amount1,
-    receive0,
-    receive1,
     liquidity,
     swapData,
     swapRoute,
