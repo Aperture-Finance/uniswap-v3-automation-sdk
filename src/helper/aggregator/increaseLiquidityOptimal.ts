@@ -206,24 +206,24 @@ async function getIncreaseLiquidityOptimalSwapData(
   slippage: Percent,
   includeRoute?: boolean,
 ) {
-  const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-  const automan = getAutomanContract(chainId, provider);
-  const approveTarget = await getApproveTarget(chainId);
-  // get swap amounts using the same pool
-  const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
-    computePoolAddress(
-      uniswap_v3_factory,
-      position.pool.token0.address,
-      position.pool.token1.address,
-      position.pool.fee,
-    ),
-    position.tickLower,
-    position.tickUpper,
-    increaseParams.amount0Desired,
-    increaseParams.amount1Desired,
-  );
-
   try {
+    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
+    const automan = getAutomanContract(chainId, provider);
+    const approveTarget = await getApproveTarget(chainId);
+    // get swap amounts using the same pool
+    const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
+      computePoolAddress(
+        uniswap_v3_factory,
+        position.pool.token0.address,
+        position.pool.token1.address,
+        position.pool.fee,
+      ),
+      position.tickLower,
+      position.tickUpper,
+      increaseParams.amount0Desired,
+      increaseParams.amount1Desired,
+    );
+
     // get a quote from 1inch
     const { tx, protocols } = await quote(
       chainId,
@@ -250,7 +250,7 @@ async function getIncreaseLiquidityOptimalSwapData(
       swapRoute: protocols,
     };
   } catch (e) {
-    console.error(`Failed to get swap data: ${e}`);
+    console.warn(`Failed to get swap data: ${e}`);
   }
   return {
     swapData: '0x',
