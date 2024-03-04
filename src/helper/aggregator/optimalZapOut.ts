@@ -174,7 +174,7 @@ async function getZapOutSwapData(
       tx.data,
     );
   } catch (e) {
-    console.error(`Failed to get swap data: ${e}`);
+    console.warn(`Failed to get swap data: ${e}`);
   }
   return '0x';
 }

@@ -250,7 +250,7 @@ async function getIncreaseLiquidityOptimalSwapData(
       swapRoute: protocols,
     };
   } catch (e) {
-    console.error(`Failed to get swap data: ${e}`);
+    console.warn(`Failed to get swap data: ${e}`);
   }
   return {
     swapData: '0x',
