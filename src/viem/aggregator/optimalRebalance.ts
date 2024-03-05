@@ -96,7 +96,7 @@ export async function optimalRebalance(
       ),
     ]);
     // use the same pool if the quote isn't better
-    if (poolEstimate.liquidity > routerEstimate.liquidity) {
+    if (poolEstimate.liquidity >= routerEstimate.liquidity) {
       return { ...poolEstimate, receive0, receive1 };
     } else {
       return { ...routerEstimate, receive0, receive1 };
