@@ -133,11 +133,12 @@ async function optimalMintPool(
     undefined,
     blockNumber,
   );
+
+  console.log('optimalMintPool', mintParams, amount0, amount1)
   let swapRoute: SwapRoute = [];
-  if (mintParams.amount0Desired.toString() !== amount0.toString()) {
-    const [fromTokenAddress, toTokenAddress] = new Big(
-      mintParams.amount0Desired.toString(),
-    ).gt(amount0.toString())
+  if (mintParams.amount0Desired !== amount0) {
+    const [fromTokenAddress, toTokenAddress] = 
+      mintParams.amount0Desired > amount0
       ? [mintParams.token0, mintParams.token1]
       : [mintParams.token1, mintParams.token0];
     swapRoute = [
