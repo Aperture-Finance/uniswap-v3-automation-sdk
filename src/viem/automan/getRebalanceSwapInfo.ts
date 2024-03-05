@@ -64,17 +64,6 @@ export async function getRebalanceSwapInfo(
     publicClient,
   );
 
-  console.log(
-    'optimalRebalance',
-    expectedAmount0,
-    expectedAmount1,
-    receive0,
-    receive1,
-    liquidity,
-    swapData,
-    swapRoute,
-  );
-
   const newPos = new Position({
     pool: position.pool,
     liquidity: liquidity.toString(),
