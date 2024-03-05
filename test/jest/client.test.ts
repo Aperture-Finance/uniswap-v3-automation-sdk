@@ -257,11 +257,15 @@ describe('Automan client test', () => {
   it('Should call list leaderboard', async () => {
     const responseData = {
       users: [
-        { userAddr: 0, points: 12345.6789, referred_users: [
-          { ownerAddr: 2, },
-          { ownerAddr: 3, },
-          { ownerAddr: 4, },
-        ] },
+        {
+          userAddr: 0,
+          points: 12345.6789,
+          referred_users: [
+            { ownerAddr: 2 },
+            { ownerAddr: 3 },
+            { ownerAddr: 4 },
+          ],
+        },
         { userAddr: 1, points: 98765.4321, referred_users: [] },
       ],
     };
