@@ -26,6 +26,12 @@ export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
   }),
 });
 
+export const LeaderboardUserResponseSchema = z.object({
+  userAddr: z.string(),
+  points: z.number().nonnegative(),
+  referred_users: z.array(LeaderboardUserResponseSchema),
+});
+
 export const ListLeaderboardRequestSchema = z.object({
   // Since it can be pretty expensive to find top 1000 users and their referred users, good idea to cache
   // to results to re-compute at most 1x every ~5 minutes.
@@ -37,6 +43,7 @@ export type ListLeaderboardRequest = z.infer<
 >;
 
 export const ListLeaderboardResponseSchema = z.object({
-  uers: z.array(/*TODO*/).describe('The list of users.'),
+  uers: z.array(LeaderboardUserResponseSchema).describe('Top 1000 users, their earned points, and their referred users'),
 });
+
 export type ListLeaderboardResponse = z.infer<typeof ListLeaderboardResponseSchema>;
