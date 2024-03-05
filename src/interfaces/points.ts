@@ -35,7 +35,7 @@ export const LeaderboardUserResponseSchema = z.object({
 export const ListLeaderboardResponseSchema = z.object({
   users: z
     .array(LeaderboardUserResponseSchema)
-    .describe('Top 1000 users, their earned points, and their referred users'),
+    .describe('Top users, their earned points, and their referred users'),
 });
 
 export type ListLeaderboardResponse = z.infer<

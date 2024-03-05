@@ -11,6 +11,7 @@ import {
   GetStrategyDetailResponse,
   HasSignedPrivateBetaAgreementRequest,
   HasSignedPrivateBetaAgreementResponse,
+  ListLeaderboardResponse,
   ListTriggerRequest,
   ListTriggerResponse,
   SignPrivateBetaAgreementRequest,
@@ -144,5 +145,10 @@ export class AutomanClient {
   ): Promise<string> {
     const url = new URL('/trackUserActivity', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async listLeaderboard(): Promise<ListLeaderboardResponse> {
+    const url = new URL('/listLeaderboard', this.endpoint);
+    return (await axios.post(url.toString())).data;
   }
 }
