@@ -1,6 +1,5 @@
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
-import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
@@ -134,13 +133,12 @@ async function optimalMintPool(
     blockNumber,
   );
 
-  console.log('optimalMintPool', mintParams, amount0, amount1)
   let swapRoute: SwapRoute = [];
   if (mintParams.amount0Desired !== amount0) {
-    const [fromTokenAddress, toTokenAddress] = 
+    const [fromTokenAddress, toTokenAddress] =
       mintParams.amount0Desired > amount0
-      ? [mintParams.token0, mintParams.token1]
-      : [mintParams.token1, mintParams.token0];
+        ? [mintParams.token0, mintParams.token1]
+        : [mintParams.token1, mintParams.token0];
     swapRoute = [
       [
         [
