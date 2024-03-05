@@ -29,7 +29,7 @@ export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
 export const LeaderboardUserResponseSchema = z.object({
   userAddr: z.string(),
   points: z.number().nonnegative(),
-  referred_users: z.array(BasePayloadSchema),
+  referred_users: z.array(z.string()),
 });
 
 export const ListLeaderboardResponseSchema = z.object({
