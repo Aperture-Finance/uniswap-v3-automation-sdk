@@ -149,6 +149,6 @@ export class AutomanClient {
 
   async listLeaderboard(): Promise<ListLeaderboardResponse> {
     const url = new URL('/listLeaderboard', this.endpoint);
-    return (await axios.post(url.toString())).data;
+    return (await axios.get(url.toString())).data;
   }
 }

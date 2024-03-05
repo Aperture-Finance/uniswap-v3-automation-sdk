@@ -265,7 +265,7 @@ describe('Automan client test', () => {
         { userAddr: 1, points: 98765.4321, referred_users: [] },
       ],
     };
-    mock.onGet(`${url}/listTrigger`).reply(200, responseData);
+    mock.onGet(`${url}/listLeaderboard`).reply(200, responseData);
 
     const response = await client.listLeaderboard();
     expect(response).toEqual(responseData);
