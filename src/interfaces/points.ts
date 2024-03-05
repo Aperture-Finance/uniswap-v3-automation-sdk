@@ -25,3 +25,5 @@ export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
     inviteCode: z.string(),
   }),
 });
+
+export type AcceptInviteRequest = z.infer<typeof AcceptInviteRequestSchema>;
