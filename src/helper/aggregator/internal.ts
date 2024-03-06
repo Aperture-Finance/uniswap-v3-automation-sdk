@@ -51,27 +51,27 @@ export async function getOptimalMintSwapData(
   swapData: string;
   swapRoute?: SwapRoute;
 }> {
-  const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-  const automan = getAutomanContract(chainId, provider);
-  const approveTarget = await getApproveTarget(chainId);
-  // get swap amounts using the same pool
-  const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
-    computePoolAddress(
-      uniswap_v3_factory,
-      mintParams.token0,
-      mintParams.token1,
-      mintParams.fee as FeeAmount,
-    ),
-    mintParams.tickLower,
-    mintParams.tickUpper,
-    mintParams.amount0Desired,
-    mintParams.amount1Desired,
-    {
-      blockTag: blockNumber,
-    },
-  );
-
   try {
+    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
+    const automan = getAutomanContract(chainId, provider);
+    const approveTarget = await getApproveTarget(chainId);
+    // get swap amounts using the same pool
+    const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
+      computePoolAddress(
+        uniswap_v3_factory,
+        mintParams.token0,
+        mintParams.token1,
+        mintParams.fee as FeeAmount,
+      ),
+      mintParams.tickLower,
+      mintParams.tickUpper,
+      mintParams.amount0Desired,
+      mintParams.amount1Desired,
+      {
+        blockTag: blockNumber,
+      },
+    );
+
     // get a quote from 1inch
     const { tx, protocols } = await quote(
       chainId,
@@ -98,7 +98,7 @@ export async function getOptimalMintSwapData(
       swapRoute: protocols,
     };
   } catch (e) {
-    console.error(`Failed to get swap data: ${e}`);
+    console.warn(`Failed to get swap data: ${e}`);
   }
   return {
     swapData: '0x',

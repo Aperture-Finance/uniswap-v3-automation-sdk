@@ -89,7 +89,7 @@ export async function getRebalanceTx(
         provider,
       ));
     } catch (err) {
-      console.error(
+      console.warn(
         `Failed to construct 1inch swap data: ${err}. Will proceed with same-pool swap.`,
       );
     }
