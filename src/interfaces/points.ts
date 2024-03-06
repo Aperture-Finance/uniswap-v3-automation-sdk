@@ -26,6 +26,8 @@ export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
   }),
 });
 
+export type AcceptInviteRequest = z.infer<typeof AcceptInviteRequestSchema>;
+
 export const LeaderboardUserResponseSchema = z.object({
   userAddr: z.string(),
   points: z.number().nonnegative(),
