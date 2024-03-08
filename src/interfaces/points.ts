@@ -46,7 +46,7 @@ export type ListLeaderboardResponse = z.infer<
   typeof ListLeaderboardResponseSchema
 >;
 
-export const PointUserStatusResponseSchema = GeneralResponseSchema.extend({
+export const PointUserStatusSchema = z.object({
   userAddress: z.string(),
   inviteCode: z.number().nonnegative(),
   xBound: z.boolean(),
@@ -56,6 +56,12 @@ export const PointUserStatusResponseSchema = GeneralResponseSchema.extend({
   referredCount: z.number().int(),
   points: z.number().nonnegative(),
   referalPoints: z.number().nonnegative(),
+});
+
+export type PointUserStatus = z.infer<typeof PointUserStatusSchema>;
+
+export const PointUserStatusResponseSchema = GeneralResponseSchema.extend({
+  userStatus: PointUserStatusSchema,
 });
 
 export type PointUserStatusResponse = z.infer<
