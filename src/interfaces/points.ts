@@ -31,13 +31,15 @@ export type AcceptInviteRequest = z.infer<typeof AcceptInviteRequestSchema>;
 export const LeaderboardUserResponseSchema = z.object({
   userAddr: z.string(),
   points: z.number().nonnegative(),
-  referred_users: z.array(z.string()),
+  num_referred_users: z.number().int(),
 });
 
 export const ListLeaderboardResponseSchema = z.object({
   users: z
     .array(LeaderboardUserResponseSchema)
-    .describe('Top users, their earned points, and their referred users'),
+    .describe(
+      'Lists top users and their earned points, number of referred users, and x_id',
+    ),
 });
 
 export type ListLeaderboardResponse = z.infer<

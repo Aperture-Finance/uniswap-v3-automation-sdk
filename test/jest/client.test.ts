@@ -258,15 +258,17 @@ describe('Automan client test', () => {
     const responseData = {
       users: [
         {
-          userAddr: 0,
+          userAddr: '0x11..FACE',
           points: 12345.6789,
-          referred_users: [
-            { ownerAddr: 2 },
-            { ownerAddr: 3 },
-            { ownerAddr: 4 },
-          ],
+          num_referred_users: 3,
+          x_id: 'user0_x',
         },
-        { userAddr: 1, points: 98765.4321, referred_users: [] },
+        {
+          userAddr: '0x23..BEEF',
+          points: 98765.4321,
+          num_referred_users: 0,
+          x_id: 'user1_x',
+        },
       ],
     };
     mock.onGet(`${url}/listLeaderboard`).reply(200, responseData);
