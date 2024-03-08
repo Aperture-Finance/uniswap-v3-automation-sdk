@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { GeneralResponseSchema, PayloadSignatureSchema } from './interfaces';
+import {
+  AddressSchema,
+  GeneralResponseSchema,
+  PayloadSignatureSchema,
+} from './interfaces';
 
 const SocialPlatformEnum = z.enum(['discord', 'twitter', 'telegram']);
 export type E_SocialPlatform = z.infer<typeof SocialPlatformEnum>;
@@ -48,12 +52,12 @@ export type ListLeaderboardResponse = z.infer<
 >;
 
 export const PointUserStatusSchema = z.object({
-  userAddress: z.string(),
+  userAddress: AddressSchema,
   inviteCode: z.string(),
   xBound: z.boolean(),
   discordBound: z.boolean(),
   telegramBound: z.boolean(),
-  referer: z.string(),
+  referer: AddressSchema,
   referredCount: z.number().int(),
   points: z.number().nonnegative(),
   referalPoints: z.number().nonnegative(),
