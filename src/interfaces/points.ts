@@ -38,7 +38,7 @@ export const ListLeaderboardResponseSchema = z.object({
   users: z
     .array(LeaderboardUserResponseSchema)
     .describe(
-      'Top users, their earned points, and their number of referred users',
+      'Lists top users and their earned points, number of referred users, and x_id',
     ),
 });
 
