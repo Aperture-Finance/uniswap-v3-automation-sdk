@@ -257,16 +257,8 @@ describe('Automan client test', () => {
   it('Should call list leaderboard', async () => {
     const responseData = {
       users: [
-        {
-          userAddr: 0,
-          points: 12345.6789,
-          referred_users: [
-            { ownerAddr: 2 },
-            { ownerAddr: 3 },
-            { ownerAddr: 4 },
-          ],
-        },
-        { userAddr: 1, points: 98765.4321, referred_users: [] },
+        { userAddr: 0, points: 12345.6789, num_referred_users: 3 },
+        { userAddr: 1, points: 98765.4321, num_referred_users: 0 },
       ],
     };
     mock.onGet(`${url}/listLeaderboard`).reply(200, responseData);
