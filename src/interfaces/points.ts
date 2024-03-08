@@ -49,7 +49,7 @@ export type ListLeaderboardResponse = z.infer<
 
 export const PointUserStatusSchema = z.object({
   userAddress: z.string(),
-  inviteCode: z.number().nonnegative(),
+  inviteCode: z.string(),
   xBound: z.boolean(),
   discordBound: z.boolean(),
   telegramBound: z.boolean(),
