@@ -253,4 +253,30 @@ describe('Automan client test', () => {
     // Expect request params to match.
     expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
+
+  it('Should call list leaderboard', async () => {
+    const responseData = {
+      users: [
+        {
+          x_id: 'user0_x',
+          userAddr: '0x11..FACE',
+          points: 12345.6789,
+          num_referred_users: 3,
+        },
+        {
+          x_id: 'user1_x',
+          userAddr: '0x23..BEEF',
+          points: 98765.4321,
+          num_referred_users: 0,
+        },
+      ],
+    };
+    mock.onGet(`${url}/listLeaderboard`).reply(200, responseData);
+
+    const response = await client.listLeaderboard();
+    expect(response).toEqual(responseData);
+
+    // Expect to call get once.
+    expect(mock.history.get.length).toEqual(1);
+  });
 });
