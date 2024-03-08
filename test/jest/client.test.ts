@@ -258,13 +258,13 @@ describe('Automan client test', () => {
     const responseData = {
       users: [
         {
-          userAddr: 0,
+          userAddr: '0x11..FACE',
           points: 12345.6789,
           num_referred_users: 3,
           x_id: 'user0_x',
         },
         {
-          userAddr: 1,
+          userAddr: '0x23..BEEF',
           points: 98765.4321,
           num_referred_users: 0,
           x_id: 'user1_x',
