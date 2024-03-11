@@ -63,6 +63,7 @@ export type ListLeaderboardResponse = z.infer<
 export const RaffleRequestSchema = z.object({
   type: RaffleTypeEnum.describe('Type of raffle to enter'),
   address: AddressSchema.describe('Address of the user entering the raffle'),
+  inviteCode: z.string(),
 });
 export type RaffleRequest = z.infer<typeof RaffleRequestSchema>;
 
