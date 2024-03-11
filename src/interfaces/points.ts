@@ -73,7 +73,9 @@ export const PointUserStatusSchema = z.object({
   referer: AddressSchema,
   referredCount: z.number().int(),
   points: z.number().nonnegative(),
-  referalPoints: z.number().nonnegative(),
+  referralPoints: z.number().nonnegative(),
+  socialFreeRaffleConsumed: z.boolean(),
+  rafflePointsConsumed: z.number().nonnegative(),
 });
 
 export type PointUserStatus = z.infer<typeof PointUserStatusSchema>;
