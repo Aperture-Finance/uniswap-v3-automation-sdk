@@ -3,11 +3,24 @@ import { z } from 'zod';
 import {
   AddressSchema,
   GeneralResponseSchema,
-  PayloadSignatureSchema,
+  AddressSchema, PayloadSignatureSchema,
 } from './interfaces';
 
 const SocialPlatformEnum = z.enum(['discord', 'twitter', 'telegram']);
 export type E_SocialPlatform = z.infer<typeof SocialPlatformEnum>;
+
+const RaffleTypeEnum = z.enum(['twitter', 'points']);
+export type RaffleTypeEnum = z.infer<typeof RaffleTypeEnum>;
+
+const RafflePrizeEnum = z.enum([
+  'Plus50Points',
+  'Plus100Points',
+  'Plus150Points',
+  'Boost5Percent',
+  'Boost10Percent',
+  'Boost20Percent',
+]);
+export type RafflePrizeEnum = z.infer<typeof RafflePrizeEnum>;
 
 const BasePayloadSchema = z.object({
   ownerAddr: z.string(),
@@ -72,3 +85,14 @@ export const PointUserStatusResponseSchema = GeneralResponseSchema.extend({
 export type PointUserStatusResponse = z.infer<
   typeof PointUserStatusResponseSchema
 >;
+
+export const RaffleRequestSchema = z.object({
+  type: RaffleTypeEnum.describe('Type of raffle to enter'),
+  address: AddressSchema.describe('Address of the user entering the raffle'),
+});
+export type RaffleRequest = z.infer<typeof RaffleRequestSchema>;
+
+export const RaffleResponesSchema = z.object({
+  prize: RafflePrizeEnum.describe('Prize won in the raffle'),
+});
+export type RaffleResponse = z.infer<typeof RaffleResponesSchema>;
