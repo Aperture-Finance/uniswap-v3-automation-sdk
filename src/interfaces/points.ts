@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   AddressSchema,
   GeneralResponseSchema,
-  AddressSchema, PayloadSignatureSchema,
+  PayloadSignatureSchema,
 } from './interfaces';
 
 const SocialPlatformEnum = z.enum(['discord', 'twitter', 'telegram']);
