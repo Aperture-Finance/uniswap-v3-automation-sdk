@@ -5,10 +5,10 @@ import { AddressSchema, PayloadSignatureSchema } from './interfaces';
 const SocialPlatformEnum = z.enum(['discord', 'twitter', 'telegram']);
 export type E_SocialPlatform = z.infer<typeof SocialPlatformEnum>;
 
-const RaffleTypeEnum = z.enum(['twitter', 'points']);
+export const RaffleTypeEnum = z.enum(['twitter', 'points']);
 export type RaffleTypeEnum = z.infer<typeof RaffleTypeEnum>;
 
-const RafflePrizeEnum = z.enum([
+export const RafflePrizeEnum = z.enum([
   'Plus50Points',
   'Plus100Points',
   'Plus150Points',
