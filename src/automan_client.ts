@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import {
+  AcceptInviteRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
   CreateTriggerRequest,
@@ -14,10 +15,12 @@ import {
   ListLeaderboardResponse,
   ListTriggerRequest,
   ListTriggerResponse,
+  RaffleRequest,
   SignPrivateBetaAgreementRequest,
   UpdatePositionPermitRequest,
   UpdateTriggerRequest,
   UserActivityTrackingRequest,
+  VerifySocialAccountRequest,
   WalletTrackingRequest,
 } from './interfaces';
 
@@ -49,6 +52,9 @@ async function buildAxiosPostRequest(
     | SignPrivateBetaAgreementRequest
     | WalletTrackingRequest
     | UserActivityTrackingRequest
+    | VerifySocialAccountRequest
+    | AcceptInviteRequest
+    | RaffleRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -151,5 +157,19 @@ export class AutomanClient {
   async listLeaderboard(): Promise<ListLeaderboardResponse> {
     const url = new URL('/listLeaderboard', this.endpoint);
     return (await buildAxiosGetRequest(url, null)).data;
+  }
+
+  async verifySocialAccount(
+    request: Readonly<VerifySocialAccountRequest>,
+  ): Promise<string> {
+    const url = new URL('/verifySocialAccount', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async acceptInvitation(
+    request: Readonly<AcceptInviteRequest>,
+  ): Promise<string> {
+    const url = new URL('/acceptInvitation', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
   }
 }
