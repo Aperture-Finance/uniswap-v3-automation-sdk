@@ -9,10 +9,10 @@ import {
 const SocialPlatformEnum = z.enum(['discord', 'twitter', 'telegram']);
 export type E_SocialPlatform = z.infer<typeof SocialPlatformEnum>;
 
-const RaffleTypeEnum = z.enum(['twitter', 'points']);
+export const RaffleTypeEnum = z.enum(['twitter', 'points']);
 export type RaffleTypeEnum = z.infer<typeof RaffleTypeEnum>;
 
-const RafflePrizeEnum = z.enum([
+export const RafflePrizeEnum = z.enum([
   'Plus50Points',
   'Plus100Points',
   'Plus150Points',
@@ -97,5 +97,9 @@ export type RaffleRequest = z.infer<typeof RaffleRequestSchema>;
 
 export const RaffleResponesSchema = z.object({
   prize: RafflePrizeEnum.describe('Prize won in the raffle'),
+  points: z
+    .number()
+    .positive()
+    .describe('The immediately updated points after raffling.'),
 });
 export type RaffleResponse = z.infer<typeof RaffleResponesSchema>;
