@@ -57,12 +57,7 @@ async function buildAxiosPostRequest(
     | RaffleRequest
   >,
 ) {
-  return axios.post(url.toString(), request).catch((e) => {
-    if (e?.data?.error) {
-      throw e.data;
-    }
-    throw e;
-  });
+  return axios.post(url.toString(), request);
 }
 
 export class AutomanClient {
