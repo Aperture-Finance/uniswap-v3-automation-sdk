@@ -31,6 +31,7 @@ export const VerifySocialAccountRequestSchema = PayloadSignatureSchema.extend({
     platform: SocialPlatformEnum,
     code: z.string(),
   }),
+  callbackUrl: z.string().optional(),
 });
 
 export type VerifySocialAccountRequest = z.infer<
