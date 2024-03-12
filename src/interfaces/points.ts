@@ -74,7 +74,7 @@ export const PointUserStatusSchema = z.object({
   referredCount: z.number().int(),
   points: z.number().nonnegative(),
   referralPoints: z.number().nonnegative(),
-  socialFreeRaffleConsumed: z.boolean(),
+  twitterFreeRaffleConsumed: z.boolean(),
   rafflePointsConsumed: z.number().nonnegative(),
 });
 
