@@ -89,6 +89,14 @@ export type PointUserStatusResponse = z.infer<
   typeof PointUserStatusResponseSchema
 >;
 
+export const GetPointUserStatusRequestSchema = z.object({
+  userAddress: AddressSchema,
+});
+
+export type GetPointUserStatusRequest = z.infer<
+  typeof GetPointUserStatusRequestSchema
+>;
+
 export const RaffleRequestSchema = z.object({
   type: RaffleTypeEnum.describe('Type of raffle to enter'),
   address: AddressSchema.describe('Address of the user entering the raffle'),
