@@ -6,6 +6,7 @@ import {
   CheckUserLimitRequest,
   CreateTriggerRequest,
   DeleteTriggerRequest,
+  GetPointUserStatusRequest,
   GetStrategiesDetailRequest,
   GetStrategiesDetailResponse,
   GetStrategyDetailRequest,
@@ -171,5 +172,20 @@ export class AutomanClient {
   ): Promise<string> {
     const url = new URL('/acceptInvitation', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async raffle(request: Readonly<RaffleRequest>): Promise<string> {
+    const url = new URL('/raffle', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async getPointUserStatus(
+    request: Readonly<GetPointUserStatusRequest>,
+  ): Promise<string> {
+    const url = new URL(
+      `/pointUserStatus/${request.userAddress}`,
+      this.endpoint,
+    );
+    return (await buildAxiosGetRequest(url, null)).data;
   }
 }
