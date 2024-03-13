@@ -6,6 +6,7 @@ import {
   CheckUserLimitRequest,
   CreateTriggerRequest,
   DeleteTriggerRequest,
+  GeneralResponse,
   GetPointUserStatusRequest,
   GetStrategiesDetailRequest,
   GetStrategiesDetailResponse,
@@ -16,6 +17,7 @@ import {
   ListLeaderboardResponse,
   ListTriggerRequest,
   ListTriggerResponse,
+  PointUserStatusResponse,
   RaffleRequest,
   SignPrivateBetaAgreementRequest,
   UpdatePositionPermitRequest,
@@ -164,21 +166,21 @@ export class AutomanClient {
 
   async verifySocialAccount(
     request: Readonly<VerifySocialAccountRequest>,
-  ): Promise<string> {
+  ): Promise<GeneralResponse> {
     const url = new URL('/verifySocialAccount', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
   async acceptInvitation(
     request: Readonly<AcceptInviteRequest>,
-  ): Promise<string> {
+  ): Promise<GeneralResponse> {
     const url = new URL('/invitations/accept', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
   async validateInviteCode(
     request: Readonly<ValidateInviteCodeRequest>,
-  ): Promise<string> {
+  ): Promise<GeneralResponse> {
     const url = new URL('/invitations/validate', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
@@ -190,7 +192,7 @@ export class AutomanClient {
 
   async getPointUserStatus(
     request: Readonly<GetPointUserStatusRequest>,
-  ): Promise<string> {
+  ): Promise<PointUserStatusResponse> {
     const url = new URL(
       `/pointUserStatus/${request.userAddress}`,
       this.endpoint,
