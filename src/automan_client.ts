@@ -183,7 +183,7 @@ export class AutomanClient {
     request: Readonly<GetPointUserStatusRequest>,
   ): Promise<string> {
     const url = new URL(
-      `/getPointUserStatus/${request.userAddress}`,
+      `/pointUserStatus/${request.userAddress}`,
       this.endpoint,
     );
     return (await buildAxiosGetRequest(url, null)).data;
