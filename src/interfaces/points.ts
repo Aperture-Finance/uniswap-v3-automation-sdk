@@ -46,6 +46,14 @@ export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
 
 export type AcceptInviteRequest = z.infer<typeof AcceptInviteRequestSchema>;
 
+export const ValidateInviteCodeRequestSchema = z.object({
+  inviteCode: z.string(),
+});
+
+export type ValidateInviteCodeRequest = z.infer<
+  typeof ValidateInviteCodeRequestSchema
+>;
+
 export const LeaderboardUserResponseSchema = z.object({
   x_id: z.string(),
   userAddr: z.string(),

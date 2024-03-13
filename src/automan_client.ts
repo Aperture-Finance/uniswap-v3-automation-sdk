@@ -21,6 +21,7 @@ import {
   UpdatePositionPermitRequest,
   UpdateTriggerRequest,
   UserActivityTrackingRequest,
+  ValidateInviteCodeRequest,
   VerifySocialAccountRequest,
   WalletTrackingRequest,
 } from './interfaces';
@@ -56,6 +57,7 @@ async function buildAxiosPostRequest(
     | VerifySocialAccountRequest
     | AcceptInviteRequest
     | RaffleRequest
+    | ValidateInviteCodeRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -170,7 +172,14 @@ export class AutomanClient {
   async acceptInvitation(
     request: Readonly<AcceptInviteRequest>,
   ): Promise<string> {
-    const url = new URL('/acceptInvitation', this.endpoint);
+    const url = new URL('/invitations/accept', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async validateInviteCode(
+    request: Readonly<ValidateInviteCodeRequest>,
+  ): Promise<string> {
+    const url = new URL('/invitations/validate', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
