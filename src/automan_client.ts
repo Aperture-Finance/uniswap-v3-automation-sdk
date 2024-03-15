@@ -19,6 +19,7 @@ import {
   ListTriggerResponse,
   PointUserStatusResponse,
   RaffleRequest,
+  RaffleResponse,
   SignPrivateBetaAgreementRequest,
   UpdatePositionPermitRequest,
   UpdateTriggerRequest,
@@ -185,7 +186,7 @@ export class AutomanClient {
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
-  async raffle(request: Readonly<RaffleRequest>): Promise<string> {
+  async raffle(request: Readonly<RaffleRequest>): Promise<RaffleResponse> {
     const url = new URL('/raffle', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
