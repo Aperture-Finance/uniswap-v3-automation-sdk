@@ -1,20 +1,14 @@
 import { z } from 'zod';
 
-// A new thread will be created for the new conversation.
-export const NewChatRequestSchema = z.object({
+// Chat request is one of new chat request or an existing one.
+export const IntentChatRequestSchema = z.object({
+  threadId: z
+    .string()
+    .optional()
+    .describe('The existing thread id to continue on.'),
   message: z.string().describe('The message.'),
 });
-export type NewChatRequest = z.infer<typeof NewChatRequestSchema>;
 
-export const ExistingChatRequestSchema = NewChatRequestSchema.extend({
-  threadId: z.string().describe('The existing thread id to continue on.'),
-});
-export type ExistingChatRequest = z.infer<typeof ExistingChatRequestSchema>;
-
-// Chat request is one of new chat request or an existing one.
-export const IntentChatRequestSchema = NewChatRequestSchema.or(
-  ExistingChatRequestSchema,
-);
 export type IntentChatRequest = z.infer<typeof IntentChatRequestSchema>;
 
 export const MessagesSchema = z.array(
