@@ -50,7 +50,7 @@ describe('Helper - Automan transaction tests', function () {
   beforeEach(async function () {
     await resetHardhatNetwork();
 
-    // Without this, Hardhat throws an InvalidInputError saying that WHALE_ADDRESS is an unknown account.
+    // Without this, Hardhat tosses an InvalidInputError saying that WHALE_ADDRESS is an unknown account.
     // Likely a Hardhat bug.
     await hardhatForkProvider.getBalance(WHALE_ADDRESS);
 
