@@ -38,6 +38,16 @@ export type VerifySocialAccountRequest = z.infer<
   typeof VerifySocialAccountRequestSchema
 >;
 
+export const VerifySocialAccountResponseSchema = z.object({
+  error: z.boolean(),
+  message: z.string().optional(),
+  retro_points: z.number().nonnegative().optional(),
+});
+
+export type VerifySocialAccountResponse = z.infer<
+  typeof VerifySocialAccountRequestSchema
+>;
+
 export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
   payload: BasePayloadSchema.extend({
     inviteCode: z.string(),
