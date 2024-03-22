@@ -41,11 +41,11 @@ export type VerifySocialAccountRequest = z.infer<
 export const VerifySocialAccountResponseSchema = z.object({
   error: z.boolean(),
   message: z.string().optional(),
-  retro_points: z.number().nonnegative().optional(),
+  retroPoints: z.number().nonnegative().optional(),
 });
 
 export type VerifySocialAccountResponse = z.infer<
-  typeof VerifySocialAccountRequestSchema
+  typeof VerifySocialAccountResponseSchema
 >;
 
 export const AcceptInviteRequestSchema = PayloadSignatureSchema.extend({
