@@ -38,8 +38,7 @@ export type VerifySocialAccountRequest = z.infer<
   typeof VerifySocialAccountRequestSchema
 >;
 
-export const VerifySocialAccountResponseSchema = z.object({
-  error: z.boolean(),
+export const VerifySocialAccountResponseSchema = GeneralResponseSchema.extend({
   message: z.string().optional(),
   retroPoints: z.number().nonnegative().optional(),
 });
