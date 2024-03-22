@@ -287,17 +287,18 @@ describe('Automan client test', () => {
       payload: {
         ownerAddr: '0x123456789ABCDEF101112131415161718191A1B1',
         platform: 'twitter',
-        code: 'code123'
+        code: 'code123',
       },
-      callbackUrl: 'https://www.callback.com/'
+      callbackUrl: 'https://www.callback.com/',
     };
-    const responseData : VerifySocialAccountResponse = {
+    const responseData: VerifySocialAccountResponse = {
       error: false,
       retroPoints: 1230,
     };
     mock.onPost(`${url}/verifySocialAccount`).reply(200, responseData);
 
-    const response : VerifySocialAccountResponse = await client.verifySocialAccount(request);
+    const response: VerifySocialAccountResponse =
+      await client.verifySocialAccount(request);
     expect(response).toEqual(responseData);
     expect(mock.history.post.length).toEqual(1);
     expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
