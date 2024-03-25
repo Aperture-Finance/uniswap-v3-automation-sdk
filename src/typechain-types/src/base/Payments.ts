@@ -22,20 +22,15 @@ import type {
 export interface PaymentsInterface extends utils.Interface {
   functions: {
     "WETH9()": FunctionFragment;
-    "factory()": FunctionFragment;
     "npm()": FunctionFragment;
   };
 
-  getFunction(
-    nameOrSignatureOrTopic: "WETH9" | "factory" | "npm"
-  ): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "WETH9" | "npm"): FunctionFragment;
 
   encodeFunctionData(functionFragment: "WETH9", values?: undefined): string;
-  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(functionFragment: "npm", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "WETH9", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "npm", data: BytesLike): Result;
 
   events: {};
@@ -70,21 +65,15 @@ export interface Payments extends BaseContract {
   functions: {
     WETH9(overrides?: CallOverrides): Promise<[string]>;
 
-    factory(overrides?: CallOverrides): Promise<[string]>;
-
     npm(overrides?: CallOverrides): Promise<[string]>;
   };
 
   WETH9(overrides?: CallOverrides): Promise<string>;
 
-  factory(overrides?: CallOverrides): Promise<string>;
-
   npm(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
     WETH9(overrides?: CallOverrides): Promise<string>;
-
-    factory(overrides?: CallOverrides): Promise<string>;
 
     npm(overrides?: CallOverrides): Promise<string>;
   };
@@ -94,15 +83,11 @@ export interface Payments extends BaseContract {
   estimateGas: {
     WETH9(overrides?: CallOverrides): Promise<BigNumber>;
 
-    factory(overrides?: CallOverrides): Promise<BigNumber>;
-
     npm(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
     WETH9(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     npm(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
