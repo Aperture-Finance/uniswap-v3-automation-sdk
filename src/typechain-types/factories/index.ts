@@ -3,6 +3,7 @@
 /* eslint-disable */
 export * as apertureFinance from "./@aperture_finance";
 export * as openzeppelin from "./@openzeppelin";
+export * as pancakeswap from "./@pancakeswap";
 export * as uniswap from "./@uniswap";
 export * as solady from "./solady";
 export * as src from "./src";

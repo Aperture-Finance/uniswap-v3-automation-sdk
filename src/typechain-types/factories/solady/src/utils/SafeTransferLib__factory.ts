@@ -21,6 +21,16 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "Permit2AmountOverflow",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Permit2Failed",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "TransferFailed",
     type: "error",
   },
