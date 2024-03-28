@@ -11,6 +11,8 @@ import {
   GetStrategyDetailResponse,
   UpdatePositionPermitRequest,
   UserActivityTrackingRequest,
+  VerifySocialAccountRequest,
+  VerifySocialAccountResponse,
   WalletConnectSubtypeEnum,
   WalletTypeEnum,
 } from '../../src';
@@ -212,7 +214,7 @@ describe('Automan client test', () => {
     );
   });
 
-  it('Should call tract wallet', async () => {
+  it('Should call track wallet', async () => {
     const request = {
       chainId: 5,
       address: '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
@@ -231,7 +233,7 @@ describe('Automan client test', () => {
     expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 
-  it('Should call tract user activity', async () => {
+  it('Should call track user activity', async () => {
     const request: UserActivityTrackingRequest = {
       chainId: 5,
       userAddress: '0xeb5105f298DbDfeD3B317E8176949e432C997C4b',
@@ -278,5 +280,27 @@ describe('Automan client test', () => {
 
     // Expect to call get once.
     expect(mock.history.get.length).toEqual(1);
+  });
+
+  it('Should call verify social account', async () => {
+    const request: VerifySocialAccountRequest = {
+      payload: {
+        ownerAddr: '0x123456789ABCDEF101112131415161718191A1B1',
+        platform: 'twitter',
+        code: 'code123',
+      },
+      callbackUrl: 'https://www.callback.com/',
+    };
+    const responseData: VerifySocialAccountResponse = {
+      error: false,
+      retroPoints: 1230,
+    };
+    mock.onPost(`${url}/verifySocialAccount`).reply(200, responseData);
+
+    const response: VerifySocialAccountResponse =
+      await client.verifySocialAccount(request);
+    expect(response).toEqual(responseData);
+    expect(mock.history.post.length).toEqual(1);
+    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 });

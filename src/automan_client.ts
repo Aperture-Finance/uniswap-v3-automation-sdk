@@ -20,6 +20,7 @@ import {
   ListTriggerResponse,
   PointUserStatusResponse,
   RaffleRequest,
+  RaffleResponse,
   SignPrivateBetaAgreementRequest,
   SocialLoginRequest,
   SocialLoginResponse,
@@ -28,6 +29,7 @@ import {
   UserActivityTrackingRequest,
   ValidateInviteCodeRequest,
   VerifySocialAccountRequest,
+  VerifySocialAccountResponse,
   WalletTrackingRequest,
 } from './interfaces';
 
@@ -171,7 +173,7 @@ export class AutomanClient {
 
   async verifySocialAccount(
     request: Readonly<VerifySocialAccountRequest>,
-  ): Promise<GeneralResponse> {
+  ): Promise<VerifySocialAccountResponse> {
     const url = new URL('/verifySocialAccount', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
@@ -204,7 +206,7 @@ export class AutomanClient {
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
-  async raffle(request: Readonly<RaffleRequest>): Promise<string> {
+  async raffle(request: Readonly<RaffleRequest>): Promise<RaffleResponse> {
     const url = new URL('/raffle', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
