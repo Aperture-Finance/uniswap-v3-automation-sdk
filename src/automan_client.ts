@@ -187,7 +187,7 @@ export class AutomanClient {
 
   async bindSocialAccount(
     request: Readonly<BindSocialAccountRequest>,
-  ): Promise<GeneralResponse> {
+  ): Promise<VerifySocialAccountResponse> {
     const url = new URL('/social/bind', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
