@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import {
   AcceptInviteRequest,
+  BindSocialAccountRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
   CreateTriggerRequest,
@@ -20,6 +21,8 @@ import {
   PointUserStatusResponse,
   RaffleRequest,
   SignPrivateBetaAgreementRequest,
+  SocialLoginRequest,
+  SocialLoginResponse,
   UpdatePositionPermitRequest,
   UpdateTriggerRequest,
   UserActivityTrackingRequest,
@@ -60,6 +63,8 @@ async function buildAxiosPostRequest(
     | AcceptInviteRequest
     | RaffleRequest
     | ValidateInviteCodeRequest
+    | SocialLoginRequest
+    | BindSocialAccountRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -168,6 +173,20 @@ export class AutomanClient {
     request: Readonly<VerifySocialAccountRequest>,
   ): Promise<GeneralResponse> {
     const url = new URL('/verifySocialAccount', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async socialLogin(
+    request: Readonly<SocialLoginRequest>,
+  ): Promise<SocialLoginResponse> {
+    const url = new URL('/social/login', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async bindSocialAccount(
+    request: Readonly<BindSocialAccountRequest>,
+  ): Promise<GeneralResponse> {
+    const url = new URL('/social/bind', this.endpoint);
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
