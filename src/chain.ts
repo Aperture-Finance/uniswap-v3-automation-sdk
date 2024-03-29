@@ -51,6 +51,7 @@ export interface ChainInfo {
   uniswap_v3_factory: Address;
   uniswap_v3_nonfungible_position_manager: Address;
   uniswap_v3_swap_router_02: Address;
+  pancakeswap_v3_pool_deployer?: Address;
   aperture_uniswap_v3_automan: Address;
   aperture_router_proxy?: Address;
   optimal_swap_router?: Address;
@@ -131,6 +132,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_swap_router_02: getAddress(
       '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45',
+    ),
+    pancakeswap_v3_pool_deployer: getAddress(
+      '0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9',
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
@@ -303,6 +307,9 @@ const CHAIN_ID_TO_INFO: {
     ),
     uniswap_v3_swap_router_02: getAddress(
       '0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2',
+    ),
+    pancakeswap_v3_pool_deployer: getAddress(
+      '0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9',
     ),
     aperture_uniswap_v3_automan: getAddress(
       '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',

@@ -150,6 +150,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        'UNISWAP',
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -162,6 +163,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      automatedMarketMaker: 'UNISWAP',
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 0,
@@ -257,6 +259,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        'UNISWAP',
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -269,6 +272,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      automatedMarketMaker: 'UNISWAP',
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 1,
@@ -320,6 +324,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        'UNISWAP',
         nativeEthPositionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -332,6 +337,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      automatedMarketMaker: 'UNISWAP',
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 1,

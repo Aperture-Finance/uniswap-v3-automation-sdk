@@ -478,6 +478,7 @@ describe('Helper - Automan transaction tests', function () {
       generateAutoCompoundRequestPayload(
         eoa,
         chainId,
+        'UNISWAP',
         positionId,
         /*feeToPrincipalRatioThreshold=*/ 0.1,
         /*slippage=*/ 0.05,
@@ -491,6 +492,7 @@ describe('Helper - Automan transaction tests', function () {
         type: ActionTypeEnum.enum.Reinvest,
       },
       chainId: 1,
+      automatedMarketMaker: 'UNISWAP',
       condition: {
         feeToPrincipalRatioThreshold: 0.1,
         type: ConditionTypeEnum.enum.AccruedFees,

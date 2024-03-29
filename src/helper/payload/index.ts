@@ -25,7 +25,10 @@ export function generateLimitOrderCloseRequestPayload(
   return {
     ownerAddr,
     chainId,
-    automatedMarketMaker: AutomatedMarketMakerEnum.enum[automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum] || AutomatedMarketMakerEnum.enum.UNISWAP,
+    automatedMarketMaker:
+      AutomatedMarketMakerEnum.enum[
+        automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum
+      ] || AutomatedMarketMakerEnum.enum.UNISWAP,
     expiration,
     nftId: positionId.toString(),
     condition: {
@@ -57,7 +60,10 @@ export function generateAutoCompoundRequestPayload(
   return {
     ownerAddr,
     chainId,
-    automatedMarketMaker: AutomatedMarketMakerEnum.enum[automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum] || AutomatedMarketMakerEnum.enum.UNISWAP,
+    automatedMarketMaker:
+      AutomatedMarketMakerEnum.enum[
+        automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum
+      ] || AutomatedMarketMakerEnum.enum.UNISWAP,
     expiration,
     nftId: positionId.toString(),
     condition: {
