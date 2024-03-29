@@ -52,7 +52,8 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { uniswap_v3_optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
+    const { uniswap_v3_optimal_swap_router, uniswap_v3_factory } =
+      getChainInfo(chainId);
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
