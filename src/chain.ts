@@ -55,7 +55,7 @@ export interface ChainInfo {
   pancakeswap_v3_nonfungible_position_manager?: Address;
   pancakeswap_v3_swap_router_v3?: Address;
   aperture_uniswap_v3_automan: Address;
-  aperture_pancakeswap_v3_automan: Address;
+  aperture_pancakeswap_v3_automan?: Address;
   aperture_router_proxy?: Address;
   uniswap_v3_optimal_swap_router?: Address;
   pancakeswap_v3_optimal_swap_router?: Address;
