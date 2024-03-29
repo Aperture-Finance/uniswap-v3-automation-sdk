@@ -11,7 +11,7 @@ import { Price, Token } from '@uniswap/sdk-core';
 import Big, { BigSource } from 'big.js';
 import { BigNumberish } from 'ethers';
 
-export function generateLimitOrderCloseRequestPayload(
+export function generateLimitOrderCloseRequestPayloadAMM(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
   automatedMarketMaker: string,
@@ -47,7 +47,26 @@ export function generateLimitOrderCloseRequestPayload(
   };
 }
 
-export function generateAutoCompoundRequestPayload(
+export function generateLimitOrderCloseRequestPayload(
+  ownerAddr: string,
+  chainId: ApertureSupportedChainId,
+  positionId: BigNumberish,
+  outerLimitPrice: Price<Token, Token>,
+  maxGasProportion: number,
+  expiration: number,
+) {
+  return generateLimitOrderCloseRequestPayloadAMM(
+    ownerAddr,
+    chainId,
+    'UNISWAP',
+    positionId,
+    outerLimitPrice,
+    maxGasProportion,
+    expiration,
+  );
+}
+
+export function generateAutoCompoundRequestPayloadAMM(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
   automatedMarketMaker: string,
@@ -76,6 +95,27 @@ export function generateAutoCompoundRequestPayload(
       maxGasProportion,
     },
   };
+}
+
+export function generateAutoCompoundRequestPayload(
+  ownerAddr: string,
+  chainId: ApertureSupportedChainId,
+  positionId: BigNumberish,
+  feeToPrincipalRatioThreshold: number,
+  slippage: number,
+  maxGasProportion: number,
+  expiration: number,
+) {
+  return generateAutoCompoundRequestPayloadAMM(
+    ownerAddr,
+    chainId,
+    'UNISWAP',
+    positionId,
+    feeToPrincipalRatioThreshold,
+    slippage,
+    maxGasProportion,
+    expiration,
+  );
 }
 
 /**
