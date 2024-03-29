@@ -94,7 +94,7 @@ export function encodeOptimalSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getChainInfo(chainId).optimal_swap_router!,
+      getChainInfo(chainId).uniswap_v3_optimal_swap_router!,
       encodePacked(
         // prettier-ignore
         ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],

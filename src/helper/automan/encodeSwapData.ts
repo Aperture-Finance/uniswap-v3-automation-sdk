@@ -39,7 +39,7 @@ export function encodeOptimalSwapData(
   return solidityPack(
     ['address', 'bytes'],
     [
-      getChainInfo(chainId).optimal_swap_router!,
+      getChainInfo(chainId).uniswap_v3_optimal_swap_router!,
       solidityPack(
         [
           'address',

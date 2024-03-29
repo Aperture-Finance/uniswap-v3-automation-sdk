@@ -51,7 +51,7 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { aperture_uniswap_v3_automan, optimal_swap_router } =
+  const { aperture_uniswap_v3_automan, uniswap_v3_optimal_swap_router } =
     getChainInfo(chainId);
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
@@ -86,7 +86,7 @@ export async function increaseLiquidityOptimal(
     overrides,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (uniswap_v3_optimal_swap_router === undefined) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
@@ -207,7 +207,7 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
+    const { uniswap_v3_optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
@@ -230,7 +230,7 @@ async function getIncreaseLiquidityOptimalSwapData(
       zeroForOne ? position.pool.token0.address : position.pool.token1.address,
       zeroForOne ? position.pool.token1.address : position.pool.token0.address,
       poolAmountIn.toString(),
-      optimal_swap_router!,
+      uniswap_v3_optimal_swap_router!,
       Number(slippage.toFixed()),
       includeRoute,
     );

@@ -34,7 +34,7 @@ export async function optimalRebalance(
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
-  const { optimal_swap_router } = getChainInfo(chainId);
+  const { uniswap_v3_optimal_swap_router } = getChainInfo(chainId);
   const position = await PositionDetails.fromPositionId(
     chainId,
     positionId,
@@ -77,7 +77,7 @@ export async function optimalRebalance(
     blockNumber,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (uniswap_v3_optimal_swap_router === undefined) {
       return { ...(await poolPromise), receive0, receive1 };
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
@@ -219,7 +219,7 @@ async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
+    const { uniswap_v3_optimal_swap_router: optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
     const automan = getAutomanContract(chainId, publicClient);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool

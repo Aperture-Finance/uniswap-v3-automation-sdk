@@ -52,9 +52,13 @@ export interface ChainInfo {
   uniswap_v3_nonfungible_position_manager: Address;
   uniswap_v3_swap_router_02: Address;
   pancakeswap_v3_pool_deployer?: Address;
+  pancakeswap_v3_nonfungible_position_manager?: Address;
+  pancakeswap_v3_swap_router_v3?: Address;
   aperture_uniswap_v3_automan: Address;
+  aperture_pancakeswap_v3_automan: Address;
   aperture_router_proxy?: Address;
-  optimal_swap_router?: Address;
+  uniswap_v3_optimal_swap_router?: Address;
+  pancakeswap_v3_optimal_swap_router?: Address;
   wrappedNativeCurrency: Token;
   routingApiInfo: ChainSpecificRoutingAPIInfo;
   // Automan maximum allowed gas deduction ceiling.
@@ -136,14 +140,28 @@ const CHAIN_ID_TO_INFO: {
     pancakeswap_v3_pool_deployer: getAddress(
       '0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9',
     ),
+    pancakeswap_v3_nonfungible_position_manager: getAddress(
+      '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
+    ),
+    pancakeswap_v3_swap_router_v3: getAddress(
+      '0x1b81D678ffb9C0263b24A97847620C99d213eB14',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x00000000Ede6d8D217c60f93191C060747324bca',
+    ),
+    aperture_pancakeswap_v3_automan: getAddress(
+      // TODO: Fill placeholder address.
+      '0x0000000000000000000000000000000000000000',
     ),
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+    ),
+    pancakeswap_v3_optimal_swap_router: getAddress(
+      // TODO: Fill placeholder address.
+      '0x0000000000000000000000000000000000000000',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
@@ -177,7 +195,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
     ),
     wrappedNativeCurrency: new Token(
@@ -212,7 +230,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
     ),
     wrappedNativeCurrency: new Token(
@@ -246,7 +264,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
     ),
     wrappedNativeCurrency: new Token(
@@ -311,14 +329,28 @@ const CHAIN_ID_TO_INFO: {
     pancakeswap_v3_pool_deployer: getAddress(
       '0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9',
     ),
+    pancakeswap_v3_nonfungible_position_manager: getAddress(
+      '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
+    ),
+    pancakeswap_v3_swap_router_v3: getAddress(
+      '0x1b81D678ffb9C0263b24A97847620C99d213eB14',
+    ),
     aperture_uniswap_v3_automan: getAddress(
       '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
+    ),
+    aperture_pancakeswap_v3_automan: getAddress(
+      // TODO: Fill placeholder address.
+      '0x0000000000000000000000000000000000000000',
     ),
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0xE0529B92EBdd478B36BC22434625d898ebE4b489',
+    ),
+    pancakeswap_v3_optimal_swap_router: getAddress(
+      // TODO: Fill placeholder address.
+      '0x0000000000000000000000000000000000000000',
     ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
@@ -351,7 +383,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x7ECD9FDB80E1445Defd38170F05189B85084EA93',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0xCc06600868DdDab1073DEEC925E9D8c22fA8b889',
     ),
     wrappedNativeCurrency: new Token(
@@ -385,7 +417,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x039eC83141218fC68bd85E0067d696769E0576bf',
     ),
     wrappedNativeCurrency: new Token(
@@ -420,7 +452,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x000000000d44011EACAB39AB7965687d0bc2B16A',
     ),
     wrappedNativeCurrency: new Token(
@@ -456,7 +488,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000000095538AD2A95685330eD1268C69753BC2',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x000000002c1732dCF01E5C9E057d3fD2A7f1c238',
     ),
     wrappedNativeCurrency: new Token(
@@ -492,7 +524,7 @@ const CHAIN_ID_TO_INFO: {
     aperture_router_proxy: getAddress(
       '0x0000008007b63BaC0E4aC47f855005285DF20e89',
     ),
-    optimal_swap_router: getAddress(
+    uniswap_v3_optimal_swap_router: getAddress(
       '0x00000000Ff5c300B992ae04D59a799AA4fbA1dC8',
     ),
     wrappedNativeCurrency: new Token(

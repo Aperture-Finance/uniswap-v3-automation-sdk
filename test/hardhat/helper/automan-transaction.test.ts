@@ -77,7 +77,7 @@ describe('Helper - Automan transaction tests', function () {
     // Set Automan address in CHAIN_ID_TO_INFO.
     getChainInfo(chainId).aperture_uniswap_v3_automan =
       automanContract.address as `0x${string}`;
-    getChainInfo(chainId).optimal_swap_router = router.address as `0x${string}`;
+    getChainInfo(chainId).uniswap_v3_optimal_swap_router = router.address as `0x${string}`;
 
     // Owner of position id 4 sets Automan as operator.
     impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);

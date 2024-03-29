@@ -54,7 +54,7 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { aperture_uniswap_v3_automan, optimal_swap_router } =
+  const { aperture_uniswap_v3_automan, uniswap_v3_optimal_swap_router } =
     getChainInfo(chainId);
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
@@ -88,7 +88,7 @@ export async function optimalMint(
     overrides,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (uniswap_v3_optimal_swap_router === undefined) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
