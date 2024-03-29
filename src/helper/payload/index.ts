@@ -1,6 +1,7 @@
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   CreateTriggerPayload,
   PriceCondition,
@@ -13,6 +14,7 @@ import { BigNumberish } from 'ethers';
 export function generateLimitOrderCloseRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
+  automatedMarketMaker: string,
   positionId: BigNumberish,
   outerLimitPrice: Price<Token, Token>,
   maxGasProportion: number,
@@ -23,6 +25,7 @@ export function generateLimitOrderCloseRequestPayload(
   return {
     ownerAddr,
     chainId,
+    automatedMarketMaker: AutomatedMarketMakerEnum.enum[automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum] || AutomatedMarketMakerEnum.enum.UNISWAP,
     expiration,
     nftId: positionId.toString(),
     condition: {
@@ -44,6 +47,7 @@ export function generateLimitOrderCloseRequestPayload(
 export function generateAutoCompoundRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
+  automatedMarketMaker: string,
   positionId: BigNumberish,
   feeToPrincipalRatioThreshold: number,
   slippage: number,
@@ -53,6 +57,7 @@ export function generateAutoCompoundRequestPayload(
   return {
     ownerAddr,
     chainId,
+    automatedMarketMaker: AutomatedMarketMakerEnum.enum[automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum] || AutomatedMarketMakerEnum.enum.UNISWAP,
     expiration,
     nftId: positionId.toString(),
     condition: {

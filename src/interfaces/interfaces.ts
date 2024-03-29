@@ -50,6 +50,8 @@ const ApertureSupportedChainIdEnum = z
     'The chain id of the network; must be one of the chains supported by Aperture.',
   );
 
+export const AutomatedMarketMakerEnum = z.enum(['UNISWAP', 'PANCAKESWAP']);
+
 export const ConditionTypeEnum = z.enum([
   'Time',
   'TokenAmount',
@@ -496,6 +498,9 @@ const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
     'The owner address of the position; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  automatedMarketMaker: AutomatedMarketMakerEnum.optional().describe(
+    'The automated market maker. If not specified, then this will be Uniswap.',
+  ),
 });
 
 export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
