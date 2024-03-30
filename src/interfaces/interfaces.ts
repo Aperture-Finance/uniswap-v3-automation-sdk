@@ -51,6 +51,7 @@ const ApertureSupportedChainIdEnum = z
   );
 
 export const AutomatedMarketMakerEnum = z.enum(['UNISWAP', 'PANCAKESWAP']);
+export type AutomatedMarketMakerEnum = z.infer<typeof AutomatedMarketMakerEnum>;
 
 export const ConditionTypeEnum = z.enum([
   'Time',
