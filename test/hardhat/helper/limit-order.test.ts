@@ -150,6 +150,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        'UNISWAP',
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
