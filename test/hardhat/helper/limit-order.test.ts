@@ -16,7 +16,7 @@ import {
   tickToLimitOrderRange,
 } from '../../../src';
 import {
-  generateLimitOrderCloseRequestPayload,
+  generateLimitOrderCloseRequestPayloadAMM,
   getBasicPositionInfo,
   getCreatePositionTxForLimitOrder,
   getCurrencyAmount,
@@ -150,7 +150,6 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
-        'UNISWAP',
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -256,7 +255,7 @@ describe('Helper - Limit order tests', function () {
       '9999999999999999576',
     );
     expect(
-      generateLimitOrderCloseRequestPayload(
+      generateLimitOrderCloseRequestPayloadAMM(
         eoa,
         chainId,
         'UNISWAP',
@@ -321,7 +320,7 @@ describe('Helper - Limit order tests', function () {
       fee: poolFee,
     });
     expect(
-      generateLimitOrderCloseRequestPayload(
+      generateLimitOrderCloseRequestPayloadAMM(
         eoa,
         chainId,
         'UNISWAP',

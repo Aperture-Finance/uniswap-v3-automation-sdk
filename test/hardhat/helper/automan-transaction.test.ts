@@ -17,7 +17,7 @@ import {
   getChainInfo,
 } from '../../../src';
 import {
-  generateAutoCompoundRequestPayload,
+  generateAutoCompoundRequestPayloadAMM,
   getBasicPositionInfo,
   getERC20Overrides,
   getIncreaseLiquidityOptimalTx,
@@ -476,7 +476,7 @@ describe('Helper - Automan transaction tests', function () {
     expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
     expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
     expect(
-      generateAutoCompoundRequestPayload(
+      generateAutoCompoundRequestPayloadAMM(
         eoa,
         chainId,
         'UNISWAP',
