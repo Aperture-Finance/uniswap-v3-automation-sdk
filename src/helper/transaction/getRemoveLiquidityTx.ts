@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
 import {
   BlockTag,
   Provider,
@@ -79,7 +79,7 @@ export async function getRemoveLiquidityTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
     calldata,
     value,
   );

@@ -5,7 +5,7 @@ import {
   IUniV3Automan__factory,
   PermitInfo,
   UniV3Automan,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { BigNumberish, BytesLike } from 'ethers';
@@ -67,13 +67,13 @@ export async function simulateDecreaseLiquiditySingle(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
       data,
       {
         ...getNPMApprovalOverrides(chainId, owner),
         ...getAutomanWhitelistOverrides(
           chainId,
-          getChainInfo(chainId).aperture_router_proxy!,
+          getChainInfoAMM(chainId).aperture_router_proxy!,
         ),
       },
       provider,

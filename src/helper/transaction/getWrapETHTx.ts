@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, WETH__factory, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, WETH__factory, getChainInfoAMM } from '@/index';
 import { TransactionRequest } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 
@@ -10,7 +10,7 @@ export function getWrapETHTx(
     throw new Error('CELO wrapping is not applicable');
   }
   return {
-    to: getChainInfo(chainId).wrappedNativeCurrency.address,
+    to: getChainInfoAMM(chainId).wrappedNativeCurrency.address,
     data: WETH__factory.createInterface().encodeFunctionData('deposit'),
     value: amount,
   };
@@ -24,7 +24,7 @@ export function getUnwrapETHTx(
     throw new Error('CELO unwrapping is not applicable');
   }
   return {
-    to: getChainInfo(chainId).wrappedNativeCurrency.address,
+    to: getChainInfoAMM(chainId).wrappedNativeCurrency.address,
     data: WETH__factory.createInterface().encodeFunctionData('withdraw', [
       amount,
     ]),

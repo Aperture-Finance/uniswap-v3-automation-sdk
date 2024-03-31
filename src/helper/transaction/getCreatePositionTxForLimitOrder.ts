@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  getChainInfo,
+  getChainInfoAMM,
   priceToClosestTickSafe,
   tickToLimitOrderRange,
 } from '@/index';
@@ -109,7 +109,7 @@ export async function getCreatePositionTxForLimitOrder(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
     calldata,
     value,
   );

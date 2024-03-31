@@ -49,7 +49,7 @@ export type InfuraNetworkId =
   | 'base'
   | 'avalanche';
 
-interface AmmInfo {
+export interface AmmInfo {
   factoryOrPoolDeployer: Address; // Factory for UNISWAP, PoolDeployer for PANCAKESWAP
   nonfungiblePositionManager: Address;
   swapRouter: Address;

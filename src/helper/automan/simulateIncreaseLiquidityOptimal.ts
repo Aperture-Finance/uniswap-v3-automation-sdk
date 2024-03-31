@@ -3,7 +3,7 @@ import {
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   UniV3Automan,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Position } from '@uniswap/v3-sdk';
@@ -45,10 +45,10 @@ export async function simulateIncreaseLiquidityOptimal(
     'increaseLiquidityOptimal',
     [increaseParams, swapData],
   );
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const tx = {
     from,
-    to: aperture_uniswap_v3_automan,
+    to: apertureAutoman,
     data,
   };
   let returnData: string;
@@ -59,14 +59,14 @@ export async function simulateIncreaseLiquidityOptimal(
         getERC20Overrides(
           position.pool.token0.address,
           from,
-          aperture_uniswap_v3_automan,
+          apertureAutoman,
           increaseParams.amount0Desired,
           provider,
         ),
         getERC20Overrides(
           position.pool.token1.address,
           from,
-          aperture_uniswap_v3_automan,
+          apertureAutoman,
           increaseParams.amount1Desired,
           provider,
         ),

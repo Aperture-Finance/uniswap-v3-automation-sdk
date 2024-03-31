@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { NonfungiblePositionManager } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
@@ -56,7 +56,7 @@ export async function getCollectTx(
     ),
   });
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
     calldata,
     value,
   );

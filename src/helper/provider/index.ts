@@ -2,7 +2,7 @@ import { providers } from '@0xsequence/multicall';
 import {
   ApertureSupportedChainId,
   InfuraNetworkId,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { Logger } from '@ethersproject/logger';
 import { Network } from '@ethersproject/networks';
@@ -133,7 +133,7 @@ export class CustomInfuraProvider extends ethers.providers.InfuraProvider {
 export function getPublicProvider(
   chainId: number,
 ): providers.MulticallProvider {
-  const info = getChainInfo(chainId);
+  const info = getChainInfoAMM(chainId);
   const provider = info.infura_network_id
     ? new CustomInfuraProvider(info.infura_network_id)
     : new ethers.providers.StaticJsonRpcProvider(info.rpc_url, chainId);

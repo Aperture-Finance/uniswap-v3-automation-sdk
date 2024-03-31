@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getChainInfoAMM } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
 import { Position } from '@uniswap/v3-sdk';
@@ -66,7 +66,7 @@ export async function getZapOutTx(
   return {
     tx: {
       from: ownerAddress,
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
       data,
     },
     amount,

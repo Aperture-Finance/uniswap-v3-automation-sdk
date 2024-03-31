@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   IUniV3Automan__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { Provider } from '@ethersproject/providers';
 import { Signer } from 'ethers';
@@ -11,7 +11,7 @@ export function getAutomanContract(
   provider: Provider | Signer,
 ) {
   return IUniV3Automan__factory.connect(
-    getChainInfo(chainId).aperture_uniswap_v3_automan,
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
     provider,
   );
 }

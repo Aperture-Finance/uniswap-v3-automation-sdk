@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { BigNumberish, BytesLike } from 'ethers';
 import { solidityPack } from 'ethers/lib/utils';
@@ -15,7 +15,7 @@ export function encodeSwapData(
   return solidityPack(
     ['address', 'bytes'],
     [
-      getChainInfo(chainId).aperture_router_proxy!,
+      getChainInfoAMM(chainId).aperture_router_proxy!,
       solidityPack(
         ['address', 'address', 'address', 'address', 'uint256', 'bytes'],
         [router, approveTarget, tokenIn, tokenOut, amountIn, data],
@@ -39,7 +39,7 @@ export function encodeOptimalSwapData(
   return solidityPack(
     ['address', 'bytes'],
     [
-      getChainInfo(chainId).uniswap_v3_optimal_swap_router!,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.optimalSwapRouter!,
       solidityPack(
         [
           'address',

@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   IUniV3Automan__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
@@ -94,7 +94,7 @@ export async function getIncreaseLiquidityOptimalTx(
   );
   return {
     tx: {
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman,
       data,
       value,
     },

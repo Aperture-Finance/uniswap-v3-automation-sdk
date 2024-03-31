@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   IUniV3Automan__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber, BigNumberish } from 'ethers';
@@ -39,7 +39,7 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
       data,
     },
     // forge an operator approval using state overrides.

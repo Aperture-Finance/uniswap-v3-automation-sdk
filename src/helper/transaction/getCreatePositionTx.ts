@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import {
   MintOptions,
@@ -43,7 +43,7 @@ export async function getCreatePositionTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getChainInfoAMM(chainId),
     calldata,
     value,
   );

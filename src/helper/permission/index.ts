@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getChainInfoAMM } from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { BigNumberish, TypedDataDomain, TypedDataField, ethers } from 'ethers';
 
@@ -25,7 +25,7 @@ export async function checkPositionApprovalStatus(
   chainId: ApertureSupportedChainId,
   provider: ethers.providers.Provider,
 ): Promise<PositionApprovalStatus> {
-  const chainInfo = getChainInfo(chainId);
+  const chainInfo = getChainInfoAMM(chainId);
   const npm = getNPM(chainId, provider);
   let owner, approved;
   try {
@@ -48,7 +48,7 @@ export async function checkPositionApprovalStatus(
       reason: 'unknownNPMQueryError',
     };
   }
-  if (approved == chainInfo.aperture_uniswap_v3_automan) {
+  if (approved == chainInfo.ammToInfo.get('UNISWAP')?.apertureAutoman) {
     return {
       owner,
       hasAuthority: true,
@@ -57,7 +57,7 @@ export async function checkPositionApprovalStatus(
   }
   const automanIsOperator = await npm.isApprovedForAll(
     owner,
-    chainInfo.aperture_uniswap_v3_automan,
+    chainInfo.ammToInfo.get('UNISWAP')?.apertureAutoman!,
   );
   if (automanIsOperator) {
     return {
@@ -102,12 +102,12 @@ export async function checkPositionPermit(
   chainId: ApertureSupportedChainId,
   provider: ethers.providers.Provider,
 ) {
-  const chainInfo = getChainInfo(chainId);
+  const chainInfo = getChainInfoAMM(chainId);
   const npm = getNPM(chainId, provider);
   try {
     const permitSignature = ethers.utils.splitSignature(permitInfo.signature);
     await npm.callStatic.permit(
-      chainInfo.aperture_uniswap_v3_automan,
+      chainInfo.ammToInfo.get('UNISWAP')?.apertureAutoman!,
       positionId,
       permitInfo.deadline,
       permitSignature.v,
@@ -140,13 +140,13 @@ export async function generateTypedDataForPermit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>;
 }> {
-  const chainInfo = getChainInfo(chainId);
+  const chainInfo = getChainInfoAMM(chainId);
   return {
     domain: {
       name: 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
-      verifyingContract: chainInfo.uniswap_v3_nonfungible_position_manager,
+      verifyingContract: chainInfo.ammToInfo.get('UNISWAP')?.nonfungiblePositionManager,
     },
     types: {
       Permit: [

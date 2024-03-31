@@ -17,7 +17,7 @@ import {
   PriceConditionSchema,
   Q192,
   fractionToBig,
-  getChainInfo,
+  getChainInfoAMM,
   getRawRelativePriceFromTokenValueProportion,
   getTokenValueProportionFromPriceRatio,
 } from '../../../src';
@@ -61,8 +61,8 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Position approval', async function () {
-    const chainInfo = getChainInfo(chainId);
-    const automanAddress = chainInfo.aperture_uniswap_v3_automan;
+    const chainInfoAMM = getChainInfoAMM(chainId);
+    const automanAddress = chainInfoAMM.ammToInfo.get('UNISWAP')?.apertureAutoman!;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(
@@ -456,14 +456,14 @@ describe('Helper - Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 761879;
     const blockTag = 119626480;
     const npm = getNPM(chainId, provider);
     const opts = { blockTag };
     const owner = await npm.ownerOf(positionId, opts);
-    expect(await npm.isApprovedForAll(owner, aperture_uniswap_v3_automan, opts))
+    expect(await npm.isApprovedForAll(owner, apertureAutoman, opts))
       .to.be.false;
     const { liquidity } = await getReinvestedPosition(
       chainId,
@@ -478,7 +478,7 @@ describe('Helper - Position util tests', function () {
     const signer = await ethers.getImpersonatedSigner(owner);
     await npm
       .connect(signer)
-      .setApprovalForAll(aperture_uniswap_v3_automan, true);
+      .setApprovalForAll(apertureAutoman, true);
     const { liquidity: liquidityBefore } = await getPosition(
       chainId,
       positionId,
@@ -490,7 +490,7 @@ describe('Helper - Position util tests', function () {
     );
     await signer.sendTransaction({
       from: owner,
-      to: aperture_uniswap_v3_automan,
+      to: apertureAutoman,
       data,
     });
     const { liquidity: liquidityAfter } = await getPosition(

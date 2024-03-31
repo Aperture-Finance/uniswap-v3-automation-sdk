@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { TransactionReceipt } from '@ethersproject/providers';
 import { BigNumber } from 'ethers';
@@ -21,7 +21,7 @@ export function getMintedPositionIdFromTxReceipt(
   recipientAddress: string,
 ): BigNumber | undefined {
   const npmAddress =
-    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager.toLowerCase();
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.nonfungiblePositionManager.toLowerCase();
   const npmInterface = INonfungiblePositionManager__factory.createInterface();
   const transferLogs = filterLogsByEvent(
     txReceipt,

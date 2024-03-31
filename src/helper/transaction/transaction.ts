@@ -1,4 +1,4 @@
-import { ChainInfo, IUniV3Automan__factory, getChainInfo } from '@/index';
+import { AmmInfo, IUniV3Automan__factory, getChainInfoAMM } from '@/index';
 import { ApertureSupportedChainId } from '@/index';
 import { INonfungiblePositionManager__factory } from '@/index';
 import { EventFragment } from '@ethersproject/abi';
@@ -65,12 +65,12 @@ export async function getAmountsWithSlippage(
 }
 
 export function getTxToNonfungiblePositionManager(
-  chainInfo: ChainInfo,
+  AmmInfo: AmmInfo,
   data: string,
   value?: BigNumberish,
 ) {
   return {
-    to: chainInfo.uniswap_v3_nonfungible_position_manager,
+    to: AmmInfo.nonfungiblePositionManager,
     data,
     value,
   };
@@ -139,12 +139,12 @@ export function getSetApprovalForAllTx(
   chainId: ApertureSupportedChainId,
   approved: boolean,
 ): TransactionRequest {
-  const chainInfo = getChainInfo(chainId);
+  const ammInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   return getTxToNonfungiblePositionManager(
-    chainInfo,
+    ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(
       'setApprovalForAll',
-      [chainInfo.aperture_uniswap_v3_automan, approved],
+      [ammInfo.apertureAutoman!, approved],
     ),
   );
 }
