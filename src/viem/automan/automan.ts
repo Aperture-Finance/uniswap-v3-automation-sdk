@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   PermitInfo,
   UniV3Automan__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import {
   FeeAmount,
@@ -52,7 +52,8 @@ export function getAutomanContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: getChainInfo(chainId).aperture_uniswap_v3_automan,
+    address:
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
     abi: UniV3Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -70,7 +71,7 @@ export function encodeSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getChainInfo(chainId).aperture_router_proxy!,
+      getChainInfoAMM(chainId).aperture_router_proxy!,
       encodePacked(
         ['address', 'address', 'address', 'address', 'uint256', 'bytes'],
         [router, approveTarget, tokenIn, tokenOut, amountIn, data],
@@ -94,7 +95,7 @@ export function encodeOptimalSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getChainInfo(chainId).uniswap_v3_optimal_swap_router!,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.optimalSwapRouter!,
       encodePacked(
         // prettier-ignore
         ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],
@@ -304,10 +305,10 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP');
   const tx = {
     from,
-    to: aperture_uniswap_v3_automan,
+    to: apertureAutoman,
     data,
   };
   let returnData: Hex;
@@ -317,14 +318,14 @@ export async function simulateMintOptimal(
       getERC20Overrides(
         mintParams.token0,
         from,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         mintParams.amount0Desired,
         publicClient,
       ),
       getERC20Overrides(
         mintParams.token1,
         from,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         mintParams.amount1Desired,
         publicClient,
       ),
@@ -379,7 +380,8 @@ export async function simulateIncreaseLiquidityOptimal(
     increaseParams,
     swapData,
   );
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const tx = {
     from,
     to: aperture_uniswap_v3_automan,
@@ -466,7 +468,7 @@ export async function simulateRemoveLiquidity(
       'eth_call',
       {
         from,
-        to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+        to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
         data,
       },
       publicClient,
@@ -506,7 +508,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
       data,
     },
     publicClient,
@@ -616,7 +618,7 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
       data,
     },
     publicClient,

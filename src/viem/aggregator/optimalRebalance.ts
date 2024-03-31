@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -34,7 +34,8 @@ export async function optimalRebalance(
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
-  const { uniswap_v3_optimal_swap_router } = getChainInfo(chainId);
+  const { optimalSwapRouter } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const position = await PositionDetails.fromPositionId(
     chainId,
     positionId,
@@ -77,7 +78,7 @@ export async function optimalRebalance(
     blockNumber,
   );
   if (!usePool) {
-    if (uniswap_v3_optimal_swap_router === undefined) {
+    if (optimalSwapRouter === undefined) {
       return { ...(await poolPromise), receive0, receive1 };
     }
     const [poolEstimate, routerEstimate] = await Promise.all([

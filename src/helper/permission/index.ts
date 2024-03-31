@@ -140,14 +140,13 @@ export async function generateTypedDataForPermit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>;
 }> {
-  const chainInfo = getChainInfoAMM(chainId);
+  const ammInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   return {
     domain: {
       name: 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
-      verifyingContract:
-        chainInfo.ammToInfo.get('UNISWAP')?.nonfungiblePositionManager,
+      verifyingContract: ammInfo.nonfungiblePositionManager,
     },
     types: {
       Permit: [
@@ -158,7 +157,7 @@ export async function generateTypedDataForPermit(
       ],
     },
     value: {
-      spender: chainInfo.aperture_uniswap_v3_automan,
+      spender: ammInfo.apertureAutoman,
       tokenId: positionId,
       nonce: (await getNPM(chainId, provider).positions(positionId)).nonce,
       deadline: deadlineEpochSeconds,
