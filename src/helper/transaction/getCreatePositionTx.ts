@@ -43,7 +43,7 @@ export async function getCreatePositionTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfoAMM(chainId),
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
     calldata,
     value,
   );

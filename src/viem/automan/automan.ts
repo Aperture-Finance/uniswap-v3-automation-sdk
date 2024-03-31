@@ -305,7 +305,7 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP');
+  const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const tx = {
     from,
     to: apertureAutoman,
@@ -384,7 +384,7 @@ export async function simulateIncreaseLiquidityOptimal(
     getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const tx = {
     from,
-    to: aperture_uniswap_v3_automan,
+    to: apertureAutoman,
     data,
   };
   let returnData: Hex;
@@ -394,14 +394,14 @@ export async function simulateIncreaseLiquidityOptimal(
       getERC20Overrides(
         position.pool.token0.address as Address,
         from,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         increaseParams.amount0Desired,
         publicClient,
       ),
       getERC20Overrides(
         position.pool.token1.address as Address,
         from,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         increaseParams.amount1Desired,
         publicClient,
       ),
