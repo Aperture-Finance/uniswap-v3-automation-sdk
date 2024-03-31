@@ -45,7 +45,8 @@ describe('Helper - Automan transaction tests', function () {
   const positionId = 4;
   let automanContract: UniV3Automan;
   let impersonatedOwnerSigner: Signer;
-  const automanAddress = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman;
+  const automanAddress =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman;
 
   beforeEach(async function () {
     await resetHardhatNetwork();

@@ -62,7 +62,8 @@ describe('Helper - Position util tests', function () {
 
   it('Position approval', async function () {
     const chainInfoAMM = getChainInfoAMM(chainId);
-    const automanAddress = chainInfoAMM.ammToInfo.get('UNISWAP')?.apertureAutoman!;
+    const automanAddress =
+      chainInfoAMM.ammToInfo.get('UNISWAP')?.apertureAutoman!;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(
@@ -456,15 +457,16 @@ describe('Helper - Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+    const { apertureAutoman } =
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 761879;
     const blockTag = 119626480;
     const npm = getNPM(chainId, provider);
     const opts = { blockTag };
     const owner = await npm.ownerOf(positionId, opts);
-    expect(await npm.isApprovedForAll(owner, apertureAutoman, opts))
-      .to.be.false;
+    expect(await npm.isApprovedForAll(owner, apertureAutoman, opts)).to.be
+      .false;
     const { liquidity } = await getReinvestedPosition(
       chainId,
       positionId,
@@ -476,9 +478,7 @@ describe('Helper - Position util tests', function () {
       blockTag,
     );
     const signer = await ethers.getImpersonatedSigner(owner);
-    await npm
-      .connect(signer)
-      .setApprovalForAll(apertureAutoman, true);
+    await npm.connect(signer).setApprovalForAll(apertureAutoman, true);
     const { liquidity: liquidityBefore } = await getPosition(
       chainId,
       positionId,

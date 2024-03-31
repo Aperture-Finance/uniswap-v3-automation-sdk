@@ -201,7 +201,8 @@ describe('Helper - Position liquidity management tests', function () {
 
     // Approve Uniswap NPM to spend WBTC. Since we are providing native ether in this example, we don't need to approve WETH.
     await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
       wbtcRawAmount.toString(),
     );
 
@@ -279,7 +280,8 @@ describe('Helper - Position liquidity management tests', function () {
 
     // Approve Uniswap NPM to spend WBTC.
     await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
       positionToCreate.mintAmounts.amount0.toString(),
     );
 
@@ -288,7 +290,8 @@ describe('Helper - Position liquidity management tests', function () {
       value: positionToCreate.mintAmounts.amount1.toString(),
     });
     await WETH__factory.connect(WETH_ADDRESS, eoaSigner).approve(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
       positionToCreate.mintAmounts.amount1.toString(),
     );
 

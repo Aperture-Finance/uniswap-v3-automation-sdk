@@ -143,15 +143,15 @@ export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
   owner: string,
 ): StateOverrides {
-  const {
-    apertureAutoman,
-    nonfungiblePositionManager,
-  } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman, nonfungiblePositionManager } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   return {
     [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, apertureAutoman)]:
-          DAC.encode(['bool'], [true]),
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]: DAC.encode(
+          ['bool'],
+          [true],
+        ),
       },
     },
   };

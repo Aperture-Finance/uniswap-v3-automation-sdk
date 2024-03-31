@@ -107,7 +107,8 @@ export async function getRebalanceTx(
     recipient: ADDRESS_ZERO, // Param value ignored by Automan.
     deadline: deadlineEpochSeconds,
   };
-  const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const { functionFragment, data } = getAutomanRebalanceCallInfo(
     mintParams,
     existingPositionId,

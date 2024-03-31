@@ -146,7 +146,8 @@ export async function generateTypedDataForPermit(
       name: 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
-      verifyingContract: chainInfo.ammToInfo.get('UNISWAP')?.nonfungiblePositionManager,
+      verifyingContract:
+        chainInfo.ammToInfo.get('UNISWAP')?.nonfungiblePositionManager,
     },
     types: {
       Permit: [

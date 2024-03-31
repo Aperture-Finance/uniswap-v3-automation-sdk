@@ -51,7 +51,8 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { apertureAutoman, optimalSwapRouter } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman, optimalSwapRouter } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -206,7 +207,8 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimalSwapRouter, factoryOrPoolDeployer } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+    const { optimalSwapRouter, factoryOrPoolDeployer } =
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
