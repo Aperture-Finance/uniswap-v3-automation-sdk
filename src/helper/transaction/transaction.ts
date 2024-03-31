@@ -144,7 +144,7 @@ export function getSetApprovalForAllTx(
     ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(
       'setApprovalForAll',
-      [ammInfo.apertureAutoman!, approved],
+      [ammInfo.apertureAutoman, approved],
     ),
   );
 }
