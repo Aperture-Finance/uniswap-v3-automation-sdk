@@ -46,7 +46,7 @@ describe('Helper - Automan transaction tests', function () {
   let automanContract: UniV3Automan;
   let impersonatedOwnerSigner: Signer;
   const automanAddress =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman;
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!;
 
   beforeEach(async function () {
     await resetHardhatNetwork();
@@ -76,6 +76,10 @@ describe('Helper - Automan transaction tests', function () {
       getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
         ?.nonfungiblePositionManager!,
     );
+    await router.deployed();
+    await automanContract.setSwapRouters([router.address], [true]);
+
+    // Set Automan address in CHAIN_ID_TO_INFO.
     const ammToInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP');
     if (ammToInfo) {
       ammToInfo.apertureAutoman = automanContract.address as `0x${string}`;

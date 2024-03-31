@@ -43,7 +43,7 @@ export function getMintedPositionIdFromTxReceipt(
 ): bigint | undefined {
   const npmAddress = getChainInfoAMM(chainId)
     .ammToInfo.get('UNISWAP')
-    ?.nonfungiblePositionManager.toLowerCase();
+    ?.nonfungiblePositionManager!.toLowerCase();
   const TransferEventAbi = getAbiItem({
     abi: INonfungiblePositionManager__factory.abi,
     name: 'Transfer',

@@ -22,7 +22,7 @@ export function getMintedPositionIdFromTxReceipt(
 ): BigNumber | undefined {
   const npmAddress = getChainInfoAMM(chainId)
     .ammToInfo.get('UNISWAP')
-    ?.nonfungiblePositionManager.toLowerCase();
+    ?.nonfungiblePositionManager!.toLowerCase();
   const npmInterface = INonfungiblePositionManager__factory.createInterface();
   const transferLogs = filterLogsByEvent(
     txReceipt,
