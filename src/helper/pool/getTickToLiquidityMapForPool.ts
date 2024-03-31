@@ -28,13 +28,13 @@ export async function getTickToLiquidityMapForPool(
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
   const chainInfoAMM = getChainInfoAMM(chainId);
+  const { factoryOrPoolDeployer } = chainInfoAMM.ammToInfo.get('UNISWAP')!;
   const { uniswap_subgraph_url } = chainInfoAMM;
-  const factory = chainInfoAMM.ammToInfo.get('UNISWAP')?.factoryOrPoolDeployer!;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    factory,
+    factoryOrPoolDeployer,
     pool.token0,
     pool.token1,
     pool.fee,

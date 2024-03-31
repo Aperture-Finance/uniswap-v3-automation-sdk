@@ -61,9 +61,8 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Position approval', async function () {
-    const chainInfoAMM = getChainInfoAMM(chainId);
     const automanAddress =
-      chainInfoAMM.ammToInfo.get('UNISWAP')?.apertureAutoman!;
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(

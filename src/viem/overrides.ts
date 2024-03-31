@@ -87,7 +87,7 @@ export function getControllerOverrides(
   from: Address,
 ) {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -103,7 +103,7 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [

@@ -332,12 +332,14 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfoAMM(chainId);
+  const chainInfoAMM = getChainInfoAMM(chainId);
+  const { factoryOrPoolDeployer } = chainInfoAMM.ammToInfo.get('UNISWAP')!;
+  const { uniswap_subgraph_url } = chainInfoAMM;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    uniswap_v3_factory,
+    factoryOrPoolDeployer,
     pool.token0,
     pool.token1,
     pool.fee,
@@ -456,7 +458,7 @@ async function getPopulatedTicksInRange(
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
     computePoolAddress(
-      getChainInfo(chainId).uniswap_v3_factory,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.factoryOrPoolDeployer!,
       pool.token0,
       pool.token1,
       pool.fee,

@@ -305,7 +305,8 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { apertureAutoman } = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   const tx = {
     from,
     to: apertureAutoman,
