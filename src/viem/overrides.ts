@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   IERC20__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import {
   AccessList,
@@ -70,14 +70,12 @@ export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
   owner: Address,
 ): StateOverrides {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } =
+    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
   return {
-    [uniswap_v3_nonfungible_position_manager]: {
+    [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
     },

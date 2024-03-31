@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
@@ -41,8 +41,9 @@ export function getMintedPositionIdFromTxReceipt(
   txReceipt: TransactionReceipt,
   recipientAddress: string,
 ): bigint | undefined {
-  const npmAddress =
-    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager.toLowerCase();
+  const npmAddress = getChainInfoAMM(chainId)
+    .ammToInfo.get('UNISWAP')
+    ?.nonfungiblePositionManager.toLowerCase();
   const TransferEventAbi = getAbiItem({
     abi: INonfungiblePositionManager__factory.abi,
     name: 'Transfer',

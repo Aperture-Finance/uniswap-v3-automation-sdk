@@ -6,7 +6,7 @@ import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
-  getChainInfo,
+  getChainInfoAMM,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import {
@@ -101,7 +101,7 @@ export function getPoolContract(
 > {
   return getContract({
     address: computePoolAddress(
-      getChainInfo(chainId).uniswap_v3_factory,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.factoryOrPoolDeployer!,
       tokenA,
       tokenB,
       fee,
@@ -195,7 +195,7 @@ export async function getFeeTierDistribution(
   tokenA: Address,
   tokenB: Address,
 ): Promise<Record<FeeAmount, number>> {
-  const { uniswap_subgraph_url } = getChainInfo(chainId);
+  const { uniswap_subgraph_url } = getChainInfoAMM(chainId);
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
@@ -332,7 +332,7 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
+  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfoAMM(chainId);
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }

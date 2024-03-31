@@ -3,7 +3,7 @@ import {
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
   fractionToBig,
-  getChainInfo,
+  getChainInfoAMM,
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
 } from '@/index';
@@ -76,7 +76,9 @@ export function getNPM(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+    address:
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
     abi: INonfungiblePositionManager__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -158,7 +160,8 @@ export async function getAllPositions(
   publicClient = publicClient ?? getPublicClient(chainId);
   try {
     positions = await viem.getAllPositionsByOwner(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
       owner,
       publicClient,
       blockNumber,
@@ -285,7 +288,8 @@ export class PositionDetails implements BasicPositionInfo {
     blockNumber?: bigint,
   ): Promise<PositionDetails> {
     const position = await viem.getPositionDetails(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
       positionId,
       publicClient ?? getPublicClient(chainId),
       blockNumber,
@@ -599,7 +603,7 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
       data,
     },
     // forge an operator approval using state overrides.

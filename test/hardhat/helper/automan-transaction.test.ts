@@ -59,7 +59,8 @@ describe('Helper - Automan transaction tests', function () {
     automanContract = await new UniV3Automan__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
       /*owner=*/ WHALE_ADDRESS,
     );
     await automanContract.deployed();
@@ -71,15 +72,15 @@ describe('Helper - Automan transaction tests', function () {
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new OptimalSwapRouter__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
-    ).deploy(getChainInfo(chainId).uniswap_v3_nonfungible_position_manager);
-    await router.deployed();
-    await automanContract.setSwapRouters([router.address], [true]);
-
-    // Set Automan address in CHAIN_ID_TO_INFO.
-    getChainInfoAMM(chainId).aperture_uniswap_v3_automan =
-      automanContract.address as `0x${string}`;
-    getChainInfo(chainId).uniswap_v3_optimal_swap_router =
-      router.address as `0x${string}`;
+    ).deploy(
+      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
+        ?.nonfungiblePositionManager!,
+    );
+    const ammToInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP');
+    if (ammToInfo) {
+      ammToInfo.apertureAutoman = automanContract.address as `0x${string}`;
+      ammToInfo.optimalSwapRouter = router.address as `0x${string}`;
+    }
 
     // Owner of position id 4 sets Automan as operator.
     impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
