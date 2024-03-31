@@ -45,8 +45,7 @@ describe('Helper - Automan transaction tests', function () {
   const positionId = 4;
   let automanContract: UniV3Automan;
   let impersonatedOwnerSigner: Signer;
-  const automanAddress =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!;
+  const automanAddress = getChainInfoAMM(chainId).UNISWAP.apertureAutoman;
 
   beforeEach(async function () {
     await resetHardhatNetwork();
@@ -59,8 +58,7 @@ describe('Helper - Automan transaction tests', function () {
     automanContract = await new UniV3Automan__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-        ?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
     await automanContract.deployed();
@@ -72,19 +70,15 @@ describe('Helper - Automan transaction tests', function () {
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new OptimalSwapRouter__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
-    ).deploy(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-        ?.nonfungiblePositionManager!,
-    );
+    ).deploy(getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager);
     await router.deployed();
     await automanContract.setSwapRouters([router.address], [true]);
 
     // Set Automan address in CHAIN_ID_TO_INFO.
-    const ammToInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP');
-    if (ammToInfo) {
-      ammToInfo.apertureAutoman = automanContract.address as `0x${string}`;
-      ammToInfo.optimalSwapRouter = router.address as `0x${string}`;
-    }
+    getChainInfoAMM(chainId).UNISWAP.apertureAutoman =
+      automanContract.address as `0x${string}`;
+    getChainInfoAMM(chainId).UNISWAP.optimalSwapRouter =
+      router.address as `0x${string}`;
 
     // Owner of position id 4 sets Automan as operator.
     impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
@@ -100,10 +94,7 @@ describe('Helper - Automan transaction tests', function () {
 
   after(() => {
     // Reset Automan address in CHAIN_ID_TO_INFO.
-    const ammToInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP');
-    if (ammToInfo) {
-      ammToInfo.apertureAutoman = automanAddress as `0x${string}`;
-    }
+    getChainInfoAMM(chainId).UNISWAP.apertureAutoman = automanAddress;
   });
 
   it('Rebalance', async function () {

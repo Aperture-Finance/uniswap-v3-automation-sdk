@@ -66,7 +66,7 @@ export async function getZapOutTx(
   return {
     tx: {
       from: ownerAddress,
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
     },
     amount,

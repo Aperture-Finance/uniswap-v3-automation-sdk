@@ -57,7 +57,7 @@ export async function simulateRemoveLiquidity(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
       getNPMApprovalOverrides(chainId, owner),
       provider,

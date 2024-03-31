@@ -95,7 +95,7 @@ export async function getOptimalMintTx(
   );
   return {
     tx: {
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
       value,
     },

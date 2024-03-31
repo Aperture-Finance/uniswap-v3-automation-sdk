@@ -81,7 +81,7 @@ export function getPoolContract(
 ) {
   return IUniswapV3Pool__factory.connect(
     computePoolAddress(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.factoryOrPoolDeployer!,
+      getChainInfoAMM(chainId).UNISWAP.factoryOrPoolDeployer,
       tokenA,
       tokenB,
       fee,

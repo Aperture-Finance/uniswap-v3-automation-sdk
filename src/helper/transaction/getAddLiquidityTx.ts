@@ -47,7 +47,7 @@ export async function getAddLiquidityTx(
     increaseLiquidityOptions,
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
+    getChainInfoAMM(chainId).UNISWAP,
     calldata,
     value,
   );

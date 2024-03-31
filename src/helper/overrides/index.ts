@@ -144,7 +144,7 @@ export function getNPMApprovalOverrides(
   owner: string,
 ): StateOverrides {
   const { apertureAutoman, nonfungiblePositionManager } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+    getChainInfoAMM(chainId).UNISWAP;
   return {
     [nonfungiblePositionManager]: {
       stateDiff: {
@@ -162,7 +162,7 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: string,
 ): StateOverrides {
   return {
-    [getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!]: {
+    [getChainInfoAMM(chainId).UNISWAP.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           DAC.encode(

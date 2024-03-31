@@ -20,9 +20,7 @@ export function getMintedPositionIdFromTxReceipt(
   txReceipt: TransactionReceipt,
   recipientAddress: string,
 ): BigNumber | undefined {
-  const npmAddress = getChainInfoAMM(chainId)
-    .ammToInfo.get('UNISWAP')
-    ?.nonfungiblePositionManager!.toLowerCase();
+  const npmAddress = getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager.toLowerCase();
   const npmInterface = INonfungiblePositionManager__factory.createInterface();
   const transferLogs = filterLogsByEvent(
     txReceipt,

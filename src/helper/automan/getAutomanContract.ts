@@ -11,7 +11,7 @@ export function getAutomanContract(
   provider: Provider | Signer,
 ) {
   return IUniV3Automan__factory.connect(
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+    getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     provider,
   );
 }

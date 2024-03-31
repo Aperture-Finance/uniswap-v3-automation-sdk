@@ -44,8 +44,7 @@ export async function simulateMintOptimal(
     'mintOptimal',
     [mintParams, swapData],
   );
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const tx = {
     from,
     to: apertureAutoman,

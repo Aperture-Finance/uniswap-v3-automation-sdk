@@ -39,7 +39,7 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
     },
     // forge an operator approval using state overrides.

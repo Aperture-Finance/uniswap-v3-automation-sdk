@@ -80,8 +80,7 @@ export class PositionDetails implements BasicPositionInfo {
   ): Promise<PositionDetails> {
     const returnData = await provider.call(
       new EphemeralGetPosition__factory().getDeployTransaction(
-        getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-          ?.nonfungiblePositionManager!,
+        getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
         positionId,
       ),
       blockTag,

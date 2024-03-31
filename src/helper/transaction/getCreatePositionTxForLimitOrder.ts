@@ -109,7 +109,7 @@ export async function getCreatePositionTxForLimitOrder(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
+    getChainInfoAMM(chainId).UNISWAP,
     calldata,
     value,
   );

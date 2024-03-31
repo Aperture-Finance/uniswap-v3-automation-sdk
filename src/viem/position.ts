@@ -76,9 +76,7 @@ export function getNPM(
   PublicClient | WalletClient
 > {
   return getContract({
-    address:
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-        ?.nonfungiblePositionManager!,
+    address: getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
     abi: INonfungiblePositionManager__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -160,8 +158,7 @@ export async function getAllPositions(
   publicClient = publicClient ?? getPublicClient(chainId);
   try {
     positions = await viem.getAllPositionsByOwner(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-        ?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
       owner,
       publicClient,
       blockNumber,
@@ -288,8 +285,7 @@ export class PositionDetails implements BasicPositionInfo {
     blockNumber?: bigint,
   ): Promise<PositionDetails> {
     const position = await viem.getPositionDetails(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-        ?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
       positionId,
       publicClient ?? getPublicClient(chainId),
       blockNumber,
@@ -603,7 +599,7 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
     },
     // forge an operator approval using state overrides.

@@ -45,8 +45,7 @@ export async function simulateIncreaseLiquidityOptimal(
     'increaseLiquidityOptimal',
     [increaseParams, swapData],
   );
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const tx = {
     from,
     to: apertureAutoman,

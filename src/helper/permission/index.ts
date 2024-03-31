@@ -48,7 +48,7 @@ export async function checkPositionApprovalStatus(
       reason: 'unknownNPMQueryError',
     };
   }
-  if (approved == chainInfo.ammToInfo.get('UNISWAP')?.apertureAutoman) {
+  if (approved == chainInfo.UNISWAP.apertureAutoman) {
     return {
       owner,
       hasAuthority: true,
@@ -57,7 +57,7 @@ export async function checkPositionApprovalStatus(
   }
   const automanIsOperator = await npm.isApprovedForAll(
     owner,
-    chainInfo.ammToInfo.get('UNISWAP')?.apertureAutoman!,
+    chainInfo.UNISWAP.apertureAutoman,
   );
   if (automanIsOperator) {
     return {
@@ -107,7 +107,7 @@ export async function checkPositionPermit(
   try {
     const permitSignature = ethers.utils.splitSignature(permitInfo.signature);
     await npm.callStatic.permit(
-      chainInfo.ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      chainInfo.UNISWAP.apertureAutoman,
       positionId,
       permitInfo.deadline,
       permitSignature.v,
@@ -140,7 +140,7 @@ export async function generateTypedDataForPermit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>;
 }> {
-  const ammInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const ammInfo = getChainInfoAMM(chainId).UNISWAP;
   return {
     domain: {
       name: 'Uniswap V3 Positions NFT-V1',

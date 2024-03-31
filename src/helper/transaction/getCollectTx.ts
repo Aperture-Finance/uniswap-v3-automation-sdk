@@ -56,7 +56,7 @@ export async function getCollectTx(
     ),
   });
   return getTxToNonfungiblePositionManager(
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!,
+    getChainInfoAMM(chainId).UNISWAP,
     calldata,
     value,
   );

@@ -71,7 +71,7 @@ export function getNPMApprovalOverrides(
   owner: Address,
 ): StateOverrides {
   const { apertureAutoman, nonfungiblePositionManager } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+    getChainInfoAMM(chainId).UNISWAP;
   return {
     [nonfungiblePositionManager]: {
       stateDiff: {
@@ -87,7 +87,7 @@ export function getControllerOverrides(
   from: Address,
 ) {
   return {
-    [getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!]: {
+    [getChainInfoAMM(chainId).UNISWAP.apertureAutoman]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -103,7 +103,7 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!]: {
+    [getChainInfoAMM(chainId).UNISWAP.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [

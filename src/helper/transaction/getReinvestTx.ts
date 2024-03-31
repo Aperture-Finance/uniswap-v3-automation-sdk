@@ -35,8 +35,7 @@ export async function getReinvestTx(
     positionId,
     provider,
   );
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const { functionFragment, data } = getAutomanReinvestCallInfo(
     positionId,
     deadlineEpochSeconds,

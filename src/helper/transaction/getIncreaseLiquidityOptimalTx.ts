@@ -94,7 +94,7 @@ export async function getIncreaseLiquidityOptimalTx(
   );
   return {
     tx: {
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
       value,
     },

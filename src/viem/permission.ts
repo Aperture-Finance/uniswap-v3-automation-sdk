@@ -33,8 +33,7 @@ export async function checkPositionApprovalStatus(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<PositionApprovalStatus> {
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const npm = getNPM(chainId, publicClient);
   const opts = { blockNumber };
   let owner, approved;
@@ -123,8 +122,7 @@ export async function checkPositionPermit(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const npm = getNPM(chainId, publicClient);
   try {
     const permitSignature = hexToSignature(permitInfo.signature as Hex);
@@ -173,7 +171,7 @@ export async function generateTypedDataForPermit(
   publicClient?: PublicClient,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
   const { apertureAutoman, nonfungiblePositionManager } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+    getChainInfoAMM(chainId).UNISWAP;
   const nonce = (
     await getNPM(chainId, publicClient).read.positions([positionId])
   )[0];

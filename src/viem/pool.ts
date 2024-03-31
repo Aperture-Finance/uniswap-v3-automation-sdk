@@ -101,7 +101,7 @@ export function getPoolContract(
 > {
   return getContract({
     address: computePoolAddress(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.factoryOrPoolDeployer!,
+      getChainInfoAMM(chainId).UNISWAP.factoryOrPoolDeployer,
       tokenA,
       tokenB,
       fee,
@@ -333,7 +333,7 @@ export async function getTickToLiquidityMapForPool(
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
   const chainInfoAMM = getChainInfoAMM(chainId);
-  const { factoryOrPoolDeployer } = chainInfoAMM.ammToInfo.get('UNISWAP')!;
+  const { factoryOrPoolDeployer } = chainInfoAMM.UNISWAP;
   const { uniswap_subgraph_url } = chainInfoAMM;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
@@ -458,7 +458,7 @@ async function getPopulatedTicksInRange(
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
     computePoolAddress(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.factoryOrPoolDeployer!,
+      getChainInfoAMM(chainId).UNISWAP.factoryOrPoolDeployer,
       pool.token0,
       pool.token1,
       pool.fee,

@@ -46,8 +46,7 @@ export function getNPM(
   provider: Provider | Signer,
 ) {
   return INonfungiblePositionManager__factory.connect(
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-      ?.nonfungiblePositionManager!,
+    getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
     provider,
   );
 }

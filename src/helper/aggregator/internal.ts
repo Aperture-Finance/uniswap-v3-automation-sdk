@@ -53,7 +53,7 @@ export async function getOptimalMintSwapData(
 }> {
   try {
     const { optimalSwapRouter, factoryOrPoolDeployer } =
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+      getChainInfoAMM(chainId).UNISWAP;
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool

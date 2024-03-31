@@ -139,7 +139,7 @@ export function getSetApprovalForAllTx(
   chainId: ApertureSupportedChainId,
   approved: boolean,
 ): TransactionRequest {
-  const ammInfo = getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const ammInfo = getChainInfoAMM(chainId).UNISWAP;
   return getTxToNonfungiblePositionManager(
     ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(

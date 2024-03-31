@@ -52,8 +52,7 @@ export function getAutomanContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address:
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+    address: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     abi: UniV3Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -95,7 +94,7 @@ export function encodeOptimalSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.optimalSwapRouter!,
+      getChainInfoAMM(chainId).UNISWAP.optimalSwapRouter!,
       encodePacked(
         // prettier-ignore
         ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],
@@ -305,8 +304,7 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const tx = {
     from,
     to: apertureAutoman,
@@ -381,8 +379,7 @@ export async function simulateIncreaseLiquidityOptimal(
     increaseParams,
     swapData,
   );
-  const { apertureAutoman } =
-    getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
   const tx = {
     from,
     to: apertureAutoman,
@@ -469,7 +466,7 @@ export async function simulateRemoveLiquidity(
       'eth_call',
       {
         from,
-        to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+        to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
         data,
       },
       publicClient,
@@ -509,7 +506,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
     },
     publicClient,
@@ -619,7 +616,7 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
       data,
     },
     publicClient,

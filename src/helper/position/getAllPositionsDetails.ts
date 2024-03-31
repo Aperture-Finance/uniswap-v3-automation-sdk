@@ -21,8 +21,7 @@ export async function getAllPositionsDetails(
 ): Promise<Map<string, PositionDetails>> {
   const returnData = await provider.call(
     new EphemeralAllPositionsByOwner__factory().getDeployTransaction(
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')
-        ?.nonfungiblePositionManager!,
+      getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
       owner,
     ),
   );

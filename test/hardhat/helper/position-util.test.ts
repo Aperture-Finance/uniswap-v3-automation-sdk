@@ -62,7 +62,7 @@ describe('Helper - Position util tests', function () {
 
   it('Position approval', async function () {
     const automanAddress =
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!;
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(
@@ -457,7 +457,7 @@ describe('Helper - Position util tests', function () {
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const { apertureAutoman } =
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')!;
+      getChainInfoAMM(chainId).UNISWAP;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 761879;
     const blockTag = 119626480;
