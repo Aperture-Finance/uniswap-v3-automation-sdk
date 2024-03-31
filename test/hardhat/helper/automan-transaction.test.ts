@@ -177,7 +177,7 @@ describe('Helper - Automan transaction tests', function () {
       existingPosition.amount0.multiply(2).quotient.toString(),
       existingPosition.amount1.multiply(2).quotient.toString(),
       eoa,
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     );
     const { tx: txRequest } = await getRebalanceTx(
       chainId,
@@ -238,7 +238,7 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
       chainId,
@@ -301,7 +301,7 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
       chainId,
@@ -357,7 +357,7 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     );
 
     const { tx } = await getIncreaseLiquidityOptimalTx(
@@ -409,7 +409,7 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfoAMM(chainId).ammToInfo.get('UNISWAP')?.apertureAutoman!,
+      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
     );
     const { tx } = await getIncreaseLiquidityOptimalTx(
       {
