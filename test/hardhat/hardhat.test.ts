@@ -986,12 +986,8 @@ describe('Position util tests', function () {
       blockNumber,
     };
     const owner = await npm.read.ownerOf([positionId], opts);
-    expect(
-      await npm.read.isApprovedForAll(
-        [owner, aperture_uniswap_v3_automan],
-        opts,
-      ),
-    ).to.be.false;
+    expect(await npm.read.isApprovedForAll([owner, apertureAutoman], opts)).to
+      .be.false;
     const [liquidity] = await getReinvestedPosition(
       chainId,
       positionId,
