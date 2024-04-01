@@ -1,6 +1,7 @@
 import {
   ApertureSupportedChainId,
-  getChainInfo,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
   priceToClosestTickSafe,
   tickToLimitOrderRange,
 } from '@/index';
@@ -109,7 +110,7 @@ export async function getCreatePositionTxForLimitOrder(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
     calldata,
     value,
   );

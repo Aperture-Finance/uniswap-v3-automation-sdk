@@ -1,4 +1,9 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  PermitInfo,
+  getAMMInfo,
+} from '@/index';
 import {
   CallExecutionError,
   Hex,
@@ -33,7 +38,10 @@ export async function checkPositionApprovalStatus(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<PositionApprovalStatus> {
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const npm = getNPM(chainId, publicClient);
   const opts = { blockNumber };
   let owner, approved;
@@ -58,7 +66,7 @@ export async function checkPositionApprovalStatus(
       reason: 'unknownNPMQueryError',
     };
   }
-  if (approved == aperture_uniswap_v3_automan) {
+  if (approved == apertureAutoman) {
     return {
       owner,
       hasAuthority: true,
@@ -66,7 +74,7 @@ export async function checkPositionApprovalStatus(
     };
   }
   const automanIsOperator = await npm.read.isApprovedForAll(
-    [owner, aperture_uniswap_v3_automan],
+    [owner, apertureAutoman],
     opts,
   );
   if (automanIsOperator) {
@@ -122,13 +130,16 @@ export async function checkPositionPermit(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const npm = getNPM(chainId, publicClient);
   try {
     const permitSignature = hexToSignature(permitInfo.signature as Hex);
     await npm.simulate.permit(
       [
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         positionId,
         BigInt(permitInfo.deadline),
         Number(permitSignature.v),
@@ -136,7 +147,7 @@ export async function checkPositionPermit(
         permitSignature.s,
       ],
       {
-        account: aperture_uniswap_v3_automan,
+        account: apertureAutoman,
         blockNumber,
         value: BigInt(0),
       },
@@ -170,10 +181,10 @@ export async function generateTypedDataForPermit(
   deadlineEpochSeconds: bigint,
   publicClient?: PublicClient,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const nonce = (
     await getNPM(chainId, publicClient).read.positions([positionId])
   )[0];
@@ -182,12 +193,12 @@ export async function generateTypedDataForPermit(
       name: 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
-      verifyingContract: uniswap_v3_nonfungible_position_manager,
+      verifyingContract: nonfungiblePositionManager,
     },
     types: PermitTypes,
     primaryType: 'Permit',
     message: {
-      spender: aperture_uniswap_v3_automan,
+      spender: apertureAutoman,
       tokenId: positionId,
       nonce,
       deadline: deadlineEpochSeconds,

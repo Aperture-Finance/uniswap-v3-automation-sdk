@@ -38,6 +38,29 @@ export type VerifySocialAccountRequest = z.infer<
   typeof VerifySocialAccountRequestSchema
 >;
 
+export const SocialLoginRequestSchema = z.object({
+  code: z.string(),
+  platform: SocialPlatformEnum,
+});
+
+export type SocialLoginRequest = z.infer<typeof SocialLoginRequestSchema>;
+
+export const SocialLoginResponseSchema = GeneralResponseSchema.extend({
+  userKey: z.string(),
+});
+
+export type SocialLoginResponse = z.infer<typeof SocialLoginResponseSchema>;
+
+export const BindSocialAccountRequestSchema = PayloadSignatureSchema.extend({
+  payload: BasePayloadSchema.extend({
+    userKey: z.string(),
+  }),
+});
+
+export type BindSocialAccountRequest = z.infer<
+  typeof BindSocialAccountRequestSchema
+>;
+
 export const VerifySocialAccountResponseSchema = GeneralResponseSchema.extend({
   message: z.string().optional(),
   retroPoints: z.number().nonnegative().optional(),

@@ -4,10 +4,11 @@ import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
 import {
+  AutomatedMarketMakerEnum,
   IERC20__factory,
   WETH__factory,
   alignPriceToClosestUsableTick,
-  getChainInfo,
+  getAMMInfo,
   parsePrice,
   priceToClosestUsableTick,
 } from '../../../src';
@@ -201,7 +202,8 @@ describe('Helper - Position liquidity management tests', function () {
 
     // Approve Uniswap NPM to spend WBTC. Since we are providing native ether in this example, we don't need to approve WETH.
     await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
       wbtcRawAmount.toString(),
     );
 
@@ -279,7 +281,8 @@ describe('Helper - Position liquidity management tests', function () {
 
     // Approve Uniswap NPM to spend WBTC.
     await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount0.toString(),
     );
 
@@ -288,7 +291,8 @@ describe('Helper - Position liquidity management tests', function () {
       value: positionToCreate.mintAmounts.amount1.toString(),
     });
     await WETH__factory.connect(WETH_ADDRESS, eoaSigner).approve(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount1.toString(),
     );
 

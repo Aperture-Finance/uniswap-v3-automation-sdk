@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { Provider } from '@ethersproject/providers';
 import { Position } from '@uniswap/v3-sdk';
@@ -46,7 +47,8 @@ export function getNPM(
   provider: Provider | Signer,
 ) {
   return INonfungiblePositionManager__factory.connect(
-    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      .nonfungiblePositionManager,
     provider,
   );
 }

@@ -1,4 +1,9 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  PermitInfo,
+  getAMMInfo,
+} from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
 import { BigNumberish } from 'ethers';
@@ -35,7 +40,10 @@ export async function getReinvestTx(
     positionId,
     provider,
   );
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const { functionFragment, data } = getAutomanReinvestCallInfo(
     positionId,
     deadlineEpochSeconds,
@@ -48,7 +56,7 @@ export async function getReinvestTx(
     pool,
     tickLower,
     tickUpper,
-    aperture_uniswap_v3_automan,
+    apertureAutoman,
     ownerAddress,
     functionFragment,
     data,
@@ -58,7 +66,7 @@ export async function getReinvestTx(
   return {
     tx: {
       from: ownerAddress,
-      to: aperture_uniswap_v3_automan,
+      to: apertureAutoman,
       data: getAutomanReinvestCallInfo(
         positionId,
         deadlineEpochSeconds,

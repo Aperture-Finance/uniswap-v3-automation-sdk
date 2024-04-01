@@ -8,9 +8,10 @@ import {
 import { ethers } from 'hardhat';
 
 import {
+  AutomatedMarketMakerEnum,
   IERC20__factory,
   alignPriceToClosestUsableTick,
-  getChainInfo,
+  getAMMInfo,
   parsePrice,
   priceToClosestTickSafe,
   tickToLimitOrderRange,
@@ -96,8 +97,10 @@ describe('Helper - Limit order tests', function () {
       chainId,
       hardhatForkProvider,
     );
-    const npmAddress =
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const npmAddress = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.nonfungiblePositionManager;
     expect(tx).to.deep.equal({
       to: npmAddress,
       data: '0x883164560000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c599000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000bb8000000000000000000000000000000000000000000000000000000000003f048000000000000000000000000000000000000000000000000000000000003f084000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004bd047ca72fa05f0b89ad08fe5ba5ccdc07dffbf00000000000000000000000000000000000000000000000000000000f3fd9d70',
@@ -150,6 +153,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -162,6 +166,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      automatedMarketMaker: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 0,
@@ -205,8 +210,10 @@ describe('Helper - Limit order tests', function () {
       chainId,
       hardhatForkProvider,
     );
-    const npmAddress =
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const npmAddress = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.nonfungiblePositionManager;
     expect(tx).to.deep.equal({
       to: npmAddress,
       data: '0x883164560000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c599000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000bb8000000000000000000000000000000000000000000000000000000000003e508000000000000000000000000000000000000000000000000000000000003e54400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008ac7230489e7fe5900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008ac7230489e7fe590000000000000000000000004bd047ca72fa05f0b89ad08fe5ba5ccdc07dffbf00000000000000000000000000000000000000000000000000000000f3fd9d70',
@@ -257,6 +264,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -269,6 +277,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      automatedMarketMaker: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 1,
@@ -320,6 +329,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         nativeEthPositionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -332,6 +342,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      automatedMarketMaker: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 1,

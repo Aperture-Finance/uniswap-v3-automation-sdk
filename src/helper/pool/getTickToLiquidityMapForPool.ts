@@ -4,6 +4,7 @@ import { Pool, TickMath } from '@uniswap/v3-sdk';
 import axios from 'axios';
 import JSBI from 'jsbi';
 
+import { AutomatedMarketMakerEnum } from '../../interfaces/interfaces';
 import {
   LiquidityAmount,
   TickNumber,
@@ -27,12 +28,14 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
+  const chainInfo = getChainInfo(chainId);
+  const { factory } = chainInfo.amms[AutomatedMarketMakerEnum.Enum.UNISWAP_V3]!;
+  const { uniswap_subgraph_url } = chainInfo;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    uniswap_v3_factory,
+    factory,
     pool.token0,
     pool.token1,
     pool.fee,

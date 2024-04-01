@@ -1,11 +1,12 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   PermitInfo,
   UniV3Automan,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { BigNumberish, BytesLike } from 'ethers';
@@ -59,7 +60,8 @@ export async function simulateRebalance(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
       data,
       getNPMApprovalOverrides(chainId, owner),
       provider,

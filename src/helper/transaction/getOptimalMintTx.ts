@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   IUniV3Automan__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
@@ -95,7 +96,8 @@ export async function getOptimalMintTx(
   );
   return {
     tx: {
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
       data,
       value,
     },
