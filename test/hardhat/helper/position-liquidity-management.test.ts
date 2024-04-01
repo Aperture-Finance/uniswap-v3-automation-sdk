@@ -1,10 +1,10 @@
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
 import {
-  AutomatedMarketMakerEnum,
   IERC20__factory,
   WETH__factory,
   alignPriceToClosestUsableTick,

@@ -7,13 +7,13 @@ import {
   TickMath,
   tickToPrice,
 } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { ethers } from 'hardhat';
 import JSBI from 'jsbi';
 
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   PriceConditionSchema,
   Q192,

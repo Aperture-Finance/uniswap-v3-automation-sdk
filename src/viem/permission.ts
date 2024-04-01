@@ -1,9 +1,5 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  PermitInfo,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   CallExecutionError,
   Hex,

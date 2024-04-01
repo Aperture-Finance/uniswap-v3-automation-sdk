@@ -4,7 +4,6 @@ import {
 } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
   getAMMInfo,
@@ -19,6 +18,7 @@ import {
   tickToPrice,
 } from '@uniswap/v3-sdk';
 import { viem } from 'aperture-lens';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
 import {

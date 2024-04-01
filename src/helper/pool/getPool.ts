@@ -1,6 +1,5 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   IUniswapV3Pool__factory,
   getAMMInfo,
 } from '@/index';
@@ -8,6 +7,7 @@ import { Provider } from '@ethersproject/abstract-provider';
 import { BlockTag } from '@ethersproject/providers';
 import { Token } from '@uniswap/sdk-core';
 import { FeeAmount, Pool } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Signer } from 'ethers';
 
 import { getToken } from '../currency';

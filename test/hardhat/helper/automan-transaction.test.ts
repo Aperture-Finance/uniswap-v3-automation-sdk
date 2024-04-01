@@ -1,16 +1,16 @@
 import { providers } from '@0xsequence/multicall';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
-import hre, { ethers } from 'hardhat';
+import { ethers } from 'hardhat';
 import JSBI from 'jsbi';
 import { Address } from 'viem';
 
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   OptimalSwapRouter__factory,
   UniV3Automan,
@@ -98,10 +98,6 @@ describe('Helper - Automan transaction tests', function () {
       automanContract.address,
       true,
     );
-
-    // Tag contract addresses for tracing.
-    hre.tracer.nameTags[automanContract.address] = 'Automan';
-    hre.tracer.nameTags[router.address] = 'OptimalSwapRouter';
   });
 
   after(() => {

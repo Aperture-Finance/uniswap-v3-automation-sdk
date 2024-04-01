@@ -1,6 +1,5 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   PermitInfo,
   UniV3Automan__factory,
   getAMMInfo,
@@ -12,6 +11,7 @@ import {
   TICK_SPACINGS,
   nearestUsableTick,
 } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Address,
   GetContractReturnType,

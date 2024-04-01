@@ -1,17 +1,17 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   INonfungiblePositionManager__factory,
   getAMMInfo,
 } from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Log,
   TransactionReceipt,
   decodeEventLog,
   getAbiItem,
-  getEventSelector,
+  toEventSelector,
 } from 'viem';
 
 import { CollectableTokenAmounts } from './position';
@@ -26,7 +26,7 @@ export function filterLogsByEvent(
   receipt: TransactionReceipt,
   eventAbi: AbiEvent,
 ): Log[] {
-  const eventSig = getEventSelector(eventAbi);
+  const eventSig = toEventSelector(eventAbi);
   return receipt.logs.filter((log) => log.topics[0] === eventSig);
 }
 

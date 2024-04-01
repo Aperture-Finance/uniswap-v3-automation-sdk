@@ -1,12 +1,12 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   IUniV3Automan__factory,
   getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { optimalMint } from '../aggregator';

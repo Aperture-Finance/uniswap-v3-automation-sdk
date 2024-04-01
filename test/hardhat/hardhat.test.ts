@@ -10,6 +10,7 @@ import {
   nearestUsableTick,
   tickToPrice,
 } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -38,7 +39,6 @@ import { arbitrum, mainnet } from 'viem/chains';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   DOUBLE_TICK,
   IERC20__factory,

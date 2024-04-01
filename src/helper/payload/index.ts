@@ -1,13 +1,13 @@
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   CreateTriggerPayload,
   PriceCondition,
   getRawRelativePriceFromTokenValueProportion,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big, { BigSource } from 'big.js';
 import { BigNumberish } from 'ethers';
 

@@ -1,9 +1,5 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  IERC20__factory,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   AccessList,
   Address,

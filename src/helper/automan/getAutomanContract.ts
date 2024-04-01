@@ -1,10 +1,10 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   IUniV3Automan__factory,
   getAMMInfo,
 } from '@/index';
 import { Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Signer } from 'ethers';
 
 export function getAutomanContract(
