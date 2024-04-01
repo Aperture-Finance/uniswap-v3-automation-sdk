@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   IERC20__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import {
   AccessList,
@@ -70,14 +71,14 @@ export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
   owner: Address,
 ): StateOverrides {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   return {
-    [uniswap_v3_nonfungible_position_manager]: {
+    [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
     },
@@ -89,7 +90,8 @@ export function getControllerOverrides(
   from: Address,
 ) {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      .apertureAutoman]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -105,7 +107,8 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      .apertureAutoman]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [

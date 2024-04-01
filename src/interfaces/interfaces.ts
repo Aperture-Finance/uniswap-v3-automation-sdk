@@ -14,11 +14,8 @@ export enum ApertureSupportedChainId {
   POLYGON_MAINNET_CHAIN_ID = 137,
   AVALANCHE_MAINNET_CHAIN_ID = 43114,
   BNB_MAINNET_CHAIN_ID = 56,
-  CELO_MAINNET_CHAIN_ID = 42220,
 
   // Testnets.
-  GOERLI_TESTNET_CHAIN_ID = 5,
-  ARBITRUM_GOERLI_TESTNET_CHAIN_ID = 421613,
   MANTA_PACIFIC_TESTNET_CHAIN_ID = 3441005,
 }
 
@@ -49,6 +46,12 @@ const ApertureSupportedChainIdEnum = z
   .describe(
     'The chain id of the network; must be one of the chains supported by Aperture.',
   );
+
+export const AutomatedMarketMakerEnum = z.enum([
+  'UNISWAP_V3',
+  'PANCAKESWAP_V3',
+]);
+export type AutomatedMarketMakerEnum = z.infer<typeof AutomatedMarketMakerEnum>;
 
 export const ConditionTypeEnum = z.enum([
   'Time',
@@ -496,6 +499,11 @@ const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
     'The owner address of the position; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  automatedMarketMaker: AutomatedMarketMakerEnum.default(
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  ).describe(
+    'The automated market maker. If not specified, then this will be UNISWAP_V3.',
+  ),
 });
 
 export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({

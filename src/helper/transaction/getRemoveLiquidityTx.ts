@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
+} from '@/index';
 import {
   BlockTag,
   Provider,
@@ -79,7 +83,7 @@ export async function getRemoveLiquidityTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
     calldata,
     value,
   );

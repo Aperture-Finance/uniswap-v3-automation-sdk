@@ -1,4 +1,9 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  PermitInfo,
+  getAMMInfo,
+} from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { BigNumberish, TypedDataDomain, TypedDataField, ethers } from 'ethers';
 
@@ -25,7 +30,10 @@ export async function checkPositionApprovalStatus(
   chainId: ApertureSupportedChainId,
   provider: ethers.providers.Provider,
 ): Promise<PositionApprovalStatus> {
-  const chainInfo = getChainInfo(chainId);
+  const automan = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!.apertureAutoman;
   const npm = getNPM(chainId, provider);
   let owner, approved;
   try {
@@ -48,17 +56,14 @@ export async function checkPositionApprovalStatus(
       reason: 'unknownNPMQueryError',
     };
   }
-  if (approved == chainInfo.aperture_uniswap_v3_automan) {
+  if (approved == automan) {
     return {
       owner,
       hasAuthority: true,
       reason: 'onChainPositionSpecificApproval',
     };
   }
-  const automanIsOperator = await npm.isApprovedForAll(
-    owner,
-    chainInfo.aperture_uniswap_v3_automan,
-  );
+  const automanIsOperator = await npm.isApprovedForAll(owner, automan);
   if (automanIsOperator) {
     return {
       owner,
@@ -102,12 +107,15 @@ export async function checkPositionPermit(
   chainId: ApertureSupportedChainId,
   provider: ethers.providers.Provider,
 ) {
-  const chainInfo = getChainInfo(chainId);
+  const automan = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!.apertureAutoman;
   const npm = getNPM(chainId, provider);
   try {
     const permitSignature = ethers.utils.splitSignature(permitInfo.signature);
     await npm.callStatic.permit(
-      chainInfo.aperture_uniswap_v3_automan,
+      automan,
       positionId,
       permitInfo.deadline,
       permitSignature.v,
@@ -140,13 +148,16 @@ export async function generateTypedDataForPermit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>;
 }> {
-  const chainInfo = getChainInfo(chainId);
+  const ammInfo = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   return {
     domain: {
       name: 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
-      verifyingContract: chainInfo.uniswap_v3_nonfungible_position_manager,
+      verifyingContract: ammInfo.nonfungiblePositionManager,
     },
     types: {
       Permit: [
@@ -157,7 +168,7 @@ export async function generateTypedDataForPermit(
       ],
     },
     value: {
-      spender: chainInfo.aperture_uniswap_v3_automan,
+      spender: ammInfo.apertureAutoman,
       tokenId: positionId,
       nonce: (await getNPM(chainId, provider).positions(positionId)).nonce,
       deadline: deadlineEpochSeconds,

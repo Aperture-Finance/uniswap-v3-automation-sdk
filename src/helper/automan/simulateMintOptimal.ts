@@ -1,9 +1,10 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   UniV3Automan,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
@@ -44,10 +45,13 @@ export async function simulateMintOptimal(
     'mintOptimal',
     [mintParams, swapData],
   );
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const tx = {
     from,
-    to: aperture_uniswap_v3_automan,
+    to: apertureAutoman,
     data,
   };
   let returnData: string;
@@ -58,14 +62,14 @@ export async function simulateMintOptimal(
         getERC20Overrides(
           mintParams.token0,
           from,
-          aperture_uniswap_v3_automan,
+          apertureAutoman,
           mintParams.amount0Desired,
           provider,
         ),
         getERC20Overrides(
           mintParams.token1,
           from,
-          aperture_uniswap_v3_automan,
+          apertureAutoman,
           mintParams.amount1Desired,
           provider,
         ),

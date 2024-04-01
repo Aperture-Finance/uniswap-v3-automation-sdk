@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
+} from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { BigintIsh } from '@uniswap/sdk-core';
 import {
@@ -47,7 +51,7 @@ export async function getAddLiquidityTx(
     increaseLiquidityOptions,
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
     calldata,
     value,
   );

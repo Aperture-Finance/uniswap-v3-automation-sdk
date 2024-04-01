@@ -13,11 +13,12 @@ import JSBI from 'jsbi';
 
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   PriceConditionSchema,
   Q192,
   fractionToBig,
-  getChainInfo,
+  getAMMInfo,
   getRawRelativePriceFromTokenValueProportion,
   getTokenValueProportionFromPriceRatio,
 } from '../../../src';
@@ -61,8 +62,10 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Position approval', async function () {
-    const chainInfo = getChainInfo(chainId);
-    const automanAddress = chainInfo.aperture_uniswap_v3_automan;
+    const automanAddress = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.apertureAutoman;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(
@@ -432,9 +435,9 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const provider = getPublicProvider(5);
-    // an address with 90+ positions
-    const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
+    const provider = getPublicProvider(chainId);
+    // An address with 24 positions on mainnet.
+    const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
     const positions = await getAllPositionsDetails(address, chainId, provider);
     const basicPositions = await getAllPositionBasicInfoByOwner(
       address,
@@ -456,15 +459,18 @@ describe('Helper - Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 761879;
     const blockTag = 119626480;
     const npm = getNPM(chainId, provider);
     const opts = { blockTag };
     const owner = await npm.ownerOf(positionId, opts);
-    expect(await npm.isApprovedForAll(owner, aperture_uniswap_v3_automan, opts))
-      .to.be.false;
+    expect(await npm.isApprovedForAll(owner, apertureAutoman, opts)).to.be
+      .false;
     const { liquidity } = await getReinvestedPosition(
       chainId,
       positionId,
@@ -476,9 +482,7 @@ describe('Helper - Position util tests', function () {
       blockTag,
     );
     const signer = await ethers.getImpersonatedSigner(owner);
-    await npm
-      .connect(signer)
-      .setApprovalForAll(aperture_uniswap_v3_automan, true);
+    await npm.connect(signer).setApprovalForAll(apertureAutoman, true);
     const { liquidity: liquidityBefore } = await getPosition(
       chainId,
       positionId,
@@ -490,7 +494,7 @@ describe('Helper - Position util tests', function () {
     );
     await signer.sendTransaction({
       from: owner,
-      to: aperture_uniswap_v3_automan,
+      to: apertureAutoman,
       data,
     });
     const { liquidity: liquidityAfter } = await getPosition(

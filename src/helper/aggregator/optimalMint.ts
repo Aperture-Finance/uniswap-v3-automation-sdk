@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
@@ -54,8 +55,10 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { aperture_uniswap_v3_automan, optimal_swap_router } =
-    getChainInfo(chainId);
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -63,14 +66,14 @@ export async function optimalMint(
       getERC20Overrides(
         mintParams.token0,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         mintParams.amount0Desired,
         provider,
       ),
       getERC20Overrides(
         mintParams.token1,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         mintParams.amount1Desired,
         provider,
       ),
@@ -88,7 +91,7 @@ export async function optimalMint(
     overrides,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (optimalSwapRouter === undefined) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([

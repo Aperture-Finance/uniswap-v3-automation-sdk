@@ -1,6 +1,7 @@
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   CreateTriggerPayload,
   PriceCondition,
@@ -12,6 +13,7 @@ import Big, { BigSource } from 'big.js';
 export function generateLimitOrderCloseRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
+  automatedMarketMaker: AutomatedMarketMakerEnum,
   positionId: string,
   outerLimitPrice: Price<Token, Token>,
   maxGasProportion: number,
@@ -22,6 +24,7 @@ export function generateLimitOrderCloseRequestPayload(
   return {
     ownerAddr,
     chainId,
+    automatedMarketMaker,
     expiration,
     nftId: positionId,
     condition: {
@@ -43,6 +46,7 @@ export function generateLimitOrderCloseRequestPayload(
 export function generateAutoCompoundRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
+  automatedMarketMaker: AutomatedMarketMakerEnum,
   positionId: string,
   feeToPrincipalRatioThreshold: number,
   slippage: number,
@@ -52,6 +56,7 @@ export function generateAutoCompoundRequestPayload(
   return {
     ownerAddr,
     chainId,
+    automatedMarketMaker,
     expiration,
     nftId: positionId,
     condition: {

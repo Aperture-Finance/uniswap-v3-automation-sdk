@@ -4,8 +4,10 @@ import {
 } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
+  getAMMInfo,
   getChainInfo,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
@@ -101,7 +103,7 @@ export function getPoolContract(
 > {
   return getContract({
     address: computePoolAddress(
-      getChainInfo(chainId).uniswap_v3_factory,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
       tokenA,
       tokenB,
       fee,
@@ -332,12 +334,13 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
+  const chainInfo = getChainInfo(chainId);
+  const { uniswap_subgraph_url } = chainInfo;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    uniswap_v3_factory,
+    chainInfo.amms[AutomatedMarketMakerEnum.enum.UNISWAP_V3]!.factory,
     pool.token0,
     pool.token1,
     pool.fee,
@@ -456,7 +459,7 @@ async function getPopulatedTicksInRange(
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
     computePoolAddress(
-      getChainInfo(chainId).uniswap_v3_factory,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
       pool.token0,
       pool.token1,
       pool.fee,

@@ -38,6 +38,7 @@ import { arbitrum, mainnet } from 'viem/chains';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   DOUBLE_TICK,
   IERC20__factory,
@@ -56,7 +57,7 @@ import {
   alignPriceToClosestUsableTick,
   convertRecurringCondition,
   fractionToBig,
-  getChainInfo,
+  getAMMInfo,
   getRawRelativePriceFromTokenValueProportion,
   getTokenHistoricalPricesFromCoingecko,
   getTokenPriceFromCoingecko,
@@ -255,7 +256,8 @@ describe('State overrides tests', function () {
       account: WHALE_ADDRESS,
       chain: mainnet,
       args: [
-        getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+        getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+          .nonfungiblePositionManager,
         /*owner=*/ WHALE_ADDRESS,
       ],
       bytecode: UniV3Automan__factory.bytecode,
@@ -268,7 +270,10 @@ describe('State overrides tests', function () {
         }),
       ),
     });
-    const npm = getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const npm = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.nonfungiblePositionManager;
     const slot = computeOperatorApprovalSlot(eoa, automanAddress);
     expect(slot).to.equal(
       '0xaf12655eb680e77b7549c03375fd65c7a46c2854e913a071f6412c5b3d693f31',
@@ -313,19 +318,22 @@ describe('State overrides tests', function () {
     const publicClient = getInfuraClient();
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const stateOverrides = {
       ...(await getERC20Overrides(
         WETH_ADDRESS,
         eoa,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         amount0Desired,
         publicClient,
       )),
       ...(await getERC20Overrides(
         WBTC_ADDRESS,
         eoa,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         amount1Desired,
         publicClient,
       )),
@@ -565,7 +573,10 @@ describe('Position util tests', function () {
   });
 
   it('Position approval', async function () {
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     // This position is owned by `eoa`.
     const positionId = 4n;
     expect(
@@ -584,7 +595,7 @@ describe('Position util tests', function () {
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const npm = getNPM(chainId, undefined, walletClient);
-    await npm.write.setApprovalForAll([aperture_uniswap_v3_automan, true], {
+    await npm.write.setApprovalForAll([apertureAutoman, true], {
       account: eoa,
       chain: walletClient.chain,
     });
@@ -601,7 +612,7 @@ describe('Position util tests', function () {
       reason: 'onChainUserLevelApproval',
     });
 
-    await npm.write.approve([aperture_uniswap_v3_automan, positionId], {
+    await npm.write.approve([apertureAutoman, positionId], {
       account: eoa,
       chain: walletClient.chain,
     });
@@ -969,7 +980,10 @@ describe('Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const positionId = 761879n;
@@ -979,12 +993,8 @@ describe('Position util tests', function () {
       blockNumber,
     };
     const owner = await npm.read.ownerOf([positionId], opts);
-    expect(
-      await npm.read.isApprovedForAll(
-        [owner, aperture_uniswap_v3_automan],
-        opts,
-      ),
-    ).to.be.false;
+    expect(await npm.read.isApprovedForAll([owner, apertureAutoman], opts)).to
+      .be.false;
     const [liquidity] = await getReinvestedPosition(
       chainId,
       positionId,
@@ -998,7 +1008,7 @@ describe('Position util tests', function () {
     await testClient.impersonateAccount({ address: owner });
     const walletClient = testClient.extend(walletActions);
     await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
-      [aperture_uniswap_v3_automan, true],
+      [apertureAutoman, true],
       {
         account: owner,
         chain: walletClient.chain,
@@ -1018,7 +1028,7 @@ describe('Position util tests', function () {
       await walletClient.sendTransaction({
         account: owner,
         chain: walletClient.chain,
-        to: aperture_uniswap_v3_automan,
+        to: apertureAutoman,
         data,
       });
       const { liquidity: liquidityAfter } = await getPosition(
@@ -1569,7 +1579,8 @@ describe('Automan transaction tests', function () {
       BigInt(hypotheticalPosition.amount0.quotient.toString()),
       BigInt(hypotheticalPosition.amount1.quotient.toString()),
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
     const { swapRoute } = await getOptimalMintSwapInfo(
       chainId,
@@ -1620,7 +1631,8 @@ describe('Automan transaction tests', function () {
       BigInt(hypotheticalPosition.amount0.quotient.toString()),
       BigInt(hypotheticalPosition.amount1.quotient.toString()),
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
 
     const { swapRoute } = await getIncreaseLiquidityOptimalSwapInfo(

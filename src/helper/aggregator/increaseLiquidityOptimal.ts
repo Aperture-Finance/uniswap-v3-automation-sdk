@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
@@ -51,8 +52,10 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { aperture_uniswap_v3_automan, optimal_swap_router } =
-    getChainInfo(chainId);
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -60,14 +63,14 @@ export async function increaseLiquidityOptimal(
       getERC20Overrides(
         token0Amount.currency.address,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         increaseParams.amount0Desired,
         provider,
       ),
       getERC20Overrides(
         token1Amount.currency.address,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         increaseParams.amount1Desired,
         provider,
       ),
@@ -86,7 +89,7 @@ export async function increaseLiquidityOptimal(
     overrides,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (optimalSwapRouter === undefined) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
@@ -207,13 +210,16 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
+    const { optimalSwapRouter, factory } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        uniswap_v3_factory,
+        factory,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,
@@ -230,7 +236,7 @@ async function getIncreaseLiquidityOptimalSwapData(
       zeroForOne ? position.pool.token0.address : position.pool.token1.address,
       zeroForOne ? position.pool.token1.address : position.pool.token0.address,
       poolAmountIn.toString(),
-      optimal_swap_router!,
+      optimalSwapRouter!,
       Number(slippage.toFixed()),
       includeRoute,
     );

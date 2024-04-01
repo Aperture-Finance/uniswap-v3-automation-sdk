@@ -10,11 +10,12 @@ import { Address } from 'viem';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   OptimalSwapRouter__factory,
   UniV3Automan,
   UniV3Automan__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '../../../src';
 import {
   generateAutoCompoundRequestPayload,
@@ -45,7 +46,10 @@ describe('Helper - Automan transaction tests', function () {
   const positionId = 4;
   let automanContract: UniV3Automan;
   let impersonatedOwnerSigner: Signer;
-  const automanAddress = getChainInfo(chainId).aperture_uniswap_v3_automan;
+  const automanAddress = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!.apertureAutoman;
 
   beforeEach(async function () {
     await resetHardhatNetwork();
@@ -58,7 +62,8 @@ describe('Helper - Automan transaction tests', function () {
     automanContract = await new UniV3Automan__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
     await automanContract.deployed();
@@ -70,14 +75,22 @@ describe('Helper - Automan transaction tests', function () {
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new OptimalSwapRouter__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
-    ).deploy(getChainInfo(chainId).uniswap_v3_nonfungible_position_manager);
+    ).deploy(
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
+    );
     await router.deployed();
     await automanContract.setSwapRouters([router.address], [true]);
 
     // Set Automan address in CHAIN_ID_TO_INFO.
-    getChainInfo(chainId).aperture_uniswap_v3_automan =
-      automanContract.address as `0x${string}`;
-    getChainInfo(chainId).optimal_swap_router = router.address as `0x${string}`;
+    getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.apertureAutoman = automanContract.address as `0x${string}`;
+    getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.optimalSwapRouter = router.address as `0x${string}`;
 
     // Owner of position id 4 sets Automan as operator.
     impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
@@ -93,7 +106,10 @@ describe('Helper - Automan transaction tests', function () {
 
   after(() => {
     // Reset Automan address in CHAIN_ID_TO_INFO.
-    getChainInfo(chainId).aperture_uniswap_v3_automan = automanAddress;
+    getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.apertureAutoman = automanAddress;
   });
 
   it('Rebalance', async function () {
@@ -176,7 +192,8 @@ describe('Helper - Automan transaction tests', function () {
       existingPosition.amount0.multiply(2).quotient.toString(),
       existingPosition.amount1.multiply(2).quotient.toString(),
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
     const { tx: txRequest } = await getRebalanceTx(
       chainId,
@@ -237,7 +254,8 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
       chainId,
@@ -300,7 +318,8 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
       chainId,
@@ -356,7 +375,8 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
 
     const { tx } = await getIncreaseLiquidityOptimalTx(
@@ -408,7 +428,8 @@ describe('Helper - Automan transaction tests', function () {
       amount0,
       amount1,
       eoa,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
     );
     const { tx } = await getIncreaseLiquidityOptimalTx(
       {
@@ -478,6 +499,7 @@ describe('Helper - Automan transaction tests', function () {
       generateAutoCompoundRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId,
         /*feeToPrincipalRatioThreshold=*/ 0.1,
         /*slippage=*/ 0.05,
@@ -491,6 +513,7 @@ describe('Helper - Automan transaction tests', function () {
         type: ActionTypeEnum.enum.Reinvest,
       },
       chainId: 1,
+      automatedMarketMaker: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         feeToPrincipalRatioThreshold: 0.1,
         type: ConditionTypeEnum.enum.AccruedFees,
