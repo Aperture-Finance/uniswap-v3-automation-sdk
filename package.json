@@ -40,7 +40,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@0xsequence/multicall": "^1.9.11",
+    "@0xsequence/multicall": "^1.9.13",
     "@uniswap/permit2-sdk": "^1.2.0",
     "@uniswap/smart-order-router": "^3.26.1",
     "@uniswap/v3-sdk": "^3.11.0",
@@ -52,7 +52,7 @@
     "jsbi": "^3.2.0",
     "json-stable-stringify": "^1.1.1",
     "lodash": "^4.17.21",
-    "viem": "^2.9.0",
+    "viem": "^2.7.9",
     "zod": "^3.22.4"
   },
   "devDependencies": {
