@@ -10,10 +10,10 @@ import {
 import { Price, Token } from '@uniswap/sdk-core';
 import Big, { BigSource } from 'big.js';
 
-export function generateLimitOrderCloseRequestPayloadAMM(
+export function generateLimitOrderCloseRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
-  automatedMarketMaker: string,
+  automatedMarketMaker: AutomatedMarketMakerEnum,
   positionId: string,
   outerLimitPrice: Price<Token, Token>,
   maxGasProportion: number,
@@ -24,10 +24,7 @@ export function generateLimitOrderCloseRequestPayloadAMM(
   return {
     ownerAddr,
     chainId,
-    automatedMarketMaker:
-      AutomatedMarketMakerEnum.enum[
-        automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum
-      ] || AutomatedMarketMakerEnum.enum.UNISWAP,
+    automatedMarketMaker,
     expiration,
     nftId: positionId,
     condition: {
@@ -46,29 +43,10 @@ export function generateLimitOrderCloseRequestPayloadAMM(
   };
 }
 
-export function generateLimitOrderCloseRequestPayload(
+export function generateAutoCompoundRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
-  positionId: string,
-  outerLimitPrice: Price<Token, Token>,
-  maxGasProportion: number,
-  expiration: number,
-): CreateTriggerPayload {
-  return generateLimitOrderCloseRequestPayloadAMM(
-    ownerAddr,
-    chainId,
-    'UNISWAP',
-    positionId,
-    outerLimitPrice,
-    maxGasProportion,
-    expiration,
-  );
-}
-
-export function generateAutoCompoundRequestPayloadAMM(
-  ownerAddr: string,
-  chainId: ApertureSupportedChainId,
-  automatedMarketMaker: string,
+  automatedMarketMaker: AutomatedMarketMakerEnum,
   positionId: string,
   feeToPrincipalRatioThreshold: number,
   slippage: number,
@@ -78,10 +56,7 @@ export function generateAutoCompoundRequestPayloadAMM(
   return {
     ownerAddr,
     chainId,
-    automatedMarketMaker:
-      AutomatedMarketMakerEnum.enum[
-        automatedMarketMaker as keyof typeof AutomatedMarketMakerEnum.enum
-      ] || AutomatedMarketMakerEnum.enum.UNISWAP,
+    automatedMarketMaker,
     expiration,
     nftId: positionId,
     condition: {
@@ -94,27 +69,6 @@ export function generateAutoCompoundRequestPayloadAMM(
       maxGasProportion,
     },
   };
-}
-
-export function generateAutoCompoundRequestPayload(
-  ownerAddr: string,
-  chainId: ApertureSupportedChainId,
-  positionId: string,
-  feeToPrincipalRatioThreshold: number,
-  slippage: number,
-  maxGasProportion: number,
-  expiration: number,
-): CreateTriggerPayload {
-  return generateAutoCompoundRequestPayloadAMM(
-    ownerAddr,
-    chainId,
-    'UNISWAP',
-    positionId,
-    feeToPrincipalRatioThreshold,
-    slippage,
-    maxGasProportion,
-    expiration,
-  );
 }
 
 /**

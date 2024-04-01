@@ -1,9 +1,10 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   PermitInfo,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import {
   JsonRpcProvider,
@@ -107,7 +108,10 @@ export async function getRebalanceTx(
     recipient: ADDRESS_ZERO, // Param value ignored by Automan.
     deadline: deadlineEpochSeconds,
   };
-  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const { functionFragment, data } = getAutomanRebalanceCallInfo(
     mintParams,
     existingPositionId,

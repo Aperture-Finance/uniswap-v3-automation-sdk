@@ -1,11 +1,12 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   PermitInfo,
   UniV3Automan,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
@@ -57,7 +58,8 @@ export async function simulateRemoveLiquidity(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
       data,
       getNPMApprovalOverrides(chainId, owner),
       provider,

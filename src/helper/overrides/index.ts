@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   IERC20__factory,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import {
   JsonRpcProvider,
@@ -143,8 +144,10 @@ export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
   owner: string,
 ): StateOverrides {
-  const { apertureAutoman, nonfungiblePositionManager } =
-    getChainInfoAMM(chainId).UNISWAP;
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   return {
     [nonfungiblePositionManager]: {
       stateDiff: {
@@ -162,7 +165,8 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: string,
 ): StateOverrides {
   return {
-    [getChainInfoAMM(chainId).UNISWAP.apertureAutoman]: {
+    [getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      .apertureAutoman]: {
       stateDiff: {
         [keccak256(
           DAC.encode(

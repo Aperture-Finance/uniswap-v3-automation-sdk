@@ -1,8 +1,10 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   PermitInfo,
   UniV3Automan__factory,
-  getChainInfoAMM,
+  getAMMInfo,
+  getChainInfo,
 } from '@/index';
 import {
   FeeAmount,
@@ -52,7 +54,8 @@ export function getAutomanContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
+    address: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      .apertureAutoman,
     abi: UniV3Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -70,7 +73,7 @@ export function encodeSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getChainInfoAMM(chainId).aperture_router_proxy!,
+      getChainInfo(chainId).aperture_router_proxy!,
       encodePacked(
         ['address', 'address', 'address', 'address', 'uint256', 'bytes'],
         [router, approveTarget, tokenIn, tokenOut, amountIn, data],
@@ -94,7 +97,8 @@ export function encodeOptimalSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getChainInfoAMM(chainId).UNISWAP.optimalSwapRouter!,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .optimalSwapRouter!,
       encodePacked(
         // prettier-ignore
         ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],
@@ -304,7 +308,10 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const tx = {
     from,
     to: apertureAutoman,
@@ -379,7 +386,10 @@ export async function simulateIncreaseLiquidityOptimal(
     increaseParams,
     swapData,
   );
-  const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
+  const { apertureAutoman } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const tx = {
     from,
     to: apertureAutoman,
@@ -466,7 +476,8 @@ export async function simulateRemoveLiquidity(
       'eth_call',
       {
         from,
-        to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
+        to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+          .apertureAutoman,
         data,
       },
       publicClient,
@@ -506,7 +517,8 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
+      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
       data,
     },
     publicClient,
@@ -616,7 +628,8 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getChainInfoAMM(chainId).UNISWAP.apertureAutoman,
+      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .apertureAutoman,
       data,
     },
     publicClient,

@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { providers } from 'ethers';
 import { PublicClient, createPublicClient, http } from 'viem';
 import type { Transport } from 'viem';
@@ -15,8 +15,8 @@ export function getPublicClient(
     batch: {
       multicall: true,
     },
-    chain: getChainInfoAMM(chainId).chain,
-    transport: http(getChainInfoAMM(chainId).rpc_url),
+    chain: getChainInfo(chainId).chain,
+    transport: http(getChainInfo(chainId).rpc_url),
   });
 }
 

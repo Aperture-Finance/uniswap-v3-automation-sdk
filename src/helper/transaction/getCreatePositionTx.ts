@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
+} from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import {
   MintOptions,
@@ -43,7 +47,7 @@ export async function getCreatePositionTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfoAMM(chainId).UNISWAP,
+    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
     calldata,
     value,
   );

@@ -1,4 +1,9 @@
-import { AmmInfo, IUniV3Automan__factory, getChainInfoAMM } from '@/index';
+import {
+  AmmInfo,
+  AutomatedMarketMakerEnum,
+  IUniV3Automan__factory,
+  getAMMInfo,
+} from '@/index';
 import { ApertureSupportedChainId } from '@/index';
 import { INonfungiblePositionManager__factory } from '@/index';
 import { EventFragment } from '@ethersproject/abi';
@@ -139,7 +144,10 @@ export function getSetApprovalForAllTx(
   chainId: ApertureSupportedChainId,
   approved: boolean,
 ): TransactionRequest {
-  const ammInfo = getChainInfoAMM(chainId).UNISWAP;
+  const ammInfo = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   return getTxToNonfungiblePositionManager(
     ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(

@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   ChainSpecificRoutingAPIInfo,
-  getChainInfoAMM,
+  getChainInfo,
 } from '@/index';
 import axios from 'axios';
 import { BigNumber, BigNumberish } from 'ethers';
@@ -64,7 +64,7 @@ export async function fetchQuoteFromRoutingApi(
 ): Promise<RoutingApiQuoteResponse> {
   return fetchQuoteFromSpecifiedRoutingApiInfo(
     chainId,
-    getChainInfoAMM(chainId).routingApiInfo,
+    getChainInfo(chainId).routingApiInfo,
     tokenInAddress,
     tokenOutAddress,
     rawAmount,
@@ -88,7 +88,7 @@ export async function fetchQuoteToNativeCurrency(
     await fetchQuoteFromRoutingApi(
       chainId,
       tokenAddress,
-      getChainInfoAMM(chainId).wrappedNativeCurrency.address,
+      getChainInfo(chainId).wrappedNativeCurrency.address,
       nativeCurrencyExactOutRawAmount,
       'exactOut',
     )

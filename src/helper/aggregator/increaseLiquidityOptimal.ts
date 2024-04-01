@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
@@ -51,8 +52,10 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { apertureAutoman, optimalSwapRouter } =
-    getChainInfoAMM(chainId).UNISWAP;
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -207,14 +210,16 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimalSwapRouter, factoryOrPoolDeployer } =
-      getChainInfoAMM(chainId).UNISWAP;
+    const { optimalSwapRouter, factory } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        factoryOrPoolDeployer,
+        factory,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,

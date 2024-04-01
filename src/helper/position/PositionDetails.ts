@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
+} from '@/index';
 import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Pool, Position, PositionLibrary } from '@uniswap/v3-sdk';
@@ -80,7 +84,8 @@ export class PositionDetails implements BasicPositionInfo {
   ): Promise<PositionDetails> {
     const returnData = await provider.call(
       new EphemeralGetPosition__factory().getDeployTransaction(
-        getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
+        getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+          .nonfungiblePositionManager,
         positionId,
       ),
       blockTag,

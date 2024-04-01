@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
@@ -54,8 +55,10 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { apertureAutoman, optimalSwapRouter } =
-    getChainInfoAMM(chainId).UNISWAP;
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances

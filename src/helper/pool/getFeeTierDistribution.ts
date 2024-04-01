@@ -1,5 +1,5 @@
 import { FeeTierDistributionQuery } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import axios from 'axios';
 
@@ -16,7 +16,7 @@ export async function getFeeTierDistribution(
   tokenA: string,
   tokenB: string,
 ): Promise<Record<FeeAmount, number>> {
-  const { uniswap_subgraph_url } = getChainInfoAMM(chainId);
+  const { uniswap_subgraph_url } = getChainInfo(chainId);
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }

@@ -13,11 +13,12 @@ import JSBI from 'jsbi';
 
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   ConditionTypeEnum,
   PriceConditionSchema,
   Q192,
   fractionToBig,
-  getChainInfoAMM,
+  getAMMInfo,
   getRawRelativePriceFromTokenValueProportion,
   getTokenValueProportionFromPriceRatio,
 } from '../../../src';
@@ -61,7 +62,10 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Position approval', async function () {
-    const automanAddress = getChainInfoAMM(chainId).UNISWAP.apertureAutoman;
+    const automanAddress = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.apertureAutoman;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(
@@ -431,9 +435,9 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const provider = getPublicProvider(5);
-    // an address with 90+ positions
-    const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
+    const provider = getPublicProvider(chainId);
+    // An address with 24 positions on mainnet.
+    const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
     const positions = await getAllPositionsDetails(address, chainId, provider);
     const basicPositions = await getAllPositionBasicInfoByOwner(
       address,
@@ -455,7 +459,10 @@ describe('Helper - Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
+    const { apertureAutoman } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 761879;
     const blockTag = 119626480;

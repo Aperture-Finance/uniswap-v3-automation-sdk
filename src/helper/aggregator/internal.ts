@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { FeeAmount } from '@uniswap/v3-sdk';
@@ -52,14 +53,16 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimalSwapRouter, factoryOrPoolDeployer } =
-      getChainInfoAMM(chainId).UNISWAP;
+    const { optimalSwapRouter, factory } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        factoryOrPoolDeployer,
+        factory,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,

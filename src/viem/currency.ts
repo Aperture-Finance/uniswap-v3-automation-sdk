@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   ERC20__factory,
-  getChainInfoAMM,
+  getChainInfo,
 } from '@/index';
 import {
   Currency,
@@ -63,7 +63,7 @@ class MaticNativeCurrency extends NativeCurrency {
   }
 
   get wrapped(): Token {
-    return getChainInfoAMM(ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID)
+    return getChainInfo(ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID)
       .wrappedNativeCurrency;
   }
 
@@ -83,7 +83,7 @@ class BscNativeCurrency extends NativeCurrency {
   }
 
   get wrapped(): Token {
-    return getChainInfoAMM(ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID)
+    return getChainInfo(ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID)
       .wrappedNativeCurrency;
   }
 
@@ -98,7 +98,7 @@ class AvaxNativeCurrency extends NativeCurrency {
   }
 
   get wrapped(): Token {
-    return getChainInfoAMM(ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID)
+    return getChainInfo(ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID)
       .wrappedNativeCurrency;
   }
 
@@ -114,7 +114,7 @@ class AvaxNativeCurrency extends NativeCurrency {
 
 class ExtendedEther extends Ether {
   public get wrapped(): Token {
-    return getChainInfoAMM(this.chainId).wrappedNativeCurrency;
+    return getChainInfo(this.chainId).wrappedNativeCurrency;
   }
 
   private static _cachedExtendedEther: { [chainId: number]: NativeCurrency } =
@@ -139,8 +139,6 @@ export function nativeOnChain(
   let nativeCurrency: NativeCurrency | Token;
   if (chainId === ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID) {
     nativeCurrency = new MaticNativeCurrency();
-  } else if (chainId === ApertureSupportedChainId.CELO_MAINNET_CHAIN_ID) {
-    nativeCurrency = getChainInfoAMM(chainId).wrappedNativeCurrency;
   } else if (chainId === ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID) {
     nativeCurrency = new BscNativeCurrency();
   } else if (chainId === ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID) {

@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
+} from '@/index';
 import { Provider } from '@ethersproject/providers';
 import { EphemeralAllPositionsByOwner__factory } from 'aperture-lens';
 import { PositionStateStructOutput } from 'aperture-lens/dist/typechain/contracts/EphemeralGetPosition';
@@ -21,7 +25,8 @@ export async function getAllPositionsDetails(
 ): Promise<Map<string, PositionDetails>> {
   const returnData = await provider.call(
     new EphemeralAllPositionsByOwner__factory().getDeployTransaction(
-      getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
       owner,
     ),
   );

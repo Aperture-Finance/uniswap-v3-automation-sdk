@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import {
+  ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
+  getAMMInfo,
+} from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -34,7 +38,10 @@ export async function optimalRebalance(
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
-  const { optimalSwapRouter } = getChainInfoAMM(chainId).UNISWAP;
+  const { optimalSwapRouter } = getAMMInfo(
+    chainId,
+    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+  )!;
   const position = await PositionDetails.fromPositionId(
     chainId,
     positionId,
@@ -219,15 +226,17 @@ async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimalSwapRouter, factoryOrPoolDeployer } =
-      getChainInfoAMM(chainId).UNISWAP;
+    const { optimalSwapRouter, factory } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const automan = getAutomanContract(chainId, publicClient);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [
         computePoolAddress(
-          factoryOrPoolDeployer,
+          factory,
           mintParams.token0,
           mintParams.token1,
           mintParams.fee as FeeAmount,

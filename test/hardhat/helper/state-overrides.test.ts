@@ -5,9 +5,10 @@ import { ethers } from 'hardhat';
 import { zeroAddress } from 'viem';
 
 import {
+  AutomatedMarketMakerEnum,
   IERC20__factory,
   UniV3Automan__factory,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '../../../src';
 import {
   PositionDetails,
@@ -39,11 +40,15 @@ describe('Helper - State overrides tests', function () {
     const automanContract = await new UniV3Automan__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
-      getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        .nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
     await automanContract.deployed();
-    const npm = getChainInfoAMM(chainId).UNISWAP.nonfungiblePositionManager;
+    const npm = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!.nonfungiblePositionManager;
     const slot = computeOperatorApprovalSlot(eoa, automanContract.address);
     expect(slot).to.equal(
       '0x0e19f2cddd2e7388039c7ef081490ef6bd2600540ca6caf0f478dc7dfebe509b',
@@ -83,7 +88,10 @@ describe('Helper - State overrides tests', function () {
     const provider = new ethers.providers.InfuraProvider(chainId);
     const amount0Desired = '1000000000000000000';
     const amount1Desired = '100000000';
-    const { apertureAutoman } = getChainInfoAMM(chainId).UNISWAP;
+    const { apertureAutoman } = getAMMInfo(
+      chainId,
+      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    )!;
     const stateOverrides = {
       ...(await getERC20Overrides(
         WETH_ADDRESS,

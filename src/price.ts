@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from 'axios';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 
-import { getChainInfoAMM } from './chain';
+import { getChainInfo } from './chain';
 import { ApertureSupportedChainId } from './interfaces';
 
 // Let Big use 30 decimal places of precision since 2^96 < 10^29.
@@ -77,7 +77,7 @@ export async function getTokenPriceFromCoingecko(
   vsCurrencies?: string,
   apiKey?: string,
 ): Promise<number> {
-  const { coingecko_asset_platform_id } = getChainInfoAMM(token.chainId);
+  const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
   if (coingecko_asset_platform_id === undefined) return 0;
   vsCurrencies = vsCurrencies ?? 'usd';
   let priceResponse: AxiosResponse;
@@ -145,7 +145,7 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
   vsCurrencies?: string,
   apiKey?: string,
 ): Promise<{ [address: string]: number }> {
-  const { coingecko_asset_platform_id } = getChainInfoAMM(chainId);
+  const { coingecko_asset_platform_id } = getChainInfo(chainId);
   if (coingecko_asset_platform_id === undefined) return {};
   vsCurrencies = vsCurrencies ?? 'usd';
   let priceResponse: AxiosResponse;
@@ -184,7 +184,7 @@ export async function getTokenHistoricalPricesFromCoingecko(
   vsCurrency?: string,
   apiKey?: string,
 ): Promise<CoingeckoHistoricalPriceDatapoint[]> {
-  const { coingecko_asset_platform_id } = getChainInfoAMM(token.chainId);
+  const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
   if (coingecko_asset_platform_id === undefined) return [];
   vsCurrency = vsCurrency ?? 'usd';
   let priceResponse: AxiosResponse;

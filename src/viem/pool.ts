@@ -4,9 +4,11 @@ import {
 } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
-  getChainInfoAMM,
+  getAMMInfo,
+  getChainInfo,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
 import {
@@ -101,7 +103,7 @@ export function getPoolContract(
 > {
   return getContract({
     address: computePoolAddress(
-      getChainInfoAMM(chainId).UNISWAP.factoryOrPoolDeployer,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
       tokenA,
       tokenB,
       fee,
@@ -195,7 +197,7 @@ export async function getFeeTierDistribution(
   tokenA: Address,
   tokenB: Address,
 ): Promise<Record<FeeAmount, number>> {
-  const { uniswap_subgraph_url } = getChainInfoAMM(chainId);
+  const { uniswap_subgraph_url } = getChainInfo(chainId);
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
@@ -332,14 +334,13 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const chainInfoAMM = getChainInfoAMM(chainId);
-  const { factoryOrPoolDeployer } = chainInfoAMM.UNISWAP;
-  const { uniswap_subgraph_url } = chainInfoAMM;
+  const chainInfo = getChainInfo(chainId);
+  const { uniswap_subgraph_url } = chainInfo;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    factoryOrPoolDeployer,
+    chainInfo.amms[AutomatedMarketMakerEnum.enum.UNISWAP_V3]!.factory,
     pool.token0,
     pool.token1,
     pool.fee,
@@ -458,7 +459,7 @@ async function getPopulatedTicksInRange(
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
     computePoolAddress(
-      getChainInfoAMM(chainId).UNISWAP.factoryOrPoolDeployer,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
       pool.token0,
       pool.token1,
       pool.fee,

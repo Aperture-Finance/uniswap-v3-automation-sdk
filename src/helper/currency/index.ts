@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
   ERC20__factory,
-  getChainInfoAMM,
+  getChainInfo,
 } from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { parseFixed } from '@ethersproject/bignumber';
@@ -62,7 +62,7 @@ class MaticNativeCurrency extends NativeCurrency {
   }
 
   get wrapped(): Token {
-    return getChainInfoAMM(ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID)
+    return getChainInfo(ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID)
       .wrappedNativeCurrency;
   }
 
@@ -82,7 +82,7 @@ class BscNativeCurrency extends NativeCurrency {
   }
 
   get wrapped(): Token {
-    return getChainInfoAMM(ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID)
+    return getChainInfo(ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID)
       .wrappedNativeCurrency;
   }
 
@@ -97,7 +97,7 @@ class AvaxNativeCurrency extends NativeCurrency {
   }
 
   get wrapped(): Token {
-    return getChainInfoAMM(ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID)
+    return getChainInfo(ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID)
       .wrappedNativeCurrency;
   }
 
@@ -113,7 +113,7 @@ class AvaxNativeCurrency extends NativeCurrency {
 
 class ExtendedEther extends Ether {
   public get wrapped(): Token {
-    return getChainInfoAMM(this.chainId).wrappedNativeCurrency;
+    return getChainInfo(this.chainId).wrappedNativeCurrency;
   }
 
   private static _cachedExtendedEther: { [chainId: number]: NativeCurrency } =
@@ -137,8 +137,6 @@ export function nativeOnChain(
   let nativeCurrency: NativeCurrency | Token;
   if (chainId === ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID) {
     nativeCurrency = new MaticNativeCurrency();
-  } else if (chainId === ApertureSupportedChainId.CELO_MAINNET_CHAIN_ID) {
-    nativeCurrency = getChainInfoAMM(chainId).wrappedNativeCurrency;
   } else if (chainId === ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID) {
     nativeCurrency = new BscNativeCurrency();
   } else if (chainId === ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID) {
@@ -186,9 +184,6 @@ const ONE_TENTH_WETH_RAW_AMOUNT = new Big('1e17').toString();
 const CHAIN_ID_TO_RAW_WRAPPED_NATIVE_CURRENCY_AMOUNT: {
   [key in ApertureSupportedChainId]: string;
 } = {
-  [ApertureSupportedChainId.ARBITRUM_GOERLI_TESTNET_CHAIN_ID]:
-    ONE_TENTH_WETH_RAW_AMOUNT,
-  [ApertureSupportedChainId.GOERLI_TESTNET_CHAIN_ID]: ONE_TENTH_WETH_RAW_AMOUNT,
   [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]:
     ONE_TENTH_WETH_RAW_AMOUNT,
   [ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]:
@@ -211,8 +206,6 @@ const CHAIN_ID_TO_RAW_WRAPPED_NATIVE_CURRENCY_AMOUNT: {
   [ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID]: new Big(
     '1e20',
   ).toString(),
-  // 100 CELO.
-  [ApertureSupportedChainId.CELO_MAINNET_CHAIN_ID]: new Big('1e20').toString(),
 };
 
 /**
@@ -227,7 +220,7 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
   chainId: ApertureSupportedChainId,
   tokenAddress: string,
 ): Promise<string> {
-  const wrappedNativeCurrency = getChainInfoAMM(chainId).wrappedNativeCurrency;
+  const wrappedNativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
   if (wrappedNativeCurrency.address === tokenAddress) return '1';
   const rawNativeCurrencyAmount =
     CHAIN_ID_TO_RAW_WRAPPED_NATIVE_CURRENCY_AMOUNT[chainId];

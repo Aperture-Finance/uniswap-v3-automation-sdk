@@ -1,7 +1,8 @@
 import {
   ApertureSupportedChainId,
+  AutomatedMarketMakerEnum,
   IUniswapV3Pool__factory,
-  getChainInfoAMM,
+  getAMMInfo,
 } from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
 import { BlockTag } from '@ethersproject/providers';
@@ -81,7 +82,7 @@ export function getPoolContract(
 ) {
   return IUniswapV3Pool__factory.connect(
     computePoolAddress(
-      getChainInfoAMM(chainId).UNISWAP.factoryOrPoolDeployer,
+      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
       tokenA,
       tokenB,
       fee,

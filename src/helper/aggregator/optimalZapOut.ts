@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfoAMM } from '@/index';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { BigNumberish } from 'ethers';
 
@@ -43,7 +43,7 @@ export async function optimalZapOut(
     feeBips,
     zeroForOne,
   );
-  if (getChainInfoAMM(chainId).aperture_router_proxy === undefined) {
+  if (getChainInfo(chainId).aperture_router_proxy === undefined) {
     return await poolPromise;
   }
   const [poolEstimate, routerEstimate] = await Promise.all([
@@ -160,7 +160,7 @@ async function getZapOutSwapData(
       tokenIn,
       tokenOut,
       amountIn,
-      getChainInfoAMM(chainId).aperture_router_proxy!,
+      getChainInfo(chainId).aperture_router_proxy!,
       slippage * 100,
     );
     const approveTarget = await getApproveTarget(chainId);
