@@ -1,4 +1,3 @@
-import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
 import {
   FeeAmount,
   Pool,
@@ -6,7 +5,8 @@ import {
   TICK_SPACINGS,
   TickMath,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { ethers } from 'hardhat';

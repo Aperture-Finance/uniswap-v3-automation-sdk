@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
-import { Position } from '@uniswap/v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 

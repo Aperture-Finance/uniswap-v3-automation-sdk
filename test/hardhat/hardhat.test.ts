@@ -1,6 +1,4 @@
 import { providers } from '@0xsequence/multicall';
-import '@nomicfoundation/hardhat-viem';
-import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   Pool,
@@ -9,7 +7,9 @@ import {
   TickMath,
   nearestUsableTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import '@nomicfoundation/hardhat-viem';
+import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';

@@ -1,5 +1,5 @@
 import { fractionToBig, getTokenValueProportionFromPriceRatio } from '@/index';
-import { Position } from '@uniswap/v3-sdk';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import Big from 'big.js';
 
 /**

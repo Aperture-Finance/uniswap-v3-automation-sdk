@@ -10,7 +10,7 @@ import {
   Position,
   TICK_SPACINGS,
   nearestUsableTick,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Address,

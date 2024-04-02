@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId, fractionToBig } from '@/index';
-import { Position } from '@uniswap/v3-sdk';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
