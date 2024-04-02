@@ -1,12 +1,9 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount, Pool, Position, PositionLibrary } from '@uniswap/v3-sdk';
 import { EphemeralGetPosition__factory } from 'aperture-lens';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { PositionStateStructOutput } from 'aperture-lens/dist/typechain/contracts/EphemeralGetPosition';
 import { BigNumber, BigNumberish } from 'ethers';
 import JSBI from 'jsbi';

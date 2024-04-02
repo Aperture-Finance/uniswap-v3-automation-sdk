@@ -1,4 +1,5 @@
 import { FeeAmount } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { z } from 'zod';
 
 export enum ApertureSupportedChainId {
@@ -46,12 +47,6 @@ const ApertureSupportedChainIdEnum = z
   .describe(
     'The chain id of the network; must be one of the chains supported by Aperture.',
   );
-
-export const AutomatedMarketMakerEnum = z.enum([
-  'UNISWAP_V3',
-  'PANCAKESWAP_V3',
-]);
-export type AutomatedMarketMakerEnum = z.infer<typeof AutomatedMarketMakerEnum>;
 
 export const ConditionTypeEnum = z.enum([
   'Time',

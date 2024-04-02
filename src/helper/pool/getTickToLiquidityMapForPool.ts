@@ -1,10 +1,10 @@
 import { AllV3TicksQuery } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { Pool, TickMath } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
 
-import { AutomatedMarketMakerEnum } from '../../interfaces/interfaces';
 import {
   LiquidityAmount,
   TickNumber,

@@ -1,11 +1,11 @@
 import '@nomiclabs/hardhat-ethers';
 import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 import { zeroAddress } from 'viem';
 
 import {
-  AutomatedMarketMakerEnum,
   IERC20__factory,
   UniV3Automan__factory,
   getAMMInfo,

@@ -1,7 +1,6 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   PermitInfo,
@@ -10,6 +9,7 @@ import {
   getChainInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish, BytesLike } from 'ethers';
 import { splitSignature } from 'ethers/lib/utils';
 

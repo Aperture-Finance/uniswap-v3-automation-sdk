@@ -1,12 +1,8 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  PermitInfo,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
 import { Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { optimalZapOut } from '../aggregator';

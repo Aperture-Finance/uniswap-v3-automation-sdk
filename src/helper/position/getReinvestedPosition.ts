@@ -1,10 +1,10 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   IUniV3Automan__factory,
   getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { getAutomanReinvestCallInfo } from '../automan';

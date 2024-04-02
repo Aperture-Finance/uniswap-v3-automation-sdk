@@ -1,8 +1,4 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { BigintIsh } from '@uniswap/sdk-core';
 import {
@@ -10,6 +6,7 @@ import {
   NonfungiblePositionManager,
   Position,
 } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
 import { PositionDetails } from '../position';
 import { getTxToNonfungiblePositionManager } from './transaction';

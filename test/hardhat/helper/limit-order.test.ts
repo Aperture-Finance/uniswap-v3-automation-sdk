@@ -5,10 +5,10 @@ import {
   priceToClosestTick,
   tickToPrice,
 } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'hardhat';
 
 import {
-  AutomatedMarketMakerEnum,
   IERC20__factory,
   alignPriceToClosestUsableTick,
   getAMMInfo,

@@ -1,11 +1,7 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  PermitInfo,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { getAutomanReinvestCallInfo } from '../automan';

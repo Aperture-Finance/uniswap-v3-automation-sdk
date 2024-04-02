@@ -1,10 +1,7 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { Provider } from '@ethersproject/providers';
 import { EphemeralAllPositionsByOwner__factory } from 'aperture-lens';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { PositionStateStructOutput } from 'aperture-lens/dist/typechain/contracts/EphemeralGetPosition';
 
 import { PositionDetails } from './PositionDetails';

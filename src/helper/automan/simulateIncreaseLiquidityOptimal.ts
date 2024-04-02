@@ -1,6 +1,5 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   UniV3Automan,
@@ -8,6 +7,7 @@ import {
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BytesLike } from 'ethers';
 
 import {

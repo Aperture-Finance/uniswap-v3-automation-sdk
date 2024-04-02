@@ -1,6 +1,5 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   getAMMInfo,
   priceToClosestTickSafe,
   tickToLimitOrderRange,
@@ -18,6 +17,7 @@ import {
   NonfungiblePositionManager,
   Position,
 } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
 

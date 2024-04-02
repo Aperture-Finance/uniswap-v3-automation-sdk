@@ -1,6 +1,5 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   INonfungiblePositionManager__factory,
   UniV3Automan__factory,
   fractionToBig,
@@ -21,6 +20,7 @@ import {
   EphemeralGetPosition__factory,
   viem,
 } from 'aperture-lens';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 import { chunk, flatten } from 'lodash';
@@ -183,12 +183,13 @@ export async function getAllPositions(
               abi: npm.abi,
               functionName: 'tokenOfOwnerByIndex',
               args: [owner, BigInt(i)],
+              blockNumber,
             };
           }),
           allowFailure: false,
           batchSize: 2_048,
         })
-      ).map((i) => BigInt(i));
+      ).map((i) => BigInt(i ?? 0));
 
       // Fetch position state.
       positions = flatten(

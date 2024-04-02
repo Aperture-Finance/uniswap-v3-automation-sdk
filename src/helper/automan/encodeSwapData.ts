@@ -1,10 +1,6 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  getAMMInfo,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getAMMInfo, getChainInfo } from '@/index';
 import { FeeAmount } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish, BytesLike } from 'ethers';
 import { solidityPack } from 'ethers/lib/utils';
 
