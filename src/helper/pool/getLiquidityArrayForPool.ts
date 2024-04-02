@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId, DOUBLE_TICK } from '@/index';
+import { Pool, tickToPrice } from '@aperture_finance/uniswap-v3-sdk';
 import { Provider } from '@ethersproject/abstract-provider';
-import { Pool, tickToPrice } from '@uniswap/v3-sdk';
 import { EphemeralGetPopulatedTicksInRange__factory } from 'aperture-lens';
 import { PoolUtils } from 'aperture-lens/dist/typechain/contracts/EphemeralGetPopulatedTicksInRange';
 

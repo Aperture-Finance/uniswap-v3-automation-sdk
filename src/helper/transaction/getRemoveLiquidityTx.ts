@@ -1,18 +1,15 @@
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  getAMMInfo,
-} from '@/index';
+  NonfungiblePositionManager,
+  Position,
+  RemoveLiquidityOptions,
+} from '@aperture_finance/uniswap-v3-sdk';
 import {
   BlockTag,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
-import {
-  NonfungiblePositionManager,
-  Position,
-  RemoveLiquidityOptions,
-} from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
 import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import {

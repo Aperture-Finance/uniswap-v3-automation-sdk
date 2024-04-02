@@ -1,10 +1,6 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  PermitInfo,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { Provider } from '@ethersproject/abstract-provider';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish, TypedDataDomain, TypedDataField, ethers } from 'ethers';
 
 import { getNPM } from '../position';

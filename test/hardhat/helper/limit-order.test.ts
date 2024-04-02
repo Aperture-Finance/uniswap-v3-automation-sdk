@@ -1,14 +1,14 @@
-import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   TICK_SPACINGS,
   priceToClosestTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'hardhat';
 
 import {
-  AutomatedMarketMakerEnum,
   IERC20__factory,
   alignPriceToClosestUsableTick,
   getAMMInfo,

@@ -1,18 +1,18 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   PermitInfo,
   getAMMInfo,
 } from '@/index';
+import { ADDRESS_ZERO, Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import {
   JsonRpcProvider,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { ADDRESS_ZERO, Pool, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { optimalMint } from '../aggregator';

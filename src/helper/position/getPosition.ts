@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { BlockTag, Provider } from '@ethersproject/providers';
-import { Position } from '@uniswap/v3-sdk';
 import { BigNumberish } from 'ethers';
 
 import { getPool, getPoolFromBasicPositionInfo } from '../pool';

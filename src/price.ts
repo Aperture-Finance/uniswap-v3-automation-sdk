@@ -1,6 +1,6 @@
 import { tickToBigPrice } from '@/tick';
+import { SqrtPriceMath, TickMath } from '@aperture_finance/uniswap-v3-sdk';
 import { Fraction, Price, Token } from '@uniswap/sdk-core';
-import { SqrtPriceMath, TickMath } from '@uniswap/v3-sdk';
 import axios, { AxiosResponse } from 'axios';
 import Big from 'big.js';
 import JSBI from 'jsbi';

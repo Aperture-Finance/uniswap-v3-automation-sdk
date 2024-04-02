@@ -638,7 +638,7 @@ input PermitInput {
 }
 
 """
-v3 pool parameters as defined by https://github.com/Uniswap/v3-sdk/blob/main/src/entities/pool.ts
+v3 pool parameters as defined by https://github.com/Aperture-Finance/uniswap-v3-sdk/blob/main/src/entities/pool.ts
 """
 input PoolInput {
   tokenA: TokenInput!

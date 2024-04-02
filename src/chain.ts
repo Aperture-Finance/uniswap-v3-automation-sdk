@@ -1,4 +1,5 @@
 import { Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Chain, getAddress } from 'viem';
 import {
   arbitrum,
@@ -13,10 +14,7 @@ import {
   scroll,
 } from 'viem/chains';
 
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-} from './interfaces';
+import { ApertureSupportedChainId } from './interfaces';
 
 export interface ChainSpecificRoutingAPIInfo {
   url: string;

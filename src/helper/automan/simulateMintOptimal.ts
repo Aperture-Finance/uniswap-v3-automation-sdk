@@ -1,13 +1,17 @@
 import {
   ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
   INonfungiblePositionManager,
   IUniV3Automan__factory,
   UniV3Automan,
   getAMMInfo,
 } from '@/index';
+import {
+  FeeAmount,
+  TICK_SPACINGS,
+  nearestUsableTick,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BytesLike } from 'ethers';
 
 import {

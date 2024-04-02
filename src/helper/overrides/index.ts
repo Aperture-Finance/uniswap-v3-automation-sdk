@@ -1,15 +1,11 @@
-import {
-  ApertureSupportedChainId,
-  AutomatedMarketMakerEnum,
-  IERC20__factory,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
 import {
   JsonRpcProvider,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
 import { AccessList } from '@ethersproject/transactions';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import { defaultAbiCoder as DAC, keccak256 } from 'ethers/lib/utils';
 import { zeroAddress } from 'viem';
