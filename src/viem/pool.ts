@@ -245,6 +245,7 @@ export async function getFeeTierDistribution(
     [FeeAmount.LOWEST]: getFeeTierFraction(FeeAmount.LOWEST),
     [FeeAmount.LOW]: getFeeTierFraction(FeeAmount.LOW),
     [FeeAmount.MEDIUM]: getFeeTierFraction(FeeAmount.MEDIUM),
+    [FeeAmount.PCS_V3_MEDIUM]: getFeeTierFraction(FeeAmount.PCS_V3_MEDIUM),
     [FeeAmount.HIGH]: getFeeTierFraction(FeeAmount.HIGH),
   };
 }
