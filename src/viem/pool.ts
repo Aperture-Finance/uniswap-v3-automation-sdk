@@ -9,7 +9,6 @@ import {
   getAMMInfo,
   getChainInfo,
 } from '@/index';
-import { Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   Pool,
@@ -17,6 +16,7 @@ import {
   computePoolAddress as _computePoolAddress,
   tickToPrice,
 } from '@aperture_finance/uniswap-v3-sdk';
+import { Price, Token } from '@uniswap/sdk-core';
 import { viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';

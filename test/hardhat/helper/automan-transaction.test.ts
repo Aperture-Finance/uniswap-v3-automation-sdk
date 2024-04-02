@@ -1,6 +1,6 @@
 import { providers } from '@0xsequence/multicall';
-import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';

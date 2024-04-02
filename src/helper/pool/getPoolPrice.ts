@@ -1,5 +1,5 @@
-import { Price, Token } from '@uniswap/sdk-core';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
+import { Price, Token } from '@uniswap/sdk-core';
 
 /**
  * Get the price of `token0` in terms of `token1` in the pool.

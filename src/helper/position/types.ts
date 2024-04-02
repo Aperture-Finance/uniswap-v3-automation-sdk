@@ -1,5 +1,5 @@
-import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 
 export interface BasicPositionInfo {
   token0: Token;
