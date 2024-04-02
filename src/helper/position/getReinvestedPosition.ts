@@ -22,6 +22,7 @@ import { getNPM } from './position';
  */
 export async function getReinvestedPosition(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   provider: JsonRpcProvider,
   blockNumber?: number,
@@ -40,12 +41,12 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      to: getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
     },
     // forge an operator approval using state overrides.
-    getNPMApprovalOverrides(chainId, owner),
+    getNPMApprovalOverrides(chainId, amm, owner),
     provider,
     blockNumber,
   );

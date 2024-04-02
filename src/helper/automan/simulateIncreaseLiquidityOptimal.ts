@@ -34,6 +34,7 @@ export type IncreaseLiquidityOptimalReturnType = UnwrapPromise<
  */
 export async function simulateIncreaseLiquidityOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   position: Position,
@@ -48,7 +49,7 @@ export async function simulateIncreaseLiquidityOptimal(
   );
   const { apertureAutoman } = getAMMInfo(
     chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    amm,
   )!;
   const tx = {
     from,

@@ -25,6 +25,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
 export async function getAddLiquidityTx(
   increaseLiquidityOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   liquidityToAdd: BigintIsh,
   position?: Position,
@@ -48,7 +49,7 @@ export async function getAddLiquidityTx(
     increaseLiquidityOptions,
   );
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

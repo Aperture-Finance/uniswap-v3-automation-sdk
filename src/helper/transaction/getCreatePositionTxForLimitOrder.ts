@@ -53,6 +53,7 @@ export async function getCreatePositionTxForLimitOrder(
   poolFee: FeeAmount,
   deadlineEpochSeconds: BigNumberish,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   widthMultiplier = 1,
 ): Promise<TransactionRequest> {
@@ -110,7 +111,7 @@ export async function getCreatePositionTxForLimitOrder(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

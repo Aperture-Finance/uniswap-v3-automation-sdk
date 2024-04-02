@@ -31,6 +31,7 @@ export async function getRemoveLiquidityTx(
   removeLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   recipient: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   receiveNativeEtherIfApplicable?: boolean,
   position?: Position,
@@ -39,6 +40,7 @@ export async function getRemoveLiquidityTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       removeLiquidityOptions.tokenId.toString(),
       provider,
       blockTag,
@@ -80,7 +82,7 @@ export async function getRemoveLiquidityTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

@@ -138,11 +138,11 @@ export async function getERC20Overrides(
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   owner: string,
 ): StateOverrides {
   const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!;
   return {
     [nonfungiblePositionManager]: {
@@ -158,10 +158,11 @@ export function getNPMApprovalOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   routerToWhitelist: string,
 ): StateOverrides {
   return {
-    [getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+    [getAMMInfo(chainId, amm)!
       .apertureAutoman]: {
       stateDiff: {
         [keccak256(

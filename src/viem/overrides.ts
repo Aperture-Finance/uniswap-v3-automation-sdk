@@ -65,11 +65,11 @@ export function computeIsControllerSlot(from: Address): Hex {
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   owner: Address,
 ): StateOverrides {
   const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!;
   return {
     [nonfungiblePositionManager]: {
@@ -83,10 +83,11 @@ export function getNPMApprovalOverrides(
 
 export function getControllerOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   from: Address,
 ) {
   return {
-    [getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+    [getAMMInfo(chainId, amm)!
       .apertureAutoman]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
@@ -100,10 +101,11 @@ export function getControllerOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+    [getAMMInfo(chainId, amm)!
       .apertureAutoman]: {
       stateDiff: {
         [keccak256(

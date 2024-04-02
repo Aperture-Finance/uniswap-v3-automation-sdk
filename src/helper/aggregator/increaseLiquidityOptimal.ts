@@ -33,6 +33,7 @@ import { SwapRoute, quote } from './quote';
  */
 export async function increaseLiquidityOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   position: Position,
   increaseOptions: IncreaseOptions,
@@ -52,10 +53,7 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -117,6 +115,7 @@ export async function increaseLiquidityOptimal(
 
 async function increaseLiquidityOptimalPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: Position,
@@ -126,6 +125,7 @@ async function increaseLiquidityOptimalPool(
   const { amount0, amount1, liquidity } =
     await simulateIncreaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       fromAddress,
       position,
@@ -166,6 +166,7 @@ async function increaseLiquidityOptimalPool(
 
 async function increaseLiquidityOptimalRouter(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: Position,
@@ -175,6 +176,7 @@ async function increaseLiquidityOptimalRouter(
 ) {
   const { swapData, swapRoute } = await getIncreaseLiquidityOptimalSwapData(
     chainId,
+    amm,
     provider,
     position,
     increaseParams,
@@ -184,6 +186,7 @@ async function increaseLiquidityOptimalRouter(
   const { amount0, amount1, liquidity } =
     await simulateIncreaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       fromAddress,
       position,
@@ -203,6 +206,7 @@ async function increaseLiquidityOptimalRouter(
 
 async function getIncreaseLiquidityOptimalSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   position: Position,
   increaseParams: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
@@ -212,7 +216,7 @@ async function getIncreaseLiquidityOptimalSwapData(
   try {
     const { optimalSwapRouter, factory } = getAMMInfo(
       chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+      amm,
     )!;
     const automan = getAutomanContract(chainId, provider);
     const approveTarget = await getApproveTarget(chainId);

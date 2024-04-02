@@ -100,8 +100,8 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000000000000000000000000000000000000', // TODO
         ),
         apertureAutoman: getAddress(
-          '0x0000000000000000000000000000000000000000',
-        ), // TODO
+          '0x0000000000000000000000000000000000000000', // TODO
+        ),
       },
     },
     aperture_router_proxy: getAddress(
@@ -252,8 +252,8 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000000000000000000000000000000000000', // TODO
         ),
         apertureAutoman: getAddress(
-          '0x0000000000000000000000000000000000000000',
-        ), // TODO
+          '0x0000000000000000000000000000000000000000', // TODO
+        ),
       },
     },
     aperture_router_proxy: getAddress(

@@ -18,12 +18,12 @@ import { filterLogsByEvent } from './transaction';
  */
 export function getMintedPositionIdFromTxReceipt(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   txReceipt: TransactionReceipt,
   recipientAddress: string,
 ): BigNumber | undefined {
   const npmAddress = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!.nonfungiblePositionManager.toLowerCase();
   const npmInterface = INonfungiblePositionManager__factory.createInterface();
   const transferLogs = filterLogsByEvent(

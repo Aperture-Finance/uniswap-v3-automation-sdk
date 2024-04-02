@@ -33,6 +33,7 @@ export type MintReturnType = UnwrapPromise<
  */
 export async function simulateMintOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -46,8 +47,7 @@ export async function simulateMintOptimal(
     [mintParams, swapData],
   );
   const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!;
   const tx = {
     from,

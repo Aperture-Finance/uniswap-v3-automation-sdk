@@ -24,11 +24,11 @@ export async function checkPositionApprovalStatus(
   positionId: BigNumberish,
   permitInfo: PermitInfo | undefined,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: ethers.providers.Provider,
 ): Promise<PositionApprovalStatus> {
   const automan = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!.apertureAutoman;
   const npm = getNPM(chainId, provider);
   let owner, approved;
@@ -101,11 +101,11 @@ export async function checkPositionPermit(
   positionId: BigNumberish,
   permitInfo: PermitInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: ethers.providers.Provider,
 ) {
   const automan = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!.apertureAutoman;
   const npm = getNPM(chainId, provider);
   try {
@@ -135,6 +135,7 @@ export async function checkPositionPermit(
  */
 export async function generateTypedDataForPermit(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   deadlineEpochSeconds: BigNumberish,
   provider: Provider,
@@ -145,8 +146,7 @@ export async function generateTypedDataForPermit(
   value: Record<string, any>;
 }> {
   const ammInfo = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!;
   return {
     domain: {

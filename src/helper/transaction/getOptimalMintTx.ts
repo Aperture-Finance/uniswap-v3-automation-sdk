@@ -29,6 +29,7 @@ import { getPool } from '../pool';
  */
 export async function getOptimalMintTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
   fee: FeeAmount,
@@ -56,6 +57,7 @@ export async function getOptimalMintTx(
   }
   const { liquidity, swapData } = await optimalMint(
     chainId,
+    amm,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
     fee,
@@ -96,7 +98,7 @@ export async function getOptimalMintTx(
   );
   return {
     tx: {
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      to: getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
       value,

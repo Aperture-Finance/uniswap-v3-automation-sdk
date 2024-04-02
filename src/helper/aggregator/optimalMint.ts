@@ -29,6 +29,7 @@ import { SwapRoute } from './quote';
  */
 export async function optimalMint(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
   fee: FeeAmount,
@@ -56,8 +57,7 @@ export async function optimalMint(
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
   const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId, amm,
   )!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {

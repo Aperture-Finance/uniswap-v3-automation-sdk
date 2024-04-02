@@ -42,6 +42,7 @@ type DecreaseLiquiditySingleReturnType = UnwrapPromise<
  */
 export async function simulateDecreaseLiquiditySingle(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   owner: string,
@@ -69,7 +70,7 @@ export async function simulateDecreaseLiquiditySingle(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
       {

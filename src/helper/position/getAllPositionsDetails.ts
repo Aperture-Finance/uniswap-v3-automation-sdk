@@ -18,11 +18,12 @@ import { PositionDetails } from './PositionDetails';
 export async function getAllPositionsDetails(
   owner: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<Map<string, PositionDetails>> {
   const returnData = await provider.call(
     new EphemeralAllPositionsByOwner__factory().getDeployTransaction(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      getAMMInfo(chainId, amm)!
         .nonfungiblePositionManager,
       owner,
     ),

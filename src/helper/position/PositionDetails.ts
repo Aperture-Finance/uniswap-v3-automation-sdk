@@ -75,13 +75,14 @@ export class PositionDetails implements BasicPositionInfo {
    */
   public static async fromPositionId(
     chainId: ApertureSupportedChainId,
+    amm: AutomatedMarketMakerEnum,
     positionId: BigNumberish,
     provider: Provider,
     blockTag?: BlockTag,
   ): Promise<PositionDetails> {
     const returnData = await provider.call(
       new EphemeralGetPosition__factory().getDeployTransaction(
-        getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+        getAMMInfo(chainId, amm)!
           .nonfungiblePositionManager,
         positionId,
       ),

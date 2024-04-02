@@ -22,6 +22,7 @@ export async function getCreatePositionTx(
   position: Position,
   options: Omit<MintOptions, 'createPool'>,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<TransactionRequest> {
   let createPool = false;
@@ -44,7 +45,7 @@ export async function getCreatePositionTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
+    getAMMInfo(chainId,amm)!,
     calldata,
     value,
   );

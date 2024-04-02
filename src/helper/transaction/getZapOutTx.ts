@@ -23,6 +23,7 @@ import { PositionDetails } from '../position';
  */
 export async function getZapOutTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   positionId: BigNumberish,
   zeroForOne: boolean,
@@ -35,6 +36,7 @@ export async function getZapOutTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       positionId,
       provider,
     ));
@@ -67,7 +69,7 @@ export async function getZapOutTx(
   return {
     tx: {
       from: ownerAddress,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      to: getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
     },

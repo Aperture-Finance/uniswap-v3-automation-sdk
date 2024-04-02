@@ -44,10 +44,11 @@ export function isPositionInRange(position: Position): boolean {
 
 export function getNPM(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider | Signer,
 ) {
   return INonfungiblePositionManager__factory.connect(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+    getAMMInfo(chainId, amm)!
       .nonfungiblePositionManager,
     provider,
   );

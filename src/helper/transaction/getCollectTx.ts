@@ -28,6 +28,7 @@ export async function getCollectTx(
   positionId: BigNumberish,
   recipient: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   receiveNativeEtherIfApplicable?: boolean,
   basicPositionInfo?: BasicPositionInfo,
@@ -57,7 +58,7 @@ export async function getCollectTx(
     ),
   });
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

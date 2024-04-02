@@ -18,6 +18,7 @@ import { PositionDetails } from '../position';
  * Generates an unsigned transaction that increase the optimal amount of liquidity for the specified token amounts and position.
  * @param increaseOptions Increase liquidity options.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param recipient The recipient address.
@@ -28,6 +29,7 @@ import { PositionDetails } from '../position';
 export async function getIncreaseLiquidityOptimalTx(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
   recipient: string,
@@ -60,6 +62,7 @@ export async function getIncreaseLiquidityOptimalTx(
 
   const { liquidity, swapData } = await increaseLiquidityOptimal(
     chainId,
+    amm,
     provider,
     position,
     increaseOptions,
@@ -95,7 +98,7 @@ export async function getIncreaseLiquidityOptimalTx(
   );
   return {
     tx: {
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      to: getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
       value,

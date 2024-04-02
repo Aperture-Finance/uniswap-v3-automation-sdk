@@ -21,6 +21,7 @@ import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
  */
 export async function getReinvestTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   positionId: BigNumberish,
   slippageTolerance: Percent,
@@ -33,12 +34,12 @@ export async function getReinvestTx(
 }> {
   const { pool, tickLower, tickUpper } = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     provider,
   );
   const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId,amm,
   )!;
   const { functionFragment, data } = getAutomanReinvestCallInfo(
     positionId,

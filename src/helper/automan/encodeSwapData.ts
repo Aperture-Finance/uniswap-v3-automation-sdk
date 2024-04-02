@@ -27,6 +27,7 @@ export function encodeSwapData(
 
 export function encodeOptimalSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0: string,
   token1: string,
   fee: FeeAmount,
@@ -40,7 +41,7 @@ export function encodeOptimalSwapData(
   return solidityPack(
     ['address', 'bytes'],
     [
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      getAMMInfo(chainId, amm)!
         .optimalSwapRouter!,
       solidityPack(
         [

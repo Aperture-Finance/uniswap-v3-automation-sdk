@@ -36,6 +36,7 @@ type RemoveLiquidityReturnType = UnwrapPromise<
  */
 export async function simulateRemoveLiquidity(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   owner: string,
@@ -58,7 +59,7 @@ export async function simulateRemoveLiquidity(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
       getNPMApprovalOverrides(chainId, owner),

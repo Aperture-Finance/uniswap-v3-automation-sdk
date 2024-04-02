@@ -138,11 +138,11 @@ export function filterLogsByEvent(
  */
 export function getSetApprovalForAllTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   approved: boolean,
 ): TransactionRequest {
   const ammInfo = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    chainId,amm,
   )!;
   return getTxToNonfungiblePositionManager(
     ammInfo,

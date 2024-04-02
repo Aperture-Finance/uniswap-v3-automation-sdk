@@ -37,6 +37,7 @@ type RebalanceReturnType = UnwrapPromise<
  */
 export async function simulateRebalance(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   owner: string,
@@ -60,7 +61,7 @@ export async function simulateRebalance(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
+      getAMMInfo(chainId, amm)!
         .apertureAutoman,
       data,
       getNPMApprovalOverrides(chainId, owner),

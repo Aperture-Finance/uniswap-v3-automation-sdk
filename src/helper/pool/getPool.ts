@@ -78,11 +78,12 @@ export function getPoolContract(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider?: Provider | Signer,
 ) {
   return IUniswapV3Pool__factory.connect(
     computePoolAddress(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
+      getAMMInfo(chainId, amm)!.factory,
       tokenA,
       tokenB,
       fee,
