@@ -42,8 +42,6 @@
   "dependencies": {
     "@0xsequence/multicall": "^1.9.13",
     "@aperture_finance/uniswap-v3-sdk": "3.11.0-PCS",
-    "@uniswap/permit2-sdk": "^1.2.0",
-    "@uniswap/smart-order-router": "^3.26.1",
     "aperture-lens": "^1.0.0",
     "axios": "^1.6.8",
     "big.js": "^6.2.1",
@@ -76,6 +74,8 @@
     "@types/node": "^20.12.2",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
+    "@uniswap/permit2-sdk": "^1.2.0",
+    "@uniswap/smart-order-router": "^3.26.1",
     "axios-mock-adapter": "^1.22.0",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
