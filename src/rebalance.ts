@@ -1,4 +1,4 @@
-import { Pool, nearestUsableTick } from '@uniswap/v3-sdk';
+import { Pool, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import Big from 'big.js';
 
 import {

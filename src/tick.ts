@@ -6,7 +6,7 @@ import {
   nearestUsableTick,
   priceToClosestTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 

@@ -3,7 +3,7 @@ import {
   FeeAmount,
   TickMath,
   computePoolAddress as _computePoolAddress,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
 import { BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
 

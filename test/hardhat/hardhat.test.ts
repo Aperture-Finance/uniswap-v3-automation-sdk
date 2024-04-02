@@ -9,7 +9,7 @@ import {
   TickMath,
   nearestUsableTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';

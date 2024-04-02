@@ -10,7 +10,7 @@ import {
 } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { Pool, Position } from '@uniswap/v3-sdk';
+import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish } from 'ethers';
 

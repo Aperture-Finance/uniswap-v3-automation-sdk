@@ -14,7 +14,7 @@ import {
   Position,
   PositionLibrary,
   TickMath,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
 import {
   EphemeralAllPositionsByOwner__factory,
   EphemeralGetPosition__factory,

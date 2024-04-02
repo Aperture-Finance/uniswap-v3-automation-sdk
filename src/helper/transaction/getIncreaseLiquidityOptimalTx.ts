@@ -5,7 +5,7 @@ import {
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
+import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 

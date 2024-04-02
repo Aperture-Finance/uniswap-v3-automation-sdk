@@ -6,7 +6,7 @@ import {
   getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { Position } from '@uniswap/v3-sdk';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BytesLike } from 'ethers';
 

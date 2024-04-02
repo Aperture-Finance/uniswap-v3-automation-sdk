@@ -1,4 +1,4 @@
-import { FeeAmount, Pool } from '@uniswap/v3-sdk';
+import { FeeAmount, Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { getAddress } from 'ethers/lib/utils';
 import JSBI from 'jsbi';
 

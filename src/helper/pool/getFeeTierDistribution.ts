@@ -1,6 +1,6 @@
 import { FeeTierDistributionQuery } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import axios from 'axios';
 
 /**

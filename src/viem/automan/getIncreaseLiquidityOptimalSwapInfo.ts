@@ -4,7 +4,7 @@ import { ApertureSupportedChainId } from '@/index';
 import { calculateIncreaseLiquidityOptimalPriceImpact, getPool } from '@/viem';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
+import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import Big from 'big.js';
 import { BigNumber } from 'ethers';
 import { Address, PublicClient } from 'viem';
