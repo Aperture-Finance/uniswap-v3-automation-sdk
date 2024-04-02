@@ -9,14 +9,14 @@ import {
   getAMMInfo,
   getChainInfo,
 } from '@/index';
-import { Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   Pool,
   TickMath,
   computePoolAddress as _computePoolAddress,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { Price, Token } from '@uniswap/sdk-core';
 import { viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
@@ -245,6 +245,7 @@ export async function getFeeTierDistribution(
     [FeeAmount.LOWEST]: getFeeTierFraction(FeeAmount.LOWEST),
     [FeeAmount.LOW]: getFeeTierFraction(FeeAmount.LOW),
     [FeeAmount.MEDIUM]: getFeeTierFraction(FeeAmount.MEDIUM),
+    [FeeAmount.PCS_V3_MEDIUM]: getFeeTierFraction(FeeAmount.PCS_V3_MEDIUM),
     [FeeAmount.HIGH]: getFeeTierFraction(FeeAmount.HIGH),
   };
 }

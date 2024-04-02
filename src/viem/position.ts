@@ -7,14 +7,14 @@ import {
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
 } from '@/index';
-import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   Pool,
   Position,
   PositionLibrary,
   TickMath,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import {
   EphemeralAllPositionsByOwner__factory,
   EphemeralGetPosition__factory,

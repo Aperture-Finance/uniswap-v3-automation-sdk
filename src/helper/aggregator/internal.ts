@@ -3,8 +3,8 @@ import {
   INonfungiblePositionManager,
   getAMMInfo,
 } from '@/index';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { FeeAmount } from '@uniswap/v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import Bottleneck from 'bottleneck';

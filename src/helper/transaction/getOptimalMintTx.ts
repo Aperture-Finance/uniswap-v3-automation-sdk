@@ -3,9 +3,9 @@ import {
   IUniV3Automan__factory,
   getAMMInfo,
 } from '@/index';
+import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { FeeAmount, Position } from '@uniswap/v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 

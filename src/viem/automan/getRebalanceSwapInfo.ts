@@ -5,8 +5,8 @@ import {
   calculateRebalancePriceImpact,
   optimalRebalance,
 } from '@/viem';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
-import { Position } from '@uniswap/v3-sdk';
 import { Address, PublicClient, zeroAddress } from 'viem';
 
 import { getSwapPath } from './internal';

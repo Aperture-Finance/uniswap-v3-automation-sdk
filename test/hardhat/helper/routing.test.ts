@@ -1,5 +1,5 @@
+import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { FeeAmount, nearestUsableTick } from '@uniswap/v3-sdk';
 import { ethers } from 'hardhat';
 
 import { ApertureSupportedChainId } from '../../../src';

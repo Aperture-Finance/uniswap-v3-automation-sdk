@@ -3,9 +3,9 @@ import {
   INonfungiblePositionManager,
   getAMMInfo,
 } from '@/index';
+import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { BigNumberish } from 'ethers';

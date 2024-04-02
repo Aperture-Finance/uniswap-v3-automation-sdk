@@ -4,6 +4,11 @@ import {
   priceToClosestTickSafe,
   tickToLimitOrderRange,
 } from '@/index';
+import {
+  FeeAmount,
+  NonfungiblePositionManager,
+  Position,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import {
   Currency,
@@ -12,11 +17,6 @@ import {
   Price,
   Token,
 } from '@uniswap/sdk-core';
-import {
-  FeeAmount,
-  NonfungiblePositionManager,
-  Position,
-} from '@uniswap/v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
