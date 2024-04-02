@@ -84,6 +84,20 @@
     "@uniswap/v3-periphery" "^1.4.4"
     solady "^0.0.180"
 
+"@aperture_finance/uniswap-v3-sdk@3.11.0-PCS":
+  version "3.11.0-PCS"
+  resolved "https://registry.yarnpkg.com/@aperture_finance/uniswap-v3-sdk/-/uniswap-v3-sdk-3.11.0-PCS.tgz#501e0ecd9aa0d46e78015bdc2a4156359c98d238"
+  integrity sha512-CoyGgw0NnvleNU7bNkB8WhcOAJEvqkSlQ44WUUjakJpIdScJmKils59GGsEIpGB1eCljN4+L9QIlI3R48dvz4Q==
+  dependencies:
+    "@ethersproject/abi" "^5.0.12"
+    "@ethersproject/solidity" "^5.0.9"
+    "@uniswap/sdk-core" "^4.2.0"
+    "@uniswap/swap-router-contracts" "^1.2.1"
+    "@uniswap/v3-periphery" "^1.1.1"
+    "@uniswap/v3-staker" "1.0.0"
+    tiny-invariant "^1.1.0"
+    tiny-warning "^1.0.3"
+
 "@ardatan/relay-compiler@12.0.0":
   version "12.0.0"
   resolved "https://registry.yarnpkg.com/@ardatan/relay-compiler/-/relay-compiler-12.0.0.tgz#2e4cca43088e807adc63450e8cab037020e91106"

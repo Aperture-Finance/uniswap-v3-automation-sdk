@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@0xsequence/multicall": "^1.9.13",
+    "@aperture_finance/uniswap-v3-sdk": "3.11.0-PCS",
     "@uniswap/permit2-sdk": "^1.2.0",
     "@uniswap/smart-order-router": "^3.26.1",
     "aperture-lens": "^1.0.0",
