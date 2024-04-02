@@ -12,9 +12,9 @@ import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
-  OptimalSwapRouter__factory,
   UniV3Automan,
   UniV3Automan__factory,
+  UniV3OptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
 import {
@@ -73,7 +73,7 @@ describe('Helper - Automan transaction tests', function () {
       feeLimitPips: BigNumber.from('500000000000000000'),
     });
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
-    const router = await new OptimalSwapRouter__factory(
+    const router = await new UniV3OptimalSwapRouter__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
