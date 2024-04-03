@@ -509,7 +509,7 @@ const TriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
 });
 
 export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
-  automatedMarketMaker: AutomatedMarketMakerEnum.default(
+  amm: AutomatedMarketMakerEnum.default(
     AutomatedMarketMakerEnum.enum.UNISWAP_V3,
   ).describe(
     'The automated market maker. If not specified, then this will be UNISWAP_V3.',
