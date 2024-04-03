@@ -19,6 +19,7 @@ import {
  * @param positionId Position id.
  * @param recipient The recipient address (connected wallet address).
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param receiveNativeEtherIfApplicable If set to true and the position involves ETH, send native ether instead of WETH to `recipient`.
  * @param basicPositionInfo Basic position info (optional); if undefined, one will be created.

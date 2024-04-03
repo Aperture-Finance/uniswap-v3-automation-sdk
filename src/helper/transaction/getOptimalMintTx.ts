@@ -16,6 +16,7 @@ import { getPool } from '../pool';
 /**
  * Generates an unsigned transaction that mints the optimal amount of liquidity for the specified token amounts and price range.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.

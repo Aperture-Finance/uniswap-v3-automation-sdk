@@ -13,6 +13,7 @@ import { Address, PublicClient } from 'viem';
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.

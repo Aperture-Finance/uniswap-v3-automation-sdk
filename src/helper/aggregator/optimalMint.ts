@@ -17,6 +17,7 @@ import { SwapRoute } from './quote';
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.

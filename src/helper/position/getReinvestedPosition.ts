@@ -15,6 +15,7 @@ import { getNPM } from './position';
  * Predict the change in liquidity and token amounts after a reinvestment without a prior approval.
  * https://github.com/dragonfly-xyz/useful-solidity-patterns/blob/main/patterns/eth_call-tricks/README.md#geth-overrides
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param provider The ethers provider.
  * @param blockNumber Optional block number to query.

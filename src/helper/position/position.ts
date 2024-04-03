@@ -12,6 +12,7 @@ import { Signer } from 'ethers';
 /**
  * Get the token SVG URL of the specified position.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param positionId Position id.
  * @param provider Ethers provider.
  * @returns A promise that resolves to the token SVG URL.

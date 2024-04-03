@@ -22,6 +22,7 @@ import {
  * @param removeLiquidityOptions Remove liquidity options.
  * @param recipient The recipient address (connected wallet address).
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param receiveNativeEtherIfApplicable If set to true and the position involves ETH, send native ether instead of WETH to `recipient`.
  * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.

@@ -15,6 +15,7 @@ import { getSwapPath } from './internal';
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the existing position.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.

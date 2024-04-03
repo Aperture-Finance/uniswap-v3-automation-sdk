@@ -28,6 +28,7 @@ export async function getPositionFromBasicInfo(
 /**
  * Get the Uniswap `Position` object for the specified position id.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param provider The ethers provider.
  * @param blockTag Optional block tag to query.

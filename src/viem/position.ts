@@ -111,6 +111,7 @@ export async function getPositionFromBasicInfo(
 /**
  * Get the Uniswap `Position` object for the specified position id.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
@@ -150,6 +151,7 @@ export async function getPosition(
  * provider gas limit is 300m.
  * @param owner The owner.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns A map where each key is a position id and its associated value is PositionDetails of that position.
@@ -481,6 +483,7 @@ export function isPositionInRange(position: Position): boolean {
 /**
  * Get the token SVG URL of the specified position.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param positionId Position id.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
@@ -591,6 +594,7 @@ export function projectRebalancedPositionAtPrice(
  * Predict the change in liquidity and token amounts after a reinvestment without a prior approval.
  * https://github.com/dragonfly-xyz/useful-solidity-patterns/blob/main/patterns/eth_call-tricks/README.md#geth-overrides
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.

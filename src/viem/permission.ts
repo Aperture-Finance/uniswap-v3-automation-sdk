@@ -23,6 +23,7 @@ export interface PositionApprovalStatus {
  * @param positionId Position id.
  * @param permitInfo If defined and Automan has not already been approved on-chain, this `permitInfo` will be validated as the last option.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns An PositionApprovalStatus object representing approval status.
@@ -114,6 +115,7 @@ export async function checkPositionApprovalStatus(
  * @param positionId Position id.
  * @param permitInfo Permit info containing the signature and deadline.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns True if the permit is valid, false otherwise.
@@ -163,6 +165,7 @@ const PermitTypes: TypedData = {
 /**
  * Generates typed data to be signed that allows Aperture's UniV3Automan contract to operate the specified position until the specified deadline.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param positionId Id of the position to generate permission for.
  * @param deadlineEpochSeconds The signed permission will be valid until this deadline specified in number of seconds since UNIX epoch.
  * @param publicClient Viem public client.

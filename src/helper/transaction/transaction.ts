@@ -133,6 +133,7 @@ export function filterLogsByEvent(
 /**
  * Set or revoke Aperture UniV3 Automan contract as an operator of the signer's UniV3 positions.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param approved True if setting approval, false if revoking approval.
  * @returns The unsigned tx setting or revoking approval.
  */

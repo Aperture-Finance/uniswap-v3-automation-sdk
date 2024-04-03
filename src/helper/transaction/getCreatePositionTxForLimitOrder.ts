@@ -42,6 +42,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
  * @param poolFee The fee tier of the liquidity pool that the limit order position should be created on.
  * @param deadlineEpochSeconds Transaction deadline in seconds since UNIX epoch.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param widthMultiplier The width multiplier of the tick range in terms of tick spacing.
  * @returns The unsigned transaction that creates such a position.

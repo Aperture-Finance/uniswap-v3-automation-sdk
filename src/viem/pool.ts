@@ -67,6 +67,7 @@ export function computePoolAddress(
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
  * @param basicInfo Basic position info.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns The constructed Uniswap SDK Pool object where the specified position resides.
@@ -123,6 +124,7 @@ export function getPoolContract(
  * @param tokenB The other token in the pool.
  * @param fee Fee tier of the pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns The constructed Uniswap SDK Pool object.
@@ -449,6 +451,7 @@ export function readTickToLiquidityMap(
  * Each tick consumes about 100k gas, so this method may fail if the number of ticks exceeds 3k assuming the provider
  * gas limit is 300m.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
  * @param tickLower The lower tick to fetch liquidity for.
  * @param tickUpper The upper tick to fetch liquidity for.
@@ -489,6 +492,7 @@ export interface Liquidity {
 /**
  * Fetches the liquidity within the tick range for the specified pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
  * @param _tickLower The lower tick to fetch liquidity for, defaults to half of the current price.
  * @param _tickUpper The upper tick to fetch liquidity for, defaults to twice of the current price.

@@ -11,6 +11,7 @@ import { BasicPositionInfo } from './types';
  * Fetches basic info for all positions of the specified owner.
  * @param owner The owner.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns A map where each key is a position id and its associated value is BasicPositionInfo of that position.
  */
@@ -43,6 +44,7 @@ export async function getAllPositionBasicInfoByOwner(
  * Lists all position ids owned by the specified owner.
  * @param owner The owner.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns List of all position ids of the specified owner.
  */

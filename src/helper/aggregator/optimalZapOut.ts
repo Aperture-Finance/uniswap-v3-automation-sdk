@@ -15,6 +15,7 @@ import { quote } from './quote';
 /**
  * Get the optimal amount of tokens to zap out of a position.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position ID.
  * @param zeroForOne Whether to swap token0 for token1 or vice versa.
  * @param feeBips The percentage of position value to pay as a fee, multiplied by 1e18.

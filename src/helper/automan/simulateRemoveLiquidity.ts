@@ -25,6 +25,7 @@ type RemoveLiquidityReturnType = UnwrapPromise<
 /**
  * Simulate a `removeLiquidity` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to burn.

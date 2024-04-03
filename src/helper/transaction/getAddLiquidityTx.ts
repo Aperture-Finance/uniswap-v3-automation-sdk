@@ -17,6 +17,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
  * `increaseLiquidityOptions.useNative` should be set to `getNativeEther(chainId)`.
  * @param increaseLiquidityOptions Increase liquidity options.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param liquidityToAdd The amount of liquidity to add to the existing position.
  * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.

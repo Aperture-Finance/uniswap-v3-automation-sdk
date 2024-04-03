@@ -12,6 +12,7 @@ import { PositionDetails } from '../position';
 /**
  * Generates an unsigned transaction that decreases liquidity from the specified position and withdraws one token.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param ownerAddress The owner address.
  * @param positionId The position ID.
  * @param zeroForOne Whether to swap token0 for token1 or vice versa.

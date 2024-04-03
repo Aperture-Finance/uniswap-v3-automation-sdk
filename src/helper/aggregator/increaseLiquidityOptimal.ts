@@ -23,6 +23,7 @@ import { SwapRoute, quote } from './quote';
 /**
  * Get the optimal amount of liquidity to increase for a given pool and token amounts.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param position The current position to simulate the call from.
  * @param increaseOptions Increase liquidity options.

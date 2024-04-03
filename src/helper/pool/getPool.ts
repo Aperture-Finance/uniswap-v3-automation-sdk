@@ -22,6 +22,7 @@ import { computePoolAddress } from './pool';
  * @param tokenB The other token in the pool.
  * @param fee Fee tier of the pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param blockTag Optional block tag to query.
  * @returns The constructed Uniswap SDK Pool object.
@@ -99,6 +100,7 @@ export function getPoolContract(
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
  * @param basicInfo Basic position info.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns The constructed Uniswap SDK Pool object where the specified position resides.
  */

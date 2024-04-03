@@ -291,6 +291,7 @@ function checkTicks(mintParams: MintParams) {
 /**
  * Simulate a `mintOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param mintParams The mint parameters.
@@ -363,6 +364,7 @@ export async function simulateMintOptimal(
 /**
  * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param position The current position to simulate the call from.
@@ -439,6 +441,7 @@ export async function simulateIncreaseLiquidityOptimal(
 /**
  * Simulate a `removeLiquidity` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to burn.
@@ -526,6 +529,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
 /**
  * Simulate a `rebalance` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to rebalance.

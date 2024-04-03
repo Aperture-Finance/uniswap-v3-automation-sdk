@@ -11,6 +11,7 @@ import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the specified position.
  * @param positionId Position id.
  * @param slippageTolerance How much the reinvested amount of either token0 or token1 is allowed to change unfavorably.

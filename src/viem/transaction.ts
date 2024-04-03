@@ -33,6 +33,7 @@ export function filterLogsByEvent(
 /**
  * Parses the specified transaction receipt and extracts the position id (token id) minted by NPM within the transaction.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param txReceipt The transaction receipt to parse.
  * @param recipientAddress The receipt address to which the position is minted.
  * @returns If a position is minted to `recipientAddress`, the position id is returned. If there is more than one, the first is returned. If there are none, `undefined` is returned.

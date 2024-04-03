@@ -16,6 +16,7 @@ import { PositionDetails } from '../position';
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
  * @param increaseOptions Increase liquidity options.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param recipient The recipient address.

@@ -23,6 +23,7 @@ export type IncreaseLiquidityOptimalReturnType = UnwrapPromise<
 /**
  * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param position The current position to simulate the call from.

@@ -15,6 +15,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
  * @param position The position to create.
  * @param options Options.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns The unsigned tx.
  */
