@@ -21,6 +21,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.INonfungiblePositionManager__factory>;
     getContractFactory(
+      name: "IPCSV3NonfungiblePositionManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPCSV3NonfungiblePositionManager__factory>;
+    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -48,6 +52,38 @@ declare module "hardhat/types/runtime" {
       name: "IERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
+    getContractFactory(
+      name: "IPancakeV3SwapCallback",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3SwapCallback__factory>;
+    getContractFactory(
+      name: "IPancakeV3Pool",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3Pool__factory>;
+    getContractFactory(
+      name: "IPancakeV3PoolActions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3PoolActions__factory>;
+    getContractFactory(
+      name: "IPancakeV3PoolDerivedState",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3PoolDerivedState__factory>;
+    getContractFactory(
+      name: "IPancakeV3PoolEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3PoolEvents__factory>;
+    getContractFactory(
+      name: "IPancakeV3PoolImmutables",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3PoolImmutables__factory>;
+    getContractFactory(
+      name: "IPancakeV3PoolOwnerActions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3PoolOwnerActions__factory>;
+    getContractFactory(
+      name: "IPancakeV3PoolState",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPancakeV3PoolState__factory>;
     getContractFactory(
       name: "IUniswapV3SwapCallback",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -113,21 +149,69 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SafeTransferLib__factory>;
     getContractFactory(
-      name: "Payments",
+      name: "Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Payments__factory>;
+    ): Promise<Contracts.Automan__factory>;
     getContractFactory(
-      name: "SwapRouter",
+      name: "PancakeV3Callback",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SwapRouter__factory>;
+    ): Promise<Contracts.PancakeV3Callback__factory>;
+    getContractFactory(
+      name: "UniswapV3Callback",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniswapV3Callback__factory>;
+    getContractFactory(
+      name: "Immutables",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Immutables__factory>;
+    getContractFactory(
+      name: "PCSV3Immutables",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PCSV3Immutables__factory>;
     getContractFactory(
       name: "UniV3Immutables",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniV3Immutables__factory>;
     getContractFactory(
+      name: "OptimalSwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OptimalSwapRouter__factory>;
+    getContractFactory(
+      name: "Payments",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Payments__factory>;
+    getContractFactory(
+      name: "PCSV3SwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PCSV3SwapRouter__factory>;
+    getContractFactory(
+      name: "SwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SwapRouter__factory>;
+    getContractFactory(
+      name: "UniV3SwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniV3SwapRouter__factory>;
+    getContractFactory(
+      name: "IAutoman",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAutoman__factory>;
+    getContractFactory(
+      name: "IPCSV3Automan",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPCSV3Automan__factory>;
+    getContractFactory(
       name: "IUniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniV3Automan__factory>;
+    getContractFactory(
+      name: "IImmutables",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IImmutables__factory>;
+    getContractFactory(
+      name: "IPCSV3Immutables",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPCSV3Immutables__factory>;
     getContractFactory(
       name: "IUniV3Immutables",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -137,9 +221,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
     getContractFactory(
-      name: "OptimalSwapRouter",
+      name: "PCSV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.OptimalSwapRouter__factory>;
+    ): Promise<Contracts.PCSV3Automan__factory>;
+    getContractFactory(
+      name: "PCSV3OptimalSwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PCSV3OptimalSwapRouter__factory>;
     getContractFactory(
       name: "RouterProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -148,6 +236,10 @@ declare module "hardhat/types/runtime" {
       name: "UniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniV3Automan__factory>;
+    getContractFactory(
+      name: "UniV3OptimalSwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniV3OptimalSwapRouter__factory>;
 
     getContractAt(
       name: "FullMath",
@@ -159,6 +251,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.INonfungiblePositionManager>;
+    getContractAt(
+      name: "IPCSV3NonfungiblePositionManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPCSV3NonfungiblePositionManager>;
     getContractAt(
       name: "Ownable",
       address: string,
@@ -194,6 +291,46 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
+    getContractAt(
+      name: "IPancakeV3SwapCallback",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3SwapCallback>;
+    getContractAt(
+      name: "IPancakeV3Pool",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3Pool>;
+    getContractAt(
+      name: "IPancakeV3PoolActions",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3PoolActions>;
+    getContractAt(
+      name: "IPancakeV3PoolDerivedState",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3PoolDerivedState>;
+    getContractAt(
+      name: "IPancakeV3PoolEvents",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3PoolEvents>;
+    getContractAt(
+      name: "IPancakeV3PoolImmutables",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3PoolImmutables>;
+    getContractAt(
+      name: "IPancakeV3PoolOwnerActions",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3PoolOwnerActions>;
+    getContractAt(
+      name: "IPancakeV3PoolState",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPancakeV3PoolState>;
     getContractAt(
       name: "IUniswapV3SwapCallback",
       address: string,
@@ -275,25 +412,85 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SafeTransferLib>;
     getContractAt(
-      name: "Payments",
+      name: "Automan",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Payments>;
+    ): Promise<Contracts.Automan>;
     getContractAt(
-      name: "SwapRouter",
+      name: "PancakeV3Callback",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.SwapRouter>;
+    ): Promise<Contracts.PancakeV3Callback>;
+    getContractAt(
+      name: "UniswapV3Callback",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniswapV3Callback>;
+    getContractAt(
+      name: "Immutables",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Immutables>;
+    getContractAt(
+      name: "PCSV3Immutables",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PCSV3Immutables>;
     getContractAt(
       name: "UniV3Immutables",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.UniV3Immutables>;
     getContractAt(
+      name: "OptimalSwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OptimalSwapRouter>;
+    getContractAt(
+      name: "Payments",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Payments>;
+    getContractAt(
+      name: "PCSV3SwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PCSV3SwapRouter>;
+    getContractAt(
+      name: "SwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SwapRouter>;
+    getContractAt(
+      name: "UniV3SwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniV3SwapRouter>;
+    getContractAt(
+      name: "IAutoman",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAutoman>;
+    getContractAt(
+      name: "IPCSV3Automan",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPCSV3Automan>;
+    getContractAt(
       name: "IUniV3Automan",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniV3Automan>;
+    getContractAt(
+      name: "IImmutables",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IImmutables>;
+    getContractAt(
+      name: "IPCSV3Immutables",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPCSV3Immutables>;
     getContractAt(
       name: "IUniV3Immutables",
       address: string,
@@ -305,10 +502,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OptimalSwap>;
     getContractAt(
-      name: "OptimalSwapRouter",
+      name: "PCSV3Automan",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.OptimalSwapRouter>;
+    ): Promise<Contracts.PCSV3Automan>;
+    getContractAt(
+      name: "PCSV3OptimalSwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PCSV3OptimalSwapRouter>;
     getContractAt(
       name: "RouterProxy",
       address: string,
@@ -319,6 +521,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.UniV3Automan>;
+    getContractAt(
+      name: "UniV3OptimalSwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniV3OptimalSwapRouter>;
 
     // default types
     getContractFactory(

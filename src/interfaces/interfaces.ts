@@ -500,14 +500,20 @@ const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
     'The owner address of the position; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
-  amm: ApertureSupportedAmmEnum.default(
+});
+const TriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
+  taskId: z
+    .number()
+    .nonnegative()
+    .describe("The task id of the trigger in Aperture's automation service."),
+});
+
+export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
+  automatedMarketMaker: AutomatedMarketMakerEnum.default(
     AutomatedMarketMakerEnum.enum.UNISWAP_V3,
   ).describe(
     'The automated market maker. If not specified, then this will be UNISWAP_V3.',
   ),
-});
-
-export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   nftId: z
     .string()
     .min(1)
@@ -529,19 +535,10 @@ export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
 });
 export type CreateTriggerPayload = z.infer<typeof CreateTriggerPayloadSchema>;
 
-export const DeleteTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
-  taskId: z
-    .number()
-    .nonnegative()
-    .describe("The task id of the trigger in Aperture's automation service."),
-});
+export const DeleteTriggerPayloadSchema = TriggerIdentifierSchema;
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
-export const UpdateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
-  taskId: z
-    .number()
-    .nonnegative()
-    .describe("The task id of the trigger in Aperture's automation service."),
+export const UpdateTriggerPayloadSchema = TriggerIdentifierSchema.extend({
   action: ActionSchema.optional().describe(
     'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
   ),
