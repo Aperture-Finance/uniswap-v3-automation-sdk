@@ -1,6 +1,7 @@
 import { ApertureSupportedChainId } from '@/index';
 import { Provider } from '@ethersproject/providers';
 import { CurrencyAmount } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { getBasicPositionInfo } from './getBasicPositionInfo';
@@ -18,6 +19,7 @@ import { BasicPositionInfo, CollectableTokenAmounts } from './types';
  */
 export async function getCollectableTokenAmounts(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   provider: Provider,
   basicPositionInfo?: BasicPositionInfo,
@@ -25,11 +27,12 @@ export async function getCollectableTokenAmounts(
   if (basicPositionInfo === undefined) {
     basicPositionInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       provider,
     );
   }
-  const npm = getNPM(chainId, provider);
+  const npm = getNPM(chainId, amm, provider);
   const owner = await npm.ownerOf(positionId);
   const MAX_UINT128 = BigNumber.from(2).pow(128).sub(1);
   const { amount0, amount1 } = await npm.callStatic.collect(

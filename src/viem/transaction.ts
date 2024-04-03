@@ -39,12 +39,13 @@ export function filterLogsByEvent(
  */
 export function getMintedPositionIdFromTxReceipt(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   txReceipt: TransactionReceipt,
   recipientAddress: string,
 ): bigint | undefined {
   const npmAddress = getAMMInfo(
     chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    amm,
   )!.nonfungiblePositionManager.toLowerCase();
   const TransferEventAbi = getAbiItem({
     abi: INonfungiblePositionManager__factory.abi,

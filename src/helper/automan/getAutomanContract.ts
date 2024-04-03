@@ -13,8 +13,7 @@ export function getAutomanContract(
   provider: Provider | Signer,
 ) {
   return IUniV3Automan__factory.connect(
-    getAMMInfo(chainId, amm)!
-      .apertureAutoman,
+    getAMMInfo(chainId, amm)!.apertureAutoman,
     provider,
   );
 }

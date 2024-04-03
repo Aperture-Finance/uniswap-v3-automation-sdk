@@ -32,6 +32,7 @@ export async function getCreatePositionTx(
       position.pool.token1,
       position.pool.fee,
       chainId,
+      amm,
       provider,
     );
   } catch (e) {
@@ -45,7 +46,7 @@ export async function getCreatePositionTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId,amm)!,
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

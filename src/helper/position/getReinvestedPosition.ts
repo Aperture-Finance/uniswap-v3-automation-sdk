@@ -31,7 +31,7 @@ export async function getReinvestedPosition(
   amount0: BigNumber;
   amount1: BigNumber;
 }> {
-  const owner = await getNPM(chainId, provider).ownerOf(positionId, {
+  const owner = await getNPM(chainId, amm, provider).ownerOf(positionId, {
     blockTag: blockNumber,
   });
   const { functionFragment, data } = getAutomanReinvestCallInfo(
@@ -41,8 +41,7 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getAMMInfo(chainId, amm)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     // forge an operator approval using state overrides.

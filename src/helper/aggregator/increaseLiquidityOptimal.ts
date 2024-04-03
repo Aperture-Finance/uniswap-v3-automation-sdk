@@ -80,6 +80,7 @@ export async function increaseLiquidityOptimal(
   }
   const poolPromise = increaseLiquidityOptimalPool(
     chainId,
+    amm,
     provider,
     fromAddress,
     position,
@@ -94,6 +95,7 @@ export async function increaseLiquidityOptimal(
       poolPromise,
       increaseLiquidityOptimalRouter(
         chainId,
+        amm,
         provider,
         fromAddress,
         position,
@@ -214,11 +216,8 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimalSwapRouter, factory } = getAMMInfo(
-      chainId,
-      amm,
-    )!;
-    const automan = getAutomanContract(chainId, provider);
+    const { optimalSwapRouter, factory } = getAMMInfo(chainId, amm)!;
+    const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
@@ -247,6 +246,7 @@ async function getIncreaseLiquidityOptimalSwapData(
     return {
       swapData: encodeOptimalSwapData(
         chainId,
+        amm,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,

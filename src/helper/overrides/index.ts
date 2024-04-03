@@ -142,7 +142,8 @@ export function getNPMApprovalOverrides(
   owner: string,
 ): StateOverrides {
   const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
-    chainId, amm,
+    chainId,
+    amm,
   )!;
   return {
     [nonfungiblePositionManager]: {
@@ -162,8 +163,7 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: string,
 ): StateOverrides {
   return {
-    [getAMMInfo(chainId, amm)!
-      .apertureAutoman]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           DAC.encode(

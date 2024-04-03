@@ -48,6 +48,7 @@ export async function getRemoveLiquidityTx(
   }
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
+    amm,
     removeLiquidityOptions.tokenId.toString(),
     provider,
     {

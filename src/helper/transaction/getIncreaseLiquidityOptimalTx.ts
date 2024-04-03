@@ -40,6 +40,7 @@ export async function getIncreaseLiquidityOptimalTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       increaseOptions.tokenId.toString(),
       provider,
     ));
@@ -76,7 +77,14 @@ export async function getIncreaseLiquidityOptimalTx(
 
   // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
   const incrementalPosition = new Position({
-    pool: await getPool(token0, token1, position.pool.fee, chainId, provider),
+    pool: await getPool(
+      token0,
+      token1,
+      position.pool.fee,
+      chainId,
+      amm,
+      provider,
+    ),
     liquidity: liquidity.toString(),
     tickLower: position.tickLower,
     tickUpper: position.tickUpper,
@@ -98,8 +106,7 @@ export async function getIncreaseLiquidityOptimalTx(
   );
   return {
     tx: {
-      to: getAMMInfo(chainId, amm)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       value,
     },

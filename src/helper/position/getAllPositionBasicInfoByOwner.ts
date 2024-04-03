@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber } from 'ethers';
 
 import { getBasicPositionInfo } from './getBasicPositionInfo';
@@ -16,12 +17,18 @@ import { BasicPositionInfo } from './types';
 export async function getAllPositionBasicInfoByOwner(
   owner: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<Map<string, BasicPositionInfo>> {
-  const positionIds = await getPositionIdsByOwner(owner, chainId, provider);
+  const positionIds = await getPositionIdsByOwner(
+    owner,
+    chainId,
+    amm,
+    provider,
+  );
   const positionInfos = await Promise.all(
     positionIds.map((positionId) =>
-      getBasicPositionInfo(chainId, positionId, provider),
+      getBasicPositionInfo(chainId, amm, positionId, provider),
     ),
   );
   return new Map(
@@ -42,9 +49,10 @@ export async function getAllPositionBasicInfoByOwner(
 export async function getPositionIdsByOwner(
   owner: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<BigNumber[]> {
-  const npm = getNPM(chainId, provider);
+  const npm = getNPM(chainId, amm, provider);
   const numPositions = (await npm.balanceOf(owner)).toNumber();
   return Promise.all(
     [...Array(numPositions).keys()].map((index) =>

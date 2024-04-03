@@ -36,12 +36,14 @@ export async function getCollectTx(
   if (basicPositionInfo === undefined) {
     basicPositionInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       provider,
     );
   }
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
+    amm,
     positionId.toString(),
     provider,
     basicPositionInfo,

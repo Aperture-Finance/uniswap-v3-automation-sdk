@@ -1,4 +1,5 @@
 import { ApertureSupportedChainId, fractionToBig } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -9,6 +10,7 @@ import { MintParams } from './types';
 
 type IRebalanceParams = {
   chainId: ApertureSupportedChainId;
+  amm: AutomatedMarketMakerEnum;
   publicClient: PublicClient;
   from?: Address;
   owner: Address;
@@ -23,9 +25,10 @@ type IRebalanceParams = {
  * calculate the price impact of this rebalance, priceImpact = abs(exchangePrice / currentPoolPrice - 1).
  */
 export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
-  const { chainId, publicClient, tokenId, blockNumber } = params;
+  const { chainId, amm, publicClient, tokenId, blockNumber } = params;
   const position = await getPosition(
     chainId,
+    amm,
     tokenId,
     publicClient,
     blockNumber,
@@ -44,6 +47,7 @@ export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
 async function getExchangePrice(params: IRebalanceParams) {
   const {
     chainId,
+    amm,
     publicClient,
     owner,
     mintParams,
@@ -58,6 +62,7 @@ async function getExchangePrice(params: IRebalanceParams) {
     await Promise.all([
       simulateRemoveLiquidity(
         chainId,
+        amm,
         publicClient,
         from,
         owner,
@@ -69,6 +74,7 @@ async function getExchangePrice(params: IRebalanceParams) {
       ),
       simulateRebalance(
         chainId,
+        amm,
         publicClient,
         from,
         owner,

@@ -31,11 +31,19 @@ export async function getPool(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider?: Provider,
   blockTag?: BlockTag,
 ): Promise<Pool> {
   provider = provider ?? getPublicProvider(chainId);
-  const poolContract = getPoolContract(tokenA, tokenB, fee, chainId, provider);
+  const poolContract = getPoolContract(
+    tokenA,
+    tokenB,
+    fee,
+    chainId,
+    amm,
+    provider,
+  );
   const opts = { blockTag };
   // If the specified pool has not been created yet, then the slot0() and liquidity() calls should fail (and throw an error).
   // Also update the tokens to the canonical type.
@@ -82,12 +90,7 @@ export function getPoolContract(
   provider?: Provider | Signer,
 ) {
   return IUniswapV3Pool__factory.connect(
-    computePoolAddress(
-      getAMMInfo(chainId, amm)!.factory,
-      tokenA,
-      tokenB,
-      fee,
-    ),
+    computePoolAddress(getAMMInfo(chainId, amm)!.factory, tokenA, tokenB, fee),
     provider ?? getPublicProvider(chainId),
   );
 }
@@ -102,6 +105,7 @@ export function getPoolContract(
 export async function getPoolFromBasicPositionInfo(
   basicInfo: BasicPositionInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<Pool> {
   return getPool(
@@ -109,6 +113,7 @@ export async function getPoolFromBasicPositionInfo(
     basicInfo.token1,
     basicInfo.fee,
     chainId,
+    amm,
     provider,
   );
 }

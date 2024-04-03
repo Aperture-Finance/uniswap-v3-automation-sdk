@@ -43,6 +43,7 @@ export async function getZapOutTx(
   }
   const { amount, swapData } = await optimalZapOut(
     chainId,
+    amm,
     positionId,
     zeroForOne,
     0,
@@ -69,8 +70,7 @@ export async function getZapOutTx(
   return {
     tx: {
       from: ownerAddress,
-      to: getAMMInfo(chainId, amm)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     amount,

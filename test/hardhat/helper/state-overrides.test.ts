@@ -1,6 +1,5 @@
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomiclabs/hardhat-ethers';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
 import { zeroAddress } from 'viem';
@@ -25,6 +24,7 @@ import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
   WHALE_ADDRESS,
+  amm,
   chainId,
   eoa,
   expect,
@@ -40,15 +40,11 @@ describe('Helper - State overrides tests', function () {
     const automanContract = await new UniV3Automan__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
     await automanContract.deployed();
-    const npm = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!.nonfungiblePositionManager;
+    const npm = getAMMInfo(chainId, amm)!.nonfungiblePositionManager;
     const slot = computeOperatorApprovalSlot(eoa, automanContract.address);
     expect(slot).to.equal(
       '0x0e19f2cddd2e7388039c7ef081490ef6bd2600540ca6caf0f478dc7dfebe509b',
@@ -56,7 +52,7 @@ describe('Helper - State overrides tests', function () {
     expect(await hardhatForkProvider.getStorageAt(npm, slot)).to.equal(
       defaultAbiCoder.encode(['bool'], [false]),
     );
-    await getNPM(chainId, impersonatedOwnerSigner).setApprovalForAll(
+    await getNPM(chainId, amm, impersonatedOwnerSigner).setApprovalForAll(
       automanContract.address,
       true,
     );
@@ -88,10 +84,7 @@ describe('Helper - State overrides tests', function () {
     const provider = new ethers.providers.InfuraProvider(chainId);
     const amount0Desired = '1000000000000000000';
     const amount1Desired = '100000000';
-    const { apertureAutoman } = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!;
+    const { apertureAutoman } = getAMMInfo(chainId, amm)!;
     const stateOverrides = {
       ...(await getERC20Overrides(
         WETH_ADDRESS,
@@ -141,6 +134,7 @@ describe('Helper - State overrides tests', function () {
       token1,
       fee,
       chainId,
+      amm,
       undefined,
       blockNumber,
     );
@@ -165,6 +159,7 @@ describe('Helper - State overrides tests', function () {
     };
     const { liquidity, amount0, amount1 } = await simulateMintOptimal(
       chainId,
+      amm,
       provider,
       eoa,
       mintParams,
@@ -188,6 +183,7 @@ describe('Helper - State overrides tests', function () {
 
     const position = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       positionId,
       provider,
       blockNumber,
@@ -195,6 +191,7 @@ describe('Helper - State overrides tests', function () {
 
     const { amount0, amount1 } = await simulateRemoveLiquidity(
       chainId,
+      amm,
       provider,
       position.owner,
       position.owner,
@@ -217,6 +214,7 @@ describe('Helper - State overrides tests', function () {
     const positionId = 4;
     const { position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       positionId,
       provider,
     );
@@ -230,6 +228,7 @@ describe('Helper - State overrides tests', function () {
     };
     const { amount0, amount1 } = await simulateIncreaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       eoa,
       position,

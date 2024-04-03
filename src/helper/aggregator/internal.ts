@@ -54,10 +54,8 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimalSwapRouter, factory } = getAMMInfo(
-      chainId, amm,
-    )!;
-    const automan = getAutomanContract(chainId, provider);
+    const { optimalSwapRouter, factory } = getAMMInfo(chainId, amm)!;
+    const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
@@ -89,6 +87,7 @@ export async function getOptimalMintSwapData(
     return {
       swapData: encodeOptimalSwapData(
         chainId,
+        amm,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,

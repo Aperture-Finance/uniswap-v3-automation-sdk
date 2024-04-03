@@ -1,8 +1,10 @@
+import {
+  FeeAmount,
+  computePoolAddress as _computePoolAddress,
+} from '@aperture_finance/uniswap-v3-sdk';
+import { Token } from '@uniswap/sdk-core';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
-import { Token } from '@uniswap/sdk-core';
-import { FeeAmount,  computePoolAddress as _computePoolAddress } from '@aperture_finance/uniswap-v3-sdk';
-
 
 import {
   CreateTriggerPayload,

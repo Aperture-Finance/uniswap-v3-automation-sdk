@@ -27,10 +27,8 @@ export async function checkPositionApprovalStatus(
   amm: AutomatedMarketMakerEnum,
   provider: ethers.providers.Provider,
 ): Promise<PositionApprovalStatus> {
-  const automan = getAMMInfo(
-    chainId, amm,
-  )!.apertureAutoman;
-  const npm = getNPM(chainId, provider);
+  const automan = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const npm = getNPM(chainId, amm, provider);
   let owner, approved;
   try {
     [owner, approved] = await Promise.all([
@@ -74,7 +72,9 @@ export async function checkPositionApprovalStatus(
       reason: 'missingSignedPermission',
     };
   }
-  if (await checkPositionPermit(positionId, permitInfo, chainId, provider)) {
+  if (
+    await checkPositionPermit(positionId, permitInfo, chainId, amm, provider)
+  ) {
     return {
       owner,
       hasAuthority: true,
@@ -104,10 +104,8 @@ export async function checkPositionPermit(
   amm: AutomatedMarketMakerEnum,
   provider: ethers.providers.Provider,
 ) {
-  const automan = getAMMInfo(
-    chainId, amm,
-  )!.apertureAutoman;
-  const npm = getNPM(chainId, provider);
+  const automan = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const npm = getNPM(chainId, amm, provider);
   try {
     const permitSignature = ethers.utils.splitSignature(permitInfo.signature);
     await npm.callStatic.permit(
@@ -145,9 +143,7 @@ export async function generateTypedDataForPermit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>;
 }> {
-  const ammInfo = getAMMInfo(
-    chainId, amm,
-  )!;
+  const ammInfo = getAMMInfo(chainId, amm)!;
   return {
     domain: {
       name: 'Uniswap V3 Positions NFT-V1',
@@ -166,7 +162,7 @@ export async function generateTypedDataForPermit(
     value: {
       spender: ammInfo.apertureAutoman,
       tokenId: positionId,
-      nonce: (await getNPM(chainId, provider).positions(positionId)).nonce,
+      nonce: (await getNPM(chainId, amm, provider).positions(positionId)).nonce,
       deadline: deadlineEpochSeconds,
     },
   };

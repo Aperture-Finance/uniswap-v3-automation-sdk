@@ -7,7 +7,6 @@ import {
   tickToPrice,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { ethers } from 'hardhat';
 import JSBI from 'jsbi';
@@ -45,6 +44,7 @@ import {
 } from '../../../src/helper';
 import {
   TEST_WALLET_PRIVATE_KEY,
+  amm,
   chainId,
   deadline,
   eoa,
@@ -58,14 +58,11 @@ describe('Helper - Position util tests', function () {
 
   beforeEach(async function () {
     await resetHardhatNetwork();
-    inRangePosition = await getPosition(chainId, 4, hardhatForkProvider);
+    inRangePosition = await getPosition(chainId, amm, 4, hardhatForkProvider);
   });
 
   it('Position approval', async function () {
-    const automanAddress = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!.apertureAutoman;
+    const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
     // This position is owned by `eoa`.
     const positionId = 4;
     expect(
@@ -73,6 +70,7 @@ describe('Helper - Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.deep.equal({
@@ -81,13 +79,14 @@ describe('Helper - Position util tests', function () {
       reason: 'missingSignedPermission',
     });
 
-    const npm = getNPM(chainId, await ethers.getImpersonatedSigner(eoa));
+    const npm = getNPM(chainId, amm, await ethers.getImpersonatedSigner(eoa));
     await npm.setApprovalForAll(automanAddress, true);
     expect(
       await checkPositionApprovalStatus(
         positionId,
         undefined,
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.deep.equal({
@@ -102,6 +101,7 @@ describe('Helper - Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.deep.include({
@@ -114,6 +114,7 @@ describe('Helper - Position util tests', function () {
         0, // Nonexistent position id.
         undefined,
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.deep.include({
@@ -125,6 +126,7 @@ describe('Helper - Position util tests', function () {
     const wallet = new ethers.Wallet(TEST_WALLET_PRIVATE_KEY);
     const permitTypedData = await generateTypedDataForPermit(
       chainId,
+      amm,
       positionId,
       deadline,
       hardhatForkProvider,
@@ -147,6 +149,7 @@ describe('Helper - Position util tests', function () {
           signature,
         },
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.deep.include({
@@ -157,6 +160,7 @@ describe('Helper - Position util tests', function () {
     // Test permit message with an incorrect position id.
     const anotherPermitTypedData = await generateTypedDataForPermit(
       chainId,
+      amm,
       positionId + 1,
       deadline,
       hardhatForkProvider,
@@ -174,6 +178,7 @@ describe('Helper - Position util tests', function () {
           signature: anotherSignature,
         },
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.deep.include({
@@ -185,6 +190,7 @@ describe('Helper - Position util tests', function () {
   it('Position in-range', async function () {
     const outOfRangePosition = await getPosition(
       chainId,
+      amm,
       7,
       hardhatForkProvider,
     );
@@ -193,7 +199,7 @@ describe('Helper - Position util tests', function () {
   });
 
   it('Token Svg', async function () {
-    const url = await getTokenSvg(chainId, 4, hardhatForkProvider);
+    const url = await getTokenSvg(chainId, amm, 4, hardhatForkProvider);
     expect(url.toString().slice(0, 60)).to.equal(
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjkwIiBoZWlnaHQ9Ij',
     );
@@ -393,17 +399,20 @@ describe('Helper - Position util tests', function () {
     const positionId = 4;
     const position = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );
     const colletableTokenAmounts = await getCollectableTokenAmounts(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
       position,
     );
     const viewOnlyColletableTokenAmounts = await viewCollectableTokenAmounts(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
       position,
@@ -413,6 +422,7 @@ describe('Helper - Position util tests', function () {
     );
     const positionDetails = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );
@@ -425,12 +435,13 @@ describe('Helper - Position util tests', function () {
   it('Test get position details', async function () {
     const { owner, position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       4,
       hardhatForkProvider,
     );
     expect(owner).to.equal(eoa);
     expect(position).to.deep.equal(
-      await getPosition(chainId, 4, hardhatForkProvider),
+      await getPosition(chainId, amm, 4, hardhatForkProvider),
     );
   });
 
@@ -438,10 +449,16 @@ describe('Helper - Position util tests', function () {
     const provider = getPublicProvider(chainId);
     // An address with 24 positions on mainnet.
     const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
-    const positions = await getAllPositionsDetails(address, chainId, provider);
+    const positions = await getAllPositionsDetails(
+      address,
+      chainId,
+      amm,
+      provider,
+    );
     const basicPositions = await getAllPositionBasicInfoByOwner(
       address,
       chainId,
+      amm,
       provider,
     );
     expect(positions.size).to.equal(basicPositions.size);
@@ -459,20 +476,18 @@ describe('Helper - Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { apertureAutoman } = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!;
+    const { apertureAutoman } = getAMMInfo(chainId, amm)!;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 761879;
     const blockTag = 119626480;
-    const npm = getNPM(chainId, provider);
+    const npm = getNPM(chainId, amm, provider);
     const opts = { blockTag };
     const owner = await npm.ownerOf(positionId, opts);
     expect(await npm.isApprovedForAll(owner, apertureAutoman, opts)).to.be
       .false;
     const { liquidity } = await getReinvestedPosition(
       chainId,
+      amm,
       positionId,
       provider,
       blockTag,
@@ -485,6 +500,7 @@ describe('Helper - Position util tests', function () {
     await npm.connect(signer).setApprovalForAll(apertureAutoman, true);
     const { liquidity: liquidityBefore } = await getPosition(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );
@@ -499,6 +515,7 @@ describe('Helper - Position util tests', function () {
     });
     const { liquidity: liquidityAfter } = await getPosition(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );

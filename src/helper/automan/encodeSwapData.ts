@@ -41,8 +41,7 @@ export function encodeOptimalSwapData(
   return solidityPack(
     ['address', 'bytes'],
     [
-      getAMMInfo(chainId, amm)!
-        .optimalSwapRouter!,
+      getAMMInfo(chainId, amm)!.optimalSwapRouter!,
       solidityPack(
         [
           'address',

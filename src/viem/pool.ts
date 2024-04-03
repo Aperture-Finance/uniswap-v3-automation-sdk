@@ -74,6 +74,7 @@ export function computePoolAddress(
 export async function getPoolFromBasicPositionInfo(
   basicInfo: BasicPositionInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
@@ -82,6 +83,7 @@ export async function getPoolFromBasicPositionInfo(
     basicInfo.token1,
     basicInfo.fee,
     chainId,
+    amm,
     publicClient,
     blockNumber,
   );
@@ -95,6 +97,7 @@ export function getPoolContract(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
@@ -103,7 +106,7 @@ export function getPoolContract(
 > {
   return getContract({
     address: computePoolAddress(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
+      getAMMInfo(chainId, amm)!.factory,
       tokenA,
       tokenB,
       fee,
@@ -129,6 +132,7 @@ export async function getPool(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
@@ -138,6 +142,7 @@ export async function getPool(
     tokenB,
     fee,
     chainId,
+    amm,
     publicClient,
   );
   const opts = { blockNumber };
@@ -452,6 +457,7 @@ export function readTickToLiquidityMap(
  */
 async function getPopulatedTicksInRange(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   tickLower: number,
   tickUpper: number,
@@ -460,7 +466,7 @@ async function getPopulatedTicksInRange(
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
     computePoolAddress(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
+      getAMMInfo(chainId, amm)!.factory,
       pool.token0,
       pool.token1,
       pool.fee,
@@ -492,6 +498,7 @@ export interface Liquidity {
  */
 export async function getLiquidityArrayForPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   _tickLower = pool.tickCurrent - DOUBLE_TICK,
   _tickUpper = pool.tickCurrent + DOUBLE_TICK,
@@ -508,6 +515,7 @@ export async function getLiquidityArrayForPool(
   const { token0, token1 } = pool;
   const populatedTicks = await getPopulatedTicksInRange(
     chainId,
+    amm,
     pool,
     tickLower,
     tickUpper,

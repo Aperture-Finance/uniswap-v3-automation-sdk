@@ -141,9 +141,7 @@ export function getSetApprovalForAllTx(
   amm: AutomatedMarketMakerEnum,
   approved: boolean,
 ): TransactionRequest {
-  const ammInfo = getAMMInfo(
-    chainId,amm,
-  )!;
+  const ammInfo = getAMMInfo(chainId, amm)!;
   return getTxToNonfungiblePositionManager(
     ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(

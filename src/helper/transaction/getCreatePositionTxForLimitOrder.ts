@@ -76,6 +76,7 @@ export async function getCreatePositionTxForLimitOrder(
     outerLimitPrice.quoteCurrency,
     poolFee,
     chainId,
+    amm,
     provider,
   );
   const position = zeroToOne

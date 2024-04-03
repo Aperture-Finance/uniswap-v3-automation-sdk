@@ -31,14 +31,12 @@ export async function checkPositionApprovalStatus(
   positionId: bigint,
   permitInfo: PermitInfo | undefined,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<PositionApprovalStatus> {
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
-  const npm = getNPM(chainId, publicClient);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const npm = getNPM(chainId, amm, publicClient);
   const opts = { blockNumber };
   let owner, approved;
   try {
@@ -92,6 +90,7 @@ export async function checkPositionApprovalStatus(
       positionId,
       permitInfo,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     )
@@ -123,14 +122,12 @@ export async function checkPositionPermit(
   positionId: bigint,
   permitInfo: PermitInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
-  const npm = getNPM(chainId, publicClient);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const npm = getNPM(chainId, amm, publicClient);
   try {
     const permitSignature = hexToSignature(permitInfo.signature as Hex);
     await npm.simulate.permit(
@@ -173,16 +170,17 @@ const PermitTypes: TypedData = {
  */
 export async function generateTypedDataForPermit(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   deadlineEpochSeconds: bigint,
   publicClient?: PublicClient,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
   const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
     chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    amm,
   )!;
   const nonce = (
-    await getNPM(chainId, publicClient).read.positions([positionId])
+    await getNPM(chainId, amm, publicClient).read.positions([positionId])
   )[0];
   return {
     domain: {

@@ -38,9 +38,7 @@ export async function getReinvestTx(
     positionId,
     provider,
   );
-  const { apertureAutoman } = getAMMInfo(
-    chainId,amm,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const { functionFragment, data } = getAutomanReinvestCallInfo(
     positionId,
     deadlineEpochSeconds,

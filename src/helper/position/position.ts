@@ -18,10 +18,11 @@ import { Signer } from 'ethers';
  */
 export async function getTokenSvg(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   provider: Provider,
 ): Promise<URL> {
-  const npm = getNPM(chainId, provider);
+  const npm = getNPM(chainId, amm, provider);
   const uri = await npm.tokenURI(positionId);
   const json_uri = Buffer.from(
     uri.replace('data:application/json;base64,', ''),
@@ -48,8 +49,7 @@ export function getNPM(
   provider: Provider | Signer,
 ) {
   return INonfungiblePositionManager__factory.connect(
-    getAMMInfo(chainId, amm)!
-      .nonfungiblePositionManager,
+    getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
     provider,
   );
 }

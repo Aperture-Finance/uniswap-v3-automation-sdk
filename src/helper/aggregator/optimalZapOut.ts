@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import {
@@ -23,6 +24,7 @@ import { quote } from './quote';
  */
 export async function optimalZapOut(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   zeroForOne: boolean,
   feeBips: BigNumberish,
@@ -32,11 +34,13 @@ export async function optimalZapOut(
 ) {
   const position = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     provider,
   );
   const poolPromise = poolZapOut(
     chainId,
+    amm,
     provider,
     fromAddress,
     position,
@@ -50,6 +54,7 @@ export async function optimalZapOut(
     poolPromise,
     routerZapOut(
       chainId,
+      amm,
       provider,
       fromAddress,
       position,
@@ -68,6 +73,7 @@ export async function optimalZapOut(
 
 async function poolZapOut(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: PositionDetails,
@@ -76,6 +82,7 @@ async function poolZapOut(
 ) {
   const amount = await simulateDecreaseLiquiditySingle(
     chainId,
+    amm,
     provider,
     fromAddress,
     position.owner,
@@ -93,6 +100,7 @@ async function poolZapOut(
 
 async function routerZapOut(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: PositionDetails,
@@ -102,6 +110,7 @@ async function routerZapOut(
 ) {
   const swapData = await getZapOutSwapData(
     chainId,
+    amm,
     provider,
     fromAddress,
     position,
@@ -111,6 +120,7 @@ async function routerZapOut(
   );
   const amount = await simulateDecreaseLiquiditySingle(
     chainId,
+    amm,
     provider,
     fromAddress,
     position.owner,
@@ -129,6 +139,7 @@ async function routerZapOut(
 
 async function getZapOutSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: PositionDetails,
@@ -139,6 +150,7 @@ async function getZapOutSwapData(
   try {
     const { amount0, amount1 } = await simulateRemoveLiquidity(
       chainId,
+      amm,
       provider,
       fromAddress,
       position.owner,

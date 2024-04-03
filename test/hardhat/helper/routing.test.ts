@@ -1,5 +1,6 @@
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'hardhat';
 
 import { ApertureSupportedChainId } from '../../../src';
@@ -67,11 +68,12 @@ describe('Helper - Routing tests', function () {
 
   it('Test optimalMint', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const token0 = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f';
     const token1 = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1';
     const fee = FeeAmount.MEDIUM;
-    const pool = await getPool(token0, token1, fee, chainId);
+    const pool = await getPool(token0, token1, fee, chainId, amm);
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
       '1000000000',
@@ -90,6 +92,7 @@ describe('Helper - Routing tests', function () {
     );
     const { amount0, amount1 } = await optimalMint(
       chainId,
+      amm,
       token0Amount,
       token1Amount,
       fee,
@@ -114,10 +117,12 @@ describe('Helper - Routing tests', function () {
   // TODO: Test failed when running all tests, but succeeded when running single test
   it.skip('Test increaseLiquidityOptimal', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const positionId = 4;
     const { position, pool } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       positionId,
       provider,
     );
@@ -132,6 +137,7 @@ describe('Helper - Routing tests', function () {
     );
     const { amount0, amount1 } = await increaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       position,
       {
@@ -157,11 +163,13 @@ describe('Helper - Routing tests', function () {
 
   it('Test optimalRebalance', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const tokenId = 726230;
     const blockNumber = 119626480;
     const { pool, position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       tokenId,
       provider,
       blockNumber,
@@ -176,12 +184,13 @@ describe('Helper - Routing tests', function () {
     );
     const { liquidity } = await optimalRebalance(
       chainId,
+      amm,
       tokenId,
       tickLower,
       tickUpper,
       0,
       true,
-      await getNPM(chainId, provider).ownerOf(tokenId),
+      await getNPM(chainId, amm, provider).ownerOf(tokenId),
       0.1,
       provider,
       blockNumber,
@@ -199,14 +208,16 @@ describe('Helper - Routing tests', function () {
 
   it('Test optimal zap out', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const tokenId = 726230;
     const { amount } = await optimalZapOut(
       chainId,
+      amm,
       tokenId,
       false,
       1e12,
-      await getNPM(chainId, provider).ownerOf(tokenId),
+      await getNPM(chainId, amm, provider).ownerOf(tokenId),
       0.1,
       provider,
     );

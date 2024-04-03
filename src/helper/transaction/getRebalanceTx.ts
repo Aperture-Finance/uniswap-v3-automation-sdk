@@ -42,6 +42,7 @@ import { SimulatedAmounts } from './transaction';
 
 export async function getRebalanceTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   existingPositionId: BigNumberish,
   newPositionTickLower: number,
@@ -59,6 +60,7 @@ export async function getRebalanceTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       existingPositionId,
       provider,
     ));
@@ -69,6 +71,7 @@ export async function getRebalanceTx(
       const { amount0: receive0, amount1: receive1 } =
         await simulateRemoveLiquidity(
           chainId,
+          amm,
           provider,
           ownerAddress,
           ownerAddress,
@@ -79,6 +82,7 @@ export async function getRebalanceTx(
         );
       ({ swapData } = await optimalMint(
         chainId,
+        amm,
         CurrencyAmount.fromRawAmount(position.pool.token0, receive0.toString()),
         CurrencyAmount.fromRawAmount(position.pool.token1, receive1.toString()),
         position.pool.fee,

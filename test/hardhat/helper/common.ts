@@ -1,4 +1,5 @@
 import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
@@ -13,6 +14,7 @@ export const hardhatForkProvider = ethers.provider;
 
 export const expect = chai.expect;
 export const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+export const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 // A whale address (Avax bridge) on Ethereum mainnet with a lot of ethers and token balances.
 export const WHALE_ADDRESS = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 export const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';

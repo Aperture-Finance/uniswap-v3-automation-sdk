@@ -61,10 +61,9 @@ export async function simulateRebalance(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, amm)!
-        .apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
-      getNPMApprovalOverrides(chainId, owner),
+      getNPMApprovalOverrides(chainId, amm, owner),
       provider,
       blockNumber,
     ),

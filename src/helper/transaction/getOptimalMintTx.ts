@@ -71,7 +71,7 @@ export async function getOptimalMintTx(
   const token0 = (token0Amount.currency as Token).address;
   const token1 = (token1Amount.currency as Token).address;
   const position = new Position({
-    pool: await getPool(token0, token1, fee, chainId, provider),
+    pool: await getPool(token0, token1, fee, chainId, amm, provider),
     liquidity: liquidity.toString(),
     tickLower,
     tickUpper,
@@ -98,8 +98,7 @@ export async function getOptimalMintTx(
   );
   return {
     tx: {
-      to: getAMMInfo(chainId, amm)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       value,
     },

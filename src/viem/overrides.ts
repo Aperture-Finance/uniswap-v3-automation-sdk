@@ -69,7 +69,8 @@ export function getNPMApprovalOverrides(
   owner: Address,
 ): StateOverrides {
   const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
-    chainId, amm,
+    chainId,
+    amm,
   )!;
   return {
     [nonfungiblePositionManager]: {
@@ -87,8 +88,7 @@ export function getControllerOverrides(
   from: Address,
 ) {
   return {
-    [getAMMInfo(chainId, amm)!
-      .apertureAutoman]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -105,8 +105,7 @@ export function getAutomanWhitelistOverrides(
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getAMMInfo(chainId, amm)!
-      .apertureAutoman]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [

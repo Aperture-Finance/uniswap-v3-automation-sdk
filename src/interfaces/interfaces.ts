@@ -48,6 +48,12 @@ const ApertureSupportedChainIdEnum = z
     'The chain id of the network; must be one of the chains supported by Aperture.',
   );
 
+const ApertureSupportedAmmEnum = z
+  .nativeEnum(AutomatedMarketMakerEnum.Values)
+  .describe(
+    'The amm of the network; must be one of the amms supported by Aperture.',
+  );
+
 export const ConditionTypeEnum = z.enum([
   'Time',
   'TokenAmount',
@@ -494,7 +500,7 @@ const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
     'The owner address of the position; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
-  automatedMarketMaker: AutomatedMarketMakerEnum.default(
+  amm: ApertureSupportedAmmEnum.default(
     AutomatedMarketMakerEnum.enum.UNISWAP_V3,
   ).describe(
     'The automated market maker. If not specified, then this will be UNISWAP_V3.',
@@ -569,6 +575,7 @@ export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
 export const CheckPositionPermitRequestSchema = ClientTypeSchema.extend({
   chainId: ApertureSupportedChainIdEnum,
+  amm: ApertureSupportedAmmEnum,
   tokenId: z
     .string()
     .min(1)
@@ -701,6 +708,7 @@ export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
     'The owner address of position `tokenId`; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  amm: ApertureSupportedAmmEnum,
   tokenId: z
     .string()
     .min(1)
@@ -745,6 +753,7 @@ export const GetStrategiesDetailRequestSchema = ClientTypeSchema.extend({
     'The owner address of position `tokenId`; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  amm: ApertureSupportedAmmEnum,
 });
 export type GetStrategiesDetailRequest = z.infer<
   typeof GetStrategiesDetailRequestSchema
@@ -860,6 +869,7 @@ export type GetStrategiesDetailResponse = z.infer<
 
 export const WalletTrackingRequestSchema = z.object({
   chainId: ApertureSupportedChainIdEnum,
+  amm: ApertureSupportedAmmEnum,
   address: AddressSchema,
   timestamp_secs: z.number().int().positive(),
   walletClient: WalletTypeEnum,
@@ -898,6 +908,7 @@ export const UserActivityTrackingRequestSchema = z.object({
   userAddress: AddressSchema,
   clientTimestampSecs: z.number().int().positive(),
   chainId: ApertureSupportedChainIdEnum,
+  amm: ApertureSupportedAmmEnum,
   // In the user activity DynamoDB table, in addition to the five "instant" action types below, the action type value can also be 'CreateTrigger' or 'ExecuteTrigger'; these two are added to the table by the backend trigger handlers as appropriate.
   actionType: z.enum([
     'Swap',

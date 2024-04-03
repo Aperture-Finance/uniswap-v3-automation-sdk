@@ -10,7 +10,7 @@ import {
   getPublicProvider,
   getTickToLiquidityMapForPool,
 } from '../../../src/helper';
-import { WBTC_ADDRESS, WETH_ADDRESS, chainId, expect } from './common';
+import { WBTC_ADDRESS, WETH_ADDRESS, amm, chainId, expect } from './common';
 
 describe('Helper - Pool subgraph query tests', function () {
   it('Fee tier distribution', async function () {
@@ -57,6 +57,7 @@ describe('Helper - Pool subgraph query tests', function () {
       WETH_ADDRESS,
       FeeAmount.LOW,
       chainId,
+      amm,
       getPublicProvider(chainId),
     );
     await testLiquidityDistribution(chainId, pool);
@@ -75,6 +76,7 @@ describe('Helper - Pool subgraph query tests', function () {
       USDC_ARBITRUM,
       FeeAmount.LOW,
       arbitrumChainId,
+      amm,
       getPublicProvider(arbitrumChainId),
     );
     await testLiquidityDistribution(arbitrumChainId, pool);

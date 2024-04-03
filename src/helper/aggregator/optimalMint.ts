@@ -56,9 +56,7 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
-    chainId, amm,
-  )!;
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -85,6 +83,7 @@ export async function optimalMint(
   }
   const poolPromise = optimalMintPool(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
@@ -98,6 +97,7 @@ export async function optimalMint(
       poolPromise,
       optimalMintRouter(
         chainId,
+        amm,
         provider,
         fromAddress,
         mintParams,
@@ -118,6 +118,7 @@ export async function optimalMint(
 
 async function optimalMintPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -125,6 +126,7 @@ async function optimalMintPool(
 ) {
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
@@ -164,6 +166,7 @@ async function optimalMintPool(
 
 async function optimalMintRouter(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -172,6 +175,7 @@ async function optimalMintRouter(
 ) {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
+    amm,
     provider,
     mintParams,
     slippage,
@@ -180,6 +184,7 @@ async function optimalMintRouter(
   );
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,

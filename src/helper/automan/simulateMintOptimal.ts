@@ -50,9 +50,7 @@ export async function simulateMintOptimal(
     'mintOptimal',
     [mintParams, swapData],
   );
-  const { apertureAutoman } = getAMMInfo(
-    chainId, amm,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const tx = {
     from,
     to: apertureAutoman,

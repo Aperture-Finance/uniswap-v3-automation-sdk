@@ -70,13 +70,13 @@ export async function simulateDecreaseLiquiditySingle(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, amm)!
-        .apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       {
-        ...getNPMApprovalOverrides(chainId, owner),
+        ...getNPMApprovalOverrides(chainId, amm, owner),
         ...getAutomanWhitelistOverrides(
           chainId,
+          amm,
           getChainInfo(chainId).aperture_router_proxy!,
         ),
       },

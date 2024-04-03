@@ -33,6 +33,7 @@ export async function getAddLiquidityTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       increaseLiquidityOptions.tokenId.toString(),
       provider,
     ));

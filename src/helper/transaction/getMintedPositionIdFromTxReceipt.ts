@@ -23,7 +23,8 @@ export function getMintedPositionIdFromTxReceipt(
   recipientAddress: string,
 ): BigNumber | undefined {
   const npmAddress = getAMMInfo(
-    chainId, amm,
+    chainId,
+    amm,
   )!.nonfungiblePositionManager.toLowerCase();
   const npmInterface = INonfungiblePositionManager__factory.createInterface();
   const transferLogs = filterLogsByEvent(

@@ -84,7 +84,7 @@
     "@uniswap/v3-periphery" "^1.4.4"
     solady "^0.0.180"
 
-"@aperture_finance/uniswap-v3-sdk@3.11.0-PCS":
+"@aperture_finance/uniswap-v3-sdk@^3.11.0-PCS":
   version "3.11.0-PCS"
   resolved "https://registry.yarnpkg.com/@aperture_finance/uniswap-v3-sdk/-/uniswap-v3-sdk-3.11.0-PCS.tgz#501e0ecd9aa0d46e78015bdc2a4156359c98d238"
   integrity sha512-CoyGgw0NnvleNU7bNkB8WhcOAJEvqkSlQ44WUUjakJpIdScJmKils59GGsEIpGB1eCljN4+L9QIlI3R48dvz4Q==
