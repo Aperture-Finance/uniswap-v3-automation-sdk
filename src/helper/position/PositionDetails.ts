@@ -169,6 +169,7 @@ export class PositionDetails implements BasicPositionInfo {
   /**
    * Get the real-time collectable token amounts.
    * @param provider Ethers provider.
+   * @param amm Automated market maker.
    */
   public async getCollectableTokenAmounts(
     provider: Provider,

@@ -12,6 +12,7 @@ import { BasicPositionInfo, CollectableTokenAmounts } from './types';
  * Finds the amount of collectable tokens in the position.
  * The collectable amount is most likely accrued fees accumulated in the position, but can be from a prior decreaseLiquidity() call which has not been collected.
  * @param chainId Chain id.
+ * @param amm Automated market maker.
  * @param positionId Position id.
  * @param provider Ethers provider.
  * @param basicPositionInfo Basic position info, optional; if undefined, one will be constructed.

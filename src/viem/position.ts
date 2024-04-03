@@ -371,6 +371,7 @@ export class PositionDetails implements BasicPositionInfo {
 
   /**
    * Get the real-time collectable token amounts.
+   * @param amm Automated Market Maker.
    * @param publicClient Viem public client.
    * @param blockNumber Optional block number to query.
    * @returns The collectable token amounts.
