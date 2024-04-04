@@ -10,10 +10,10 @@ import { Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Signer } from 'ethers';
 
+import { computePoolAddress } from '../../utils';
 import { getToken } from '../currency';
 import { BasicPositionInfo } from '../position';
 import { getPublicProvider } from '../provider';
-import { computePoolAddress } from './pool';
 
 /**
  * Constructs a Uniswap SDK Pool object for an existing and initialized pool.
@@ -91,7 +91,7 @@ export function getPoolContract(
   provider?: Provider | Signer,
 ) {
   return IUniswapV3Pool__factory.connect(
-    computePoolAddress(getAMMInfo(chainId, amm)!.factory, tokenA, tokenB, fee),
+    computePoolAddress(amm, getAMMInfo(chainId, amm)!, tokenA, tokenB, fee),
     provider ?? getPublicProvider(chainId),
   );
 }

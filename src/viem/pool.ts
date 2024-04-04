@@ -13,7 +13,6 @@ import {
   FeeAmount,
   Pool,
   TickMath,
-  computePoolAddress as _computePoolAddress,
   tickToPrice,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { Price, Token } from '@uniswap/sdk-core';
@@ -29,39 +28,10 @@ import {
   getContract,
 } from 'viem';
 
+import { computePoolAddress } from '../utils';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
-
-/**
- * Computes a pool address
- * @param factoryAddress The Uniswap V3 factory address
- * @param token0 The first token of the pair, irrespective of sort order
- * @param token1 The second token of the pair, irrespective of sort order
- * @param fee The fee tier of the pool
- * @returns The pool address
- */
-export function computePoolAddress(
-  factoryAddress: Address,
-  token0: Token | string,
-  token1: Token | string,
-  fee: FeeAmount,
-): Address {
-  return _computePoolAddress({
-    factoryAddress,
-    tokenA: new Token(
-      1,
-      typeof token0 === 'string' ? token0 : token0.address,
-      18,
-    ),
-    tokenB: new Token(
-      1,
-      typeof token1 === 'string' ? token1 : token1.address,
-      18,
-    ),
-    fee,
-  }) as Address;
-}
 
 /**
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
@@ -107,7 +77,8 @@ export function getPoolContract(
 > {
   return getContract({
     address: computePoolAddress(
-      getAMMInfo(chainId, amm)!.factory,
+      amm,
+      getAMMInfo(chainId, amm)!,
       tokenA,
       tokenB,
       fee,
@@ -350,7 +321,8 @@ export async function getTickToLiquidityMapForPool(
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    chainInfo.amms[amm]!.factory,
+    amm,
+    chainInfo.amms[amm]!,
     pool.token0,
     pool.token1,
     pool.fee,
@@ -471,7 +443,8 @@ async function getPopulatedTicksInRange(
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
     computePoolAddress(
-      getAMMInfo(chainId, amm)!.factory,
+      amm,
+      getAMMInfo(chainId, amm)!,
       pool.token0,
       pool.token1,
       pool.fee,

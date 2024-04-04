@@ -7,7 +7,7 @@ export {
   type TickNumber,
   type LiquidityAmount,
   type TickToLiquidityMap,
-  computePoolAddress,
   readTickToLiquidityMap,
   checkAutomationSupportForPool,
 } from './pool';
+export { computePoolAddress } from '../../utils';
