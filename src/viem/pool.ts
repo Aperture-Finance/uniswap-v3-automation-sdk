@@ -331,6 +331,7 @@ export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
 /**
  * Fetches the liquidity for all ticks for the specified pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
  * @param _tickLower The lower tick to fetch liquidity for, defaults to `TickMath.MIN_TICK`.
  * @param _tickUpper The upper tick to fetch liquidity for, defaults to `TickMath.MAX_TICK`.
@@ -338,6 +339,7 @@ export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
  */
 export async function getTickToLiquidityMapForPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
@@ -348,7 +350,7 @@ export async function getTickToLiquidityMapForPool(
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    chainInfo.amms[AutomatedMarketMakerEnum.enum.UNISWAP_V3]!.factory,
+    chainInfo.amms[amm]!.factory,
     pool.token0,
     pool.token1,
     pool.fee,

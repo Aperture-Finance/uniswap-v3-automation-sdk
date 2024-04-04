@@ -1334,7 +1334,7 @@ describe('Pool subgraph query tests', function () {
     const tickUpper = pool.tickCurrent + DOUBLE_TICK;
     const [liquidityArr, tickToLiquidityMap] = await Promise.all([
       getLiquidityArrayForPool(chainId, amm, pool, tickLower, tickUpper),
-      getTickToLiquidityMapForPool(chainId, pool, tickLower, tickUpper),
+      getTickToLiquidityMapForPool(chainId, amm, pool, tickLower, tickUpper),
     ]);
     expect(liquidityArr.length).to.be.greaterThan(0);
     expect(tickToLiquidityMap.size).to.be.greaterThan(0);
