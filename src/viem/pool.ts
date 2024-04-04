@@ -6,7 +6,6 @@ import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
-  getAMMInfo,
   getChainInfo,
 } from '@/index';
 import {
@@ -76,13 +75,7 @@ export function getPoolContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: computePoolAddress(
-      amm,
-      getAMMInfo(chainId, amm)!,
-      tokenA,
-      tokenB,
-      fee,
-    ) as Address,
+    address: computePoolAddress(chainId, amm, tokenA, tokenB, fee),
     abi: IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -321,8 +314,8 @@ export async function getTickToLiquidityMapForPool(
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
+    chainId,
     amm,
-    chainInfo.amms[amm]!,
     pool.token0,
     pool.token1,
     pool.fee,
@@ -442,13 +435,7 @@ async function getPopulatedTicksInRange(
   blockNumber?: bigint,
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
-    computePoolAddress(
-      amm,
-      getAMMInfo(chainId, amm)!,
-      pool.token0,
-      pool.token1,
-      pool.fee,
-    ),
+    computePoolAddress(chainId, amm, pool.token0, pool.token1, pool.fee),
     tickLower,
     tickUpper,
     publicClient ?? getPublicClient(chainId),

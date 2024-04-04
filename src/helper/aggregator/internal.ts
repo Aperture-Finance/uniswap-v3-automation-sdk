@@ -60,8 +60,8 @@ export async function getOptimalMintSwapData(
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
+        chainId,
         amm,
-        ammInfo,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,

@@ -238,8 +238,8 @@ async function getOptimalMintSwapData(
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [
         computePoolAddress(
+          chainId,
           amm,
-          ammInfo,
           mintParams.token0,
           mintParams.token1,
           mintParams.fee as FeeAmount,

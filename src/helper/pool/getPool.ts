@@ -1,8 +1,4 @@
-import {
-  ApertureSupportedChainId,
-  IUniswapV3Pool__factory,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IUniswapV3Pool__factory } from '@/index';
 import { FeeAmount, Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Provider } from '@ethersproject/abstract-provider';
 import { BlockTag } from '@ethersproject/providers';
@@ -91,7 +87,7 @@ export function getPoolContract(
   provider?: Provider | Signer,
 ) {
   return IUniswapV3Pool__factory.connect(
-    computePoolAddress(amm, getAMMInfo(chainId, amm)!, tokenA, tokenB, fee),
+    computePoolAddress(chainId, amm, tokenA, tokenB, fee),
     provider ?? getPublicProvider(chainId),
   );
 }

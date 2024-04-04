@@ -35,8 +35,8 @@ export async function getTickToLiquidityMapForPool(
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
+    chainId,
     amm,
-    chainInfo.amms[amm]!,
     pool.token0,
     pool.token1,
     pool.fee,

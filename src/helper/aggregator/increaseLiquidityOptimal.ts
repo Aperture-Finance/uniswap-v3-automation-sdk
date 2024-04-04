@@ -223,8 +223,8 @@ async function getIncreaseLiquidityOptimalSwapData(
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
+        chainId,
         amm,
-        ammInfo,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,
