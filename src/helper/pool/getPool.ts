@@ -22,6 +22,7 @@ import { computePoolAddress } from './pool';
  * @param tokenB The other token in the pool.
  * @param fee Fee tier of the pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param blockTag Optional block tag to query.
  * @returns The constructed Uniswap SDK Pool object.
@@ -31,11 +32,19 @@ export async function getPool(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider?: Provider,
   blockTag?: BlockTag,
 ): Promise<Pool> {
   provider = provider ?? getPublicProvider(chainId);
-  const poolContract = getPoolContract(tokenA, tokenB, fee, chainId, provider);
+  const poolContract = getPoolContract(
+    tokenA,
+    tokenB,
+    fee,
+    chainId,
+    amm,
+    provider,
+  );
   const opts = { blockTag };
   // If the specified pool has not been created yet, then the slot0() and liquidity() calls should fail (and throw an error).
   // Also update the tokens to the canonical type.
@@ -78,15 +87,11 @@ export function getPoolContract(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider?: Provider | Signer,
 ) {
   return IUniswapV3Pool__factory.connect(
-    computePoolAddress(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!.factory,
-      tokenA,
-      tokenB,
-      fee,
-    ),
+    computePoolAddress(getAMMInfo(chainId, amm)!.factory, tokenA, tokenB, fee),
     provider ?? getPublicProvider(chainId),
   );
 }
@@ -95,12 +100,14 @@ export function getPoolContract(
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
  * @param basicInfo Basic position info.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns The constructed Uniswap SDK Pool object where the specified position resides.
  */
 export async function getPoolFromBasicPositionInfo(
   basicInfo: BasicPositionInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<Pool> {
   return getPool(
@@ -108,6 +115,7 @@ export async function getPoolFromBasicPositionInfo(
     basicInfo.token1,
     basicInfo.fee,
     chainId,
+    amm,
     provider,
   );
 }

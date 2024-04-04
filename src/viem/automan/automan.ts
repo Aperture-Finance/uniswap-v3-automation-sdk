@@ -47,6 +47,7 @@ import { MintParams } from './types';
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
@@ -54,8 +55,7 @@ export function getAutomanContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-      .apertureAutoman,
+    address: getAMMInfo(chainId, amm)!.apertureAutoman,
     abi: UniV3Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -84,6 +84,7 @@ export function encodeSwapData(
 
 export function encodeOptimalSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0: Address,
   token1: Address,
   fee: FeeAmount,
@@ -97,8 +98,7 @@ export function encodeOptimalSwapData(
   return encodePacked(
     ['address', 'bytes'],
     [
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .optimalSwapRouter!,
+      getAMMInfo(chainId, amm)!.optimalSwapRouter!,
       encodePacked(
         // prettier-ignore
         ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],
@@ -291,6 +291,7 @@ function checkTicks(mintParams: MintParams) {
 /**
  * Simulate a `mintOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param mintParams The mint parameters.
@@ -300,6 +301,7 @@ function checkTicks(mintParams: MintParams) {
  */
 export async function simulateMintOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
   mintParams: MintParams,
@@ -308,10 +310,7 @@ export async function simulateMintOptimal(
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
   const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const tx = {
     from,
     to: apertureAutoman,
@@ -365,6 +364,7 @@ export async function simulateMintOptimal(
 /**
  * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param position The current position to simulate the call from.
@@ -375,6 +375,7 @@ export async function simulateMintOptimal(
  */
 export async function simulateIncreaseLiquidityOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
   position: Position,
@@ -386,10 +387,7 @@ export async function simulateIncreaseLiquidityOptimal(
     increaseParams,
     swapData,
   );
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const tx = {
     from,
     to: apertureAutoman,
@@ -443,6 +441,7 @@ export async function simulateIncreaseLiquidityOptimal(
 /**
  * Simulate a `removeLiquidity` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to burn.
@@ -454,6 +453,7 @@ export async function simulateIncreaseLiquidityOptimal(
  */
 export async function simulateRemoveLiquidity(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
   owner: Address,
@@ -476,12 +476,11 @@ export async function simulateRemoveLiquidity(
       'eth_call',
       {
         from,
-        to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-          .apertureAutoman,
+        to: getAMMInfo(chainId, amm)!.apertureAutoman,
         data,
       },
       publicClient,
-      getNPMApprovalOverrides(chainId, owner),
+      getNPMApprovalOverrides(chainId, amm, owner),
       blockNumber,
     ),
     functionName: 'removeLiquidity',
@@ -491,6 +490,7 @@ export async function simulateRemoveLiquidity(
 export async function requestRebalance<M extends keyof RpcReturnType>(
   method: M,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
@@ -510,15 +510,14 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
   );
   from = getFromAddress(from);
   const overrides = {
-    ...getNPMApprovalOverrides(chainId, owner),
-    ...getControllerOverrides(chainId, from),
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
   };
   return tryRequestWithOverrides(
     method,
     {
       from,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     publicClient,
@@ -530,6 +529,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
 /**
  * Simulate a `rebalance` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to rebalance.
@@ -541,6 +541,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
  */
 export async function simulateRebalance(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
@@ -553,6 +554,7 @@ export async function simulateRebalance(
   const data = await requestRebalance(
     'eth_call',
     chainId,
+    amm,
     publicClient,
     from,
     owner,
@@ -571,6 +573,7 @@ export async function simulateRebalance(
 
 export async function estimateRebalanceGas(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
@@ -584,6 +587,7 @@ export async function estimateRebalanceGas(
     await requestRebalance(
       'eth_estimateGas',
       chainId,
+      amm,
       publicClient,
       from,
       owner,
@@ -599,6 +603,7 @@ export async function estimateRebalanceGas(
 export async function requestReinvest<M extends keyof RpcReturnType>(
   method: M,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
@@ -621,15 +626,14 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
   );
   from = getFromAddress(from);
   const overrides = {
-    ...getNPMApprovalOverrides(chainId, owner),
-    ...getControllerOverrides(chainId, from),
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
   };
   return tryRequestWithOverrides(
     method,
     {
       from,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     publicClient,
@@ -640,6 +644,7 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
 
 export async function estimateReinvestGas(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
@@ -655,6 +660,7 @@ export async function estimateReinvestGas(
     await requestReinvest(
       'eth_estimateGas',
       chainId,
+      amm,
       publicClient,
       from,
       owner,

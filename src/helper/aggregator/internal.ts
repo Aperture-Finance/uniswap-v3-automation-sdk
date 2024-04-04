@@ -43,6 +43,7 @@ function apiRequestUrl(chainId: ApertureSupportedChainId, methodName: string) {
 
 export async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
   slippage: number,
@@ -53,11 +54,8 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimalSwapRouter, factory } = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!;
-    const automan = getAutomanContract(chainId, provider);
+    const { optimalSwapRouter, factory } = getAMMInfo(chainId, amm)!;
+    const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
@@ -89,6 +87,7 @@ export async function getOptimalMintSwapData(
     return {
       swapData: encodeOptimalSwapData(
         chainId,
+        amm,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,

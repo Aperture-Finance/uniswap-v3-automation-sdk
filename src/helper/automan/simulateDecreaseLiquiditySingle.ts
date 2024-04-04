@@ -29,6 +29,7 @@ type DecreaseLiquiditySingleReturnType = UnwrapPromise<
 /**
  * Simulate a `decreaseLiquidity` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to decrease liquidity from.
@@ -42,6 +43,7 @@ type DecreaseLiquiditySingleReturnType = UnwrapPromise<
  */
 export async function simulateDecreaseLiquiditySingle(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   owner: string,
@@ -69,13 +71,13 @@ export async function simulateDecreaseLiquiditySingle(
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       {
-        ...getNPMApprovalOverrides(chainId, owner),
+        ...getNPMApprovalOverrides(chainId, amm, owner),
         ...getAutomanWhitelistOverrides(
           chainId,
+          amm,
           getChainInfo(chainId).aperture_router_proxy!,
         ),
       },

@@ -17,6 +17,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
  * `increaseLiquidityOptions.useNative` should be set to `getNativeEther(chainId)`.
  * @param increaseLiquidityOptions Increase liquidity options.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param liquidityToAdd The amount of liquidity to add to the existing position.
  * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.
@@ -25,6 +26,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
 export async function getAddLiquidityTx(
   increaseLiquidityOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   liquidityToAdd: BigintIsh,
   position?: Position,
@@ -32,6 +34,7 @@ export async function getAddLiquidityTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       increaseLiquidityOptions.tokenId.toString(),
       provider,
     ));
@@ -48,7 +51,7 @@ export async function getAddLiquidityTx(
     increaseLiquidityOptions,
   );
   return getTxToNonfungiblePositionManager(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!,
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

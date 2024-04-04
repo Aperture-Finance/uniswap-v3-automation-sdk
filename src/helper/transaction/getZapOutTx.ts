@@ -12,6 +12,7 @@ import { PositionDetails } from '../position';
 /**
  * Generates an unsigned transaction that decreases liquidity from the specified position and withdraws one token.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param ownerAddress The owner address.
  * @param positionId The position ID.
  * @param zeroForOne Whether to swap token0 for token1 or vice versa.
@@ -23,6 +24,7 @@ import { PositionDetails } from '../position';
  */
 export async function getZapOutTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   positionId: BigNumberish,
   zeroForOne: boolean,
@@ -35,12 +37,14 @@ export async function getZapOutTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       positionId,
       provider,
     ));
   }
   const { amount, swapData } = await optimalZapOut(
     chainId,
+    amm,
     positionId,
     zeroForOne,
     0,
@@ -67,8 +71,7 @@ export async function getZapOutTx(
   return {
     tx: {
       from: ownerAddress,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     amount,

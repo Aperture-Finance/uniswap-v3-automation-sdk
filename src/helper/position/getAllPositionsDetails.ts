@@ -12,18 +12,19 @@ import { PositionDetails } from './PositionDetails';
  * provider gas limit is 300m.
  * @param owner The owner.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns A map where each key is a position id and its associated value is PositionDetails of that position.
  */
 export async function getAllPositionsDetails(
   owner: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
 ): Promise<Map<string, PositionDetails>> {
   const returnData = await provider.call(
     new EphemeralAllPositionsByOwner__factory().getDeployTransaction(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       owner,
     ),
   );

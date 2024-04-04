@@ -27,6 +27,7 @@ export type MintReturnType = UnwrapPromise<
 /**
  * Simulate a `mintOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param mintParams The mint parameters.
@@ -37,6 +38,7 @@ export type MintReturnType = UnwrapPromise<
  */
 export async function simulateMintOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -49,10 +51,7 @@ export async function simulateMintOptimal(
     'mintOptimal',
     [mintParams, swapData],
   );
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const tx = {
     from,
     to: apertureAutoman,

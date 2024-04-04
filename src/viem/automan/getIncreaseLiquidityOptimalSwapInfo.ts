@@ -5,6 +5,7 @@ import { calculateIncreaseLiquidityOptimalPriceImpact, getPool } from '@/viem';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { BigNumber } from 'ethers';
 import { Address, PublicClient } from 'viem';
@@ -15,6 +16,7 @@ import { PositionDetails } from '../position';
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
  * @param increaseOptions Increase liquidity options.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param recipient The recipient address.
@@ -26,6 +28,7 @@ import { PositionDetails } from '../position';
 export async function getIncreaseLiquidityOptimalSwapInfo(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
   recipient: Address,
@@ -37,6 +40,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       BigInt(increaseOptions.tokenId.toString()),
       publicClient,
     ));
@@ -52,6 +56,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     // TODO: migrate to viem version
     await increaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       position,
       increaseOptions,
@@ -70,6 +75,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
       token1,
       position.pool.fee,
       chainId,
+      amm,
       publicClient,
     ),
     liquidity: liquidity.toString(),
@@ -90,6 +96,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
 
   const priceImpact = await calculateIncreaseLiquidityOptimalPriceImpact({
     chainId,
+    amm,
     swapData: swapData as `0x${string}`,
     from: recipient as `0x${string}`,
     position,

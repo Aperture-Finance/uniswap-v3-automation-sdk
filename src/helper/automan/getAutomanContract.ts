@@ -9,11 +9,11 @@ import { Signer } from 'ethers';
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider | Signer,
 ) {
   return IUniV3Automan__factory.connect(
-    getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-      .apertureAutoman,
+    getAMMInfo(chainId, amm)!.apertureAutoman,
     provider,
   );
 }

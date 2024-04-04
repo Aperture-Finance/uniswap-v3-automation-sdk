@@ -17,6 +17,7 @@ import { SwapRoute } from './quote';
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.
@@ -29,6 +30,7 @@ import { SwapRoute } from './quote';
  */
 export async function optimalMint(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
   fee: FeeAmount,
@@ -55,10 +57,7 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -85,6 +84,7 @@ export async function optimalMint(
   }
   const poolPromise = optimalMintPool(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
@@ -98,6 +98,7 @@ export async function optimalMint(
       poolPromise,
       optimalMintRouter(
         chainId,
+        amm,
         provider,
         fromAddress,
         mintParams,
@@ -118,6 +119,7 @@ export async function optimalMint(
 
 async function optimalMintPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -125,6 +127,7 @@ async function optimalMintPool(
 ) {
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
@@ -164,6 +167,7 @@ async function optimalMintPool(
 
 async function optimalMintRouter(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -172,6 +176,7 @@ async function optimalMintRouter(
 ) {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
+    amm,
     provider,
     mintParams,
     slippage,
@@ -180,6 +185,7 @@ async function optimalMintRouter(
   );
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,

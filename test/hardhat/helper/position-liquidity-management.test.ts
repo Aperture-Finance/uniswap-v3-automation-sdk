@@ -1,6 +1,5 @@
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
@@ -31,6 +30,7 @@ import {
 import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
+  amm,
   chainId,
   eoa,
   expect,
@@ -65,11 +65,13 @@ describe('Helper - Position liquidity management tests', function () {
     nativeEtherBalanceBefore = await hardhatForkProvider.getBalance(eoa);
     position4BasicInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );
     position4ColletableTokenAmounts = await getCollectableTokenAmounts(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
       position4BasicInfo,
@@ -88,6 +90,7 @@ describe('Helper - Position liquidity management tests', function () {
       positionId,
       eoa,
       chainId,
+      amm,
       hardhatForkProvider,
       false,
       position4BasicInfo,
@@ -122,6 +125,7 @@ describe('Helper - Position liquidity management tests', function () {
     const position = await getPositionFromBasicInfo(
       position4BasicInfo,
       chainId,
+      amm,
       hardhatForkProvider,
     );
     const liquidityPercentage = new Percent(1); // 100%
@@ -134,6 +138,7 @@ describe('Helper - Position liquidity management tests', function () {
       },
       eoa,
       chainId,
+      amm,
       hardhatForkProvider,
       /*receiveNativeEtherIfApplicable=*/ true,
       position,
@@ -202,8 +207,7 @@ describe('Helper - Position liquidity management tests', function () {
 
     // Approve Uniswap NPM to spend WBTC. Since we are providing native ether in this example, we don't need to approve WETH.
     await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       wbtcRawAmount.toString(),
     );
 
@@ -217,14 +221,21 @@ describe('Helper - Position liquidity management tests', function () {
         useNative: getNativeCurrency(chainId),
       },
       chainId,
+      amm,
       hardhatForkProvider,
       liquidityToAdd,
       position,
     );
     await (await eoaSigner.sendTransaction(addLiquidityTxRequest)).wait();
     expect(
-      (await getBasicPositionInfo(chainId, positionId, hardhatForkProvider))
-        .liquidity!,
+      (
+        await getBasicPositionInfo(
+          chainId,
+          amm,
+          positionId,
+          hardhatForkProvider,
+        )
+      ).liquidity!,
     ).to.equal(liquidityToAdd.toString());
 
     // ------- Create Position -------
@@ -255,6 +266,7 @@ describe('Helper - Position liquidity management tests', function () {
       WETH,
       poolFee,
       chainId,
+      amm,
       hardhatForkProvider,
     );
     // Since WBTC is token0, we use `Position.fromAmount0()`.
@@ -281,8 +293,7 @@ describe('Helper - Position liquidity management tests', function () {
 
     // Approve Uniswap NPM to spend WBTC.
     await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount0.toString(),
     );
 
@@ -291,8 +302,7 @@ describe('Helper - Position liquidity management tests', function () {
       value: positionToCreate.mintAmounts.amount1.toString(),
     });
     await WETH__factory.connect(WETH_ADDRESS, eoaSigner).approve(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount1.toString(),
     );
 
@@ -305,6 +315,7 @@ describe('Helper - Position liquidity management tests', function () {
         recipient: eoa,
       },
       chainId,
+      amm,
       hardhatForkProvider,
     );
     const createPositionTxReceipt = await (
@@ -312,12 +323,14 @@ describe('Helper - Position liquidity management tests', function () {
     ).wait();
     const createdPositionId = getMintedPositionIdFromTxReceipt(
       chainId,
+      amm,
       createPositionTxReceipt,
       eoa,
     )!;
     expect(
       await getBasicPositionInfo(
         chainId,
+        amm,
         createdPositionId,
         hardhatForkProvider,
       ),

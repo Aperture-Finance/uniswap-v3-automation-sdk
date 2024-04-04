@@ -15,6 +15,7 @@ import { getNPM } from './position';
  * Predict the change in liquidity and token amounts after a reinvestment without a prior approval.
  * https://github.com/dragonfly-xyz/useful-solidity-patterns/blob/main/patterns/eth_call-tricks/README.md#geth-overrides
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param provider The ethers provider.
  * @param blockNumber Optional block number to query.
@@ -22,6 +23,7 @@ import { getNPM } from './position';
  */
 export async function getReinvestedPosition(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   provider: JsonRpcProvider,
   blockNumber?: number,
@@ -30,7 +32,7 @@ export async function getReinvestedPosition(
   amount0: BigNumber;
   amount1: BigNumber;
 }> {
-  const owner = await getNPM(chainId, provider).ownerOf(positionId, {
+  const owner = await getNPM(chainId, amm, provider).ownerOf(positionId, {
     blockTag: blockNumber,
   });
   const { functionFragment, data } = getAutomanReinvestCallInfo(
@@ -40,12 +42,11 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     // forge an operator approval using state overrides.
-    getNPMApprovalOverrides(chainId, owner),
+    getNPMApprovalOverrides(chainId, amm, owner),
     provider,
     blockNumber,
   );

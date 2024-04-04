@@ -17,6 +17,7 @@ export interface PositionApprovalStatus {
  * @param positionId Position id.
  * @param permitInfo If defined and Automan has not already been approved on-chain, this `permitInfo` will be validated as the last option.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns An PositionApprovalStatus object representing approval status.
  */
@@ -24,13 +25,11 @@ export async function checkPositionApprovalStatus(
   positionId: BigNumberish,
   permitInfo: PermitInfo | undefined,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: ethers.providers.Provider,
 ): Promise<PositionApprovalStatus> {
-  const automan = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!.apertureAutoman;
-  const npm = getNPM(chainId, provider);
+  const automan = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const npm = getNPM(chainId, amm, provider);
   let owner, approved;
   try {
     [owner, approved] = await Promise.all([
@@ -74,7 +73,9 @@ export async function checkPositionApprovalStatus(
       reason: 'missingSignedPermission',
     };
   }
-  if (await checkPositionPermit(positionId, permitInfo, chainId, provider)) {
+  if (
+    await checkPositionPermit(positionId, permitInfo, chainId, amm, provider)
+  ) {
     return {
       owner,
       hasAuthority: true,
@@ -94,6 +95,7 @@ export async function checkPositionApprovalStatus(
  * @param positionId Position id.
  * @param permitInfo Permit info containing the signature and deadline.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @returns True if the permit is valid, false otherwise.
  */
@@ -101,13 +103,11 @@ export async function checkPositionPermit(
   positionId: BigNumberish,
   permitInfo: PermitInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: ethers.providers.Provider,
 ) {
-  const automan = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!.apertureAutoman;
-  const npm = getNPM(chainId, provider);
+  const automan = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const npm = getNPM(chainId, amm, provider);
   try {
     const permitSignature = ethers.utils.splitSignature(permitInfo.signature);
     await npm.callStatic.permit(
@@ -128,6 +128,7 @@ export async function checkPositionPermit(
 /**
  * Generates typed data to be signed that allows Aperture's UniV3Automan contract to operate the specified position until the specified deadline.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param positionId Id of the position to generate permission for.
  * @param deadlineEpochSeconds The signed permission will be valid until this deadline specified in number of seconds since UNIX epoch.
  * @param provider Ethers provider.
@@ -135,6 +136,7 @@ export async function checkPositionPermit(
  */
 export async function generateTypedDataForPermit(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   deadlineEpochSeconds: BigNumberish,
   provider: Provider,
@@ -144,10 +146,7 @@ export async function generateTypedDataForPermit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>;
 }> {
-  const ammInfo = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const ammInfo = getAMMInfo(chainId, amm)!;
   return {
     domain: {
       name: 'Uniswap V3 Positions NFT-V1',
@@ -166,7 +165,7 @@ export async function generateTypedDataForPermit(
     value: {
       spender: ammInfo.apertureAutoman,
       tokenId: positionId,
-      nonce: (await getNPM(chainId, provider).positions(positionId)).nonce,
+      nonce: (await getNPM(chainId, amm, provider).positions(positionId)).nonce,
       deadline: deadlineEpochSeconds,
     },
   };

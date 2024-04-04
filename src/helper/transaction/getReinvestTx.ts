@@ -11,6 +11,7 @@ import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the specified position.
  * @param positionId Position id.
  * @param slippageTolerance How much the reinvested amount of either token0 or token1 is allowed to change unfavorably.
@@ -21,6 +22,7 @@ import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
  */
 export async function getReinvestTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   positionId: BigNumberish,
   slippageTolerance: Percent,
@@ -33,13 +35,11 @@ export async function getReinvestTx(
 }> {
   const { pool, tickLower, tickUpper } = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     provider,
   );
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const { functionFragment, data } = getAutomanReinvestCallInfo(
     positionId,
     deadlineEpochSeconds,

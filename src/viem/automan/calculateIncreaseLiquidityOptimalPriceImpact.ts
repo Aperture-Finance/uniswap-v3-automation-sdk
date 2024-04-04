@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId, fractionToBig } from '@/index';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -8,6 +9,7 @@ import { IncreaseLiquidityParams, getFromAddress } from './internal';
 
 type IIncreaseLiquidityOptimalParams = {
   chainId: ApertureSupportedChainId;
+  amm: AutomatedMarketMakerEnum;
   publicClient: PublicClient;
   from: Address;
   position: Position;
@@ -37,6 +39,7 @@ export async function calculateIncreaseLiquidityOptimalPriceImpact(
 async function getExchangePrice(params: IIncreaseLiquidityOptimalParams) {
   const {
     chainId,
+    amm,
     publicClient,
     position,
     increaseParams,
@@ -50,6 +53,7 @@ async function getExchangePrice(params: IIncreaseLiquidityOptimalParams) {
 
   const [, finalAmount0, finalAmount1] = await simulateIncreaseLiquidityOptimal(
     chainId,
+    amm,
     publicClient,
     from,
     position,

@@ -1,4 +1,5 @@
 import { ApertureSupportedChainId, fractionToBig } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -9,6 +10,7 @@ import { MintParams } from './types';
 
 type IMintOptimalParams = {
   chainId: ApertureSupportedChainId;
+  amm: AutomatedMarketMakerEnum;
   publicClient: PublicClient;
   from: Address;
   mintParams: MintParams;
@@ -25,6 +27,7 @@ export async function calculateMintOptimalPriceImpact(
   const {
     mintParams: { token0, token1, fee },
     chainId,
+    amm,
     publicClient,
     blockNumber,
   } = params;
@@ -34,6 +37,7 @@ export async function calculateMintOptimalPriceImpact(
     token1,
     fee,
     chainId,
+    amm,
     publicClient,
     blockNumber,
   );
@@ -49,7 +53,8 @@ export async function calculateMintOptimalPriceImpact(
 }
 
 async function getExchangePrice(params: IMintOptimalParams) {
-  const { chainId, publicClient, mintParams, swapData, blockNumber } = params;
+  const { chainId, amm, publicClient, mintParams, swapData, blockNumber } =
+    params;
   const from = getFromAddress(params.from);
 
   const { amount0Desired: initAmount0, amount1Desired: initAmount1 } =
@@ -57,6 +62,7 @@ async function getExchangePrice(params: IMintOptimalParams) {
 
   const [, , finalAmount0, finalAmount1] = await simulateMintOptimal(
     chainId,
+    amm,
     publicClient,
     from,
     mintParams,

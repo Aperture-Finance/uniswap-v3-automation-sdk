@@ -23,6 +23,7 @@ export interface PositionApprovalStatus {
  * @param positionId Position id.
  * @param permitInfo If defined and Automan has not already been approved on-chain, this `permitInfo` will be validated as the last option.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns An PositionApprovalStatus object representing approval status.
@@ -31,14 +32,12 @@ export async function checkPositionApprovalStatus(
   positionId: bigint,
   permitInfo: PermitInfo | undefined,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<PositionApprovalStatus> {
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
-  const npm = getNPM(chainId, publicClient);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const npm = getNPM(chainId, amm, publicClient);
   const opts = { blockNumber };
   let owner, approved;
   try {
@@ -92,6 +91,7 @@ export async function checkPositionApprovalStatus(
       positionId,
       permitInfo,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     )
@@ -115,6 +115,7 @@ export async function checkPositionApprovalStatus(
  * @param positionId Position id.
  * @param permitInfo Permit info containing the signature and deadline.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns True if the permit is valid, false otherwise.
@@ -123,14 +124,12 @@ export async function checkPositionPermit(
   positionId: bigint,
   permitInfo: PermitInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
-  const npm = getNPM(chainId, publicClient);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const npm = getNPM(chainId, amm, publicClient);
   try {
     const permitSignature = hexToSignature(permitInfo.signature as Hex);
     await npm.simulate.permit(
@@ -166,6 +165,7 @@ const PermitTypes: TypedData = {
 /**
  * Generates typed data to be signed that allows Aperture's UniV3Automan contract to operate the specified position until the specified deadline.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param positionId Id of the position to generate permission for.
  * @param deadlineEpochSeconds The signed permission will be valid until this deadline specified in number of seconds since UNIX epoch.
  * @param publicClient Viem public client.
@@ -173,16 +173,17 @@ const PermitTypes: TypedData = {
  */
 export async function generateTypedDataForPermit(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   deadlineEpochSeconds: bigint,
   publicClient?: PublicClient,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
   const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
     chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+    amm,
   )!;
   const nonce = (
-    await getNPM(chainId, publicClient).read.positions([positionId])
+    await getNPM(chainId, amm, publicClient).read.positions([positionId])
   )[0];
   return {
     domain: {

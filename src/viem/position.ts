@@ -70,6 +70,7 @@ type PositionStateArray = ContractFunctionReturnType<
 
 export function getNPM(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
@@ -77,8 +78,7 @@ export function getNPM(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-      .nonfungiblePositionManager,
+    address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
     abi: INonfungiblePositionManager__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -87,6 +87,7 @@ export function getNPM(
 export async function getPositionFromBasicInfo(
   basicInfo: BasicPositionInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Position> {
@@ -97,6 +98,7 @@ export async function getPositionFromBasicInfo(
     pool: await getPoolFromBasicPositionInfo(
       basicInfo,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     ),
@@ -109,6 +111,7 @@ export async function getPositionFromBasicInfo(
 /**
  * Get the Uniswap `Position` object for the specified position id.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
@@ -116,13 +119,14 @@ export async function getPositionFromBasicInfo(
  */
 export async function getPosition(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
   publicClient = publicClient ?? getPublicClient(chainId);
   const [, , token0, token1, fee, tickLower, tickUpper, liquidity] =
-    await getNPM(chainId, publicClient).read.positions([positionId], {
+    await getNPM(chainId, amm, publicClient).read.positions([positionId], {
       blockNumber,
     });
   return new Position({
@@ -131,6 +135,7 @@ export async function getPosition(
       token1,
       fee,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     ),
@@ -146,6 +151,7 @@ export async function getPosition(
  * provider gas limit is 300m.
  * @param owner The owner.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns A map where each key is a position id and its associated value is PositionDetails of that position.
@@ -153,6 +159,7 @@ export async function getPosition(
 export async function getAllPositions(
   owner: Address,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Map<string, PositionDetails>> {
@@ -160,8 +167,7 @@ export async function getAllPositions(
   publicClient = publicClient ?? getPublicClient(chainId);
   try {
     positions = await viem.getAllPositionsByOwner(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       owner,
       publicClient,
       blockNumber,
@@ -173,7 +179,7 @@ export async function getAllPositions(
     //   - Batch fetch token ids.
     //   - Batch fetch position details using token ids.
     if (error.details === 'out of gas') {
-      const npm = getNPM(chainId, publicClient);
+      const npm = getNPM(chainId, amm, publicClient);
       const numPositions = await npm.read.balanceOf([owner], { blockNumber });
       const tokenIds = (
         await publicClient.multicall({
@@ -277,6 +283,7 @@ export class PositionDetails implements BasicPositionInfo {
   /**
    * Get the position details in a single call by deploying an ephemeral contract via `eth_call`
    * @param chainId Chain id.
+   * @param amm Automated market maker.
    * @param positionId Position id.
    * @param publicClient Viem public client.
    * @param blockNumber Optional block number to query.
@@ -284,13 +291,13 @@ export class PositionDetails implements BasicPositionInfo {
    */
   public static async fromPositionId(
     chainId: ApertureSupportedChainId,
+    amm: AutomatedMarketMakerEnum,
     positionId: bigint,
     publicClient?: PublicClient,
     blockNumber?: bigint,
   ): Promise<PositionDetails> {
     const position = await viem.getPositionDetails(
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .nonfungiblePositionManager,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionId,
       publicClient ?? getPublicClient(chainId),
       blockNumber,
@@ -364,11 +371,13 @@ export class PositionDetails implements BasicPositionInfo {
 
   /**
    * Get the real-time collectable token amounts.
+   * @param amm Automated Market Maker.
    * @param publicClient Viem public client.
    * @param blockNumber Optional block number to query.
    * @returns The collectable token amounts.
    */
   public async getCollectableTokenAmounts(
+    amm: AutomatedMarketMakerEnum,
     publicClient?: PublicClient,
     blockNumber?: bigint,
   ): Promise<CollectableTokenAmounts> {
@@ -378,6 +387,7 @@ export class PositionDetails implements BasicPositionInfo {
       this.token1,
       this.fee,
       this.chainId,
+      amm,
       publicClient,
     );
     const opts = { blockNumber };
@@ -394,7 +404,7 @@ export class PositionDetails implements BasicPositionInfo {
       pool.read.feeGrowthGlobal1X128(opts),
       pool.read.ticks([this.tickLower], opts),
       pool.read.ticks([this.tickUpper], opts),
-      getNPM(this.chainId, publicClient).read.positions(
+      getNPM(this.chainId, amm, publicClient).read.positions(
         [BigInt(this.tokenId)],
         opts,
       ),
@@ -474,6 +484,7 @@ export function isPositionInRange(position: Position): boolean {
 /**
  * Get the token SVG URL of the specified position.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param positionId Position id.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
@@ -481,11 +492,12 @@ export function isPositionInRange(position: Position): boolean {
  */
 export async function getTokenSvg(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<URL> {
-  const npm = getNPM(chainId, publicClient);
+  const npm = getNPM(chainId, amm, publicClient);
   const uri = await npm.read.tokenURI([positionId], { blockNumber });
   const json_uri = Buffer.from(
     uri.replace('data:application/json;base64,', ''),
@@ -583,6 +595,7 @@ export function projectRebalancedPositionAtPrice(
  * Predict the change in liquidity and token amounts after a reinvestment without a prior approval.
  * https://github.com/dragonfly-xyz/useful-solidity-patterns/blob/main/patterns/eth_call-tricks/README.md#geth-overrides
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param positionId The position id.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
@@ -590,13 +603,17 @@ export function projectRebalancedPositionAtPrice(
  */
 export async function getReinvestedPosition(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   publicClient: PublicClient,
   blockNumber?: bigint,
 ): Promise<readonly [liquidity: bigint, amount0: bigint, amount1: bigint]> {
-  const owner = await getNPM(chainId, publicClient).read.ownerOf([positionId], {
-    blockNumber,
-  });
+  const owner = await getNPM(chainId, amm, publicClient).read.ownerOf(
+    [positionId],
+    {
+      blockNumber,
+    },
+  );
   const data = getAutomanReinvestCalldata(
     positionId,
     BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
@@ -604,12 +621,11 @@ export async function getReinvestedPosition(
   const returnData = await staticCallWithOverrides(
     {
       from: owner,
-      to: getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
     },
     // forge an operator approval using state overrides.
-    getNPMApprovalOverrides(chainId, owner),
+    getNPMApprovalOverrides(chainId, amm, owner),
     publicClient,
     blockNumber,
   );

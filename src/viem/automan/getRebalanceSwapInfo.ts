@@ -7,6 +7,7 @@ import {
 } from '@/viem';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, zeroAddress } from 'viem';
 
 import { getSwapPath } from './internal';
@@ -14,6 +15,7 @@ import { getSwapPath } from './internal';
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the existing position.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
@@ -26,6 +28,7 @@ import { getSwapPath } from './internal';
  */
 export async function getRebalanceSwapInfo(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
   existingPositionId: bigint,
   newPositionTickLower: number,
@@ -39,6 +42,7 @@ export async function getRebalanceSwapInfo(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       existingPositionId,
       publicClient,
     ));
@@ -54,6 +58,7 @@ export async function getRebalanceSwapInfo(
     swapRoute,
   } = await optimalRebalance(
     chainId,
+    amm,
     existingPositionId,
     newPositionTickLower,
     newPositionTickUpper,
@@ -91,6 +96,7 @@ export async function getRebalanceSwapInfo(
 
   const priceImpact = await calculateRebalancePriceImpact({
     chainId,
+    amm,
     swapData: swapData as `0x${string}`,
     from: ownerAddress,
     owner: ownerAddress,

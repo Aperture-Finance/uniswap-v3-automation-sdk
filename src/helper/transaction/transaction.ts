@@ -133,17 +133,16 @@ export function filterLogsByEvent(
 /**
  * Set or revoke Aperture UniV3 Automan contract as an operator of the signer's UniV3 positions.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param approved True if setting approval, false if revoking approval.
  * @returns The unsigned tx setting or revoking approval.
  */
 export function getSetApprovalForAllTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   approved: boolean,
 ): TransactionRequest {
-  const ammInfo = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const ammInfo = getAMMInfo(chainId, amm)!;
   return getTxToNonfungiblePositionManager(
     ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(

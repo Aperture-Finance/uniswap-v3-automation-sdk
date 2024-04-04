@@ -27,6 +27,7 @@ import { SimulatedAmounts } from './transaction';
 /**
  * Generates an unsigned transaction that rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the existing position.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
@@ -42,6 +43,7 @@ import { SimulatedAmounts } from './transaction';
 
 export async function getRebalanceTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   existingPositionId: BigNumberish,
   newPositionTickLower: number,
@@ -59,6 +61,7 @@ export async function getRebalanceTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       existingPositionId,
       provider,
     ));
@@ -69,6 +72,7 @@ export async function getRebalanceTx(
       const { amount0: receive0, amount1: receive1 } =
         await simulateRemoveLiquidity(
           chainId,
+          amm,
           provider,
           ownerAddress,
           ownerAddress,
@@ -79,6 +83,7 @@ export async function getRebalanceTx(
         );
       ({ swapData } = await optimalMint(
         chainId,
+        amm,
         CurrencyAmount.fromRawAmount(position.pool.token0, receive0.toString()),
         CurrencyAmount.fromRawAmount(position.pool.token1, receive1.toString()),
         position.pool.fee,
@@ -108,10 +113,7 @@ export async function getRebalanceTx(
     recipient: ADDRESS_ZERO, // Param value ignored by Automan.
     deadline: deadlineEpochSeconds,
   };
-  const { apertureAutoman } = getAMMInfo(
-    chainId,
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  )!;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const { functionFragment, data } = getAutomanRebalanceCallInfo(
     mintParams,
     existingPositionId,

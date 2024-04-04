@@ -5,6 +5,7 @@ import { MintParams, calculateMintOptimalPriceImpact, getPool } from '@/viem';
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { BigNumber } from 'ethers';
 import { Address, PublicClient } from 'viem';
@@ -12,6 +13,7 @@ import { Address, PublicClient } from 'viem';
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.
@@ -26,6 +28,7 @@ import { Address, PublicClient } from 'viem';
  */
 export async function getOptimalMintSwapInfo(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
   fee: FeeAmount,
@@ -52,6 +55,7 @@ export async function getOptimalMintSwapInfo(
     // TODO: migrate to viem version
     await optimalMint(
       chainId,
+      amm,
       token0Amount as CurrencyAmount<Token>,
       token1Amount as CurrencyAmount<Token>,
       fee,
@@ -65,7 +69,7 @@ export async function getOptimalMintSwapInfo(
   const token0 = (token0Amount.currency as Token).address as Address;
   const token1 = (token1Amount.currency as Token).address as Address;
   const position = new Position({
-    pool: await getPool(token0, token1, fee, chainId, publicClient),
+    pool: await getPool(token0, token1, fee, chainId, amm, publicClient),
     liquidity: liquidity.toString(),
     tickLower,
     tickUpper,
@@ -89,6 +93,7 @@ export async function getOptimalMintSwapInfo(
 
   const priceImpact = await calculateMintOptimalPriceImpact({
     chainId,
+    amm,
     swapData: swapData as `0x${string}`,
     from: recipient as `0x${string}`,
     mintParams,

@@ -24,12 +24,13 @@ import {
  */
 export async function getTickToLiquidityMapForPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
   const chainInfo = getChainInfo(chainId);
-  const { factory } = chainInfo.amms[AutomatedMarketMakerEnum.Enum.UNISWAP_V3]!;
+  const { factory } = chainInfo.amms[amm]!;
   const { uniswap_subgraph_url } = chainInfo;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';

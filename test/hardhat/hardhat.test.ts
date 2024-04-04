@@ -115,6 +115,7 @@ dotenvConfig();
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 // A whale address (Avax bridge) on Ethereum mainnet with a lot of ethers and token balances.
 const WHALE_ADDRESS = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
@@ -165,6 +166,7 @@ describe('Estimate gas tests', function () {
       token1,
       fee,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     );
@@ -189,6 +191,7 @@ describe('Estimate gas tests', function () {
     };
     const gas = await estimateRebalanceGas(
       chainId,
+      amm,
       publicClient,
       from,
       eoa,
@@ -208,6 +211,7 @@ describe('Estimate gas tests', function () {
     const amount1Desired = 1000000000000000n;
     const gas = await estimateReinvestGas(
       chainId,
+      amm,
       publicClient,
       from,
       eoa,
@@ -256,8 +260,7 @@ describe('State overrides tests', function () {
       account: WHALE_ADDRESS,
       chain: mainnet,
       args: [
-        getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-          .nonfungiblePositionManager,
+        getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
         /*owner=*/ WHALE_ADDRESS,
       ],
       bytecode: UniV3Automan__factory.bytecode,
@@ -270,10 +273,7 @@ describe('State overrides tests', function () {
         }),
       ),
     });
-    const npm = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!.nonfungiblePositionManager;
+    const npm = getAMMInfo(chainId, amm)!.nonfungiblePositionManager;
     const slot = computeOperatorApprovalSlot(eoa, automanAddress);
     expect(slot).to.equal(
       '0xaf12655eb680e77b7549c03375fd65c7a46c2854e913a071f6412c5b3d693f31',
@@ -282,7 +282,7 @@ describe('State overrides tests', function () {
       encodeAbiParameters(parseAbiParameters('bool'), [false]),
     );
     await testClient.impersonateAccount({ address: eoa });
-    await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
+    await getNPM(chainId, amm, undefined, walletClient).write.setApprovalForAll(
       [automanAddress, true],
       {
         account: eoa,
@@ -318,10 +318,7 @@ describe('State overrides tests', function () {
     const publicClient = getInfuraClient();
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
-    const { apertureAutoman } = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!;
+    const { apertureAutoman } = getAMMInfo(chainId, amm)!;
     const stateOverrides = {
       ...(await getERC20Overrides(
         WETH_ADDRESS,
@@ -371,6 +368,7 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     );
@@ -396,6 +394,7 @@ describe('State overrides tests', function () {
 
     const priceImpact = await calculateMintOptimalPriceImpact({
       chainId,
+      amm,
       publicClient,
       from: eoa,
       mintParams,
@@ -407,6 +406,7 @@ describe('State overrides tests', function () {
 
     const [, liquidity, amount0, amount1] = await simulateMintOptimal(
       chainId,
+      amm,
       publicClient,
       eoa,
       mintParams,
@@ -424,7 +424,13 @@ describe('State overrides tests', function () {
     const publicClient = getInfuraClient();
     const amount0Desired = 100000000n;
     const amount1Desired = 1000000000000000000n;
-    const position = await getPosition(chainId, 4n, publicClient, blockNumber);
+    const position = await getPosition(
+      chainId,
+      amm,
+      4n,
+      publicClient,
+      blockNumber,
+    );
     const increaseParams = {
       tokenId: positionId,
       amount0Desired,
@@ -436,6 +442,7 @@ describe('State overrides tests', function () {
 
     const priceImpact = await calculateIncreaseLiquidityOptimalPriceImpact({
       chainId,
+      amm,
       publicClient,
       from: eoa,
       position,
@@ -448,6 +455,7 @@ describe('State overrides tests', function () {
 
     const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
       chainId,
+      amm,
       publicClient,
       eoa as Address,
       position,
@@ -472,6 +480,7 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     );
@@ -498,6 +507,7 @@ describe('State overrides tests', function () {
 
     const priceImpact = await calculateMintOptimalPriceImpact({
       chainId,
+      amm,
       publicClient,
       from: eoa,
       mintParams,
@@ -522,6 +532,7 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
+      amm,
       publicClient,
       blockNumber,
     );
@@ -547,6 +558,7 @@ describe('State overrides tests', function () {
 
     const impact = await calculateRebalancePriceImpact({
       chainId,
+      amm,
       publicClient,
       from: eoa,
       owner: eoa,
@@ -569,14 +581,11 @@ describe('Position util tests', function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient, 17188000n);
-    inRangePosition = await getPosition(chainId, 4n, publicClient);
+    inRangePosition = await getPosition(chainId, amm, 4n, publicClient);
   });
 
   it('Position approval', async function () {
-    const { apertureAutoman } = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!;
+    const { apertureAutoman } = getAMMInfo(chainId, amm)!;
     // This position is owned by `eoa`.
     const positionId = 4n;
     expect(
@@ -584,6 +593,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        amm,
         publicClient,
       ),
     ).to.deep.equal({
@@ -594,7 +604,7 @@ describe('Position util tests', function () {
 
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
-    const npm = getNPM(chainId, undefined, walletClient);
+    const npm = getNPM(chainId, amm, undefined, walletClient);
     await npm.write.setApprovalForAll([apertureAutoman, true], {
       account: eoa,
       chain: walletClient.chain,
@@ -604,6 +614,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        amm,
         publicClient,
       ),
     ).to.deep.equal({
@@ -621,6 +632,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        amm,
         publicClient,
       ),
     ).to.deep.include({
@@ -633,6 +645,7 @@ describe('Position util tests', function () {
         0n, // Nonexistent position id.
         undefined,
         chainId,
+        amm,
         publicClient,
       ),
     ).to.deep.include({
@@ -646,7 +659,7 @@ describe('Position util tests', function () {
     const account = privateKeyToAccount(TEST_WALLET_PRIVATE_KEY);
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
-    const npm = getNPM(chainId, undefined, walletClient);
+    const npm = getNPM(chainId, amm, undefined, walletClient);
 
     // Transfer position id 4 from `eoa` to the test wallet.
     await npm.write.transferFrom([eoa, account.address, positionId], {
@@ -662,6 +675,7 @@ describe('Position util tests', function () {
     });
     const permitTypedData = await generateTypedDataForPermit(
       chainId,
+      amm,
       positionId,
       BigInt(deadline),
       publicClient,
@@ -679,6 +693,7 @@ describe('Position util tests', function () {
           signature,
         },
         chainId,
+        amm,
         publicClient,
       ),
     ).to.deep.include({
@@ -689,6 +704,7 @@ describe('Position util tests', function () {
     // Test permit message with an incorrect position id.
     const anotherPermitTypedData = await generateTypedDataForPermit(
       chainId,
+      amm,
       positionId + 1n,
       BigInt(deadline),
       publicClient,
@@ -704,6 +720,7 @@ describe('Position util tests', function () {
           signature: anotherSignature,
         },
         chainId,
+        amm,
         publicClient,
       ),
     ).to.deep.include({
@@ -713,13 +730,18 @@ describe('Position util tests', function () {
   });
 
   it('Position in-range', async function () {
-    const outOfRangePosition = await getPosition(chainId, 7n, publicClient);
+    const outOfRangePosition = await getPosition(
+      chainId,
+      amm,
+      7n,
+      publicClient,
+    );
     expect(isPositionInRange(inRangePosition)).to.equal(true);
     expect(isPositionInRange(outOfRangePosition)).to.equal(false);
   });
 
   it('Token Svg', async function () {
-    const url = await getTokenSvg(chainId, 4n, publicClient);
+    const url = await getTokenSvg(chainId, amm, 4n, publicClient);
     expect(url.toString().slice(0, 60)).to.equal(
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjkwIiBoZWlnaHQ9Ij',
     );
@@ -904,11 +926,12 @@ describe('Position util tests', function () {
   it('Test viewCollectableTokenAmounts', async function () {
     const positionDetails = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       4n,
       publicClient,
     );
     const colletableTokenAmounts =
-      await positionDetails.getCollectableTokenAmounts(publicClient);
+      await positionDetails.getCollectableTokenAmounts(amm, publicClient);
     expect(colletableTokenAmounts).to.deep.equal({
       token0Amount: positionDetails.tokensOwed0,
       token1Amount: positionDetails.tokensOwed1,
@@ -918,12 +941,13 @@ describe('Position util tests', function () {
   it('Test get position details', async function () {
     const { owner, position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       4n,
       publicClient,
     );
     expect(owner).to.equal(eoa);
     expect(position).to.deep.equal(
-      await getPosition(chainId, 4n, publicClient),
+      await getPosition(chainId, amm, 4n, publicClient),
     );
   });
 
@@ -934,9 +958,10 @@ describe('Position util tests', function () {
     const positionDetails = await getAllPositions(
       address,
       chainId,
+      amm,
       publicClient,
     );
-    const npm = getNPM(chainId, publicClient);
+    const npm = getNPM(chainId, amm, publicClient);
     const numPositions = await npm.read.balanceOf([address]);
     const positionIds = await Promise.all(
       [...Array(Number(numPositions)).keys()].map((index) =>
@@ -948,7 +973,7 @@ describe('Position util tests', function () {
         positionIds.map(async (positionId) => {
           return [
             positionId.toString(),
-            await getPosition(chainId, positionId, publicClient),
+            await getPosition(chainId, amm, positionId, publicClient),
           ] as const;
         }),
       ),
@@ -973,6 +998,7 @@ describe('Position util tests', function () {
     const positionDetails = await getAllPositions(
       address,
       chainId,
+      amm,
       publicClient,
     );
     expect(positionDetails.size).to.greaterThan(7000);
@@ -980,15 +1006,12 @@ describe('Position util tests', function () {
 
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { apertureAutoman } = getAMMInfo(
-      chainId,
-      AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-    )!;
+    const { apertureAutoman } = getAMMInfo(chainId, amm)!;
     const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const positionId = 761879n;
     const blockNumber = 119626480n;
-    const npm = getNPM(chainId, publicClient);
+    const npm = getNPM(chainId, amm, publicClient);
     const opts = {
       blockNumber,
     };
@@ -997,6 +1020,7 @@ describe('Position util tests', function () {
       .be.false;
     const [liquidity] = await getReinvestedPosition(
       chainId,
+      amm,
       positionId,
       publicClient,
       blockNumber,
@@ -1007,7 +1031,7 @@ describe('Position util tests', function () {
     });
     await testClient.impersonateAccount({ address: owner });
     const walletClient = testClient.extend(walletActions);
-    await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
+    await getNPM(chainId, amm, undefined, walletClient).write.setApprovalForAll(
       [apertureAutoman, true],
       {
         account: owner,
@@ -1018,6 +1042,7 @@ describe('Position util tests', function () {
       const publicClient = await hre.viem.getPublicClient();
       const { liquidity: liquidityBefore } = await getPosition(
         chainId,
+        amm,
         positionId,
         publicClient,
       );
@@ -1033,6 +1058,7 @@ describe('Position util tests', function () {
       });
       const { liquidity: liquidityAfter } = await getPosition(
         chainId,
+        amm,
         positionId,
         publicClient,
       );
@@ -1307,8 +1333,8 @@ describe('Pool subgraph query tests', function () {
     const tickLower = pool.tickCurrent - DOUBLE_TICK;
     const tickUpper = pool.tickCurrent + DOUBLE_TICK;
     const [liquidityArr, tickToLiquidityMap] = await Promise.all([
-      getLiquidityArrayForPool(chainId, pool, tickLower, tickUpper),
-      getTickToLiquidityMapForPool(chainId, pool, tickLower, tickUpper),
+      getLiquidityArrayForPool(chainId, amm, pool, tickLower, tickUpper),
+      getTickToLiquidityMapForPool(chainId, amm, pool, tickLower, tickUpper),
     ]);
     expect(liquidityArr.length).to.be.greaterThan(0);
     expect(tickToLiquidityMap.size).to.be.greaterThan(0);
@@ -1328,6 +1354,7 @@ describe('Pool subgraph query tests', function () {
       WETH_ADDRESS,
       FeeAmount.LOW,
       chainId,
+      amm,
       getPublicClient(chainId),
     );
     await testLiquidityDistribution(chainId, pool);
@@ -1346,6 +1373,7 @@ describe('Pool subgraph query tests', function () {
       USDC_ARBITRUM,
       FeeAmount.LOW,
       arbitrumChainId,
+      amm,
       getPublicClient(arbitrumChainId),
     );
     await testLiquidityDistribution(arbitrumChainId, pool);
@@ -1368,6 +1396,7 @@ describe('Recurring rebalance tests', function () {
       USDC_ARBITRUM,
       FeeAmount.LOW,
       arbitrumChainId,
+      amm,
       getPublicClient(arbitrumChainId),
     );
   });
@@ -1480,6 +1509,7 @@ describe('Routing tests', function () {
     const blockNumber = 119626480n;
     const { pool, position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       tokenId,
       publicClient,
       blockNumber,
@@ -1492,9 +1522,12 @@ describe('Routing tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
-    const owner = await getNPM(chainId, publicClient).read.ownerOf([tokenId]);
+    const owner = await getNPM(chainId, amm, publicClient).read.ownerOf([
+      tokenId,
+    ]);
     const { liquidity } = await optimalRebalance(
       chainId,
+      amm,
       tokenId,
       tickLower,
       tickUpper,
@@ -1556,6 +1589,7 @@ describe('Automan transaction tests', function () {
       WETH_ADDRESS,
       FeeAmount.MEDIUM,
       chainId,
+      amm,
       publicClient,
     );
     const tickLower = nearestUsableTick(
@@ -1579,11 +1613,11 @@ describe('Automan transaction tests', function () {
       BigInt(hypotheticalPosition.amount0.quotient.toString()),
       BigInt(hypotheticalPosition.amount1.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapRoute } = await getOptimalMintSwapInfo(
       chainId,
+      amm,
       hypotheticalPosition.amount0,
       hypotheticalPosition.amount1,
       FeeAmount.MEDIUM,
@@ -1610,11 +1644,13 @@ describe('Automan transaction tests', function () {
       WETH_ADDRESS,
       FeeAmount.MEDIUM,
       chainId,
+      amm,
       publicClient,
     );
     const positionId = 4;
     const [, , , , , tickLower, tickUpper] = await getNPM(
       chainId,
+      amm,
       publicClient,
     ).read.positions([BigInt(positionId)]);
 
@@ -1631,8 +1667,7 @@ describe('Automan transaction tests', function () {
       BigInt(hypotheticalPosition.amount0.quotient.toString()),
       BigInt(hypotheticalPosition.amount1.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.UNISWAP_V3)!
-        .apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
     );
 
     const { swapRoute } = await getIncreaseLiquidityOptimalSwapInfo(
@@ -1642,6 +1677,7 @@ describe('Automan transaction tests', function () {
         deadline: Math.floor(Date.now() / 1000 + 60 * 30),
       },
       chainId,
+      amm,
       hypotheticalPosition.amount0,
       hypotheticalPosition.amount1,
       eoa as Address,
