@@ -608,6 +608,7 @@ export const UpdateTriggerRequestSchema = PayloadSignatureSchema.extend({
 export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
 
 export const ListTriggerRequestSchema = BaseTriggerPayloadSchema.extend({
+  amm: AutomatedMarketMakerEnum,
   isLimitOrder: z
     .boolean()
     .describe(
@@ -750,10 +751,13 @@ export type GetStrategiesDetailRequest = z.infer<
   typeof GetStrategiesDetailRequestSchema
 >;
 
-export const GetStrategyDetailRequestSchema =
-  GetStrategiesDetailRequestSchema.extend({
-    strategyId: z.string().min(1).describe('The id of the strategy.'),
-  });
+export const GetStrategyDetailRequestSchema = ClientTypeSchema.extend({
+  ownerAddr: AddressSchema.describe(
+    'The owner address of position `tokenId`; must be a checksum address.',
+  ),
+  chainId: ApertureSupportedChainIdEnum,
+  strategyId: z.string().min(1).describe('The id of the strategy.'),
+});
 export type GetStrategyDetailRequest = z.infer<
   typeof GetStrategyDetailRequestSchema
 >;
