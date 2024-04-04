@@ -5,11 +5,11 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
 
+import { computePoolAddress } from '../../utils';
 import {
   LiquidityAmount,
   TickNumber,
   TickToLiquidityMap,
-  computePoolAddress,
   normalizeTicks,
   reconstructLiquidityArray,
 } from './pool';
@@ -30,13 +30,13 @@ export async function getTickToLiquidityMapForPool(
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
   const chainInfo = getChainInfo(chainId);
-  const { factory } = chainInfo.amms[amm]!;
   const { uniswap_subgraph_url } = chainInfo;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    factory,
+    chainId,
+    amm,
     pool.token0,
     pool.token1,
     pool.fee,

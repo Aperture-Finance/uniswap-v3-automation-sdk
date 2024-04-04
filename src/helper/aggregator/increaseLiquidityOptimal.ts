@@ -10,13 +10,13 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { BigNumberish } from 'ethers';
 
+import { computePoolAddress } from '../../utils';
 import {
   encodeOptimalSwapData,
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
 import { StateOverrides, getERC20Overrides } from '../overrides';
-import { computePoolAddress } from '../pool';
 import { getApproveTarget } from './index';
 import { SwapRoute, quote } from './quote';
 
@@ -217,13 +217,14 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimalSwapRouter, factory } = getAMMInfo(chainId, amm)!;
+    const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        factory,
+        chainId,
+        amm,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,
@@ -240,7 +241,7 @@ async function getIncreaseLiquidityOptimalSwapData(
       zeroForOne ? position.pool.token0.address : position.pool.token1.address,
       zeroForOne ? position.pool.token1.address : position.pool.token0.address,
       poolAmountIn.toString(),
-      optimalSwapRouter!,
+      ammInfo.optimalSwapRouter!,
       Number(slippage.toFixed()),
       includeRoute,
     );

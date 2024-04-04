@@ -9,8 +9,8 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import Bottleneck from 'bottleneck';
 
+import { computePoolAddress } from '../../utils';
 import { encodeOptimalSwapData, getAutomanContract } from '../automan';
-import { computePoolAddress } from '../pool';
 import { getApproveTarget } from './index';
 import { SwapRoute, quote } from './quote';
 
@@ -54,13 +54,14 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimalSwapRouter, factory } = getAMMInfo(chainId, amm)!;
+    const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        factory,
+        chainId,
+        amm,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,
@@ -80,7 +81,7 @@ export async function getOptimalMintSwapData(
       zeroForOne ? mintParams.token0 : mintParams.token1,
       zeroForOne ? mintParams.token1 : mintParams.token0,
       poolAmountIn.toString(),
-      optimalSwapRouter!,
+      ammInfo.optimalSwapRouter!,
       slippage * 100,
       includeRoute,
     );

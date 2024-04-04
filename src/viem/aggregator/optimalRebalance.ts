@@ -3,6 +3,7 @@ import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient } from 'viem';
 
+import { computePoolAddress } from '../../utils';
 import {
   MintParams,
   encodeOptimalSwapData,
@@ -10,7 +11,6 @@ import {
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
-import { computePoolAddress } from '../pool';
 import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
 import { SwapRoute, quote } from './quote';
@@ -231,14 +231,15 @@ async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimalSwapRouter, factory } = getAMMInfo(chainId, amm)!;
+    const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [
         computePoolAddress(
-          factory,
+          chainId,
+          amm,
           mintParams.token0,
           mintParams.token1,
           mintParams.fee as FeeAmount,
@@ -259,7 +260,7 @@ async function getOptimalMintSwapData(
       zeroForOne ? mintParams.token0 : mintParams.token1,
       zeroForOne ? mintParams.token1 : mintParams.token0,
       poolAmountIn.toString(),
-      optimalSwapRouter!,
+      ammInfo.optimalSwapRouter!,
       slippage * 100,
       includeRoute,
     );

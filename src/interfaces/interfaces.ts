@@ -745,6 +745,7 @@ const GetStrategyRequestBaseSchema = ClientTypeSchema.extend({
     'The owner address of the request strategy/strategies; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  amm: AutomatedMarketMakerEnum,
 });
 
 export const GetStrategiesDetailRequestSchema =
