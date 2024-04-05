@@ -1,5 +1,6 @@
 import { providers } from '@0xsequence/multicall';
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
@@ -12,9 +13,9 @@ import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
-  UniV3Automan,
-  UniV3Automan__factory,
-  UniV3OptimalSwapRouter__factory,
+  PCSV3Automan,
+  PCSV3Automan__factory,
+  PCSV3OptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
 import {
@@ -35,32 +36,30 @@ import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
   WHALE_ADDRESS,
-  amm,
-  chainId,
-  eoa,
   expect,
   hardhatForkProvider,
-  resetHardhatNetwork,
 } from './common';
 
-describe('Helper - Automan transaction tests', function () {
-  const positionId = 4;
-  let automanContract: UniV3Automan;
+describe('Helper - PCSV3Automan transaction tests', function () {
+  const BNB_CHAIN_ID = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
+  const PCS_AMM = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
+  const positionId = 528336;
+  let automanContract: PCSV3Automan;
   let impersonatedOwnerSigner: Signer;
-  const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const automanAddress = getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman;
 
   beforeEach(async function () {
-    await resetHardhatNetwork();
+    await hardhatReset(process.env.BNB_RPC_URL!, /*blockNumber=*/ 37287100);
 
     // Without this, Hardhat throws an InvalidInputError saying that WHALE_ADDRESS is an unknown account.
     // Likely a Hardhat bug.
     await hardhatForkProvider.getBalance(WHALE_ADDRESS);
 
     // Deploy Automan.
-    automanContract = await new UniV3Automan__factory(
+    automanContract = await new PCSV3Automan__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
-      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
     await automanContract.deployed();
@@ -70,41 +69,42 @@ describe('Helper - Automan transaction tests', function () {
       feeLimitPips: BigNumber.from('500000000000000000'),
     });
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
-    const router = await new UniV3OptimalSwapRouter__factory(
+    const router = await new PCSV3OptimalSwapRouter__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
-    ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
+    ).deploy(getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.nonfungiblePositionManager);
     await router.deployed();
     await automanContract.setSwapRouters([router.address], [true]);
 
     // Set Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman =
-      automanContract.address as `0x${string}`;
-    getAMMInfo(chainId, amm)!.optimalSwapRouter =
-      router.address as `0x${string}`;
+    getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman =
+      automanContract.address as Address;
+    getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.optimalSwapRouter =
+      router.address as Address;
 
     // Owner of position id 4 sets Automan as operator.
     impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
-    await getNPM(chainId, amm, impersonatedOwnerSigner).setApprovalForAll(
-      automanContract.address,
-      true,
-    );
+    await getNPM(
+      BNB_CHAIN_ID,
+      PCS_AMM,
+      impersonatedOwnerSigner,
+    ).setApprovalForAll(automanContract.address, true);
   });
 
   after(() => {
     // Reset Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman = automanAddress;
+    getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman = automanAddress;
   });
 
   it('Rebalance', async function () {
     const existingPosition = await getPosition(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       positionId,
       hardhatForkProvider,
     );
     const { tx: txRequest } = await getRebalanceTx(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       eoa,
       positionId,
       240000,
@@ -118,15 +118,15 @@ describe('Helper - Automan transaction tests', function () {
       await impersonatedOwnerSigner.sendTransaction(txRequest)
     ).wait();
     const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       txReceipt,
       eoa,
     )!;
     expect(
       await getBasicPositionInfo(
-        chainId,
-        amm,
+        BNB_CHAIN_ID,
+        PCS_AMM,
         newPositionId,
         hardhatForkProvider,
       ),
@@ -172,23 +172,23 @@ describe('Helper - Automan transaction tests', function () {
 
   it('Rebalance with 1inch', async function () {
     const existingPosition = await getPosition(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       positionId,
       hardhatForkProvider,
     );
     await dealERC20(
-      chainId,
+      BNB_CHAIN_ID,
       existingPosition.pool.token0.address,
       existingPosition.pool.token1.address,
       existingPosition.amount0.multiply(2).quotient.toString(),
       existingPosition.amount1.multiply(2).quotient.toString(),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx: txRequest } = await getRebalanceTx(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       eoa,
       positionId,
       240000,
@@ -205,15 +205,15 @@ describe('Helper - Automan transaction tests', function () {
       await impersonatedOwnerSigner.sendTransaction(txRequest)
     ).wait();
     const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       txReceipt,
       eoa,
     )!;
     expect(
       await getBasicPositionInfo(
-        chainId,
-        amm,
+        BNB_CHAIN_ID,
+        PCS_AMM,
         newPositionId,
         hardhatForkProvider,
       ),
@@ -232,8 +232,8 @@ describe('Helper - Automan transaction tests', function () {
       WBTC_ADDRESS,
       WETH_ADDRESS,
       FeeAmount.MEDIUM,
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       hardhatForkProvider,
     );
     const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
@@ -247,17 +247,17 @@ describe('Helper - Automan transaction tests', function () {
       pool.tickSpacing,
     );
     await dealERC20(
-      chainId,
+      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
       FeeAmount.MEDIUM,
@@ -274,14 +274,14 @@ describe('Helper - Automan transaction tests', function () {
       await impersonatedOwnerSigner.sendTransaction(tx)
     ).wait();
     const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       txReceipt,
       eoa,
     )!;
     const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       newPositionId,
       hardhatForkProvider,
     );
@@ -299,8 +299,8 @@ describe('Helper - Automan transaction tests', function () {
       WBTC_ADDRESS,
       WETH_ADDRESS,
       FeeAmount.MEDIUM,
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       hardhatForkProvider,
     );
     const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
@@ -314,17 +314,17 @@ describe('Helper - Automan transaction tests', function () {
       pool.tickSpacing,
     );
     await dealERC20(
-      chainId,
+      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
       FeeAmount.MEDIUM,
@@ -341,14 +341,14 @@ describe('Helper - Automan transaction tests', function () {
       await impersonatedOwnerSigner.sendTransaction(tx)
     ).wait();
     const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       txReceipt,
       eoa,
     )!;
     const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       newPositionId,
       hardhatForkProvider,
     );
@@ -365,8 +365,8 @@ describe('Helper - Automan transaction tests', function () {
 
   it('Increase liquidity optimal with 1inch', async function () {
     const existingPosition = await getPosition(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       positionId,
       hardhatForkProvider,
     );
@@ -374,13 +374,13 @@ describe('Helper - Automan transaction tests', function () {
     const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
     const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
     await dealERC20(
-      chainId,
+      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
 
     const { tx } = await getIncreaseLiquidityOptimalTx(
@@ -389,8 +389,8 @@ describe('Helper - Automan transaction tests', function () {
         slippageTolerance: new Percent(50, 100),
         deadline: Math.floor(Date.now() / 1000 + 60 * 30),
       },
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
       eoa as Address,
@@ -401,8 +401,8 @@ describe('Helper - Automan transaction tests', function () {
 
     await (await impersonatedOwnerSigner.sendTransaction(tx)).wait();
     const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       positionId,
       hardhatForkProvider,
     );
@@ -420,8 +420,8 @@ describe('Helper - Automan transaction tests', function () {
 
   it('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await getPosition(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       positionId,
       hardhatForkProvider,
     );
@@ -429,13 +429,13 @@ describe('Helper - Automan transaction tests', function () {
     const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
     const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
     await dealERC20(
-      chainId,
+      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx } = await getIncreaseLiquidityOptimalTx(
       {
@@ -443,8 +443,8 @@ describe('Helper - Automan transaction tests', function () {
         slippageTolerance: new Percent(5, 1000),
         deadline: Math.floor(Date.now() / 1000 + 60 * 30),
       },
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
       eoa as Address,
@@ -455,8 +455,8 @@ describe('Helper - Automan transaction tests', function () {
 
     await (await impersonatedOwnerSigner.sendTransaction(tx)).wait();
     const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       positionId,
       hardhatForkProvider,
     );
@@ -473,8 +473,8 @@ describe('Helper - Automan transaction tests', function () {
 
   it('Test getZapOutTx', async function () {
     const { tx } = await getZapOutTx(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       eoa,
       positionId,
       true,
@@ -488,11 +488,16 @@ describe('Helper - Automan transaction tests', function () {
 
   it('Reinvest', async function () {
     const liquidityBeforeReinvest = (
-      await getBasicPositionInfo(chainId, amm, positionId, hardhatForkProvider)
+      await getBasicPositionInfo(
+        BNB_CHAIN_ID,
+        PCS_AMM,
+        positionId,
+        hardhatForkProvider,
+      )
     ).liquidity!;
     const { tx: txRequest } = await getReinvestTx(
-      chainId,
-      amm,
+      BNB_CHAIN_ID,
+      PCS_AMM,
       eoa,
       positionId,
       /*slippageTolerance=*/ new Percent(1, 100),
@@ -501,14 +506,19 @@ describe('Helper - Automan transaction tests', function () {
     );
     await (await impersonatedOwnerSigner.sendTransaction(txRequest)).wait();
     const liquidityAfterReinvest = (
-      await getBasicPositionInfo(chainId, amm, positionId, hardhatForkProvider)
+      await getBasicPositionInfo(
+        BNB_CHAIN_ID,
+        PCS_AMM,
+        positionId,
+        hardhatForkProvider,
+      )
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
     expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
-        chainId,
+        BNB_CHAIN_ID,
         AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId,
         /*feeToPrincipalRatioThreshold=*/ 0.1,
