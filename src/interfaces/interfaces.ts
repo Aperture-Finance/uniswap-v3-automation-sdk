@@ -20,6 +20,12 @@ export enum ApertureSupportedChainId {
   MANTA_PACIFIC_TESTNET_CHAIN_ID = 3441005,
 }
 
+const ammEnumWithUniswapV3Default = AutomatedMarketMakerEnum.default(
+  AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+).describe(
+  'The automated market maker. If not specified, then this will be UNISWAP_V3.',
+);
+
 export const ClientTypeEnum = z.enum(['FRONTEND', 'API']);
 export type ClientTypeEnum = z.infer<typeof ClientTypeEnum>;
 
@@ -503,11 +509,7 @@ const TriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
 });
 
 export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
-  amm: AutomatedMarketMakerEnum.default(
-    AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-  ).describe(
-    'The automated market maker. If not specified, then this will be UNISWAP_V3.',
-  ),
+  amm: ammEnumWithUniswapV3Default,
   nftId: z
     .string()
     .min(1)
@@ -566,7 +568,7 @@ export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
 export const CheckPositionPermitRequestSchema = ClientTypeSchema.extend({
   chainId: ApertureSupportedChainIdEnum,
-  amm: AutomatedMarketMakerEnum,
+  amm: ammEnumWithUniswapV3Default,
   tokenId: z
     .string()
     .min(1)
@@ -608,7 +610,7 @@ export const UpdateTriggerRequestSchema = PayloadSignatureSchema.extend({
 export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
 
 export const ListTriggerRequestSchema = BaseTriggerPayloadSchema.extend({
-  amm: AutomatedMarketMakerEnum,
+  amm: ammEnumWithUniswapV3Default,
   isLimitOrder: z
     .boolean()
     .describe(
@@ -700,7 +702,7 @@ export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
     'The owner address of position `tokenId`; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
-  amm: AutomatedMarketMakerEnum,
+  amm: ammEnumWithUniswapV3Default,
   tokenId: z
     .string()
     .min(1)
@@ -745,12 +747,12 @@ const GetStrategyRequestBaseSchema = ClientTypeSchema.extend({
     'The owner address of the request strategy/strategies; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
-  amm: AutomatedMarketMakerEnum,
+  amm: ammEnumWithUniswapV3Default,
 });
 
 export const GetStrategiesDetailRequestSchema =
   GetStrategyRequestBaseSchema.extend({
-    amm: AutomatedMarketMakerEnum,
+    amm: ammEnumWithUniswapV3Default,
   });
 export type GetStrategiesDetailRequest = z.infer<
   typeof GetStrategiesDetailRequestSchema
@@ -866,7 +868,7 @@ export type GetStrategiesDetailResponse = z.infer<
 
 export const WalletTrackingRequestSchema = z.object({
   chainId: ApertureSupportedChainIdEnum,
-  amm: AutomatedMarketMakerEnum,
+  amm: ammEnumWithUniswapV3Default,
   address: AddressSchema,
   timestamp_secs: z.number().int().positive(),
   walletClient: WalletTypeEnum,
@@ -905,7 +907,7 @@ export const UserActivityTrackingRequestSchema = z.object({
   userAddress: AddressSchema,
   clientTimestampSecs: z.number().int().positive(),
   chainId: ApertureSupportedChainIdEnum,
-  amm: AutomatedMarketMakerEnum,
+  amm: ammEnumWithUniswapV3Default,
   // In the user activity DynamoDB table, in addition to the five "instant" action types below, the action type value can also be 'CreateTrigger' or 'ExecuteTrigger'; these two are added to the table by the backend trigger handlers as appropriate.
   actionType: z.enum([
     'Swap',
