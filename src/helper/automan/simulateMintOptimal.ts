@@ -1,8 +1,8 @@
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
-  UniV3Automan,
   getAMMInfo,
 } from '@/index';
 import {
@@ -22,7 +22,7 @@ import {
 import { UnwrapPromise } from './automan';
 
 export type MintReturnType = UnwrapPromise<
-  ReturnType<UniV3Automan['callStatic']['mintOptimal']>
+  ReturnType<Automan['callStatic']['mintOptimal']>
 >;
 /**
  * Simulate a `mintOptimal` call by overriding the balances and allowances of the tokens involved.
@@ -47,7 +47,7 @@ export async function simulateMintOptimal(
   overrides?: StateOverrides,
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
-  const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
+  const data = IAutoman__factory.createInterface().encodeFunctionData(
     'mintOptimal',
     [mintParams, swapData],
   );
@@ -91,7 +91,7 @@ export async function simulateMintOptimal(
   } else {
     returnData = await provider.call(tx, blockNumber);
   }
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     'mintOptimal',
     returnData,
   ) as MintReturnType;

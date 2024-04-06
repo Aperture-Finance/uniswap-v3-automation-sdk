@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  IUniV3Automan__factory,
+  IAutoman__factory,
   getAMMInfo,
 } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
@@ -100,7 +100,7 @@ export async function getIncreaseLiquidityOptimalTx(
     amount1Min: amount1.toString(),
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
+  const data = IAutoman__factory.createInterface().encodeFunctionData(
     'increaseLiquidityOptimal',
     [increaseParams, swapData],
   );

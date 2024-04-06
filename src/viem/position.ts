@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
+  Automan__factory,
   INonfungiblePositionManager__factory,
-  UniV3Automan__factory,
   fractionToBig,
   getAMMInfo,
   getTokenValueProportionFromPriceRatio,
@@ -630,7 +630,7 @@ export async function getReinvestedPosition(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     functionName: 'reinvest',
     data: returnData,
   });

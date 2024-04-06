@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  IUniV3Automan__factory,
+  Automan__factory,
   getAMMInfo,
 } from '@/index';
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
@@ -93,7 +93,7 @@ export async function getOptimalMintTx(
     recipient,
     deadline,
   };
-  const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
+  const data = Automan__factory.createInterface().encodeFunctionData(
     'mintOptimal',
     [mintParams, swapData],
   );

@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
   getAMMInfo,
 } from '@/index';
@@ -167,7 +167,7 @@ async function getAmountsWithSlippage(
     data,
   });
   const { amount0, amount1, liquidity } =
-    IUniV3Automan__factory.createInterface().decodeFunctionResult(
+    IAutoman__factory.createInterface().decodeFunctionResult(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       functionFragment,

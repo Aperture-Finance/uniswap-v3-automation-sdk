@@ -1,10 +1,10 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
-  UniV3Automan,
   getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
@@ -20,7 +20,7 @@ import { UnwrapPromise, checkTicks } from './automan';
 import { AutomanCallInfo } from './automan';
 
 type RebalanceReturnType = UnwrapPromise<
-  ReturnType<UniV3Automan['callStatic'][GetAutomanFragment<'rebalance'>]>
+  ReturnType<Automan['callStatic'][GetAutomanFragment<'rebalance'>]>
 >;
 
 /**
@@ -56,7 +56,7 @@ export async function simulateRebalance(
     undefined,
     swapData,
   );
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     functionFragment,
@@ -83,7 +83,7 @@ export function getAutomanRebalanceCallInfo(
       'rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)';
     return {
       functionFragment,
-      data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+      data: IAutoman__factory.createInterface().encodeFunctionData(
         functionFragment,
         [mintParams, tokenId, feeBips, swapData],
       ),
@@ -94,7 +94,7 @@ export function getAutomanRebalanceCallInfo(
     'rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)';
   return {
     functionFragment,
-    data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+    data: IAutoman__factory.createInterface().encodeFunctionData(
       functionFragment,
       [mintParams, tokenId, feeBips, swapData, permitInfo.deadline, v, r, s],
     ),

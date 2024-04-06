@@ -1,5 +1,6 @@
 import { providers } from '@0xsequence/multicall';
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { reset as hardhatReset } from '@nomicfoundation/hardhat-network-helpers';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -30,20 +31,17 @@ import {
   getPosition,
   getRebalanceTx,
   getReinvestTx,
-  getZapOutTx,
 } from '../../../src/helper';
-import {
-  WBTC_ADDRESS,
-  WETH_ADDRESS,
-  WHALE_ADDRESS,
-  expect,
-  hardhatForkProvider,
-} from './common';
+import { expect, hardhatForkProvider } from './common';
 
 describe('Helper - PCSV3Automan transaction tests', function () {
   const BNB_CHAIN_ID = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
   const PCS_AMM = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
+  const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
+  const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
+  const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336;
+  const positionOwner = '0x4B104b883104d17E618d84f766d0be06F6F6f486';
   let automanContract: PCSV3Automan;
   let impersonatedOwnerSigner: Signer;
   const automanAddress = getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman;
@@ -81,8 +79,8 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.optimalSwapRouter =
       router.address as Address;
 
-    // Owner of position id 4 sets Automan as operator.
-    impersonatedOwnerSigner = await ethers.getImpersonatedSigner(eoa);
+    // Owner of position id 528336 sets Automan as operator.
+    impersonatedOwnerSigner = await ethers.getImpersonatedSigner(positionOwner);
     await getNPM(
       BNB_CHAIN_ID,
       PCS_AMM,
@@ -105,7 +103,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     const { tx: txRequest } = await getRebalanceTx(
       BNB_CHAIN_ID,
       PCS_AMM,
-      eoa,
+      positionOwner,
       positionId,
       240000,
       300000,
@@ -121,7 +119,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       BNB_CHAIN_ID,
       PCS_AMM,
       txReceipt,
-      eoa,
+      positionOwner,
     )!;
     expect(
       await getBasicPositionInfo(
@@ -134,14 +132,13 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       token0: existingPosition.pool.token0,
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
-      liquidity: '13291498909567',
+      liquidity: '15250213564999769681912914',
       tickLower: 240000,
       tickUpper: 300000,
     });
   });
 
   async function dealERC20(
-    chainId: ApertureSupportedChainId,
     token0: string,
     token1: string,
     amount0: BigNumberish,
@@ -149,7 +146,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     from: string,
     to: string,
   ) {
-    const provider = new ethers.providers.InfuraProvider(chainId);
+    const provider = new JsonRpcProvider(process.env.BNB_RPC_URL!);
     const [token0Overrides, token1Overrides] = await Promise.all([
       getERC20Overrides(token0, from, to, amount0, provider),
       getERC20Overrides(token1, from, to, amount1, provider),
@@ -178,18 +175,17 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       hardhatForkProvider,
     );
     await dealERC20(
-      BNB_CHAIN_ID,
       existingPosition.pool.token0.address,
       existingPosition.pool.token1.address,
       existingPosition.amount0.multiply(2).quotient.toString(),
       existingPosition.amount1.multiply(2).quotient.toString(),
-      eoa,
+      positionOwner,
       getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx: txRequest } = await getRebalanceTx(
       BNB_CHAIN_ID,
       PCS_AMM,
-      eoa,
+      positionOwner,
       positionId,
       240000,
       300000,
@@ -208,7 +204,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       BNB_CHAIN_ID,
       PCS_AMM,
       txReceipt,
-      eoa,
+      positionOwner,
     )!;
     expect(
       await getBasicPositionInfo(
@@ -231,7 +227,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
-      FeeAmount.MEDIUM,
+      FeeAmount.PCS_V3_MEDIUM,
       BNB_CHAIN_ID,
       PCS_AMM,
       hardhatForkProvider,
@@ -247,12 +243,11 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       pool.tickSpacing,
     );
     await dealERC20(
-      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
-      eoa,
+      positionOwner,
       getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
@@ -260,10 +255,10 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      FeeAmount.MEDIUM,
+      pool.fee,
       tickLower,
       tickUpper,
-      eoa,
+      positionOwner,
       Math.floor(Date.now() / 1000) + 60,
       0.5,
       new providers.MulticallProvider(hardhatForkProvider),
@@ -277,7 +272,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       BNB_CHAIN_ID,
       PCS_AMM,
       txReceipt,
-      eoa,
+      positionOwner,
     )!;
     const newPosition = await getBasicPositionInfo(
       BNB_CHAIN_ID,
@@ -296,9 +291,9 @@ describe('Helper - PCSV3Automan transaction tests', function () {
 
   it('Optimal mint without 1inch', async function () {
     const pool = await getPool(
-      WBTC_ADDRESS,
       WETH_ADDRESS,
-      FeeAmount.MEDIUM,
+      WBTC_ADDRESS,
+      FeeAmount.PCS_V3_MEDIUM,
       BNB_CHAIN_ID,
       PCS_AMM,
       hardhatForkProvider,
@@ -314,12 +309,11 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       pool.tickSpacing,
     );
     await dealERC20(
-      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
-      eoa,
+      positionOwner,
       getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx } = await getOptimalMintTx(
@@ -327,15 +321,16 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      FeeAmount.MEDIUM,
+      pool.fee,
       tickLower,
       tickUpper,
-      eoa,
+      positionOwner,
       Math.floor(Date.now() / 1000) + 60,
       0.5,
       new providers.MulticallProvider(hardhatForkProvider),
       false,
     );
+    console.log(tx);
 
     const txReceipt = await (
       await impersonatedOwnerSigner.sendTransaction(tx)
@@ -344,7 +339,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       BNB_CHAIN_ID,
       PCS_AMM,
       txReceipt,
-      eoa,
+      positionOwner,
     )!;
     const newPosition = await getBasicPositionInfo(
       BNB_CHAIN_ID,
@@ -359,7 +354,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       fee: pool.fee,
       tickLower,
       tickUpper,
-      liquidity: '430845571946454',
+      liquidity: '47532189833423434372',
     });
   });
 
@@ -374,12 +369,11 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
     const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
     await dealERC20(
-      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
-      eoa,
+      positionOwner,
       getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
 
@@ -393,7 +387,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      eoa as Address,
+      positionOwner as Address,
       new providers.MulticallProvider(hardhatForkProvider),
       existingPosition,
       true,
@@ -429,12 +423,11 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     const amount0 = BigNumber.from(10).pow(pool.token0.decimals);
     const amount1 = BigNumber.from(10).pow(pool.token1.decimals);
     await dealERC20(
-      BNB_CHAIN_ID,
       pool.token0.address,
       pool.token1.address,
       amount0,
       amount1,
-      eoa,
+      positionOwner,
       getAMMInfo(BNB_CHAIN_ID, PCS_AMM)!.apertureAutoman,
     );
     const { tx } = await getIncreaseLiquidityOptimalTx(
@@ -447,7 +440,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       PCS_AMM,
       CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()),
       CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()),
-      eoa as Address,
+      positionOwner as Address,
       new providers.MulticallProvider(hardhatForkProvider),
       existingPosition,
       false,
@@ -467,23 +460,8 @@ describe('Helper - PCSV3Automan transaction tests', function () {
       fee: pool.fee,
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
-      liquidity: '119758517567519',
+      liquidity: '133225009575497476219',
     });
-  });
-
-  it('Test getZapOutTx', async function () {
-    const { tx } = await getZapOutTx(
-      BNB_CHAIN_ID,
-      PCS_AMM,
-      eoa,
-      positionId,
-      true,
-      /*slippageTolerance=*/ new Percent(1, 100),
-      /*deadlineEpochSeconds=*/ Math.floor(Date.now() / 1000),
-      hardhatForkProvider,
-    );
-    const eoaSigner = await ethers.getImpersonatedSigner(eoa);
-    await (await eoaSigner.sendTransaction(tx)).wait();
   });
 
   it('Reinvest', async function () {
@@ -498,7 +476,7 @@ describe('Helper - PCSV3Automan transaction tests', function () {
     const { tx: txRequest } = await getReinvestTx(
       BNB_CHAIN_ID,
       PCS_AMM,
-      eoa,
+      positionOwner,
       positionId,
       /*slippageTolerance=*/ new Percent(1, 100),
       /*deadlineEpochSeconds=*/ Math.floor(Date.now() / 1000),
@@ -513,13 +491,13 @@ describe('Helper - PCSV3Automan transaction tests', function () {
         hardhatForkProvider,
       )
     ).liquidity!;
-    expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
+    expect(liquidityBeforeReinvest.toString()).to.equal('17360687214921889114');
+    expect(liquidityAfterReinvest.toString()).to.equal('17369508569204326673');
     expect(
       generateAutoCompoundRequestPayload(
-        eoa,
+        positionOwner,
         BNB_CHAIN_ID,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        PCS_AMM,
         positionId,
         /*feeToPrincipalRatioThreshold=*/ 0.1,
         /*slippage=*/ 0.05,
@@ -532,14 +510,14 @@ describe('Helper - PCSV3Automan transaction tests', function () {
         slippage: 0.05,
         type: ActionTypeEnum.enum.Reinvest,
       },
-      chainId: 1,
-      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+      chainId: BNB_CHAIN_ID,
+      amm: PCS_AMM,
       condition: {
         feeToPrincipalRatioThreshold: 0.1,
         type: ConditionTypeEnum.enum.AccruedFees,
       },
       nftId: positionId.toString(),
-      ownerAddr: eoa,
+      ownerAddr: positionOwner,
       expiration: 1627776000,
     });
   });

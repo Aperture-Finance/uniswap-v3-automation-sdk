@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
+  Automan__factory,
   PermitInfo,
-  UniV3Automan__factory,
   getAMMInfo,
   getChainInfo,
 } from '@/index';
@@ -51,12 +51,12 @@ export function getAutomanContract(
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof UniV3Automan__factory.abi,
+  typeof Automan__factory.abi,
   PublicClient | WalletClient
 > {
   return getContract({
     address: getAMMInfo(chainId, amm)!.apertureAutoman,
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }
@@ -114,7 +114,7 @@ export function getAutomanMintOptimalCalldata(
   swapData: Hex = '0x',
 ): Hex {
   return encodeFunctionData({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     args: [mintParams, swapData] as const,
     functionName: 'mintOptimal',
   });
@@ -125,7 +125,7 @@ export function getAutomanIncreaseLiquidityOptimalCallData(
   swapData: Hex = '0x',
 ): Hex {
   return encodeFunctionData({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     args: [increaseParams, swapData] as const,
     functionName: 'increaseLiquidityOptimal',
   });
@@ -149,14 +149,14 @@ export function getAutomanDecreaseLiquidityCalldata(
   };
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: UniV3Automan__factory.abi,
+      abi: Automan__factory.abi,
       args: [params, feeBips] as const,
       functionName: 'decreaseLiquidity',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     args: [
       params,
       feeBips,
@@ -178,14 +178,14 @@ export function getAutomanRebalanceCalldata(
 ): Hex {
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: UniV3Automan__factory.abi,
+      abi: Automan__factory.abi,
       args: [mintParams, tokenId, feeBips, swapData] as const,
       functionName: 'rebalance',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     args: [
       mintParams,
       tokenId,
@@ -219,14 +219,14 @@ export function getAutomanReinvestCalldata(
   };
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: UniV3Automan__factory.abi,
+      abi: Automan__factory.abi,
       args: [params, feeBips, swapData] as const,
       functionName: 'reinvest',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     args: [
       params,
       feeBips,
@@ -257,14 +257,14 @@ export function getAutomanRemoveLiquidityCalldata(
   };
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: UniV3Automan__factory.abi,
+      abi: Automan__factory.abi,
       args: [params, feeBips] as const,
       functionName: 'removeLiquidity',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     args: [
       params,
       feeBips,
@@ -355,7 +355,7 @@ export async function simulateMintOptimal(
     ).data!;
   }
   return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     data: returnData,
     functionName: 'mintOptimal',
   });
@@ -432,7 +432,7 @@ export async function simulateIncreaseLiquidityOptimal(
     ).data!;
   }
   return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     data: returnData,
     functionName: 'increaseLiquidityOptimal',
   });
@@ -471,7 +471,7 @@ export async function simulateRemoveLiquidity(
     feeBips,
   );
   return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     data: await tryRequestWithOverrides(
       'eth_call',
       {
@@ -565,7 +565,7 @@ export async function simulateRebalance(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: UniV3Automan__factory.abi,
+    abi: Automan__factory.abi,
     data,
     functionName: 'rebalance',
   });

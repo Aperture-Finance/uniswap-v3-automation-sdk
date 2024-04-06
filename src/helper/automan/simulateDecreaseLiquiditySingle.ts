@@ -1,10 +1,10 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
-  UniV3Automan,
   getAMMInfo,
   getChainInfo,
 } from '@/index';
@@ -22,7 +22,7 @@ import { AutomanCallInfo, UnwrapPromise } from './automan';
 
 type DecreaseLiquiditySingleReturnType = UnwrapPromise<
   ReturnType<
-    UniV3Automan['callStatic'][GetAutomanFragment<'decreaseLiquiditySingle'>]
+    Automan['callStatic'][GetAutomanFragment<'decreaseLiquiditySingle'>]
   >
 >;
 
@@ -65,7 +65,7 @@ export async function simulateDecreaseLiquiditySingle(
     undefined,
     swapData,
   );
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     functionFragment,
@@ -109,7 +109,7 @@ export function getAutomanDecreaseLiquiditySingleCallInfo(
       'decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes)';
     return {
       functionFragment,
-      data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+      data: IAutoman__factory.createInterface().encodeFunctionData(
         functionFragment,
         [params, zeroForOne, feeBips, swapData],
       ),
@@ -120,7 +120,7 @@ export function getAutomanDecreaseLiquiditySingleCallInfo(
     'decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,bytes,uint256,uint8,bytes32,bytes32)';
   return {
     functionFragment,
-    data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+    data: IAutoman__factory.createInterface().encodeFunctionData(
       functionFragment,
       [params, zeroForOne, feeBips, swapData, permitInfo.deadline, v, r, s],
     ),

@@ -1,6 +1,6 @@
 import {
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
 } from '@/index';
 import { BigNumberish } from 'ethers';
@@ -29,7 +29,7 @@ export function getAutomanDecreaseLiquidityCallInfo(
       'decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)';
     return {
       functionFragment,
-      data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+      data: IAutoman__factory.createInterface().encodeFunctionData(
         functionFragment,
         [params, feeBips],
       ),
@@ -40,7 +40,7 @@ export function getAutomanDecreaseLiquidityCallInfo(
     'decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)';
   return {
     functionFragment,
-    data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+    data: IAutoman__factory.createInterface().encodeFunctionData(
       functionFragment,
       [params, feeBips, permitInfo.deadline, v, r, s],
     ),
