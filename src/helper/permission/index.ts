@@ -13,7 +13,7 @@ export interface PositionApprovalStatus {
 }
 
 /**
- * Checks whether Aperture's UniV3Automan contract has authority over the specified position.
+ * Checks whether Aperture's Automan contract has authority over the specified position.
  * @param positionId Position id.
  * @param permitInfo If defined and Automan has not already been approved on-chain, this `permitInfo` will be validated as the last option.
  * @param chainId Chain id.
@@ -126,7 +126,7 @@ export async function checkPositionPermit(
 }
 
 /**
- * Generates typed data to be signed that allows Aperture's UniV3Automan contract to operate the specified position until the specified deadline.
+ * Generates typed data to be signed that allows Aperture's Automan contract to operate the specified position until the specified deadline.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param positionId Id of the position to generate permission for.
@@ -149,7 +149,10 @@ export async function generateTypedDataForPermit(
   const ammInfo = getAMMInfo(chainId, amm)!;
   return {
     domain: {
-      name: 'Uniswap V3 Positions NFT-V1',
+      name:
+        amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
+          ? 'Pancake V3 Positions NFT-V1'
+          : 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
       verifyingContract: ammInfo.nonfungiblePositionManager,

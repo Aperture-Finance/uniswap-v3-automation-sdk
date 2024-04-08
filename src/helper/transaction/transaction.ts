@@ -1,4 +1,4 @@
-import { AmmInfo, IUniV3Automan__factory, getAMMInfo } from '@/index';
+import { AmmInfo, IAutoman__factory, getAMMInfo } from '@/index';
 import { ApertureSupportedChainId } from '@/index';
 import { INonfungiblePositionManager__factory } from '@/index';
 import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
@@ -41,7 +41,7 @@ export async function getAmountsWithSlippage(
     data,
   });
   const { amount0, amount1, liquidity } =
-    IUniV3Automan__factory.createInterface().decodeFunctionResult(
+    IAutoman__factory.createInterface().decodeFunctionResult(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       functionFragment,
@@ -131,7 +131,7 @@ export function filterLogsByEvent(
 }
 
 /**
- * Set or revoke Aperture UniV3 Automan contract as an operator of the signer's UniV3 positions.
+ * Set or revoke Aperture Automan contract as an operator of the signer's positions.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param approved True if setting approval, false if revoking approval.

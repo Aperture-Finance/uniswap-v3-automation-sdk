@@ -29,7 +29,6 @@ import {
   getPosition,
   getRebalanceTx,
   getReinvestTx,
-  getZapOutTx,
 } from '../../../src/helper';
 import {
   WBTC_ADDRESS,
@@ -43,7 +42,8 @@ import {
   resetHardhatNetwork,
 } from './common';
 
-describe('Helper - Automan transaction tests', function () {
+// Tests for UniV3Automan transactions on a forked Ethereum mainnet.
+describe('Helper - UniV3Automan transaction tests', function () {
   const positionId = 4;
   let automanContract: UniV3Automan;
   let impersonatedOwnerSigner: Signer;
@@ -469,21 +469,6 @@ describe('Helper - Automan transaction tests', function () {
       tickUpper: existingPosition.tickUpper,
       liquidity: '119758517567519',
     });
-  });
-
-  it('Test getZapOutTx', async function () {
-    const { tx } = await getZapOutTx(
-      chainId,
-      amm,
-      eoa,
-      positionId,
-      true,
-      /*slippageTolerance=*/ new Percent(1, 100),
-      /*deadlineEpochSeconds=*/ Math.floor(Date.now() / 1000),
-      hardhatForkProvider,
-    );
-    const eoaSigner = await ethers.getImpersonatedSigner(eoa);
-    await (await eoaSigner.sendTransaction(tx)).wait();
   });
 
   it('Reinvest', async function () {

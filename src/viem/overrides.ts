@@ -50,7 +50,7 @@ export function computeOperatorApprovalSlot(
 }
 
 /**
- * Compute the storage slot for the isController mapping in UniV3Automan.
+ * Compute the storage slot for the isController mapping in Automan.
  * @param from The address of controller.
  * @returns The storage slot.
  */

@@ -57,7 +57,6 @@ export interface ChainInfo {
   amms: {
     [key in AutomatedMarketMakerEnum]?: AmmInfo;
   };
-  aperture_router_proxy?: Address;
   wrappedNativeCurrency: Token;
   routingApiInfo: ChainSpecificRoutingAPIInfo;
   // Automan maximum allowed gas deduction ceiling.
@@ -106,9 +105,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       getAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
@@ -141,9 +137,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
       getAddress('0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'),
@@ -176,9 +169,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID,
       getAddress('0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'),
@@ -210,9 +200,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
       getAddress('0x4200000000000000000000000000000000000006'),
@@ -258,9 +245,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
       getAddress('0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'),
@@ -292,9 +276,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x7ECD9FDB80E1445Defd38170F05189B85084EA93',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
       getAddress('0x4200000000000000000000000000000000000006'),
@@ -326,9 +307,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
       getAddress('0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'),
@@ -361,9 +339,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       getAddress('0x0Dc808adcE2099A9F62AA87D9670745AbA741746'),
@@ -397,9 +372,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000000095538AD2A95685330eD1268C69753BC2',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_TESTNET_CHAIN_ID,
       getAddress('0xdB1fE098232A00A8B81dd6c2A911f2486cb374EE'),
@@ -433,9 +405,6 @@ const CHAIN_ID_TO_INFO: {
         ),
       },
     },
-    aperture_router_proxy: getAddress(
-      '0x0000008007b63BaC0E4aC47f855005285DF20e89',
-    ),
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
       getAddress('0x5300000000000000000000000000000000000004'),

@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  IUniV3Automan__factory,
+  IAutoman__factory,
   getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider } from '@ethersproject/providers';
@@ -50,7 +50,7 @@ export async function getReinvestedPosition(
     provider,
     blockNumber,
   );
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     functionFragment,

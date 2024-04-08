@@ -1,29 +1,8 @@
-import { ApertureSupportedChainId, getAMMInfo, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { BigNumberish, BytesLike } from 'ethers';
+import { BytesLike } from 'ethers';
 import { solidityPack } from 'ethers/lib/utils';
-
-export function encodeSwapData(
-  chainId: ApertureSupportedChainId,
-  router: string,
-  approveTarget: string,
-  tokenIn: string,
-  tokenOut: string,
-  amountIn: BigNumberish,
-  data: BytesLike,
-): string {
-  return solidityPack(
-    ['address', 'bytes'],
-    [
-      getChainInfo(chainId).aperture_router_proxy!,
-      solidityPack(
-        ['address', 'address', 'address', 'address', 'uint256', 'bytes'],
-        [router, approveTarget, tokenIn, tokenOut, amountIn, data],
-      ),
-    ],
-  );
-}
 
 export function encodeOptimalSwapData(
   chainId: ApertureSupportedChainId,

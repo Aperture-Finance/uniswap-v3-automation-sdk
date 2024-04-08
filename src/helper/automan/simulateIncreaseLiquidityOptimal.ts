@@ -1,8 +1,8 @@
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
-  UniV3Automan,
   getAMMInfo,
 } from '@/index';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
@@ -18,7 +18,7 @@ import {
 import { UnwrapPromise } from './automan';
 
 export type IncreaseLiquidityOptimalReturnType = UnwrapPromise<
-  ReturnType<UniV3Automan['callStatic']['increaseLiquidityOptimal']>
+  ReturnType<Automan['callStatic']['increaseLiquidityOptimal']>
 >;
 /**
  * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
@@ -44,7 +44,7 @@ export async function simulateIncreaseLiquidityOptimal(
   blockNumber?: number,
   overrides?: StateOverrides,
 ): Promise<IncreaseLiquidityOptimalReturnType> {
-  const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
+  const data = IAutoman__factory.createInterface().encodeFunctionData(
     'increaseLiquidityOptimal',
     [increaseParams, swapData],
   );
@@ -88,7 +88,7 @@ export async function simulateIncreaseLiquidityOptimal(
   } else {
     returnData = await provider.call(tx, blockNumber);
   }
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     'increaseLiquidityOptimal',
     returnData,
   ) as IncreaseLiquidityOptimalReturnType;

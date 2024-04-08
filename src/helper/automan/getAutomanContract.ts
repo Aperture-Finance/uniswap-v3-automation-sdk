@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  IUniV3Automan__factory,
+  IAutoman__factory,
   getAMMInfo,
 } from '@/index';
 import { Provider } from '@ethersproject/providers';
@@ -12,7 +12,7 @@ export function getAutomanContract(
   amm: AutomatedMarketMakerEnum,
   provider: Provider | Signer,
 ) {
-  return IUniV3Automan__factory.connect(
+  return IAutoman__factory.connect(
     getAMMInfo(chainId, amm)!.apertureAutoman,
     provider,
   );
