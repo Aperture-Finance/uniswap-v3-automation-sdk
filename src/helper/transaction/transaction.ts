@@ -131,7 +131,7 @@ export function filterLogsByEvent(
 }
 
 /**
- * Set or revoke Aperture  Automan contract as an operator of the signer's  positions.
+ * Set or revoke Aperture Automan contract as an operator of the signer's positions.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param approved True if setting approval, false if revoking approval.

@@ -3,7 +3,6 @@ import {
   Automan__factory,
   PermitInfo,
   getAMMInfo,
-  getChainInfo,
 } from '@/index';
 import {
   FeeAmount,
@@ -59,27 +58,6 @@ export function getAutomanContract(
     abi: Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
-}
-
-export function encodeSwapData(
-  chainId: ApertureSupportedChainId,
-  router: Address,
-  approveTarget: Address,
-  tokenIn: Address,
-  tokenOut: Address,
-  amountIn: bigint,
-  data: Hex,
-): Hex {
-  return encodePacked(
-    ['address', 'bytes'],
-    [
-      getChainInfo(chainId).aperture_router_proxy!,
-      encodePacked(
-        ['address', 'address', 'address', 'address', 'uint256', 'bytes'],
-        [router, approveTarget, tokenIn, tokenOut, amountIn, data],
-      ),
-    ],
-  );
 }
 
 export function encodeOptimalSwapData(

@@ -10,5 +10,4 @@ export * from './getRebalanceTx';
 export * from './getReinvestTx';
 export * from './getRemoveLiquidityTx';
 export * from './getWrapETHTx';
-export * from './getZapOutTx';
 export { filterLogsByEvent, getSetApprovalForAllTx } from './transaction';

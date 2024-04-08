@@ -34,6 +34,7 @@ import {
 } from '../../../src/helper';
 import { expect, hardhatForkProvider } from './common';
 
+// Tests for PCSV3Automan transactions on a forked BNB chain.
 // These tests pass locally with a free QuickNode BSC key, but they time out on CI, so skipping them for now.
 describe.skip('Helper - PCSV3Automan transaction tests', function () {
   const BNB_CHAIN_ID = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;

@@ -18,7 +18,6 @@ import {
   increaseLiquidityOptimal,
   optimalMint,
   optimalRebalance,
-  optimalZapOut,
 } from '../../../src/helper';
 import { eoa, expect } from './common';
 
@@ -204,24 +203,6 @@ describe('Helper - Routing tests', function () {
       Number(predictedLiquidity.toString()),
       Number(predictedLiquidity.toString()) * 0.1,
     );
-  });
-
-  it('Test optimal zap out', async function () {
-    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const provider = new ethers.providers.InfuraProvider(chainId);
-    const tokenId = 726230;
-    const { amount } = await optimalZapOut(
-      chainId,
-      amm,
-      tokenId,
-      false,
-      1e12,
-      await getNPM(chainId, amm, provider).ownerOf(tokenId),
-      0.1,
-      provider,
-    );
-    console.log('zap out amount', amount.toString());
   });
 
   it('Test automation eligiblity', async function () {
