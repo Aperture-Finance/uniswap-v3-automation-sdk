@@ -187,7 +187,10 @@ export async function generateTypedDataForPermit(
   )[0];
   return {
     domain: {
-      name: 'Uniswap V3 Positions NFT-V1',
+      name:
+        amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
+          ? 'Pancake V3 Positions NFT-V1'
+          : 'Uniswap V3 Positions NFT-V1',
       version: '1',
       chainId,
       verifyingContract: nonfungiblePositionManager,
