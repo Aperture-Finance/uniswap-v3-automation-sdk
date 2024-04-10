@@ -1,17 +1,18 @@
 import {
   ApertureSupportedChainId,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
+import { ADDRESS_ZERO, Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import {
   JsonRpcProvider,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { ADDRESS_ZERO, Pool, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { optimalMint } from '../aggregator';
@@ -26,6 +27,7 @@ import { SimulatedAmounts } from './transaction';
 /**
  * Generates an unsigned transaction that rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the existing position.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
@@ -41,6 +43,7 @@ import { SimulatedAmounts } from './transaction';
 
 export async function getRebalanceTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   existingPositionId: BigNumberish,
   newPositionTickLower: number,
@@ -58,6 +61,7 @@ export async function getRebalanceTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       existingPositionId,
       provider,
     ));
@@ -68,6 +72,7 @@ export async function getRebalanceTx(
       const { amount0: receive0, amount1: receive1 } =
         await simulateRemoveLiquidity(
           chainId,
+          amm,
           provider,
           ownerAddress,
           ownerAddress,
@@ -78,6 +83,7 @@ export async function getRebalanceTx(
         );
       ({ swapData } = await optimalMint(
         chainId,
+        amm,
         CurrencyAmount.fromRawAmount(position.pool.token0, receive0.toString()),
         CurrencyAmount.fromRawAmount(position.pool.token1, receive1.toString()),
         position.pool.fee,
@@ -107,7 +113,7 @@ export async function getRebalanceTx(
     recipient: ADDRESS_ZERO, // Param value ignored by Automan.
     deadline: deadlineEpochSeconds,
   };
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const { functionFragment, data } = getAutomanRebalanceCallInfo(
     mintParams,
     existingPositionId,
@@ -119,7 +125,7 @@ export async function getRebalanceTx(
     position.pool,
     newPositionTickLower,
     newPositionTickUpper,
-    aperture_uniswap_v3_automan,
+    apertureAutoman,
     ownerAddress,
     functionFragment,
     data,
@@ -131,7 +137,7 @@ export async function getRebalanceTx(
   return {
     tx: {
       from: ownerAddress,
-      to: aperture_uniswap_v3_automan,
+      to: apertureAutoman,
       data: getAutomanRebalanceCallInfo(
         mintParams,
         existingPositionId,
@@ -161,7 +167,7 @@ async function getAmountsWithSlippage(
     data,
   });
   const { amount0, amount1, liquidity } =
-    IUniV3Automan__factory.createInterface().decodeFunctionResult(
+    IAutoman__factory.createInterface().decodeFunctionResult(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       functionFragment,

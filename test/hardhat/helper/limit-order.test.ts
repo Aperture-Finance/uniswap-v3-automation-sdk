@@ -1,16 +1,17 @@
-import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   TICK_SPACINGS,
   priceToClosestTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'hardhat';
 
 import {
   IERC20__factory,
   alignPriceToClosestUsableTick,
-  getChainInfo,
+  getAMMInfo,
   parsePrice,
   priceToClosestTickSafe,
   tickToLimitOrderRange,
@@ -30,6 +31,7 @@ import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
   WHALE_ADDRESS,
+  amm,
   chainId,
   deadline,
   eoa,
@@ -65,6 +67,7 @@ describe('Helper - Limit order tests', function () {
         poolFee,
         deadline,
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.be.rejectedWith('Specified limit price not applicable');
@@ -74,6 +77,7 @@ describe('Helper - Limit order tests', function () {
       WBTC,
       poolFee,
       chainId,
+      amm,
       hardhatForkProvider,
     );
     const currentPrice = tickToPrice(
@@ -94,10 +98,10 @@ describe('Helper - Limit order tests', function () {
       poolFee,
       deadline,
       chainId,
+      amm,
       hardhatForkProvider,
     );
-    const npmAddress =
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const npmAddress = getAMMInfo(chainId, amm)!.nonfungiblePositionManager;
     expect(tx).to.deep.equal({
       to: npmAddress,
       data: '0x883164560000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c599000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000bb8000000000000000000000000000000000000000000000000000000000003f048000000000000000000000000000000000000000000000000000000000003f084000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004bd047ca72fa05f0b89ad08fe5ba5ccdc07dffbf00000000000000000000000000000000000000000000000000000000f3fd9d70',
@@ -118,11 +122,13 @@ describe('Helper - Limit order tests', function () {
     const txReceipt = await (await impersonatedEOA.sendTransaction(tx)).wait();
     const positionId = getMintedPositionIdFromTxReceipt(
       chainId,
+      amm,
       txReceipt,
       eoa,
     )!;
     const basicPositionInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );
@@ -141,6 +147,7 @@ describe('Helper - Limit order tests', function () {
     const position = await getPositionFromBasicInfo(
       basicPositionInfo,
       chainId,
+      amm,
       hardhatForkProvider,
     );
     // The user actually provided 9.99999999 WBTC due to liquidity precision, i.e. 10 WBTC would have yielded the exact same liquidity amount of 134361875488133608.
@@ -150,6 +157,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -162,6 +170,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 0,
@@ -187,6 +196,7 @@ describe('Helper - Limit order tests', function () {
         poolFee,
         deadline,
         chainId,
+        amm,
         hardhatForkProvider,
       ),
     ).to.be.rejectedWith('Specified limit price not applicable');
@@ -203,10 +213,10 @@ describe('Helper - Limit order tests', function () {
       poolFee,
       deadline,
       chainId,
+      amm,
       hardhatForkProvider,
     );
-    const npmAddress =
-      getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const npmAddress = getAMMInfo(chainId, amm)!.nonfungiblePositionManager;
     expect(tx).to.deep.equal({
       to: npmAddress,
       data: '0x883164560000000000000000000000002260fac5e5542a773aa44fbcfedf7c193bc2c599000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000bb8000000000000000000000000000000000000000000000000000000000003e508000000000000000000000000000000000000000000000000000000000003e54400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008ac7230489e7fe5900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008ac7230489e7fe590000000000000000000000004bd047ca72fa05f0b89ad08fe5ba5ccdc07dffbf00000000000000000000000000000000000000000000000000000000f3fd9d70',
@@ -227,11 +237,13 @@ describe('Helper - Limit order tests', function () {
     const txReceipt = await (await impersonatedEOA.sendTransaction(tx)).wait();
     const positionId = getMintedPositionIdFromTxReceipt(
       chainId,
+      amm,
       txReceipt,
       eoa,
     )!;
     const basicPositionInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       hardhatForkProvider,
     );
@@ -246,6 +258,7 @@ describe('Helper - Limit order tests', function () {
     const position = await getPositionFromBasicInfo(
       basicPositionInfo,
       chainId,
+      amm,
       hardhatForkProvider,
     );
     // The user actually provided 9.999999999999999576 WETH due to liquidity precision, i.e. 10 WETH would have yielded the exact same liquidity amount of 9551241229311572.
@@ -257,6 +270,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -269,6 +283,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 1,
@@ -287,6 +302,7 @@ describe('Helper - Limit order tests', function () {
       poolFee,
       deadline,
       chainId,
+      amm,
       hardhatForkProvider,
     );
     expect(nativeEthTx).to.deep.equal({
@@ -299,12 +315,14 @@ describe('Helper - Limit order tests', function () {
     ).wait();
     const nativeEthPositionId = getMintedPositionIdFromTxReceipt(
       chainId,
+      amm,
       nativeEthTxReceipt,
       eoa,
     )!;
     expect(
       await getBasicPositionInfo(
         chainId,
+        amm,
         nativeEthPositionId,
         hardhatForkProvider,
       ),
@@ -320,6 +338,7 @@ describe('Helper - Limit order tests', function () {
       generateLimitOrderCloseRequestPayload(
         eoa,
         chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         nativeEthPositionId,
         alignedLimitPrice,
         /*maxGasProportion=*/ 0.2,
@@ -332,6 +351,7 @@ describe('Helper - Limit order tests', function () {
         type: 'LimitOrderClose',
       },
       chainId: 1,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       condition: {
         type: 'TokenAmount',
         zeroAmountToken: 1,

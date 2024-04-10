@@ -7,12 +7,14 @@ import {
   getRawRelativePriceFromTokenValueProportion,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big, { BigSource } from 'big.js';
 import { BigNumberish } from 'ethers';
 
 export function generateLimitOrderCloseRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   outerLimitPrice: Price<Token, Token>,
   maxGasProportion: number,
@@ -23,6 +25,7 @@ export function generateLimitOrderCloseRequestPayload(
   return {
     ownerAddr,
     chainId,
+    amm,
     expiration,
     nftId: positionId.toString(),
     condition: {
@@ -44,6 +47,7 @@ export function generateLimitOrderCloseRequestPayload(
 export function generateAutoCompoundRequestPayload(
   ownerAddr: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   feeToPrincipalRatioThreshold: number,
   slippage: number,
@@ -53,6 +57,7 @@ export function generateAutoCompoundRequestPayload(
   return {
     ownerAddr,
     chainId,
+    amm,
     expiration,
     nftId: positionId.toString(),
     condition: {

@@ -1,14 +1,15 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import {
+  NonfungiblePositionManager,
+  Position,
+  RemoveLiquidityOptions,
+} from '@aperture_finance/uniswap-v3-sdk';
 import {
   BlockTag,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
-import {
-  NonfungiblePositionManager,
-  Position,
-  RemoveLiquidityOptions,
-} from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
 import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import {
@@ -21,6 +22,7 @@ import {
  * @param removeLiquidityOptions Remove liquidity options.
  * @param recipient The recipient address (connected wallet address).
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param receiveNativeEtherIfApplicable If set to true and the position involves ETH, send native ether instead of WETH to `recipient`.
  * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.
@@ -30,6 +32,7 @@ export async function getRemoveLiquidityTx(
   removeLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   recipient: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   receiveNativeEtherIfApplicable?: boolean,
   position?: Position,
@@ -38,6 +41,7 @@ export async function getRemoveLiquidityTx(
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
+      amm,
       removeLiquidityOptions.tokenId.toString(),
       provider,
       blockTag,
@@ -45,6 +49,7 @@ export async function getRemoveLiquidityTx(
   }
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
+    amm,
     removeLiquidityOptions.tokenId.toString(),
     provider,
     {
@@ -79,7 +84,7 @@ export async function getRemoveLiquidityTx(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

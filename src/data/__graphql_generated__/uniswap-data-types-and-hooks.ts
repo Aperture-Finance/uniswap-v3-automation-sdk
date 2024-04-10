@@ -637,7 +637,7 @@ export type PermitInput = {
   spender: Scalars['String'];
 };
 
-/** v3 pool parameters as defined by https://github.com/Uniswap/v3-sdk/blob/main/src/entities/pool.ts */
+/** v3 pool parameters as defined by https://github.com/Aperture-Finance/uniswap-v3-sdk/blob/main/src/entities/pool.ts */
 export type PoolInput = {
   fee: Scalars['Int'];
   liquidity: Scalars['String'];

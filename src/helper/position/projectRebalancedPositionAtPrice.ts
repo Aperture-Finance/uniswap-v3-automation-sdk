@@ -1,5 +1,5 @@
 import { priceToSqrtRatioX96 } from '@/index';
-import { Pool, Position, TickMath } from '@uniswap/v3-sdk';
+import { Pool, Position, TickMath } from '@aperture_finance/uniswap-v3-sdk';
 import Big from 'big.js';
 
 import { getRebalancedPosition } from './getRebalancedPosition';

@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { BlockTag, Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { getToken } from '../currency';
@@ -8,11 +9,12 @@ import { BasicPositionInfo } from './types';
 
 export async function getBasicPositionInfo(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   provider: Provider,
   blockTag?: BlockTag,
 ): Promise<BasicPositionInfo> {
-  const npm = getNPM(chainId, provider);
+  const npm = getNPM(chainId, amm, provider);
   const overrides = { blockTag };
   const positionInfo = await npm.positions(positionId, overrides);
   const [token0, token1] = await Promise.all([

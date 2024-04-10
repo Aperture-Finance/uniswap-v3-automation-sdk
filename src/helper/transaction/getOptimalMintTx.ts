@@ -1,11 +1,12 @@
 import {
   ApertureSupportedChainId,
-  IUniV3Automan__factory,
-  getChainInfo,
+  Automan__factory,
+  getAMMInfo,
 } from '@/index';
+import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { FeeAmount, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { optimalMint } from '../aggregator';
@@ -15,6 +16,7 @@ import { getPool } from '../pool';
 /**
  * Generates an unsigned transaction that mints the optimal amount of liquidity for the specified token amounts and price range.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.
@@ -28,6 +30,7 @@ import { getPool } from '../pool';
  */
 export async function getOptimalMintTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
   fee: FeeAmount,
@@ -55,6 +58,7 @@ export async function getOptimalMintTx(
   }
   const { liquidity, swapData } = await optimalMint(
     chainId,
+    amm,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
     fee,
@@ -68,7 +72,7 @@ export async function getOptimalMintTx(
   const token0 = (token0Amount.currency as Token).address;
   const token1 = (token1Amount.currency as Token).address;
   const position = new Position({
-    pool: await getPool(token0, token1, fee, chainId, provider),
+    pool: await getPool(token0, token1, fee, chainId, amm, provider),
     liquidity: liquidity.toString(),
     tickLower,
     tickUpper,
@@ -89,13 +93,13 @@ export async function getOptimalMintTx(
     recipient,
     deadline,
   };
-  const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
+  const data = Automan__factory.createInterface().encodeFunctionData(
     'mintOptimal',
     [mintParams, swapData],
   );
   return {
     tx: {
-      to: getChainInfo(chainId).aperture_uniswap_v3_automan,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       value,
     },

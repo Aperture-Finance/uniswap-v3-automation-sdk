@@ -1,6 +1,7 @@
-import { ChainInfo, IUniV3Automan__factory, getChainInfo } from '@/index';
+import { AmmInfo, IAutoman__factory, getAMMInfo } from '@/index';
 import { ApertureSupportedChainId } from '@/index';
 import { INonfungiblePositionManager__factory } from '@/index';
+import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { EventFragment } from '@ethersproject/abi';
 import { Provider } from '@ethersproject/providers';
 import {
@@ -10,7 +11,7 @@ import {
 } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { Pool, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish } from 'ethers';
 
 import { AutomanFragment } from '../automan';
@@ -40,7 +41,7 @@ export async function getAmountsWithSlippage(
     data,
   });
   const { amount0, amount1, liquidity } =
-    IUniV3Automan__factory.createInterface().decodeFunctionResult(
+    IAutoman__factory.createInterface().decodeFunctionResult(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       functionFragment,
@@ -65,12 +66,12 @@ export async function getAmountsWithSlippage(
 }
 
 export function getTxToNonfungiblePositionManager(
-  chainInfo: ChainInfo,
+  AmmInfo: AmmInfo,
   data: string,
   value?: BigNumberish,
 ) {
   return {
-    to: chainInfo.uniswap_v3_nonfungible_position_manager,
+    to: AmmInfo.nonfungiblePositionManager,
     data,
     value,
   };
@@ -130,21 +131,23 @@ export function filterLogsByEvent(
 }
 
 /**
- * Set or revoke Aperture UniV3 Automan contract as an operator of the signer's UniV3 positions.
+ * Set or revoke Aperture Automan contract as an operator of the signer's positions.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param approved True if setting approval, false if revoking approval.
  * @returns The unsigned tx setting or revoking approval.
  */
 export function getSetApprovalForAllTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   approved: boolean,
 ): TransactionRequest {
-  const chainInfo = getChainInfo(chainId);
+  const ammInfo = getAMMInfo(chainId, amm)!;
   return getTxToNonfungiblePositionManager(
-    chainInfo,
+    ammInfo,
     INonfungiblePositionManager__factory.createInterface().encodeFunctionData(
       'setApprovalForAll',
-      [chainInfo.aperture_uniswap_v3_automan, approved],
+      [ammInfo.apertureAutoman, approved],
     ),
   );
 }

@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId, INonfungiblePositionManager } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { simulateRebalance, simulateRemoveLiquidity } from '../automan';
@@ -8,6 +9,7 @@ import { getOptimalMintSwapData } from './internal';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   newTickLower: number,
   newTickUpper: number,
@@ -20,6 +22,7 @@ export async function optimalRebalance(
 ) {
   const position = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     provider,
     blockNumber,
@@ -27,6 +30,7 @@ export async function optimalRebalance(
   const { amount0: receive0, amount1: receive1 } =
     await simulateRemoveLiquidity(
       chainId,
+      amm,
       provider,
       fromAddress,
       position.owner,
@@ -54,6 +58,7 @@ export async function optimalRebalance(
     swapData = (
       await getOptimalMintSwapData(
         chainId,
+        amm,
         provider,
         mintParams,
         slippage,
@@ -63,6 +68,7 @@ export async function optimalRebalance(
   }
   const { amount0, amount1, liquidity } = await simulateRebalance(
     chainId,
+    amm,
     provider,
     fromAddress,
     position.owner,

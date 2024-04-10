@@ -1,6 +1,5 @@
 import '@nomicfoundation/hardhat-viem';
 import '@nomiclabs/hardhat-ethers';
-import 'hardhat-tracer';
 import { HardhatUserConfig } from 'hardhat/config';
 
 const config: HardhatUserConfig = {

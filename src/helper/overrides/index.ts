@@ -1,14 +1,11 @@
-import {
-  ApertureSupportedChainId,
-  IERC20__factory,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
 import {
   JsonRpcProvider,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
 import { AccessList } from '@ethersproject/transactions';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import { defaultAbiCoder as DAC, keccak256 } from 'ethers/lib/utils';
 import { zeroAddress } from 'viem';
@@ -141,17 +138,20 @@ export async function getERC20Overrides(
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   owner: string,
 ): StateOverrides {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    amm,
+  )!;
   return {
-    [uniswap_v3_nonfungible_position_manager]: {
+    [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
-          DAC.encode(['bool'], [true]),
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]: DAC.encode(
+          ['bool'],
+          [true],
+        ),
       },
     },
   };
@@ -159,10 +159,11 @@ export function getNPMApprovalOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   routerToWhitelist: string,
 ): StateOverrides {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           DAC.encode(

@@ -1,9 +1,14 @@
 import {
   ApertureSupportedChainId,
-  getChainInfo,
+  getAMMInfo,
   priceToClosestTickSafe,
   tickToLimitOrderRange,
 } from '@/index';
+import {
+  FeeAmount,
+  NonfungiblePositionManager,
+  Position,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import {
   Currency,
@@ -12,11 +17,7 @@ import {
   Price,
   Token,
 } from '@uniswap/sdk-core';
-import {
-  FeeAmount,
-  NonfungiblePositionManager,
-  Position,
-} from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
 
@@ -41,6 +42,7 @@ import { getTxToNonfungiblePositionManager } from './transaction';
  * @param poolFee The fee tier of the liquidity pool that the limit order position should be created on.
  * @param deadlineEpochSeconds Transaction deadline in seconds since UNIX epoch.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param widthMultiplier The width multiplier of the tick range in terms of tick spacing.
  * @returns The unsigned transaction that creates such a position.
@@ -52,6 +54,7 @@ export async function getCreatePositionTxForLimitOrder(
   poolFee: FeeAmount,
   deadlineEpochSeconds: BigNumberish,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   widthMultiplier = 1,
 ): Promise<TransactionRequest> {
@@ -74,6 +77,7 @@ export async function getCreatePositionTxForLimitOrder(
     outerLimitPrice.quoteCurrency,
     poolFee,
     chainId,
+    amm,
     provider,
   );
   const position = zeroToOne
@@ -109,7 +113,7 @@ export async function getCreatePositionTxForLimitOrder(
     },
   );
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

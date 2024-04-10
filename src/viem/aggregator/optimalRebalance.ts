@@ -1,7 +1,9 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient } from 'viem';
 
+import { computePoolAddress } from '../../utils';
 import {
   MintParams,
   encodeOptimalSwapData,
@@ -9,13 +11,13 @@ import {
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
-import { computePoolAddress } from '../pool';
 import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
 import { SwapRoute, quote } from './quote';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   newTickLower: number,
   newTickUpper: number,
@@ -34,15 +36,17 @@ export async function optimalRebalance(
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
-  const { optimal_swap_router } = getChainInfo(chainId);
+  const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   const position = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     publicClient,
     blockNumber,
   );
   const [receive0, receive1] = await simulateRemoveLiquidity(
     chainId,
+    amm,
     publicClient,
     fromAddress,
     position.owner,
@@ -68,6 +72,7 @@ export async function optimalRebalance(
 
   const poolPromise = optimalMintPool(
     chainId,
+    amm,
     publicClient,
     fromAddress,
     mintParams,
@@ -77,13 +82,14 @@ export async function optimalRebalance(
     blockNumber,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (optimalSwapRouter === undefined) {
       return { ...(await poolPromise), receive0, receive1 };
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
       optimalMintRouter(
         chainId,
+        amm,
         publicClient,
         fromAddress,
         mintParams,
@@ -107,6 +113,7 @@ export async function optimalRebalance(
 
 async function optimalMintPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
   mintParams: MintParams,
@@ -123,6 +130,7 @@ async function optimalMintPool(
 }> {
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
+    amm,
     publicClient,
     fromAddress,
     positionOwner,
@@ -164,6 +172,7 @@ async function optimalMintPool(
 
 async function optimalMintRouter(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
   mintParams: MintParams,
@@ -181,6 +190,7 @@ async function optimalMintRouter(
 }> {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
+    amm,
     publicClient,
     mintParams,
     slippage,
@@ -189,6 +199,7 @@ async function optimalMintRouter(
   );
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
+    amm,
     publicClient,
     fromAddress,
     positionOwner,
@@ -209,6 +220,7 @@ async function optimalMintRouter(
 
 async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   mintParams: MintParams,
   slippage: number,
@@ -219,14 +231,15 @@ async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-    const automan = getAutomanContract(chainId, publicClient);
+    const ammInfo = getAMMInfo(chainId, amm)!;
+    const automan = getAutomanContract(chainId, amm, publicClient);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [
         computePoolAddress(
-          uniswap_v3_factory,
+          chainId,
+          amm,
           mintParams.token0,
           mintParams.token1,
           mintParams.fee as FeeAmount,
@@ -247,13 +260,14 @@ async function getOptimalMintSwapData(
       zeroForOne ? mintParams.token0 : mintParams.token1,
       zeroForOne ? mintParams.token1 : mintParams.token0,
       poolAmountIn.toString(),
-      optimal_swap_router!,
+      ammInfo.optimalSwapRouter!,
       slippage * 100,
       includeRoute,
     );
     return {
       swapData: encodeOptimalSwapData(
         chainId,
+        amm,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,

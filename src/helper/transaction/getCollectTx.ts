@@ -1,6 +1,7 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { NonfungiblePositionManager } from '@aperture_finance/uniswap-v3-sdk';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
-import { NonfungiblePositionManager } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import {
@@ -18,6 +19,7 @@ import {
  * @param positionId Position id.
  * @param recipient The recipient address (connected wallet address).
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param provider Ethers provider.
  * @param receiveNativeEtherIfApplicable If set to true and the position involves ETH, send native ether instead of WETH to `recipient`.
  * @param basicPositionInfo Basic position info (optional); if undefined, one will be created.
@@ -27,6 +29,7 @@ export async function getCollectTx(
   positionId: BigNumberish,
   recipient: string,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: Provider,
   receiveNativeEtherIfApplicable?: boolean,
   basicPositionInfo?: BasicPositionInfo,
@@ -34,12 +37,14 @@ export async function getCollectTx(
   if (basicPositionInfo === undefined) {
     basicPositionInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       provider,
     );
   }
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
+    amm,
     positionId.toString(),
     provider,
     basicPositionInfo,
@@ -56,7 +61,7 @@ export async function getCollectTx(
     ),
   });
   return getTxToNonfungiblePositionManager(
-    getChainInfo(chainId),
+    getAMMInfo(chainId, amm)!,
     calldata,
     value,
   );

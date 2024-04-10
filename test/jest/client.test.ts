@@ -1,8 +1,10 @@
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
 import {
   ActionTypeEnum,
+  ApertureSupportedChainId,
   AutomanClient,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
@@ -29,7 +31,8 @@ describe('Automan client test', () => {
     const request = {
       payload: {
         ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
-        chainId: 5,
+        chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+        amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         nftId: '64448',
         condition: {
           type: ConditionTypeEnum.enum.Time,
@@ -64,7 +67,8 @@ describe('Automan client test', () => {
   it('Should call list trigger', async () => {
     const request = {
       ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
-      chainId: 5,
+      chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       isLimitOrder: false,
     };
 
@@ -92,6 +96,7 @@ describe('Automan client test', () => {
       payload: {
         ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
         chainId: 5,
+        amm: 'UNISWAP_V3',
         taskId: 0,
         expiration: 123,
       },
@@ -115,6 +120,7 @@ describe('Automan client test', () => {
       payload: {
         ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
         chainId: 5,
+        amm: 'UNISWAP_V3',
         taskId: 0,
       },
       payloadSignature:
@@ -135,6 +141,7 @@ describe('Automan client test', () => {
   it('Should call check position approval', async () => {
     const request: CheckPositionPermitRequest = {
       chainId: 1,
+      amm: 'UNISWAP_V3',
       tokenId: '2',
     };
 
@@ -154,6 +161,7 @@ describe('Automan client test', () => {
   it('Should call update position permit', async () => {
     const request: UpdatePositionPermitRequest = {
       chainId: 1,
+      amm: 'UNISWAP_V3',
       tokenId: '2',
       permitInfo: {
         signature: '0x111',
@@ -175,6 +183,7 @@ describe('Automan client test', () => {
   it('Should call check user limit', async () => {
     const request: CheckUserLimitRequest = {
       chainId: 1,
+      amm: 'UNISWAP_V3',
       tokenId: '2',
       ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
       actionType: 'Reinvest',
@@ -195,7 +204,8 @@ describe('Automan client test', () => {
 
   it('Should call get strategy detail', async () => {
     const request: GetStrategyDetailRequest = {
-      chainId: 5,
+      chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       ownerAddr: '0x087d531a59Ab1C89a831715a6B171B7FdF5A0566',
       strategyId:
         'effc0cdc899eba75ea5294dccd78194ec0bd36eae80ed53acfa0a9b3fe8e6bb0',
@@ -216,7 +226,8 @@ describe('Automan client test', () => {
 
   it('Should call track wallet', async () => {
     const request = {
-      chainId: 5,
+      chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       address: '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
       timestamp_secs: 1708938824,
       walletClient: WalletTypeEnum['HALO'],
@@ -235,7 +246,8 @@ describe('Automan client test', () => {
 
   it('Should call track user activity', async () => {
     const request: UserActivityTrackingRequest = {
-      chainId: 5,
+      chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
       userAddress: '0xeb5105f298DbDfeD3B317E8176949e432C997C4b',
       clientTimestampSecs: 1708990541,
       actionType: 'Swap',
@@ -289,6 +301,7 @@ describe('Automan client test', () => {
         platform: 'twitter',
         code: 'code123',
       },
+      payloadSignature: '0x123456789ABCDEF101112131415161718191A1B1',
       callbackUrl: 'https://www.callback.com/',
     };
     const responseData: VerifySocialAccountResponse = {

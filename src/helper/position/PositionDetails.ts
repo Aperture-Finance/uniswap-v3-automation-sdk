@@ -1,8 +1,14 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import {
+  FeeAmount,
+  Pool,
+  Position,
+  PositionLibrary,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { FeeAmount, Pool, Position, PositionLibrary } from '@uniswap/v3-sdk';
 import { EphemeralGetPosition__factory } from 'aperture-lens';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { PositionStateStructOutput } from 'aperture-lens/dist/typechain/contracts/EphemeralGetPosition';
 import { BigNumber, BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
@@ -68,19 +74,21 @@ export class PositionDetails implements BasicPositionInfo {
   /**
    * Get the position details in a single call by deploying an ephemeral contract via `eth_call`
    * @param chainId Chain id.
+   * @param amm Automated market maker.
    * @param positionId Position id.
    * @param provider Ethers provider.
    * @returns The position details.
    */
   public static async fromPositionId(
     chainId: ApertureSupportedChainId,
+    amm: AutomatedMarketMakerEnum,
     positionId: BigNumberish,
     provider: Provider,
     blockTag?: BlockTag,
   ): Promise<PositionDetails> {
     const returnData = await provider.call(
       new EphemeralGetPosition__factory().getDeployTransaction(
-        getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+        getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
         positionId,
       ),
       blockTag,
@@ -161,18 +169,26 @@ export class PositionDetails implements BasicPositionInfo {
   /**
    * Get the real-time collectable token amounts.
    * @param provider Ethers provider.
+   * @param amm Automated market maker.
    */
   public async getCollectableTokenAmounts(
     provider: Provider,
+    amm: AutomatedMarketMakerEnum,
   ): Promise<CollectableTokenAmounts> {
-    return viewCollectableTokenAmounts(this.chainId, this.tokenId, provider, {
-      token0: this.token0,
-      token1: this.token1,
-      fee: this.fee,
-      tickLower: this.tickLower,
-      tickUpper: this.tickUpper,
-      liquidity: this.liquidity,
-    });
+    return viewCollectableTokenAmounts(
+      this.chainId,
+      amm,
+      this.tokenId,
+      provider,
+      {
+        token0: this.token0,
+        token1: this.token1,
+        fee: this.fee,
+        tickLower: this.tickLower,
+        tickUpper: this.tickUpper,
+        liquidity: this.liquidity,
+      },
+    );
   }
 }
 
@@ -180,6 +196,7 @@ export class PositionDetails implements BasicPositionInfo {
  * View the amount of collectable tokens in a position without specifying the owner as `from` which isn't multicallable.
  * The collectable amount is most likely accrued fees accumulated in the position, but can be from a prior decreaseLiquidity() call which has not been collected.
  * @param chainId Chain id.
+ * @param amm Automated market maker.
  * @param positionId Position id.
  * @param provider Ethers provider.
  * @param basicPositionInfo Basic position info, optional.
@@ -187,6 +204,7 @@ export class PositionDetails implements BasicPositionInfo {
  */
 export async function viewCollectableTokenAmounts(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   provider: Provider,
   basicPositionInfo?: BasicPositionInfo,
@@ -195,6 +213,7 @@ export async function viewCollectableTokenAmounts(
   if (basicPositionInfo === undefined) {
     basicPositionInfo = await getBasicPositionInfo(
       chainId,
+      amm,
       positionId,
       provider,
       blockTag,
@@ -205,6 +224,7 @@ export async function viewCollectableTokenAmounts(
     basicPositionInfo.token1,
     basicPositionInfo.fee,
     chainId,
+    amm,
     provider,
   );
   const overrides = { blockTag };
@@ -221,7 +241,7 @@ export async function viewCollectableTokenAmounts(
     pool.feeGrowthGlobal1X128(overrides),
     pool.ticks(basicPositionInfo.tickLower, overrides),
     pool.ticks(basicPositionInfo.tickUpper, overrides),
-    getNPM(chainId, provider).positions(positionId, overrides),
+    getNPM(chainId, amm, provider).positions(positionId, overrides),
   ]);
 
   // https://github.com/Uniswap/v4-core/blob/f630c8ca8c669509d958353200953762fd15761a/contracts/libraries/Pool.sol#L566

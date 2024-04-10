@@ -1,27 +1,29 @@
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
+import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { IncreaseOptions, Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { BigNumberish } from 'ethers';
 
+import { computePoolAddress } from '../../utils';
 import {
   encodeOptimalSwapData,
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
 import { StateOverrides, getERC20Overrides } from '../overrides';
-import { computePoolAddress } from '../pool';
 import { getApproveTarget } from './index';
 import { SwapRoute, quote } from './quote';
 
 /**
  * Get the optimal amount of liquidity to increase for a given pool and token amounts.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param position The current position to simulate the call from.
  * @param increaseOptions Increase liquidity options.
@@ -32,6 +34,7 @@ import { SwapRoute, quote } from './quote';
  */
 export async function increaseLiquidityOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   position: Position,
   increaseOptions: IncreaseOptions,
@@ -51,8 +54,7 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { aperture_uniswap_v3_automan, optimal_swap_router } =
-    getChainInfo(chainId);
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -60,14 +62,14 @@ export async function increaseLiquidityOptimal(
       getERC20Overrides(
         token0Amount.currency.address,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         increaseParams.amount0Desired,
         provider,
       ),
       getERC20Overrides(
         token1Amount.currency.address,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         increaseParams.amount1Desired,
         provider,
       ),
@@ -79,6 +81,7 @@ export async function increaseLiquidityOptimal(
   }
   const poolPromise = increaseLiquidityOptimalPool(
     chainId,
+    amm,
     provider,
     fromAddress,
     position,
@@ -86,13 +89,14 @@ export async function increaseLiquidityOptimal(
     overrides,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (optimalSwapRouter === undefined) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
       increaseLiquidityOptimalRouter(
         chainId,
+        amm,
         provider,
         fromAddress,
         position,
@@ -114,6 +118,7 @@ export async function increaseLiquidityOptimal(
 
 async function increaseLiquidityOptimalPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: Position,
@@ -123,6 +128,7 @@ async function increaseLiquidityOptimalPool(
   const { amount0, amount1, liquidity } =
     await simulateIncreaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       fromAddress,
       position,
@@ -163,6 +169,7 @@ async function increaseLiquidityOptimalPool(
 
 async function increaseLiquidityOptimalRouter(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   position: Position,
@@ -172,6 +179,7 @@ async function increaseLiquidityOptimalRouter(
 ) {
   const { swapData, swapRoute } = await getIncreaseLiquidityOptimalSwapData(
     chainId,
+    amm,
     provider,
     position,
     increaseParams,
@@ -181,6 +189,7 @@ async function increaseLiquidityOptimalRouter(
   const { amount0, amount1, liquidity } =
     await simulateIncreaseLiquidityOptimal(
       chainId,
+      amm,
       provider,
       fromAddress,
       position,
@@ -200,6 +209,7 @@ async function increaseLiquidityOptimalRouter(
 
 async function getIncreaseLiquidityOptimalSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   position: Position,
   increaseParams: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
@@ -207,13 +217,14 @@ async function getIncreaseLiquidityOptimalSwapData(
   includeRoute?: boolean,
 ) {
   try {
-    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-    const automan = getAutomanContract(chainId, provider);
+    const ammInfo = getAMMInfo(chainId, amm)!;
+    const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        uniswap_v3_factory,
+        chainId,
+        amm,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,
@@ -230,13 +241,14 @@ async function getIncreaseLiquidityOptimalSwapData(
       zeroForOne ? position.pool.token0.address : position.pool.token1.address,
       zeroForOne ? position.pool.token1.address : position.pool.token0.address,
       poolAmountIn.toString(),
-      optimal_swap_router!,
+      ammInfo.optimalSwapRouter!,
       Number(slippage.toFixed()),
       includeRoute,
     );
     return {
       swapData: encodeOptimalSwapData(
         chainId,
+        amm,
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,

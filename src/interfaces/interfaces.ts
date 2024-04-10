@@ -1,4 +1,5 @@
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { z } from 'zod';
 
 export enum ApertureSupportedChainId {
@@ -14,13 +15,16 @@ export enum ApertureSupportedChainId {
   POLYGON_MAINNET_CHAIN_ID = 137,
   AVALANCHE_MAINNET_CHAIN_ID = 43114,
   BNB_MAINNET_CHAIN_ID = 56,
-  CELO_MAINNET_CHAIN_ID = 42220,
 
   // Testnets.
-  GOERLI_TESTNET_CHAIN_ID = 5,
-  ARBITRUM_GOERLI_TESTNET_CHAIN_ID = 421613,
   MANTA_PACIFIC_TESTNET_CHAIN_ID = 3441005,
 }
+
+const ammEnumWithUniswapV3Default = AutomatedMarketMakerEnum.default(
+  AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+).describe(
+  'The automated market maker. If not specified, then this will be UNISWAP_V3.',
+);
 
 export const ClientTypeEnum = z.enum(['FRONTEND', 'API']);
 export type ClientTypeEnum = z.infer<typeof ClientTypeEnum>;
@@ -497,8 +501,15 @@ const BaseTriggerPayloadSchema = ClientTypeSchema.extend({
   ),
   chainId: ApertureSupportedChainIdEnum,
 });
+const TriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
+  taskId: z
+    .number()
+    .nonnegative()
+    .describe("The task id of the trigger in Aperture's automation service."),
+});
 
 export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
+  amm: ammEnumWithUniswapV3Default,
   nftId: z
     .string()
     .min(1)
@@ -520,19 +531,10 @@ export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
 });
 export type CreateTriggerPayload = z.infer<typeof CreateTriggerPayloadSchema>;
 
-export const DeleteTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
-  taskId: z
-    .number()
-    .nonnegative()
-    .describe("The task id of the trigger in Aperture's automation service."),
-});
+export const DeleteTriggerPayloadSchema = TriggerIdentifierSchema;
 export type DeleteTriggerPayload = z.infer<typeof DeleteTriggerPayloadSchema>;
 
-export const UpdateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
-  taskId: z
-    .number()
-    .nonnegative()
-    .describe("The task id of the trigger in Aperture's automation service."),
+export const UpdateTriggerPayloadSchema = TriggerIdentifierSchema.extend({
   action: ActionSchema.optional().describe(
     'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
   ),
@@ -566,6 +568,7 @@ export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
 export const CheckPositionPermitRequestSchema = ClientTypeSchema.extend({
   chainId: ApertureSupportedChainIdEnum,
+  amm: ammEnumWithUniswapV3Default,
   tokenId: z
     .string()
     .min(1)
@@ -607,6 +610,7 @@ export const UpdateTriggerRequestSchema = PayloadSignatureSchema.extend({
 export type UpdateTriggerRequest = z.infer<typeof UpdateTriggerRequestSchema>;
 
 export const ListTriggerRequestSchema = BaseTriggerPayloadSchema.extend({
+  amm: ammEnumWithUniswapV3Default,
   isLimitOrder: z
     .boolean()
     .describe(
@@ -698,6 +702,7 @@ export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
     'The owner address of position `tokenId`; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  amm: ammEnumWithUniswapV3Default,
   tokenId: z
     .string()
     .min(1)
@@ -737,18 +742,24 @@ export type HasSignedPrivateBetaAgreementResponse = z.infer<
   typeof HasSignedPrivateBetaAgreementResponseSchema
 >;
 
-export const GetStrategiesDetailRequestSchema = ClientTypeSchema.extend({
+const GetStrategyRequestBaseSchema = ClientTypeSchema.extend({
   ownerAddr: AddressSchema.describe(
-    'The owner address of position `tokenId`; must be a checksum address.',
+    'The owner address of the request strategy/strategies; must be a checksum address.',
   ),
   chainId: ApertureSupportedChainIdEnum,
+  amm: ammEnumWithUniswapV3Default,
 });
+
+export const GetStrategiesDetailRequestSchema =
+  GetStrategyRequestBaseSchema.extend({
+    amm: ammEnumWithUniswapV3Default,
+  });
 export type GetStrategiesDetailRequest = z.infer<
   typeof GetStrategiesDetailRequestSchema
 >;
 
 export const GetStrategyDetailRequestSchema =
-  GetStrategiesDetailRequestSchema.extend({
+  GetStrategyRequestBaseSchema.extend({
     strategyId: z.string().min(1).describe('The id of the strategy.'),
   });
 export type GetStrategyDetailRequest = z.infer<
@@ -857,6 +868,7 @@ export type GetStrategiesDetailResponse = z.infer<
 
 export const WalletTrackingRequestSchema = z.object({
   chainId: ApertureSupportedChainIdEnum,
+  amm: ammEnumWithUniswapV3Default,
   address: AddressSchema,
   timestamp_secs: z.number().int().positive(),
   walletClient: WalletTypeEnum,
@@ -895,6 +907,7 @@ export const UserActivityTrackingRequestSchema = z.object({
   userAddress: AddressSchema,
   clientTimestampSecs: z.number().int().positive(),
   chainId: ApertureSupportedChainIdEnum,
+  amm: ammEnumWithUniswapV3Default,
   // In the user activity DynamoDB table, in addition to the five "instant" action types below, the action type value can also be 'CreateTrigger' or 'ExecuteTrigger'; these two are added to the table by the backend trigger handlers as appropriate.
   actionType: z.enum([
     'Swap',

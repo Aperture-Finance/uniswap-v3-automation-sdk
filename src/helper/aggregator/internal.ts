@@ -1,15 +1,16 @@
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import Bottleneck from 'bottleneck';
 
+import { computePoolAddress } from '../../utils';
 import { encodeOptimalSwapData, getAutomanContract } from '../automan';
-import { computePoolAddress } from '../pool';
 import { getApproveTarget } from './index';
 import { SwapRoute, quote } from './quote';
 
@@ -42,6 +43,7 @@ function apiRequestUrl(chainId: ApertureSupportedChainId, methodName: string) {
 
 export async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
   slippage: number,
@@ -52,13 +54,14 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-    const automan = getAutomanContract(chainId, provider);
+    const ammInfo = getAMMInfo(chainId, amm)!;
+    const automan = getAutomanContract(chainId, amm, provider);
     const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
       computePoolAddress(
-        uniswap_v3_factory,
+        chainId,
+        amm,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,
@@ -78,13 +81,14 @@ export async function getOptimalMintSwapData(
       zeroForOne ? mintParams.token0 : mintParams.token1,
       zeroForOne ? mintParams.token1 : mintParams.token0,
       poolAmountIn.toString(),
-      optimal_swap_router!,
+      ammInfo.optimalSwapRouter!,
       slippage * 100,
       includeRoute,
     );
     return {
       swapData: encodeOptimalSwapData(
         chainId,
+        amm,
         mintParams.token0,
         mintParams.token1,
         mintParams.fee as FeeAmount,

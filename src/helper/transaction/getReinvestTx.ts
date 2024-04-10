@@ -1,6 +1,7 @@
-import { ApertureSupportedChainId, PermitInfo, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { Percent } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
 import { getAutomanReinvestCallInfo } from '../automan';
@@ -10,6 +11,7 @@ import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the specified position.
  * @param positionId Position id.
  * @param slippageTolerance How much the reinvested amount of either token0 or token1 is allowed to change unfavorably.
@@ -20,6 +22,7 @@ import { SimulatedAmounts, getAmountsWithSlippage } from './transaction';
  */
 export async function getReinvestTx(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   ownerAddress: string,
   positionId: BigNumberish,
   slippageTolerance: Percent,
@@ -32,10 +35,11 @@ export async function getReinvestTx(
 }> {
   const { pool, tickLower, tickUpper } = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     provider,
   );
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const { functionFragment, data } = getAutomanReinvestCallInfo(
     positionId,
     deadlineEpochSeconds,
@@ -48,7 +52,7 @@ export async function getReinvestTx(
     pool,
     tickLower,
     tickUpper,
-    aperture_uniswap_v3_automan,
+    apertureAutoman,
     ownerAddress,
     functionFragment,
     data,
@@ -58,7 +62,7 @@ export async function getReinvestTx(
   return {
     tx: {
       from: ownerAddress,
-      to: aperture_uniswap_v3_automan,
+      to: apertureAutoman,
       data: getAutomanReinvestCallInfo(
         positionId,
         deadlineEpochSeconds,

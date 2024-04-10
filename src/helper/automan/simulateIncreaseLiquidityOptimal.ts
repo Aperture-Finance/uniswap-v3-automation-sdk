@@ -1,12 +1,13 @@
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
-  UniV3Automan,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { Position } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BytesLike } from 'ethers';
 
 import {
@@ -17,11 +18,12 @@ import {
 import { UnwrapPromise } from './automan';
 
 export type IncreaseLiquidityOptimalReturnType = UnwrapPromise<
-  ReturnType<UniV3Automan['callStatic']['increaseLiquidityOptimal']>
+  ReturnType<Automan['callStatic']['increaseLiquidityOptimal']>
 >;
 /**
  * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param position The current position to simulate the call from.
@@ -33,6 +35,7 @@ export type IncreaseLiquidityOptimalReturnType = UnwrapPromise<
  */
 export async function simulateIncreaseLiquidityOptimal(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   position: Position,
@@ -41,14 +44,14 @@ export async function simulateIncreaseLiquidityOptimal(
   blockNumber?: number,
   overrides?: StateOverrides,
 ): Promise<IncreaseLiquidityOptimalReturnType> {
-  const data = IUniV3Automan__factory.createInterface().encodeFunctionData(
+  const data = IAutoman__factory.createInterface().encodeFunctionData(
     'increaseLiquidityOptimal',
     [increaseParams, swapData],
   );
-  const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const tx = {
     from,
-    to: aperture_uniswap_v3_automan,
+    to: apertureAutoman,
     data,
   };
   let returnData: string;
@@ -59,14 +62,14 @@ export async function simulateIncreaseLiquidityOptimal(
         getERC20Overrides(
           position.pool.token0.address,
           from,
-          aperture_uniswap_v3_automan,
+          apertureAutoman,
           increaseParams.amount0Desired,
           provider,
         ),
         getERC20Overrides(
           position.pool.token1.address,
           from,
-          aperture_uniswap_v3_automan,
+          apertureAutoman,
           increaseParams.amount1Desired,
           provider,
         ),
@@ -85,7 +88,7 @@ export async function simulateIncreaseLiquidityOptimal(
   } else {
     returnData = await provider.call(tx, blockNumber);
   }
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     'increaseLiquidityOptimal',
     returnData,
   ) as IncreaseLiquidityOptimalReturnType;

@@ -29,3 +29,4 @@ jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
         run: yarn test
         env:
           INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          BNB_RPC_URL: ${{ secrets.BNB_RPC_URL }}

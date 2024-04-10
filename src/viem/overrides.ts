@@ -1,8 +1,5 @@
-import {
-  ApertureSupportedChainId,
-  IERC20__factory,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   AccessList,
   Address,
@@ -53,7 +50,7 @@ export function computeOperatorApprovalSlot(
 }
 
 /**
- * Compute the storage slot for the isController mapping in UniV3Automan.
+ * Compute the storage slot for the isController mapping in Automan.
  * @param from The address of controller.
  * @returns The storage slot.
  */
@@ -68,16 +65,17 @@ export function computeIsControllerSlot(from: Address): Hex {
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   owner: Address,
 ): StateOverrides {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    amm,
+  )!;
   return {
-    [uniswap_v3_nonfungible_position_manager]: {
+    [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
     },
@@ -86,10 +84,11 @@ export function getNPMApprovalOverrides(
 
 export function getControllerOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   from: Address,
 ) {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -102,10 +101,11 @@ export function getControllerOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [

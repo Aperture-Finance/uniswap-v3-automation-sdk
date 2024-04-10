@@ -1,6 +1,10 @@
 import { AutomanActionName, GetAutomanFragment } from '@/helper';
 import { INonfungiblePositionManager } from '@/index';
-import { FeeAmount, TICK_SPACINGS, nearestUsableTick } from '@uniswap/v3-sdk';
+import {
+  FeeAmount,
+  TICK_SPACINGS,
+  nearestUsableTick,
+} from '@aperture_finance/uniswap-v3-sdk';
 
 export type AutomanCallInfo<T extends AutomanActionName> = {
   functionFragment: GetAutomanFragment<T>;

@@ -1,14 +1,15 @@
 import { AllV3TicksQuery } from '@/data/__graphql_generated__/uniswap-thegraph-types-and-hooks';
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
-import { Pool, TickMath } from '@uniswap/v3-sdk';
+import { Pool, TickMath } from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
 
+import { computePoolAddress } from '../../utils';
 import {
   LiquidityAmount,
   TickNumber,
   TickToLiquidityMap,
-  computePoolAddress,
   normalizeTicks,
   reconstructLiquidityArray,
 } from './pool';
@@ -23,16 +24,19 @@ import {
  */
 export async function getTickToLiquidityMapForPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
+  const chainInfo = getChainInfo(chainId);
+  const { uniswap_subgraph_url } = chainInfo;
   if (uniswap_subgraph_url === undefined) {
     throw 'Subgraph URL is not defined for the specified chain id';
   }
   const poolAddress = computePoolAddress(
-    uniswap_v3_factory,
+    chainId,
+    amm,
     pool.token0,
     pool.token1,
     pool.fee,
