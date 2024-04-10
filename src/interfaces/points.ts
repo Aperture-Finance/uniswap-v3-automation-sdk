@@ -149,6 +149,10 @@ export const RaffleResponesSchema = z.object({
   points: z
     .number()
     .positive()
-    .describe('The immediately updated points after raffling.'),
+    .describe('Immediately updated total points after raffling.'),
+  prizeV2: z
+    .number()
+    .positive()
+    .describe('Points won from the raffle. If exists, use to replace prize.'),
 });
 export type RaffleResponse = z.infer<typeof RaffleResponesSchema>;
