@@ -145,7 +145,10 @@ export const RaffleRequestSchema = z.object({
 export type RaffleRequest = z.infer<typeof RaffleRequestSchema>;
 
 export const RaffleResponesSchema = z.object({
-  prize: RafflePrizeEnum.describe('Prize won in the raffle'),
+  prize: z
+    .number()
+    .positive()
+    .describe('Number of points won from the raffle.'),
   points: z
     .number()
     .positive()
