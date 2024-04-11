@@ -3833,15 +3833,15 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aperture-lens@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-1.0.0.tgz#e5141dd84e86c5dd875a8236cbcfd2f5fd1a3193"
-  integrity sha512-+k6lQ5b0dViw3w7FWST4phaDeMmPvwwWOJa4YU/buzoGjtl46Mt1dsevK21LluOntafs6kpwY8yKv/4UnETbhg==
+aperture-lens@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-1.0.1.tgz#db585ee4e60e3c1e6e5121259a53bd42caa09718"
+  integrity sha512-YgxVJ+m64qyePZv/rCeDorGDUwvB9SjYcfmjXW2omthu7/lnLgtiTn+F92gOW38vK4cgTATwpK7Ya5O9E+v1Dg==
   dependencies:
     "@aperture_finance/uni-v3-lib" "^2.0.1"
     "@openzeppelin/contracts" "^5.0.2"
     ethers "5.7.2"
-    viem "^2.9.6"
+    viem "^2.8.4"
     zod "^3.22.4"
 
 arg@^4.1.0:
@@ -8373,10 +8373,10 @@ value-or-promise@^1.0.11, value-or-promise@^1.0.12:
   resolved "https://registry.yarnpkg.com/value-or-promise/-/value-or-promise-1.0.12.tgz#0e5abfeec70148c78460a849f6b003ea7986f15c"
   integrity sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==
 
-viem@^2.9.6:
-  version "2.9.6"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.9.6.tgz#66819684e878b6ea659ad9c49a0a864512859190"
-  integrity sha512-VVFWjGQei2wnWTvAB/xrIf22m6flCwxeBr8LnwejXMTSSi1EORWEswrw2lfKTmw3TlRPSG4uSiQMa/d0l0DKRg==
+viem@^2.8.4:
+  version "2.9.15"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.9.15.tgz#a176f3c3504a6785333ac0f948666854c3a29e30"
+  integrity sha512-7kcmHqybc3JhpjL8gKY7YxBYpZt1//qhoTZIU5Ez9JdyRCnYMMnJu20s7wd7Gv6a3zPbq8jV8dCp94a/NLJJcA==
   dependencies:
     "@adraffy/ens-normalize" "1.10.0"
     "@noble/curves" "1.2.0"
