@@ -6,5 +6,6 @@ export * from './permission';
 export * from './pool';
 export * from './position';
 export * from './public_client';
+export * from './public_client_v1';
 export * from './transaction';
 export * from './aggregator';

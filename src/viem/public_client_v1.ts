@@ -6,7 +6,7 @@ import { PublicClient, createPublicClient, http } from 'viem-v1';
  * @param chainId chain id must be supported by Aperture's UniV3 Automation platform.
  * @returns A multicall-enabled public client.
  */
-export function getPublicClient(
+export function getPublicClientV1(
   chainId: ApertureSupportedChainId,
 ): PublicClient {
   return createPublicClient({
