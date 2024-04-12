@@ -45,7 +45,7 @@ export interface AmmInfo {
   factory: Address;
   poolDeployer?: Address; // Only applicable to PANCAKESWAP_V3.
   nonfungiblePositionManager: Address;
-  // This is SwapRouter02 for UNISWAP_V3 and SwapRouter for PANCAKESWAP_V3.
+  // This is SwapRouter02 for UNISWAP_V3 and SmartRouter for PANCAKESWAP_V3.
   swapRouter: Address;
   // Aperture's optimal swap router. Only populated for chains with an aggregator service like 1inch.
   optimalSwapRouter?: Address;
@@ -101,7 +101,7 @@ const CHAIN_ID_TO_INFO: {
         nonfungiblePositionManager: getAddress(
           '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
         ),
-        swapRouter: getAddress('0x1b81D678ffb9C0263b24A97847620C99d213eB14'),
+        swapRouter: getAddress('0x13f4EA83D0bd40E75C8222255bc855a974568Dd4'),
         optimalSwapRouter: getAddress(
           '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
         ),
@@ -243,7 +243,7 @@ const CHAIN_ID_TO_INFO: {
         nonfungiblePositionManager: getAddress(
           '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
         ),
-        swapRouter: getAddress('0x1b81D678ffb9C0263b24A97847620C99d213eB14'),
+        swapRouter: getAddress('0x13f4EA83D0bd40E75C8222255bc855a974568Dd4'),
         optimalSwapRouter: getAddress(
           '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
         ),
