@@ -49,7 +49,12 @@ export interface AmmInfo {
   swapRouter: Address;
   // Aperture's optimal swap router. Only populated for chains with an aggregator service like 1inch.
   optimalSwapRouter?: Address;
+  // Aperture's Automan contract address.
   apertureAutoman: Address;
+  // The subgraph URL for the AMM.
+  // For Uniswap, refer to https://docs.uniswap.org/api/subgraph/overview.
+  // For PancakeSwap, refer to https://github.com/pancakeswap/pancake-subgraph.
+  subgraph_url?: string;
 }
 
 export interface ChainInfo {
@@ -67,8 +72,6 @@ export interface ChainInfo {
   rpc_url?: string;
   // Only populated for networks with a CoinGecko asset platform ID.
   coingecko_asset_platform_id?: string;
-  // Only populated for networks with a Uniswap subgraph URL.
-  uniswap_subgraph_url?: string;
 }
 
 const CHAIN_ID_TO_INFO: {
@@ -89,6 +92,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
@@ -103,6 +108,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -115,8 +122,6 @@ const CHAIN_ID_TO_INFO: {
     coingecko_asset_platform_id: 'ethereum',
     infura_network_id: 'mainnet',
     rpc_url: 'https://ethereum.publicnode.com',
-    uniswap_subgraph_url:
-      'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -135,6 +140,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -147,8 +154,6 @@ const CHAIN_ID_TO_INFO: {
     coingecko_asset_platform_id: 'arbitrum-one',
     infura_network_id: 'arbitrum',
     rpc_url: 'https://arbitrum-one.publicnode.com',
-    uniswap_subgraph_url:
-      'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -167,6 +172,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -178,8 +185,6 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'polygon-pos',
     infura_network_id: 'matic',
-    uniswap_subgraph_url:
-      'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -198,6 +203,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -209,8 +216,6 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'optimistic-ethereum',
     infura_network_id: 'optimism',
-    uniswap_subgraph_url:
-      'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -229,6 +234,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/ilyamk/uniswap-v3---bnb-chain',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
@@ -243,6 +250,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -254,8 +263,6 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'binance-smart-chain',
     rpc_url: 'https://bsc-dataseed.bnbchain.org',
-    uniswap_subgraph_url:
-      'https://api.thegraph.com/subgraphs/name/ilyamk/uniswap-v3---bnb-chain',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -274,6 +281,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000EDb4489cB49FE07246f39345c9f838cD',
         ),
+        subgraph_url:
+          'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -285,8 +294,6 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'base',
     rpc_url: 'https://mainnet.base.org',
-    uniswap_subgraph_url:
-      'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -305,6 +312,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
         ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -317,8 +326,6 @@ const CHAIN_ID_TO_INFO: {
     coingecko_asset_platform_id: 'avalanche',
     infura_network_id: 'avalanche',
     rpc_url: 'https://api.avax.network/ext/bc/C/rpc',
-    uniswap_subgraph_url:
-      'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -337,6 +344,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
         ),
+        subgraph_url:
+          'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture/uniswap-v3/gn',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -348,8 +357,6 @@ const CHAIN_ID_TO_INFO: {
     ),
     rpc_url: 'https://manta-pacific-aperture.calderachain.xyz/http',
     maxGasCeiling: 0.2,
-    uniswap_subgraph_url:
-      'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture/uniswap-v3/gn',
     routingApiInfo: {
       type: 'ROUTING_API',
       url: 'https://uniswap-routing.aperture.finance/quote',
@@ -370,6 +377,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
         ),
+        subgraph_url:
+          'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -381,8 +390,6 @@ const CHAIN_ID_TO_INFO: {
     ),
     rpc_url: 'https://manta-testnet.calderachain.xyz/http',
     maxGasCeiling: 0.2,
-    uniswap_subgraph_url:
-      'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
     routingApiInfo: {
       type: 'ROUTING_API',
       url: 'https://uniswap-routing.aperture.finance/quote',
@@ -403,6 +410,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
         ),
+        subgraph_url:
+          'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -415,8 +424,6 @@ const CHAIN_ID_TO_INFO: {
     coingecko_asset_platform_id: 'scroll',
     rpc_url: 'https://rpc.scroll.io',
     maxGasCeiling: 0.2,
-    uniswap_subgraph_url:
-      'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
     routingApiInfo: {
       type: 'ROUTING_API',
       url: 'https://uniswap-routing.aperture.finance/quote',

@@ -6,7 +6,7 @@ import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import {
   FeeAmount,
@@ -165,16 +165,17 @@ export function getPoolPrice(pool: Pool): Price<Token, Token> {
  */
 export async function getFeeTierDistribution(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   tokenA: Address,
   tokenB: Address,
 ): Promise<Record<FeeAmount, number>> {
-  const { uniswap_subgraph_url } = getChainInfo(chainId);
-  if (uniswap_subgraph_url === undefined) {
-    throw 'Subgraph URL is not defined for the specified chain id';
+  const subgraph_url = getAMMInfo(chainId, amm)?.subgraph_url;
+  if (subgraph_url === undefined) {
+    throw 'Subgraph URL is not defined for the specified chain id and amm';
   }
   const [token0, token1] = [tokenA.toLowerCase(), tokenB.toLowerCase()].sort();
   const feeTierTotalValueLocked: FeeTierDistributionQuery = (
-    await axios.post(uniswap_subgraph_url, {
+    await axios.post(subgraph_url, {
       operationName: 'FeeTierDistribution',
       variables: {
         token0,
@@ -308,10 +309,9 @@ export async function getTickToLiquidityMapForPool(
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const chainInfo = getChainInfo(chainId);
-  const { uniswap_subgraph_url } = chainInfo;
-  if (uniswap_subgraph_url === undefined) {
-    throw 'Subgraph URL is not defined for the specified chain id';
+  const subgraph_url = getAMMInfo(chainId, amm)?.subgraph_url;
+  if (subgraph_url === undefined) {
+    throw 'Subgraph URL is not defined for the specified chain id and amm';
   }
   const poolAddress = computePoolAddress(
     chainId,
@@ -322,7 +322,7 @@ export async function getTickToLiquidityMapForPool(
   ).toLowerCase();
   // Fetch current in-range liquidity from subgraph.
   const poolResponse = (
-    await axios.post(uniswap_subgraph_url, {
+    await axios.post(subgraph_url, {
       operationName: 'PoolLiquidity',
       variables: {},
       query: `
@@ -346,7 +346,7 @@ export async function getTickToLiquidityMapForPool(
   const numTicksPerQuery = 1000;
   for (let skip = 0; ; skip += numTicksPerQuery) {
     const response: AllV3TicksQuery | undefined = (
-      await axios.post(uniswap_subgraph_url, {
+      await axios.post(subgraph_url, {
         operationName: 'AllV3Ticks',
         variables: {
           poolAddress,
