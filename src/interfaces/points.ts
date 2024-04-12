@@ -92,7 +92,6 @@ export const LeaderboardUserResponseSchema = z.object({
   points: z.number().nonnegative(),
   num_referred_users: z.number().int(),
   streak: z.number().int(),
-  boost: z.number().int(),
 });
 
 export const ListLeaderboardResponseSchema = z.object({
