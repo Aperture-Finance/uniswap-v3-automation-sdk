@@ -277,7 +277,6 @@ describe('Automan client test', () => {
           points: 12345.6789,
           num_referred_users: 3,
           streak: 1,
-          boost: 0,
         },
         {
           x_id: 'user1_x',
@@ -285,7 +284,6 @@ describe('Automan client test', () => {
           points: 98765.4321,
           num_referred_users: 0,
           streak: 2,
-          boost: 5,
         },
       ],
     };
