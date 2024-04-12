@@ -276,12 +276,14 @@ describe('Automan client test', () => {
           userAddr: '0x11..FACE',
           points: 12345.6789,
           num_referred_users: 3,
+          streak: 1,
         },
         {
           x_id: 'user1_x',
           userAddr: '0x23..BEEF',
           points: 98765.4321,
           num_referred_users: 0,
+          streak: 2,
         },
       ],
     };

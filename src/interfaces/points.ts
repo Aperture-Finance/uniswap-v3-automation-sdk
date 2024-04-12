@@ -9,7 +9,7 @@ import {
 const SocialPlatformEnum = z.enum(['discord', 'twitter', 'telegram']);
 export type E_SocialPlatform = z.infer<typeof SocialPlatformEnum>;
 
-export const RaffleTypeEnum = z.enum(['twitter', 'points']);
+export const RaffleTypeEnum = z.enum(['twitter', 'points', 'daily']);
 export type RaffleTypeEnum = z.infer<typeof RaffleTypeEnum>;
 
 export const RafflePrizeEnum = z.enum([
@@ -91,6 +91,7 @@ export const LeaderboardUserResponseSchema = z.object({
   userAddr: z.string(),
   points: z.number().nonnegative(),
   num_referred_users: z.number().int(),
+  streak: z.number().int(),
 });
 
 export const ListLeaderboardResponseSchema = z.object({
