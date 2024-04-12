@@ -2,7 +2,7 @@ import { Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Chain, getAddress } from 'viem';
 import { Chain as ChainV1 } from 'viem-v1';
-import chainV1 from 'viem-v1/chains';
+import { bsc as bscV1, mainnet as mainnetV1 } from 'viem-v1/chains';
 import {
   arbitrum,
   avalanche,
@@ -82,7 +82,7 @@ const CHAIN_ID_TO_INFO: {
 } = {
   [ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]: {
     chain: mainnet,
-    chainV1: chainV1.mainnet,
+    chainV1: mainnetV1,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
@@ -131,7 +131,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
     chain: arbitrum,
-    chainV1: chainV1.arbitrum,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
@@ -164,7 +163,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID]: {
     chain: polygon,
-    chainV1: chainV1.polygon,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
@@ -196,7 +194,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID]: {
     chain: optimism,
-    chainV1: chainV1.optimism,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
@@ -228,7 +225,7 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID]: {
     chain: bsc,
-    chainV1: chainV1.bsc,
+    chainV1: bscV1,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7'),
@@ -276,7 +273,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID]: {
     chain: base,
-    chainV1: chainV1.base,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x33128a8fC17869897dcE68Ed026d694621f6FDfD'),
@@ -308,7 +304,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID]: {
     chain: avalanche,
-    chainV1: chainV1.avalanche,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x740b1c1de25031C31FF4fC9A62f554A55cdC1baD'),
@@ -341,7 +336,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID]: {
     chain: manta,
-    chainV1: chainV1.manta,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x5bd1F6735B80e58aAC88B8A94836854d3068a13a'),
@@ -408,7 +402,6 @@ const CHAIN_ID_TO_INFO: {
   },
   [ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID]: {
     chain: scroll,
-    chainV1: chainV1.scroll,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
         factory: getAddress('0x70C62C8b8e801124A4Aa81ce07b637A3e83cb919'),
