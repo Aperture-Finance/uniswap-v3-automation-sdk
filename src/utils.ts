@@ -111,14 +111,14 @@ export function computePoolAddress(
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off daily raffles and always returns true (raffle is consumed) after 120 days.
  */
-export function isDailyRaffleConsumed(dailyRafflesConsumed: number) {
+export function isDailyRaffleConsumed(dailyRafflesConsumed: number): boolean {
   const raffleStartDate = new Date(Date.UTC(2024, 3, 12)); // 2024 April 12th
   const nowDate = new Date();
   const daysDiff = Math.floor(
     (nowDate.getTime() - raffleStartDate.getTime()) / (1000 * 60 * 60 * 24),
   );
   if (daysDiff > 120) return true;
-  return dailyRafflesConsumed & (1 << daysDiff);
+  return (dailyRafflesConsumed & (1 << daysDiff)) == 1 << daysDiff;
 }
 
 /**
@@ -129,7 +129,7 @@ export function isDailyRaffleConsumed(dailyRafflesConsumed: number) {
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off streaks and always returns 1 after 120 days.
  */
-export function getSteak(datesActive: number) {
+export function getSteak(datesActive: number): number {
   const campaignPhase2StartDate = new Date(Date.UTC(2024, 3, 12)); // 2024 April 12th
   const nowDate = new Date();
   let daysDiff = Math.floor(

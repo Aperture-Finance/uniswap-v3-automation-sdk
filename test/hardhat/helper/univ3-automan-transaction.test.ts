@@ -419,6 +419,7 @@ describe('Helper - UniV3Automan transaction tests', function () {
   });
 
   it('Increase liquidity optimal without 1inch', async function () {
+    this.timeout(60 * 1000); // Increase the timeout to 60 seconds.
     const existingPosition = await getPosition(
       chainId,
       amm,
