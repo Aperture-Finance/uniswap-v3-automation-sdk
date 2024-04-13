@@ -102,11 +102,18 @@ export function computePoolAddress(
   }) as Address;
 }
 
+/**
+ * @param now: The current moment. This gives option for consistency across day boundaries.
+ * @returns the number of days after the campaign phase 2 start date as a BigInt
+ * The types for bit shifts have to match, so return as BigInt to avoid accidentally using non-bigints.
+ */
 export function getDaysFromCampaignPhase2Start(now: Moment = moment()) {
-  return Math.floor(
-    moment
-      .duration(now.diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
-      .asDays(),
+  return BigInt(
+    Math.floor(
+      moment
+        .duration(now.diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
+        .asDays(),
+    ),
   );
 }
 
@@ -122,12 +129,12 @@ export function getDaysFromCampaignPhase2Start(now: Moment = moment()) {
  *    So cutting off daily raffles and always returns true (raffle is consumed) after 120 days.
  */
 export function isDailyRaffleConsumed(
-  dailyRafflesConsumed: number,
+  dailyRafflesConsumed: bigint,
   now: Moment = moment(),
 ): boolean {
   const daysDiff = getDaysFromCampaignPhase2Start(now);
   if (daysDiff > 120) return true;
-  return (dailyRafflesConsumed & (1 << daysDiff)) == 1 << daysDiff;
+  return (dailyRafflesConsumed & (1n << daysDiff)) == 1n << daysDiff;
 }
 
 /**
@@ -139,7 +146,7 @@ export function isDailyRaffleConsumed(
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off streaks and always returns 1 after 120 days.
  */
-export function getSteak(datesActive: number, now: Moment = moment()): number {
+export function getSteak(datesActive: bigint, now: Moment = moment()): number {
   let daysDiff = getDaysFromCampaignPhase2Start(now);
   let streak = 1;
   if (daysDiff > 120) return streak;
@@ -147,7 +154,7 @@ export function getSteak(datesActive: number, now: Moment = moment()): number {
     // Bitwise & to check if user was active on specific date.
     // If so, continue to increment streak and check the next day.
     // Since today is not over yet, start checking the streak from yesterday using the prefix decrement.
-    if (datesActive & (1 << --daysDiff)) {
+    if (datesActive & (1n << --daysDiff)) {
       streak++;
     } else {
       break;
