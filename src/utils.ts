@@ -111,14 +111,14 @@ export function computePoolAddress(
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off daily raffles and always returns true (raffle is consumed) after 120 days.
  */
-export function isDailyRaffleConsumed(dailyRaffleConsumed: number) {
+export function isDailyRaffleConsumed(dailyRafflesConsumed: number) {
   const raffleStartDate = new Date(Date.UTC(2024, 3, 12)); // 2024 April 12th
   const nowDate = new Date();
   const daysDiff = Math.floor(
     (nowDate.getTime() - raffleStartDate.getTime()) / (1000 * 60 * 60 * 24),
   );
   if (daysDiff > 120) return true;
-  return dailyRaffleConsumed & (1 << daysDiff);
+  return dailyRafflesConsumed & (1 << daysDiff);
 }
 
 /**
