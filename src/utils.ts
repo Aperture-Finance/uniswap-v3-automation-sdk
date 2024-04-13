@@ -6,6 +6,7 @@ import { Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
+import moment from 'moment';
 import { Address } from 'viem';
 
 import { getAMMInfo } from './chain';
@@ -99,4 +100,53 @@ export function computePoolAddress(
         ? PCS_V3_POOL_INIT_CODE_HASH
         : undefined,
   }) as Address;
+}
+
+/**
+ * Checks whether today's daily raffle is consumed from the binary representation of dailyRaffleConsumed.
+ * @param dailyRaffleConsumed: The number representation of daily raffle consumed.
+ * @returns boolean whether today's daily raffle is consumed.
+ * The right most bit is April 12th, 2nd from rightmost bit is April 13th, and so on.
+ * For example, if dailyRaffleConsumed == 0, then no daily raffles are consumed, and should return false.
+ * If dailyRaffleConsumed == 5, then 5 in binary is 101, meaning the April 12th and April 14th's daily raffles are consumed, but April 13th's daily raffle is not consumed.
+ *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
+ *    So cutting off daily raffles and always returns true (raffle is consumed) after 120 days.
+ */
+export function isDailyRaffleConsumed(dailyRafflesConsumed: number): boolean {
+  const daysDiff = Math.floor(
+    moment
+      .duration(moment().diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
+      .asDays(),
+  );
+  if (daysDiff > 120) return true;
+  return (dailyRafflesConsumed & (1 << daysDiff)) == 1 << daysDiff;
+}
+
+/**
+ * Get the streak for user.
+ * @param datesActive The number representation of dates active.
+ * @returns The current streak.
+ * The right most bit is April 12th, 2nd from rightmost bit is April 13th, and so on.
+ *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
+ *    So cutting off streaks and always returns 1 after 120 days.
+ */
+export function getSteak(datesActive: number): number {
+  let daysDiff = Math.floor(
+    moment
+      .duration(moment().diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
+      .asDays(),
+  );
+  let streak = 1;
+  if (daysDiff > 120) return streak;
+  while (daysDiff > 0) {
+    // Bitwise & to check if user was active on specific date.
+    // If so, continue to increment streak and check the next day.
+    // Since today is not over yet, start checking the streak from yesterday using the prefix decrement.
+    if (datesActive & (1 << --daysDiff)) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
 }
