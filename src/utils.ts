@@ -100,3 +100,52 @@ export function computePoolAddress(
         : undefined,
   }) as Address;
 }
+
+/**
+ * Checks whether today's daily raffle is consumed from the binary representation of dailyRaffleConsumed.
+ * @param dailyRaffleConsumed: The number representation of daily raffle consumed.
+ * @returns boolean whether today's daily raffle is consumed.
+ * The right most bit is April 12th, 2nd from rightmost bit is April 13th, and so on.
+ * For example, if dailyRaffleConsumed == 0, then no daily raffles are consumed, and should return false, the raffle is not consumed.
+ * If dailyRaffleConsumed == 5, then 5 in binary is 101, meaning the April 12th and April 14th's daily raffles are consumed, but April 13th's daily raffle is not consumed.
+ *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
+ *    So cutting off daily raffles and always returns true (raffle is consumed) after 120 days.
+ */
+export function isDailyRaffleConsumed(dailyRaffleConsumed: number) {
+  const raffleStartDate = new Date(Date.UTC(2024, 3, 12)); // 2024 April 12th
+  const nowDate = new Date();
+  const daysDiff = Math.floor(
+    (nowDate.getTime() - raffleStartDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  if (daysDiff > 120) return true;
+  return dailyRaffleConsumed & (1 << daysDiff);
+}
+
+/**
+ * Get the streak for user.
+ * @param datesActive The number representation of dates active.
+ * @returns The current streak.
+ * The right most bit is April 12th, 2nd from rightmost bit is April 13th, and so on.
+ *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
+ *    So cutting off streaks and always returns 1 after 120 days.
+ */
+export function getSteak(datesActive: number) {
+  const campaignPhase2StartDate = new Date(Date.UTC(2024, 3, 12)); // 2024 April 12th
+  const nowDate = new Date();
+  let daysDiff = Math.floor(
+    (nowDate.getTime() - campaignPhase2StartDate.getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+  let streak = 1;
+  if (daysDiff > 120) return streak;
+  while (daysDiff > 0) {
+    // bitwise & to check if user was active on specific date, returns true if not 0.
+    if (datesActive & (1 << --daysDiff)) {
+      // Only start looking at streak from yesterday, so --daysDiff
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
