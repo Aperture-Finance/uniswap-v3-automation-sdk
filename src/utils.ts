@@ -6,7 +6,7 @@ import { Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Address } from 'viem';
 
 import { getAMMInfo } from './chain';
@@ -102,9 +102,18 @@ export function computePoolAddress(
   }) as Address;
 }
 
+export function getDaysFromCampaignPhase2Start(now: Moment = moment()) {
+  return Math.floor(
+    moment
+      .duration(now.diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
+      .asDays(),
+  );
+}
+
 /**
  * Checks whether today's daily raffle is consumed from the binary representation of dailyRaffleConsumed.
  * @param dailyRaffleConsumed: The number representation of daily raffle consumed.
+ * @param now: The current moment. This gives option for consistency if people are raffling on day boundaries.
  * @returns boolean whether today's daily raffle is consumed.
  * The right most bit is April 12th, 2nd from rightmost bit is April 13th, and so on.
  * For example, if dailyRaffleConsumed == 0, then no daily raffles are consumed, and should return false.
@@ -112,12 +121,11 @@ export function computePoolAddress(
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off daily raffles and always returns true (raffle is consumed) after 120 days.
  */
-export function isDailyRaffleConsumed(dailyRafflesConsumed: number): boolean {
-  const daysDiff = Math.floor(
-    moment
-      .duration(moment().diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
-      .asDays(),
-  );
+export function isDailyRaffleConsumed(
+  dailyRafflesConsumed: number,
+  now: Moment = moment(),
+): boolean {
+  const daysDiff = getDaysFromCampaignPhase2Start(now);
   if (daysDiff > 120) return true;
   return (dailyRafflesConsumed & (1 << daysDiff)) == 1 << daysDiff;
 }
@@ -125,17 +133,14 @@ export function isDailyRaffleConsumed(dailyRafflesConsumed: number): boolean {
 /**
  * Get the streak for user.
  * @param datesActive The number representation of dates active.
+ * @param now: The current moment. This gives option to ensure consistency on day boundaries.
  * @returns The current streak.
  * The right most bit is April 12th, 2nd from rightmost bit is April 13th, and so on.
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off streaks and always returns 1 after 120 days.
  */
-export function getSteak(datesActive: number): number {
-  let daysDiff = Math.floor(
-    moment
-      .duration(moment().diff(moment('12/04/2024', 'DD/MM/YYYY').utc(true)))
-      .asDays(),
-  );
+export function getSteak(datesActive: number, now: Moment = moment()): number {
+  let daysDiff = getDaysFromCampaignPhase2Start(now);
   let streak = 1;
   if (daysDiff > 120) return streak;
   while (daysDiff > 0) {
