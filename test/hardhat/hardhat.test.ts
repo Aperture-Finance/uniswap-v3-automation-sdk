@@ -1363,6 +1363,34 @@ describe('Pool subgraph query tests', function () {
     ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
   });
 
+  it('Fee tier distribution - UniswapV3 on BNB chain', async function () {
+    const bnbChainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
+    const WETH_BNB = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
+    const BTCB_BNB = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
+    const [distribution, distributionOppositeTokenOrder] = await Promise.all([
+      getFeeTierDistribution(
+        bnbChainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        WETH_BNB,
+        BTCB_BNB,
+      ),
+      getFeeTierDistribution(
+        bnbChainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        BTCB_BNB,
+        WETH_BNB,
+      ),
+    ]);
+    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
+    expect(
+      Object.values(distribution).reduce(
+        (partialSum, num) => partialSum + num,
+        0,
+      ),
+    ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
+    console.log(distribution);
+  });
+
   async function testLiquidityDistribution(
     chainId: ApertureSupportedChainId,
     amm: AutomatedMarketMakerEnum,

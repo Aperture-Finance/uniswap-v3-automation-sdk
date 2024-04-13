@@ -235,7 +235,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ilyamk/uniswap-v3---bnb-chain',
+          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
