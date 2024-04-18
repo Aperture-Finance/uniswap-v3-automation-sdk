@@ -1,7 +1,7 @@
 // Util tests. Compile and run with the following commands:
 // repository_root$ yarn
 // repository_root$ yarn test:jest test/jest/util.test.ts
-import { getSteak, isDailyRaffleConsumed } from '../../src/utils';
+import { getStreak, isDailyRaffleConsumed } from '../../src/utils';
 
 describe('isDailyRaffleConsumed', () => {
   it('should return false when dailyRafflesConsumed is 0 within 120 days.', () => {
@@ -110,58 +110,58 @@ describe('isDailyRaffleConsumed', () => {
   });
 });
 
-describe('getSteak', () => {
+describe('getStreak', () => {
   it('should return 1 when datesActive is 0 within 120 days.', () => {
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 3, 20)));
-    expect(getSteak(/*datesActive=*/ 0n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 0n)).toBe(1);
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 6, 20)));
-    expect(getSteak(/*datesActive=*/ 0n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 0n)).toBe(1);
   });
 
   it('should return 1 after 120 days.', () => {
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 10))); // 2024 September
-    expect(getSteak(/*datesActive=*/ 255n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 255n)).toBe(1);
   });
 
   it('should return > 1 when datesActive binary representation right of today is 1', () => {
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 3, 13, 6))); // 2024 Apr 13th 6AM UTC.
     // April 13th maps to the 2nd rightmost bit, so any odd number should return 2.
-    expect(getSteak(/*datesActive=*/ 1n)).toBe(2);
-    expect(getSteak(/*datesActive=*/ 5n)).toBe(2);
-    expect(getSteak(/*datesActive=*/ 7n)).toBe(2);
-    expect(getSteak(/*datesActive=*/ 13n)).toBe(2);
-    expect(getSteak(/*datesActive=*/ 265n)).toBe(2);
+    expect(getStreak(/*datesActive=*/ 1n)).toBe(2);
+    expect(getStreak(/*datesActive=*/ 5n)).toBe(2);
+    expect(getStreak(/*datesActive=*/ 7n)).toBe(2);
+    expect(getStreak(/*datesActive=*/ 13n)).toBe(2);
+    expect(getStreak(/*datesActive=*/ 265n)).toBe(2);
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 3, 20, 6))); // 2024 Apr 20th 6AM UTC.
     // April 20th maps to the 9th rightmost bit (surrounded by underscores).
-    // getSteak should return 1 + the number of consecutive 1s after the 9th rightmost bit.
-    expect(getSteak(/*datesActive=*/ 0b0_0_11010101n)).toBe(3);
-    expect(getSteak(/*datesActive=*/ 213n)).toBe(3); // decimal 213 == 0b0_0_11010101
-    expect(getSteak(/*datesActive=*/ 0b1_0_11110101n)).toBe(5);
-    expect(getSteak(/*datesActive=*/ 757n)).toBe(5); // decimal 757 == 0b1_0_11110101
-    expect(getSteak(/*datesActive=*/ 0b0_1_11010101n)).toBe(3);
-    expect(getSteak(/*datesActive=*/ 469n)).toBe(3); // decimal 501 == 0b0_1_11010101
-    expect(getSteak(/*datesActive=*/ 0b1_1_11110101n)).toBe(5);
-    expect(getSteak(/*datesActive=*/ 1013n)).toBe(5); // decimal 1013 == 0b1_1_11110101
+    // getStreak should return 1 + the number of consecutive 1s after the 9th rightmost bit.
+    expect(getStreak(/*datesActive=*/ 0b0_0_11010101n)).toBe(3);
+    expect(getStreak(/*datesActive=*/ 213n)).toBe(3); // decimal 213 == 0b0_0_11010101
+    expect(getStreak(/*datesActive=*/ 0b1_0_11110101n)).toBe(5);
+    expect(getStreak(/*datesActive=*/ 757n)).toBe(5); // decimal 757 == 0b1_0_11110101
+    expect(getStreak(/*datesActive=*/ 0b0_1_11010101n)).toBe(3);
+    expect(getStreak(/*datesActive=*/ 469n)).toBe(3); // decimal 501 == 0b0_1_11010101
+    expect(getStreak(/*datesActive=*/ 0b1_1_11110101n)).toBe(5);
+    expect(getStreak(/*datesActive=*/ 1013n)).toBe(5); // decimal 1013 == 0b1_1_11110101
   });
 
   it('should return 1 when dailyRafflesConsumed binary representation right of today is 0', () => {
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 3, 12, 6))); // 2024 Apr 12th 6AM UTC.
     // April 12th maps to the rightmost bit, so any even number should return 1.
-    expect(getSteak(/*datesActive=*/ 2n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 4n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 6n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 8n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 284n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 2n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 4n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 6n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 8n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 284n)).toBe(1);
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2024, 3, 20, 6))); // 2024 Apr 20th 6AM UTC.
     // April 20th maps to the 9th rightmost bit (surrounded by underscores).
-    // getSteak should return the 1 + number of consecutive 1s after the 9th rightmost bit.
-    expect(getSteak(/*datesActive=*/ 0b0_0_00000000n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 0n)).toBe(1); // decimal 0 == 0b0_0_00000000
-    expect(getSteak(/*datesActive=*/ 0b0_0_00110110n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 54n)).toBe(1); // decimal 54 == 0b0_0_00110110
-    expect(getSteak(/*datesActive=*/ 0b0_1_00000000n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 256n)).toBe(1); // decimal 256 == 0b0_1_00000000
-    expect(getSteak(/*datesActive=*/ 0b0_1_00110110n)).toBe(1);
-    expect(getSteak(/*datesActive=*/ 310n)).toBe(1); // decimal 310 == 0b0_1_00110110
+    // getStreak should return the 1 + number of consecutive 1s after the 9th rightmost bit.
+    expect(getStreak(/*datesActive=*/ 0b0_0_00000000n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 0n)).toBe(1); // decimal 0 == 0b0_0_00000000
+    expect(getStreak(/*datesActive=*/ 0b0_0_00110110n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 54n)).toBe(1); // decimal 54 == 0b0_0_00110110
+    expect(getStreak(/*datesActive=*/ 0b0_1_00000000n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 256n)).toBe(1); // decimal 256 == 0b0_1_00000000
+    expect(getStreak(/*datesActive=*/ 0b0_1_00110110n)).toBe(1);
+    expect(getStreak(/*datesActive=*/ 310n)).toBe(1); // decimal 310 == 0b0_1_00110110
   });
 });

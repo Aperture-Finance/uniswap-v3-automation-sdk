@@ -146,7 +146,7 @@ export function isDailyRaffleConsumed(
  *  DynamoDB numbers are limited to 38 digits of precision, and log2(38 digits) is ~128.
  *    So cutting off streaks and always returns 1 after 120 days.
  */
-export function getSteak(datesActive: bigint, now: Moment = moment()): number {
+export function getStreak(datesActive: bigint, now: Moment = moment()): number {
   let daysDiff = getDaysFromCampaignPhase2Start(now);
   let streak = 1;
   if (daysDiff > 120) return streak;
