@@ -35,13 +35,15 @@ export async function calculateRebalancePriceImpact(params: IRebalanceParams) {
   );
 
   const currentPoolPrice = fractionToBig(position.pool.token0Price);
-  const exchangePrice = await getExchangePrice(params);
-
-  if (exchangePrice.eq(0)) {
-    return exchangePrice;
-  }
-
-  return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+  const { exchangePrice, finalAmount0, finalAmount1 } =
+    await getExchangePrice(params);
+  return {
+    priceImpact: exchangePrice.eq(0)
+      ? exchangePrice
+      : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs(),
+    finalAmount0,
+    finalAmount1,
+  };
 }
 
 async function getExchangePrice(params: IRebalanceParams) {
@@ -90,11 +92,13 @@ async function getExchangePrice(params: IRebalanceParams) {
     initAmount1.toString(),
   );
 
-  if (deltaAmount1.eq(0)) {
-    return deltaAmount1;
-  }
-
-  return deltaAmount1.div(
-    new Big(initAmount0.toString()).minus(finalAmount0.toString()),
-  );
+  return {
+    exchangePrice: deltaAmount1.eq(0)
+      ? deltaAmount1
+      : deltaAmount1.div(
+          new Big(initAmount0.toString()).minus(finalAmount0.toString()),
+        ),
+    finalAmount0,
+    finalAmount1,
+  };
 }
