@@ -94,16 +94,17 @@ export async function getRebalanceSwapInfo(
     deadline: deadlineEpochSeconds,
   };
 
-  const priceImpact = await calculateRebalancePriceImpact({
-    chainId,
-    amm,
-    swapData: swapData as `0x${string}`,
-    from: ownerAddress,
-    owner: ownerAddress,
-    tokenId: existingPositionId,
-    mintParams,
-    publicClient,
-  });
+  const { priceImpact, finalAmount0, finalAmount1 } =
+    await calculateRebalancePriceImpact({
+      chainId,
+      amm,
+      swapData: swapData as `0x${string}`,
+      from: ownerAddress,
+      owner: ownerAddress,
+      tokenId: existingPositionId,
+      mintParams,
+      publicClient,
+    });
 
   return {
     swapRoute,
@@ -117,5 +118,7 @@ export async function getRebalanceSwapInfo(
       slippageTolerance,
     ),
     priceImpact,
+    finalAmount0,
+    finalAmount1,
   };
 }

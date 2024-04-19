@@ -394,17 +394,20 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const priceImpact = await calculateMintOptimalPriceImpact({
-      chainId,
-      amm: UNIV3_AMM,
-      publicClient,
-      from: eoa,
-      mintParams,
-      swapData: undefined,
-      blockNumber,
-    });
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateMintOptimalPriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        mintParams,
+        swapData: undefined,
+        blockNumber,
+      });
 
     expect(priceImpact.toString()).to.equal('0.003010298098311076209996397317');
+    expect(finalAmount0.toString()).to.equal('51320357');
+    expect(finalAmount1.toString()).to.equal('8736560293857784398');
 
     const [, liquidity, amount0, amount1] = await simulateMintOptimal(
       chainId,
@@ -442,18 +445,21 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const priceImpact = await calculateIncreaseLiquidityOptimalPriceImpact({
-      chainId,
-      amm: UNIV3_AMM,
-      publicClient,
-      from: eoa,
-      position,
-      increaseParams,
-      swapData: undefined,
-      blockNumber,
-    });
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateIncreaseLiquidityOptimalPriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        position,
+        increaseParams,
+        swapData: undefined,
+        blockNumber,
+      });
 
     expect(priceImpact.toString()).to.equal('0.00300826277866017098015215935');
+    expect(finalAmount0.toString()).to.equal('61259538');
+    expect(finalAmount1.toString()).to.equal('7156958298534991565');
 
     const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
       chainId,
@@ -507,17 +513,20 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const priceImpact = await calculateMintOptimalPriceImpact({
-      chainId,
-      amm: UNIV3_AMM,
-      publicClient,
-      from: eoa,
-      mintParams,
-      swapData: undefined,
-      blockNumber,
-    });
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateMintOptimalPriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        mintParams,
+        swapData: undefined,
+        blockNumber,
+      });
 
     expect(priceImpact.toString()).to.equal('0');
+    expect(finalAmount0.toString()).to.equal('96674');
+    expect(finalAmount1.toString()).to.equal('16468879195954429');
   });
 
   it('Test calculateRebalancePriceImpact', async function () {
@@ -558,19 +567,22 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const impact = await calculateRebalancePriceImpact({
-      chainId,
-      amm: UNIV3_AMM,
-      publicClient,
-      from: eoa,
-      owner: eoa,
-      mintParams,
-      tokenId: 4n,
-      feeBips: undefined,
-      swapData: undefined,
-      blockNumber,
-    });
-    expect(impact.toString()).to.equal('0.00300526535105717178193071153');
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateRebalancePriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        owner: eoa,
+        mintParams,
+        tokenId: 4n,
+        feeBips: undefined,
+        swapData: undefined,
+        blockNumber,
+      });
+    expect(priceImpact.toString()).to.equal('0.00300526535105717178193071153');
+    expect(finalAmount0.toString()).to.equal('23718330');
+    expect(finalAmount1.toString()).to.equal('4040287637285704807');
   });
 });
 
