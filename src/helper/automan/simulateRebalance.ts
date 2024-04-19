@@ -16,8 +16,7 @@ import {
   getNPMApprovalOverrides,
   tryStaticCallWithOverrides,
 } from '../overrides';
-import { UnwrapPromise, checkTicks } from './automan';
-import { AutomanCallInfo } from './automan';
+import { AutomanCallInfo, UnwrapPromise, checkTicks } from './automan';
 
 type RebalanceReturnType = UnwrapPromise<
   ReturnType<Automan['callStatic'][GetAutomanFragment<'rebalance'>]>

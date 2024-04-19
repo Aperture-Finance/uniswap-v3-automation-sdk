@@ -93,6 +93,7 @@ export async function getOptimalMintTx(
     recipient,
     deadline,
   };
+  console.log(1235, swapData);
   const data = Automan__factory.createInterface().encodeFunctionData(
     'mintOptimal',
     [mintParams, swapData],

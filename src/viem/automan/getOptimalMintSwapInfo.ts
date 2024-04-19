@@ -44,6 +44,8 @@ export async function getOptimalMintSwapInfo(
   swapRoute: SwapRoute | undefined;
   swapPath: SwapPath;
   priceImpact: Big.Big;
+  finalAmount0: bigint;
+  finalAmount1: bigint;
 }> {
   const {
     amount0: expectedAmount0,
@@ -91,14 +93,15 @@ export async function getOptimalMintSwapInfo(
     deadline,
   };
 
-  const priceImpact = await calculateMintOptimalPriceImpact({
-    chainId,
-    amm,
-    swapData: swapData as `0x${string}`,
-    from: recipient as `0x${string}`,
-    mintParams,
-    publicClient,
-  });
+  const { priceImpact, finalAmount0, finalAmount1 } =
+    await calculateMintOptimalPriceImpact({
+      chainId,
+      amm,
+      swapData: swapData as `0x${string}`,
+      from: recipient as `0x${string}`,
+      mintParams,
+      publicClient,
+    });
   return {
     swapRoute,
     swapPath: getSwapPath(
@@ -109,6 +112,8 @@ export async function getOptimalMintSwapInfo(
       slippage,
     ),
     priceImpact,
+    finalAmount0,
+    finalAmount1,
   };
 }
 

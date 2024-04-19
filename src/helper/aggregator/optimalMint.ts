@@ -183,6 +183,7 @@ async function optimalMintRouter(
     /** blockNumber= */ undefined,
     /** includeRoute= */ true,
   );
+  console.log(1235, swapData, swapRoute);
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
     amm,

@@ -94,15 +94,16 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
-  const priceImpact = await calculateIncreaseLiquidityOptimalPriceImpact({
-    chainId,
-    amm,
-    swapData: swapData as `0x${string}`,
-    from: recipient as `0x${string}`,
-    position,
-    increaseParams,
-    publicClient,
-  });
+  const { priceImpact, finalAmount0, finalAmount1 } =
+    await calculateIncreaseLiquidityOptimalPriceImpact({
+      chainId,
+      amm,
+      swapData: swapData as `0x${string}`,
+      from: recipient as `0x${string}`,
+      position,
+      increaseParams,
+      publicClient,
+    });
   return {
     swapRoute,
     swapPath: getSwapPath(
@@ -113,6 +114,8 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
       increaseOptions.slippageTolerance,
     ),
     priceImpact,
+    finalAmount0,
+    finalAmount1,
   };
 }
 
