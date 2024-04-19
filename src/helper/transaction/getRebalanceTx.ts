@@ -94,6 +94,7 @@ export async function getRebalanceTx(
           Number(slippageTolerance.denominator.toString()),
         provider,
       ));
+      console.log(1235, 'getRebalanceTx line 97:', swapData);
     } catch (err) {
       console.warn(
         `Failed to construct 1inch swap data: ${err}. Will proceed with same-pool swap.`,

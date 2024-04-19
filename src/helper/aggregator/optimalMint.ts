@@ -106,6 +106,7 @@ export async function optimalMint(
         overrides,
       ),
     ]);
+    console.log(1235, 'optimalMint line 111:', poolEstimate, routerEstimate);
     // use the same pool if the quote isn't better
     if (poolEstimate.liquidity.gte(routerEstimate.liquidity)) {
       return poolEstimate;
@@ -183,6 +184,18 @@ async function optimalMintRouter(
     /** blockNumber= */ undefined,
     /** includeRoute= */ true,
   );
+  console.log(
+    1235,
+    'optimalMint line 189:',
+    chainId,
+    amm,
+    provider,
+    fromAddress,
+    mintParams,
+    swapData,
+    overrides,
+    swapRoute,
+  );
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
     amm,
@@ -193,6 +206,7 @@ async function optimalMintRouter(
     undefined,
     overrides,
   );
+  console.log(1235, 'optimalMint line 200:', amount0, amount1, liquidity);
   return {
     amount0,
     amount1,
