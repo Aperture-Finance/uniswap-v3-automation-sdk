@@ -558,19 +558,22 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const impact = await calculateRebalancePriceImpact({
-      chainId,
-      amm: UNIV3_AMM,
-      publicClient,
-      from: eoa,
-      owner: eoa,
-      mintParams,
-      tokenId: 4n,
-      feeBips: undefined,
-      swapData: undefined,
-      blockNumber,
-    });
-    expect(impact.toString()).to.equal('0.00300526535105717178193071153');
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateRebalancePriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        owner: eoa,
+        mintParams,
+        tokenId: 4n,
+        feeBips: undefined,
+        swapData: undefined,
+        blockNumber,
+      });
+    expect(priceImpact.toString()).to.equal('0.00300526535105717178193071153');
+    expect(finalAmount0.toString()).to.equal('23718330');
+    expect(finalAmount1.toString()).to.equal('4040287637285704807');
   });
 });
 
