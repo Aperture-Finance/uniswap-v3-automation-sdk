@@ -67,6 +67,7 @@ export async function getRebalanceTx(
     ));
   }
   let swapData = '0x';
+  console.log(1235, use1inch);
   if (use1inch) {
     try {
       const { amount0: receive0, amount1: receive1 } =
@@ -94,6 +95,7 @@ export async function getRebalanceTx(
           Number(slippageTolerance.denominator.toString()),
         provider,
       ));
+      console.log(1235, swapData);
     } catch (err) {
       console.warn(
         `Failed to construct 1inch swap data: ${err}. Will proceed with same-pool swap.`,

@@ -43,13 +43,16 @@ export async function calculateMintOptimalPriceImpact(
   );
 
   const currentPoolPrice = fractionToBig(pool.token0Price);
-  const exchangePrice = await getExchangePrice(params);
+  const { exchangePrice, finalAmount0, finalAmount1 } =
+    await getExchangePrice(params);
 
-  if (exchangePrice.eq(0)) {
-    return exchangePrice;
-  }
-
-  return new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+  return {
+    priceImpact: exchangePrice.eq(0)
+      ? exchangePrice
+      : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs(),
+    finalAmount0,
+    finalAmount1,
+  };
 }
 
 async function getExchangePrice(params: IMintOptimalParams) {
@@ -70,9 +73,16 @@ async function getExchangePrice(params: IMintOptimalParams) {
     blockNumber,
   );
 
-  if (initAmount0 === finalAmount0) return new Big(0);
-
-  return new Big(finalAmount1.toString())
-    .minus(initAmount1.toString())
-    .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
+  return {
+    exchangePrice:
+      initAmount0 === finalAmount0
+        ? new Big(0)
+        : new Big(finalAmount1.toString())
+            .minus(initAmount1.toString())
+            .div(
+              new Big(initAmount0.toString()).minus(finalAmount0.toString()),
+            ),
+    finalAmount0,
+    finalAmount1,
+  };
 }
