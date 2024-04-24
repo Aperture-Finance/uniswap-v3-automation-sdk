@@ -22,6 +22,9 @@ export const RafflePrizeEnum = z.enum([
 ]);
 export type RafflePrizeEnum = z.infer<typeof RafflePrizeEnum>;
 
+export const LeaderboardTypeEnum = z.enum(['points', 'referrals', 'streak']);
+export type LeaderboardTypeEnum = z.infer<typeof LeaderboardTypeEnum>;
+
 const BasePayloadSchema = z.object({
   ownerAddr: z.string(),
 });
@@ -87,7 +90,9 @@ export type ValidateInviteCodeRequest = z.infer<
 >;
 
 export const ListLeaderboardRequestSchema = z.object({
-  type: z.string().optional(),
+  type: LeaderboardTypeEnum.describe(
+    'Type of leaderboard for sorting.',
+  ).optional(),
 });
 export type ListLeaderboardRequest = z.infer<
   typeof ListLeaderboardRequestSchema
