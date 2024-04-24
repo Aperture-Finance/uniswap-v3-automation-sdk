@@ -86,6 +86,13 @@ export type ValidateInviteCodeRequest = z.infer<
   typeof ValidateInviteCodeRequestSchema
 >;
 
+export const ListLeaderboardRequestSchema = z.object({
+  type: z.string().optional(),
+});
+export type ListLeaderboardRequest = z.infer<
+  typeof ListLeaderboardRequestSchema
+>;
+
 export const LeaderboardUserResponseSchema = z.object({
   x_id: z.string(),
   userAddr: z.string(),
@@ -95,10 +102,12 @@ export const LeaderboardUserResponseSchema = z.object({
 });
 
 export const ListLeaderboardResponseSchema = z.object({
+  totalCampaignUsers: z.number().int().nonnegative(),
+  totalCampaignPoints: z.number().nonnegative(),
   users: z
     .array(LeaderboardUserResponseSchema)
     .describe(
-      'Lists top users and their earned points, number of referred users, and x_id',
+      "List top 1000 wallet's { address, points, numReferrals, streak } ordered by type.",
     ),
 });
 
