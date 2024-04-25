@@ -73,36 +73,36 @@ describe('isDailyRaffleConsumed', () => {
   });
 
   it('should work for 120 days', () => {
-    const campaignPhase2StartDate = new Date(Date.UTC(2024, 3, 12, 6)); // 2024 Apr 12th 6AM UTC.
+    const campaignPhase3StartDate = new Date(Date.UTC(2024, 4, 1, 6)); // 2024 May 1st 6AM UTC.
 
     // Raffle should be consumed on day 119 if dailyRafflesConsumed == 1 << 119.
-    let testDate = new Date(campaignPhase2StartDate);
-    testDate.setDate(campaignPhase2StartDate.getDate() + 119);
+    let testDate = new Date(campaignPhase3StartDate);
+    testDate.setDate(campaignPhase3StartDate.getDate() + 119);
     jest.useFakeTimers().setSystemTime(testDate);
     expect(isDailyRaffleConsumed(/*dailyRafflesConsumed=*/ 1n << 119n)).toBe(
       true,
     );
 
     // Raffle should be available on day 120 if dailyRafflesConsumed == 1 << 119.
-    testDate = new Date(campaignPhase2StartDate);
-    testDate.setDate(campaignPhase2StartDate.getDate() + 120);
+    testDate = new Date(campaignPhase3StartDate);
+    testDate.setDate(campaignPhase3StartDate.getDate() + 120);
     jest.useFakeTimers().setSystemTime(testDate);
     expect(isDailyRaffleConsumed(/*dailyRafflesConsumed=*/ 1n << 119n)).toBe(
       false,
     );
 
     // Raffle should be consumed on day 120 if dailyRafflesConsumed == 1 << 120.
-    testDate = new Date(campaignPhase2StartDate);
-    testDate.setDate(campaignPhase2StartDate.getDate() + 120);
+    testDate = new Date(campaignPhase3StartDate);
+    testDate.setDate(campaignPhase3StartDate.getDate() + 120);
     jest.useFakeTimers().setSystemTime(testDate);
     expect(isDailyRaffleConsumed(/*dailyRafflesConsumed=*/ 1n << 120n)).toBe(
       true,
     );
 
-    // After 120, campaign should be over and users should not be allowed to draw daily raffles anymore.
+    // After 120 days, campaign should be over and users should not be allowed to draw daily raffles anymore.
     // Returning true that the daily raffles was consumed should disallow users from drawing daily raffles.
-    testDate = new Date(campaignPhase2StartDate);
-    testDate.setDate(campaignPhase2StartDate.getDate() + 121);
+    testDate = new Date(campaignPhase3StartDate);
+    testDate.setDate(campaignPhase3StartDate.getDate() + 121);
     jest.useFakeTimers().setSystemTime(testDate);
     expect(isDailyRaffleConsumed(/*dailyRafflesConsumed=*/ 1n << 120n)).toBe(
       true,
