@@ -20,7 +20,7 @@ import { SwapRoute } from './quote';
  * @param tickUpper The upper tick of the range.
  * @param fromAddress The address to mint from.
  * @param slippage The slippage tolerance.
- * @param provider A JSON RPC provider or a base provider.
+ * @param publicClient Viem public client.
  * @param usePool Whether to use the pool or the aggregator for the swap.
  */
 export async function optimalMint(
