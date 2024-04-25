@@ -11,6 +11,7 @@ import {
   ConditionTypeEnum,
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
+  ListLeaderboardResponse,
   UpdatePositionPermitRequest,
   UserActivityTrackingRequest,
   VerifySocialAccountRequest,
@@ -269,21 +270,23 @@ describe('Automan client test', () => {
   });
 
   it('Should call list leaderboard', async () => {
-    const responseData = {
+    const responseData: ListLeaderboardResponse = {
+      totalCampaignUsers: 2,
+      totalCampaignPoints: 98765.4321 + 12345.6789,
       users: [
         {
-          x_id: 'user0_x',
-          userAddr: '0x11..FACE',
-          points: 12345.6789,
-          num_referred_users: 3,
-          streak: 1,
-        },
-        {
-          x_id: 'user1_x',
-          userAddr: '0x23..BEEF',
+          x_id: '*',
+          userAddr: '0xBE..EF',
           points: 98765.4321,
           num_referred_users: 0,
           streak: 2,
+        },
+        {
+          x_id: '*',
+          userAddr: '0xFA..CE',
+          points: 12345.6789,
+          num_referred_users: 3,
+          streak: 1,
         },
       ],
     };
