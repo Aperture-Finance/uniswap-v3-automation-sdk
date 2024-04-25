@@ -22,6 +22,9 @@ export const RafflePrizeEnum = z.enum([
 ]);
 export type RafflePrizeEnum = z.infer<typeof RafflePrizeEnum>;
 
+export const LeaderboardTypeEnum = z.enum(['points', 'referrals', 'streak']);
+export type LeaderboardTypeEnum = z.infer<typeof LeaderboardTypeEnum>;
+
 const BasePayloadSchema = z.object({
   ownerAddr: z.string(),
 });
@@ -86,6 +89,15 @@ export type ValidateInviteCodeRequest = z.infer<
   typeof ValidateInviteCodeRequestSchema
 >;
 
+export const ListLeaderboardRequestSchema = z.object({
+  type: LeaderboardTypeEnum.describe(
+    'Type of leaderboard for sorting.',
+  ).optional(),
+});
+export type ListLeaderboardRequest = z.infer<
+  typeof ListLeaderboardRequestSchema
+>;
+
 export const LeaderboardUserResponseSchema = z.object({
   x_id: z.string(),
   userAddr: z.string(),
@@ -95,10 +107,12 @@ export const LeaderboardUserResponseSchema = z.object({
 });
 
 export const ListLeaderboardResponseSchema = z.object({
+  totalCampaignUsers: z.number().int().nonnegative(),
+  totalCampaignPoints: z.number().nonnegative(),
   users: z
     .array(LeaderboardUserResponseSchema)
     .describe(
-      'Lists top users and their earned points, number of referred users, and x_id',
+      "List top 1000 wallet's { address, points, numReferrals, streak } ordered by type.",
     ),
 });
 
