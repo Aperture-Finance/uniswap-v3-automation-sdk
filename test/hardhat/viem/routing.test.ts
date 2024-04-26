@@ -62,7 +62,7 @@ describe('Routing tests', function () {
     );
   });
 
-  it('Test increaseLiquidityOptimal', async function () {
+  it('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient('mainnet');
@@ -97,7 +97,7 @@ describe('Routing tests', function () {
       token0Amount,
       token1Amount,
       eoa,
-      false,
+      true, //don't use 1inch in unit test
       blockNumber,
     );
 
