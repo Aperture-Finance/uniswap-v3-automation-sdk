@@ -5,7 +5,7 @@ import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
-import { increaseLiquidityOptimal } from '../aggregator/increaseLiquidityOptimal';
+import { increaseLiquidityOptimal } from '../aggregator';
 import { PositionDetails } from '../position';
 import { getSwapPath } from './internal';
 

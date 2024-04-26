@@ -9,9 +9,9 @@ import {
   PositionDetails,
   getNPM,
   getRebalancedPosition,
+  increaseLiquidityOptimal,
   optimalRebalance,
 } from '../../../src/viem';
-import { increaseLiquidityOptimal } from '../../../src/viem/aggregator/increaseLiquidityOptimal';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
 describe('Routing tests', function () {
@@ -65,7 +65,7 @@ describe('Routing tests', function () {
   it('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient('mainnet');
+    const publicClient = getInfuraClient();
     const blockNumber = 17975698n;
 
     const { position, pool } = await PositionDetails.fromPositionId(
