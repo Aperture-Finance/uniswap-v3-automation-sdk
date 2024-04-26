@@ -323,6 +323,10 @@ export async function simulateMintOptimal(
       blockNumber,
     );
   } catch (e) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('fail to override', e);
+    }
+
     returnData = (
       await publicClient.call({
         account: from,
