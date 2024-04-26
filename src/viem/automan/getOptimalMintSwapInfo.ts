@@ -8,7 +8,6 @@ import {
   optimalMint,
 } from '@/viem';
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
-import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
@@ -29,7 +28,6 @@ import { getSwapPath } from './internal';
  * @param deadline The deadline in seconds before which the transaction must be mined.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
- * @param provider A JSON RPC provider or a base provider.
  * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  */
 export async function getOptimalMintSwapInfo(
@@ -44,7 +42,6 @@ export async function getOptimalMintSwapInfo(
   deadline: bigint,
   slippage: number,
   publicClient: PublicClient,
-  _?: JsonRpcProvider | Provider, // deprecated
   use1inch?: boolean,
 ): Promise<{
   swapRoute: SwapRoute | undefined;
