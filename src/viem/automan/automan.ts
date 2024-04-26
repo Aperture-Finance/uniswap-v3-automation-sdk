@@ -35,14 +35,13 @@ import {
 } from '../overrides';
 import {
   DecreaseLiquidityParams,
-  IncreaseLiquidityParams,
   IncreaseLiquidityReturnType,
   MintReturnType,
   RebalanceReturnType,
   RemoveLiquidityReturnType,
   getFromAddress,
 } from './internal';
-import { MintParams } from './types';
+import { IncreaseLiquidityParams, MintParams } from './types';
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,

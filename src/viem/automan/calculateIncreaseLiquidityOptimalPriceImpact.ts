@@ -5,7 +5,8 @@ import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import { simulateIncreaseLiquidityOptimal } from './automan';
-import { IncreaseLiquidityParams, getFromAddress } from './internal';
+import { getFromAddress } from './internal';
+import { IncreaseLiquidityParams } from './types';
 
 type IIncreaseLiquidityOptimalParams = {
   chainId: ApertureSupportedChainId;
