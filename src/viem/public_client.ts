@@ -10,11 +10,13 @@ import type { Transport } from 'viem';
  */
 export function getPublicClient(
   chainId: ApertureSupportedChainId,
+  cacheTime = 4000,
 ): PublicClient {
   return createPublicClient({
     batch: {
       multicall: true,
     },
+    cacheTime,
     chain: getChainInfo(chainId).chain,
     transport: http(getChainInfo(chainId).rpc_url),
   });
