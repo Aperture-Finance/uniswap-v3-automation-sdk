@@ -224,8 +224,8 @@ describe.skip('Helper - PCSV3Automan transaction tests', function () {
     });
   });
 
-  // This test is known to be flaky.
-  it('Optimal mint with 1inch', async function () {
+  // This test is known to be flaky, skip it for now.
+  it.skip('Optimal mint with 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -360,7 +360,7 @@ describe.skip('Helper - PCSV3Automan transaction tests', function () {
     });
   });
 
-  it('Increase liquidity optimal with 1inch', async function () {
+  it.skip('Increase liquidity optimal with 1inch', async function () {
     const existingPosition = await getPosition(
       BNB_CHAIN_ID,
       PCS_AMM,

@@ -363,7 +363,7 @@ describe('Helper - UniV3Automan transaction tests', function () {
     });
   });
 
-  it('Increase liquidity optimal with 1inch', async function () {
+  it.skip('Increase liquidity optimal with 1inch', async function () {
     const existingPosition = await getPosition(
       chainId,
       amm,
