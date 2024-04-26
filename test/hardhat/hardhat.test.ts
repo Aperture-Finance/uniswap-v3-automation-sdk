@@ -1600,55 +1600,6 @@ describe('Recurring rebalance tests', function () {
   });
 });
 
-describe('Routing tests', function () {
-  it('Test optimalRebalance', async function () {
-    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
-    const tokenId = 726230n;
-    const blockNumber = 119626480n;
-    const { pool, position } = await PositionDetails.fromPositionId(
-      chainId,
-      UNIV3_AMM,
-      tokenId,
-      publicClient,
-      blockNumber,
-    );
-    const tickLower = nearestUsableTick(
-      pool.tickCurrent - 10 * pool.tickSpacing,
-      pool.tickSpacing,
-    );
-    const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 10 * pool.tickSpacing,
-      pool.tickSpacing,
-    );
-    const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
-      tokenId,
-    ]);
-    const { liquidity } = await optimalRebalance(
-      chainId,
-      UNIV3_AMM,
-      tokenId,
-      tickLower,
-      tickUpper,
-      0n,
-      true,
-      owner,
-      0.1,
-      publicClient,
-      blockNumber,
-    );
-    const { liquidity: predictedLiquidity } = getRebalancedPosition(
-      position,
-      tickLower,
-      tickUpper,
-    );
-    expect(Number(liquidity.toString())).to.be.closeTo(
-      Number(predictedLiquidity.toString()),
-      Number(predictedLiquidity.toString()) * 0.1,
-    );
-  });
-});
-
 describe('Automan transaction tests', function () {
   async function dealERC20(
     token0: Address,
@@ -1738,6 +1689,7 @@ describe('Automan transaction tests', function () {
     const testClient = await hre.viem.getTestClient();
     const publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient);
+
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,

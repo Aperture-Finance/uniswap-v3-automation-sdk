@@ -37,6 +37,7 @@ export async function increaseLiquidityOptimal(
   token1Amount: CurrencyAmount<Token>,
   fromAddress: Address,
   usePool = false,
+  blockNumber?: bigint,
 ) {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -58,6 +59,7 @@ export async function increaseLiquidityOptimal(
     fromAddress,
     position,
     increaseParams,
+    blockNumber,
   );
   if (!usePool) {
     if (optimalSwapRouter === undefined) {
@@ -93,6 +95,7 @@ async function increaseLiquidityOptimalPool(
   fromAddress: Address,
   position: Position,
   increaseParams: IncreaseLiquidityParams,
+  blockNumber?: bigint,
 ) {
   const [liquidity, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
     chainId,
@@ -102,7 +105,7 @@ async function increaseLiquidityOptimalPool(
     position,
     increaseParams,
     /** swapData= */ undefined,
-    /** blockNumber= */ undefined,
+    blockNumber,
   );
   let swapRoute: SwapRoute = [];
   if (increaseParams.amount0Desired.toString() !== amount0.toString()) {
@@ -142,6 +145,7 @@ async function increaseLiquidityOptimalRouter(
   position: Position,
   increaseParams: IncreaseLiquidityParams,
   slippage: number,
+  blockNumber?: bigint,
 ) {
   const { swapData, swapRoute } = await getIncreaseLiquidityOptimalSwapData(
     chainId,
@@ -160,7 +164,7 @@ async function increaseLiquidityOptimalRouter(
     position,
     increaseParams,
     swapData,
-    /** blockNumber= */ undefined,
+    blockNumber,
   );
   return {
     amount0,

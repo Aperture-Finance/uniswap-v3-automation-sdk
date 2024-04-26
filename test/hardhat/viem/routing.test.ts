@@ -1,0 +1,116 @@
+import { nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import '@nomicfoundation/hardhat-viem';
+import { Percent } from '@uniswap/sdk-core';
+import { CurrencyAmount } from '@uniswap/smart-order-router';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+
+import { ApertureSupportedChainId } from '../../../src';
+import {
+  PositionDetails,
+  getNPM,
+  getRebalancedPosition,
+  optimalRebalance,
+} from '../../../src/viem';
+import { increaseLiquidityOptimal } from '../../../src/viem/aggregator/increaseLiquidityOptimal';
+import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
+
+describe('Routing tests', function () {
+  it('Test optimalRebalance', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const tokenId = 726230n;
+    const blockNumber = 119626480n;
+    const { pool, position } = await PositionDetails.fromPositionId(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      publicClient,
+      blockNumber,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
+      tokenId,
+    ]);
+    const { liquidity } = await optimalRebalance(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      tickLower,
+      tickUpper,
+      0n,
+      true,
+      owner,
+      0.1,
+      publicClient,
+      blockNumber,
+    );
+    const { liquidity: predictedLiquidity } = getRebalancedPosition(
+      position,
+      tickLower,
+      tickUpper,
+    );
+    expect(Number(liquidity.toString())).to.be.closeTo(
+      Number(predictedLiquidity.toString()),
+      Number(predictedLiquidity.toString()) * 0.1,
+    );
+  });
+
+  it('Test increaseLiquidityOptimal', async function () {
+    const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
+    const publicClient = getInfuraClient('mainnet');
+    const blockNumber = 17975698n;
+
+    const { position, pool } = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      4n,
+      publicClient,
+    );
+
+    const token0Amount = CurrencyAmount.fromRawAmount(
+      pool.token0,
+      '10000000000000',
+    );
+    const token1Amount = CurrencyAmount.fromRawAmount(
+      pool.token1,
+      '1000000000000000000',
+    );
+
+    const { amount0, amount1 } = await increaseLiquidityOptimal(
+      chainId,
+      amm,
+      publicClient,
+      position,
+      {
+        tokenId: 4,
+        slippageTolerance: new Percent(5, 1000),
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      token0Amount,
+      token1Amount,
+      eoa,
+      false,
+      blockNumber,
+    );
+
+    const _total = Number(
+      pool.token0Price
+        .quote(CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()))
+        .add(CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()))
+        .toFixed(),
+    );
+    const total = Number(
+      pool.token0Price.quote(token0Amount).add(token1Amount).toFixed(),
+    );
+
+    expect(_total).to.be.closeTo(total, total * 0.03);
+  });
+});
