@@ -1726,7 +1726,6 @@ describe('Automan transaction tests', function () {
       BigInt(Math.floor(Date.now() / 1000) + 60),
       0.5,
       publicClient,
-      new providers.MulticallProvider(hardhatForkProvider),
       // 1inch quote currently doesn't support the no-swap case.
       false,
     );
