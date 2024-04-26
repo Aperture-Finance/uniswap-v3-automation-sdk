@@ -363,6 +363,7 @@ describe('Helper - UniV3Automan transaction tests', function () {
     });
   });
 
+  // unit test with 1inch is unstable, skip it for now
   it.skip('Increase liquidity optimal with 1inch', async function () {
     const existingPosition = await getPosition(
       chainId,
