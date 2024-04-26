@@ -103,7 +103,6 @@ import {
   getToken,
   getTokenSvg,
   isPositionInRange,
-  optimalRebalance,
   projectRebalancedPositionAtPrice,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
