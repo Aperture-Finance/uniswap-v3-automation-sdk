@@ -1732,7 +1732,6 @@ describe('Automan transaction tests', function () {
       hypotheticalPosition.amount1,
       eoa as Address,
       publicClient,
-      new providers.MulticallProvider(hardhatForkProvider),
       hypotheticalPosition,
       // 1inch quote currently doesn't support the no-swap case.
       false,
