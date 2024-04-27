@@ -6,7 +6,6 @@ import { Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { ethers } from 'ethers';
 import stringify from 'json-stable-stringify';
-import moment, { Moment } from 'moment';
 import { Address } from 'viem';
 
 import { getAMMInfo } from './chain';
