@@ -1,14 +1,19 @@
-// TODO: migrate optimalMint to viem version
-import { SwapRoute, optimalMint } from '@/helper/aggregator';
+import { SwapRoute } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import { MintParams, calculateMintOptimalPriceImpact, getPool } from '@/viem';
+import {
+  MintParams,
+  SwapPath,
+  calculateMintOptimalPriceImpact,
+  getPool,
+  optimalMint,
+} from '@/viem';
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
-import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import { BigNumber } from 'ethers';
 import { Address, PublicClient } from 'viem';
+
+import { getSwapPath } from './internal';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
@@ -23,7 +28,6 @@ import { Address, PublicClient } from 'viem';
  * @param deadline The deadline in seconds before which the transaction must be mined.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
- * @param provider A JSON RPC provider or a base provider.
  * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  */
 export async function getOptimalMintSwapInfo(
@@ -38,7 +42,6 @@ export async function getOptimalMintSwapInfo(
   deadline: bigint,
   slippage: number,
   publicClient: PublicClient,
-  provider: JsonRpcProvider | Provider,
   use1inch?: boolean,
 ): Promise<{
   swapRoute: SwapRoute | undefined;
@@ -53,21 +56,19 @@ export async function getOptimalMintSwapInfo(
     liquidity,
     swapData,
     swapRoute,
-  } =
-    // TODO: migrate to viem version
-    await optimalMint(
-      chainId,
-      amm,
-      token0Amount as CurrencyAmount<Token>,
-      token1Amount as CurrencyAmount<Token>,
-      fee,
-      tickLower,
-      tickUpper,
-      recipient,
-      slippage,
-      provider,
-      !use1inch,
-    );
+  } = await optimalMint(
+    chainId,
+    amm,
+    token0Amount as CurrencyAmount<Token>,
+    token1Amount as CurrencyAmount<Token>,
+    fee,
+    tickLower,
+    tickUpper,
+    recipient,
+    slippage,
+    publicClient,
+    !use1inch,
+  );
   const token0 = (token0Amount.currency as Token).address as Address;
   const token1 = (token1Amount.currency as Token).address as Address;
   const position = new Position({
@@ -105,8 +106,10 @@ export async function getOptimalMintSwapInfo(
   return {
     swapRoute,
     swapPath: getSwapPath(
-      token0Amount as CurrencyAmount<Token>,
-      token1Amount as CurrencyAmount<Token>,
+      token0,
+      token1,
+      mintParams.amount0Desired,
+      mintParams.amount1Desired,
       expectedAmount0,
       expectedAmount1,
       slippage,
@@ -116,47 +119,3 @@ export async function getOptimalMintSwapInfo(
     finalAmount1,
   };
 }
-
-type SwapPath = {
-  tokenIn: Address;
-  tokenOut: Address;
-  amountIn: string;
-  amountOut: string;
-  minAmountOut: string;
-};
-
-const getSwapPath = (
-  token0: CurrencyAmount<Token>,
-  token1: CurrencyAmount<Token>,
-  finalToken0Amount: BigNumber,
-  finalToken1Amount: BigNumber,
-  slippage: number,
-): SwapPath => {
-  const initToken0Amount = token0.quotient.toString();
-  const initToken1Amount = token1.quotient.toString();
-  const [tokenIn, tokenOut, amountIn, amountOut] = finalToken0Amount.gt(
-    initToken0Amount,
-  )
-    ? [
-        token1.currency,
-        token0.currency,
-        finalToken1Amount.sub(initToken1Amount).abs(),
-        finalToken0Amount.sub(initToken0Amount),
-      ]
-    : [
-        token0.currency,
-        token1.currency,
-        finalToken0Amount.sub(initToken0Amount).abs(),
-        finalToken1Amount.sub(initToken1Amount),
-      ];
-
-  return {
-    tokenIn: tokenIn.address as Address,
-    tokenOut: tokenOut.address as Address,
-    amountIn: amountIn.toString(),
-    amountOut: amountOut.toString(),
-    minAmountOut: new Big(amountOut.toString())
-      .times(1 - slippage * 0.01)
-      .toFixed(0),
-  };
-};
