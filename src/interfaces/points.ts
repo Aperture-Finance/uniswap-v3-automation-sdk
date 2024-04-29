@@ -134,6 +134,7 @@ export const PointUserStatusSchema = z.object({
   rafflePointsConsumed: z.number().nonnegative(),
   streak: z.number().int(),
   canDrawDailyRaffle: z.boolean(),
+  hasCompletedOnChainActivityForPoints: z.boolean(),
 });
 
 export type PointUserStatus = z.infer<typeof PointUserStatusSchema>;
