@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { md5 } from 'js-md5';
+import stringify from 'json-stable-stringify';
 import {
   AccessList,
   Address,
@@ -262,7 +262,7 @@ export async function generateAccessList(
   blockNumber?: bigint,
 ): Promise<AccessListReturnType> {
   try {
-    const key = keccak256(toHex(Object.values(tx).join()));
+    const key = keccak256(toHex(stringify(tx)));
     // viem cache seems not work, use custom request cache
     return await getCachedRequest().addRequest(key, () =>
       requestWithOverrides(
