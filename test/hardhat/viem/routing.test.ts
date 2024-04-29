@@ -40,14 +40,14 @@ describe('Viem - Routing tests', function () {
     const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
       tokenId,
     ]);
-    const { liquidity } = await optimalRebalance(
+    const { liquidity, priceImpact } = await optimalRebalance(
       chainId,
       UNIV3_AMM,
       tokenId,
       tickLower,
       tickUpper,
       0n,
-      true,
+      /** usePool= */ true, // don't use 1inch in unit test
       owner,
       0.1,
       publicClient,
@@ -61,6 +61,10 @@ describe('Viem - Routing tests', function () {
     expect(Number(liquidity.toString())).to.be.closeTo(
       Number(predictedLiquidity.toString()),
       Number(predictedLiquidity.toString()) * 0.1,
+    );
+
+    expect(priceImpact.toString()).to.be.equal(
+      '0.000523169007954374179065197874',
     );
   });
 

@@ -94,11 +94,10 @@ export async function optimalMint(
 
   const estimate = await getEstimate();
 
-  const { amount0, amount1, swapData } = estimate;
+  const { amount0, amount1 } = estimate;
   const { priceImpact } = await calculateMintOptimalPriceImpact({
     chainId,
     amm,
-    swapData,
     from: fromAddress,
     mintParams,
     publicClient,

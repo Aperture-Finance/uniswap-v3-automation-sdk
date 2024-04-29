@@ -6,6 +6,7 @@ import { Address, Hex, PublicClient } from 'viem';
 import { computePoolAddress } from '../../utils';
 import {
   MintParams,
+  calculateRebalancePriceImpact,
   encodeOptimalSwapData,
   getAutomanContract,
   simulateRebalance,
@@ -35,6 +36,7 @@ export async function optimalRebalance(
   liquidity: bigint;
   swapData: Hex;
   swapRoute?: SwapRoute;
+  priceImpact: Big.Big;
 }> {
   const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   const position = await PositionDetails.fromPositionId(
@@ -56,6 +58,7 @@ export async function optimalRebalance(
     feeBips,
     blockNumber,
   );
+
   const mintParams: MintParams = {
     token0: position.token0.address as Address,
     token1: position.token1.address as Address,
@@ -70,19 +73,19 @@ export async function optimalRebalance(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
-  const poolPromise = optimalMintPool(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    mintParams,
-    positionId,
-    position.owner,
-    feeBips,
-    blockNumber,
-  );
-  if (!usePool) {
-    if (optimalSwapRouter === undefined) {
+  const getEstimate = async () => {
+    const poolPromise = optimalMintPool(
+      chainId,
+      amm,
+      publicClient,
+      fromAddress,
+      mintParams,
+      positionId,
+      position.owner,
+      feeBips,
+      blockNumber,
+    );
+    if (usePool || !optimalSwapRouter) {
       return { ...(await poolPromise), receive0, receive1 };
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
@@ -106,9 +109,26 @@ export async function optimalRebalance(
     } else {
       return { ...routerEstimate, receive0, receive1 };
     }
-  } else {
-    return { ...(await poolPromise), receive0, receive1 };
-  }
+  };
+
+  const estimate = await getEstimate();
+  const { amount0, amount1 } = estimate;
+
+  const { priceImpact } = await calculateRebalancePriceImpact({
+    chainId,
+    amm,
+    mintParams,
+    tokenId: positionId,
+    publicClient,
+    blockNumber,
+    finalAmount0: amount0,
+    finalAmount1: amount1,
+  });
+
+  return {
+    ...estimate,
+    priceImpact,
+  };
 }
 
 async function optimalMintPool(
@@ -137,7 +157,7 @@ async function optimalMintPool(
     mintParams,
     positionId,
     feeBips,
-    undefined,
+    /*swapData =*/ '0x',
     blockNumber,
   );
 
@@ -194,7 +214,7 @@ async function optimalMintRouter(
     publicClient,
     mintParams,
     slippage,
-    /** blockNumber= */ undefined,
+    blockNumber,
     /** includeRoute= */ true,
   );
   const [, liquidity, amount0, amount1] = await simulateRebalance(

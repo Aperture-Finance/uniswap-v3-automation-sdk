@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, fractionToBig } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import { Address, Hex, PublicClient } from 'viem';
+import { Address, PublicClient } from 'viem';
 
 import { getPool } from '../pool';
 import { MintParams } from './types';
@@ -12,7 +12,6 @@ interface IMintOptimalParams {
   publicClient: PublicClient;
   from: Address;
   mintParams: MintParams;
-  swapData?: Hex;
   blockNumber?: bigint;
   finalAmount0: bigint;
   finalAmount1: bigint;
