@@ -46,6 +46,11 @@ export type MintParams = GetAbiFunctionParamsTypes<
   'mint'
 >[0];
 
+export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
+  typeof INonfungiblePositionManager__factory.abi,
+  'increaseLiquidity'
+>[0];
+
 export type SwapPath = {
   tokenIn: Address;
   tokenOut: Address;
