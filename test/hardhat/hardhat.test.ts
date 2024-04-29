@@ -1,4 +1,3 @@
-import { providers } from '@0xsequence/multicall';
 import {
   FeeAmount,
   Pool,
@@ -10,7 +9,6 @@ import {
 } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
-import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';
