@@ -10,6 +10,7 @@ import {
   getNPM,
   getRebalancedPosition,
   increaseLiquidityOptimal,
+  optimalMint,
   optimalRebalance,
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
@@ -112,5 +113,53 @@ describe('Routing tests', function () {
     );
 
     expect(_total).to.be.closeTo(total, total * 0.03);
+  });
+
+  it('Test optimalMint', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
+    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const token0 = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f';
+    const token1 = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1';
+    const fee = FeeAmount.MEDIUM;
+    const pool = await getPool(token0, token1, fee, chainId, amm);
+    const token0Amount = CurrencyAmount.fromRawAmount(
+      pool.token0,
+      '1000000000',
+    );
+    const token1Amount = CurrencyAmount.fromRawAmount(
+      pool.token1,
+      '1000000000000000000',
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const { amount0, amount1 } = await optimalMint(
+      chainId,
+      amm,
+      token0Amount,
+      token1Amount,
+      fee,
+      tickLower,
+      tickUpper,
+      eoa,
+      0.1,
+      publicClient,
+    );
+    const _total = Number(
+      pool.token0Price
+        .quote(CurrencyAmount.fromRawAmount(pool.token0, amount0.toString()))
+        .add(CurrencyAmount.fromRawAmount(pool.token1, amount1.toString()))
+        .toFixed(),
+    );
+    const total = Number(
+      pool.token0Price.quote(token0Amount).add(token1Amount).toFixed(),
+    );
+    expect(_total).to.be.closeTo(total, total * 0.005);
   });
 });
