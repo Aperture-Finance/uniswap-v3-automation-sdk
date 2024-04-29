@@ -10,6 +10,7 @@ import {
 } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
+import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';
@@ -1664,6 +1665,7 @@ describe('Automan transaction tests', function () {
       eoa,
       getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
     );
+
     const { swapRoute } = await getOptimalMintSwapInfo(
       chainId,
       UNIV3_AMM,
@@ -1676,7 +1678,6 @@ describe('Automan transaction tests', function () {
       BigInt(Math.floor(Date.now() / 1000) + 60),
       0.5,
       publicClient,
-      new providers.MulticallProvider(hardhatForkProvider),
       // 1inch quote currently doesn't support the no-swap case.
       false,
     );
