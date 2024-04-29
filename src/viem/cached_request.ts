@@ -1,5 +1,3 @@
-// implement a request queue with identical request key, for the same request, only the first request will be processed, the rest will wait for the first request to complete and return the same result
-
 class CachedRequest {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private requests: Record<string, Promise<any>>;
