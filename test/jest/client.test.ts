@@ -11,6 +11,7 @@ import {
   ConditionTypeEnum,
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
+  ListLeaderboardRequest,
   ListLeaderboardResponse,
   UpdatePositionPermitRequest,
   UserActivityTrackingRequest,
@@ -270,6 +271,9 @@ describe('Automan client test', () => {
   });
 
   it('Should call list leaderboard', async () => {
+    const request: ListLeaderboardRequest = {
+      type: 'points',
+    };
     const responseData: ListLeaderboardResponse = {
       totalCampaignUsers: 2,
       totalCampaignPoints: 98765.4321 + 12345.6789,
@@ -292,7 +296,7 @@ describe('Automan client test', () => {
     };
     mock.onGet(`${url}/listLeaderboard`).reply(200, responseData);
 
-    const response = await client.listLeaderboard();
+    const response = await client.listLeaderboard(request);
     expect(response).toEqual(responseData);
 
     // Expect to call get once.
