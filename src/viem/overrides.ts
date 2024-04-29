@@ -1,5 +1,6 @@
 import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { md5 } from 'js-md5';
 import {
   AccessList,
   Address,
@@ -14,6 +15,8 @@ import {
   toHex,
   zeroAddress,
 } from 'viem';
+
+import { getCachedRequest } from './cached_request';
 
 type StateOverrides = {
   [address: Address]: {
@@ -259,15 +262,19 @@ export async function generateAccessList(
   blockNumber?: bigint,
 ): Promise<AccessListReturnType> {
   try {
-    return await requestWithOverrides(
-      'eth_createAccessList',
-      {
-        ...tx,
-        gas: '0x11E1A300',
-      },
-      publicClient,
-      undefined,
-      blockNumber,
+    const key = keccak256(toHex(Object.values(tx).join()));
+    // viem cache seems not work, use custom request cache
+    return await getCachedRequest().addRequest(key, () =>
+      requestWithOverrides(
+        'eth_createAccessList',
+        {
+          ...tx,
+          gas: '0x11E1A300',
+        },
+        publicClient,
+        undefined,
+        blockNumber,
+      ),
     );
   } catch (error) {
     console.error('Error generating access list:', error);
