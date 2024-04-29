@@ -15,6 +15,7 @@ import {
   GetStrategyDetailResponse,
   HasSignedPrivateBetaAgreementRequest,
   HasSignedPrivateBetaAgreementResponse,
+  ListLeaderboardRequest,
   ListLeaderboardResponse,
   ListTriggerRequest,
   ListTriggerResponse,
@@ -41,6 +42,7 @@ async function buildAxiosGetRequest(
     | CheckUserLimitRequest
     | GetStrategyDetailRequest
     | HasSignedPrivateBetaAgreementRequest
+    | ListLeaderboardRequest
     | null
   >,
 ) {
@@ -166,9 +168,11 @@ export class AutomanClient {
     return (await buildAxiosPostRequest(url, request)).data;
   }
 
-  async listLeaderboard(): Promise<ListLeaderboardResponse> {
+  async listLeaderboard(
+    request: Readonly<ListLeaderboardRequest>,
+  ): Promise<ListLeaderboardResponse> {
     const url = new URL('/listLeaderboard', this.endpoint);
-    return (await buildAxiosGetRequest(url, null)).data;
+    return (await buildAxiosGetRequest(url, request)).data;
   }
 
   async verifySocialAccount(
