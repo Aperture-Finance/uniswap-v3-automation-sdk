@@ -1,12 +1,6 @@
 import { SwapRoute } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import {
-  MintParams,
-  SwapPath,
-  calculateMintOptimalPriceImpact,
-  getPool,
-  optimalMint,
-} from '@/viem';
+import { MintParams, SwapPath, getPool, optimalMint } from '@/viem';
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -54,8 +48,8 @@ export async function getOptimalMintSwapInfo(
     amount0: expectedAmount0,
     amount1: expectedAmount1,
     liquidity,
-    swapData,
     swapRoute,
+    priceImpact,
   } = await optimalMint(
     chainId,
     amm,
@@ -94,15 +88,6 @@ export async function getOptimalMintSwapInfo(
     deadline,
   };
 
-  const { priceImpact, finalAmount0, finalAmount1 } =
-    await calculateMintOptimalPriceImpact({
-      chainId,
-      amm,
-      swapData: swapData as `0x${string}`,
-      from: recipient as `0x${string}`,
-      mintParams,
-      publicClient,
-    });
   return {
     swapRoute,
     swapPath: getSwapPath(
@@ -115,7 +100,7 @@ export async function getOptimalMintSwapInfo(
       slippage,
     ),
     priceImpact,
-    finalAmount0,
-    finalAmount1,
+    finalAmount0: expectedAmount0,
+    finalAmount1: expectedAmount1,
   };
 }
