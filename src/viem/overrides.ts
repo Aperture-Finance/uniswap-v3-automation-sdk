@@ -263,7 +263,7 @@ export async function generateAccessList(
 ): Promise<AccessListReturnType> {
   try {
     const method = 'eth_createAccessList';
-    const key = keccak256(toHex(`${method}_${stringify(tx)}`));
+    const key = `${method}_${keccak256(toHex(stringify(tx)))}`;
     // viem cache seems not work, use custom request cache
     return await getCachedRequest().addRequest(key, () =>
       requestWithOverrides(
