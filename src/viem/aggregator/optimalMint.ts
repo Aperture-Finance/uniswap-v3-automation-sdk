@@ -69,47 +69,43 @@ export async function optimalMint(
       blockNumber,
     );
 
-    if (!usePool) {
-      if (optimalSwapRouter === undefined) {
-        return await poolPromise;
-      }
-      const [poolEstimate, routerEstimate] = await Promise.all([
-        poolPromise,
-        optimalMintRouter(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          mintParams,
-          slippage,
-        ),
-      ]);
-      // use the same pool if the quote isn't better
-      if (poolEstimate.liquidity > routerEstimate.liquidity) {
-        return poolEstimate;
-      } else {
-        return routerEstimate;
-      }
-    } else {
+    if (usePool || !optimalSwapRouter) {
       return await poolPromise;
+    }
+
+    const [poolEstimate, routerEstimate] = await Promise.all([
+      poolPromise,
+      optimalMintRouter(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        mintParams,
+        slippage,
+      ),
+    ]);
+    // use the same pool if the quote isn't better
+    if (poolEstimate.liquidity > routerEstimate.liquidity) {
+      return poolEstimate;
+    } else {
+      return routerEstimate;
     }
   };
 
   const estimate = await getEstimate();
 
   const { amount0, amount1, swapData } = estimate;
-  const { priceImpact } = await calculateMintOptimalPriceImpact(
-    {
-      chainId,
-      amm,
-      swapData,
-      from: fromAddress,
-      mintParams,
-      publicClient,
-    },
-    amount0,
-    amount1,
-  );
+  const { priceImpact } = await calculateMintOptimalPriceImpact({
+    chainId,
+    amm,
+    swapData,
+    from: fromAddress,
+    mintParams,
+    publicClient,
+    blockNumber,
+    finalAmount0: amount0,
+    finalAmount1: amount1,
+  });
 
   return {
     ...estimate,

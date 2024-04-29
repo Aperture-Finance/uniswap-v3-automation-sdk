@@ -6,7 +6,7 @@ import { Address, Hex, PublicClient } from 'viem';
 import { getPool } from '../pool';
 import { MintParams } from './types';
 
-type IMintOptimalParams = {
+interface IMintOptimalParams {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
   publicClient: PublicClient;
@@ -14,30 +14,28 @@ type IMintOptimalParams = {
   mintParams: MintParams;
   swapData?: Hex;
   blockNumber?: bigint;
-};
+  finalAmount0: bigint;
+  finalAmount1: bigint;
+}
 
 /**
  * calculate the price impact of mintOptimal(aka Zap-in)
  */
-export async function calculateMintOptimalPriceImpact(
-  params: IMintOptimalParams,
-  finalAmount0: bigint,
-  finalAmount1: bigint,
-) {
-  const {
-    mintParams: {
-      token0,
-      token1,
-      fee,
-      amount0Desired: initAmount0,
-      amount1Desired: initAmount1,
-    },
-    chainId,
-    amm,
-    publicClient,
-    blockNumber,
-  } = params;
-
+export async function calculateMintOptimalPriceImpact({
+  mintParams: {
+    token0,
+    token1,
+    fee,
+    amount0Desired: initAmount0,
+    amount1Desired: initAmount1,
+  },
+  chainId,
+  amm,
+  publicClient,
+  blockNumber,
+  finalAmount0,
+  finalAmount1,
+}: IMintOptimalParams) {
   const pool = await getPool(
     token0,
     token1,

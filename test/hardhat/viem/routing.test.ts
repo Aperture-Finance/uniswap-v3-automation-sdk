@@ -16,7 +16,7 @@ import {
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
-describe('Routing tests', function () {
+describe('Viem - Routing tests', function () {
   it('Test optimalRebalance', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
@@ -180,7 +180,7 @@ describe('Routing tests', function () {
     expect(amount0.toString()).to.be.equal('684889078');
     expect(amount1.toString()).to.be.equal('61653987834490876385');
     expect(priceImpact.toString()).to.be.equal(
-      '0.014214968398156586283292246003',
+      '0.014225518521980056226428532424',
     );
   });
 });
