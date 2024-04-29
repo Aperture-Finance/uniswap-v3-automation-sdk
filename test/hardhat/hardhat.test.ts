@@ -9,6 +9,7 @@ import {
 } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
+import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';
@@ -1681,6 +1682,69 @@ describe('Automan transaction tests', function () {
     );
 
     expect(swapRoute?.length).to.equal(0);
+  });
+
+  it('Optimal mint with swap', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+
+    const token0Amount = CurrencyAmount.fromRawAmount(
+      pool.token0,
+      '1000000000',
+    );
+    const token1Amount = CurrencyAmount.fromRawAmount(
+      pool.token1,
+      '1000000000000000000',
+    );
+
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      BigInt(token0Amount.quotient.toString()),
+      BigInt(token1Amount.quotient.toString()),
+      eoa,
+      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
+    );
+
+    const { swapRoute, swapPath } = await getOptimalMintSwapInfo(
+      chainId,
+      UNIV3_AMM,
+      token0Amount,
+      token1Amount,
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      BigInt(Math.floor(Date.now() / 1000) + 60),
+      0.5,
+      publicClient,
+      // 1inch quote currently doesn't support the no-swap case.
+      false,
+    );
+
+    console.log('swapPath', swapPath);
+
+    expect(swapRoute?.length).to.gt(0);
+
+    expect(swapPath.tokenIn).to.equal(WBTC_ADDRESS);
+    expect(swapPath.tokenOut).to.equal(WETH_ADDRESS);
   });
 
   it('Increase liquidity optimal no need swap', async function () {
