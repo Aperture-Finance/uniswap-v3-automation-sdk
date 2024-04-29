@@ -1,4 +1,4 @@
-import { nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
@@ -8,6 +8,7 @@ import { ApertureSupportedChainId } from '../../../src';
 import {
   PositionDetails,
   getNPM,
+  getPool,
   getRebalancedPosition,
   increaseLiquidityOptimal,
   optimalMint,
