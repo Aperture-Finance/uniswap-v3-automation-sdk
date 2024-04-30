@@ -16,7 +16,7 @@ import {
   zeroAddress,
 } from 'viem';
 
-import { getCachedRequest } from './cached_request';
+import { getRequestCache } from './cached_request';
 
 type StateOverrides = {
   [address: Address]: {
@@ -265,17 +265,20 @@ export async function generateAccessList(
     const method = 'eth_createAccessList';
     const key = `${method}_${keccak256(toHex(stringify(tx)))}`;
     // viem cache seems not work, use custom request cache
-    return await getCachedRequest().addRequest(key, () =>
-      requestWithOverrides(
-        method,
-        {
-          ...tx,
-          gas: '0x11E1A300',
-        },
-        publicClient,
-        undefined,
-        blockNumber,
-      ),
+    return await getRequestCache().addRequest(
+      key,
+      () =>
+        requestWithOverrides(
+          method,
+          {
+            ...tx,
+            gas: '0x11E1A300',
+          },
+          publicClient,
+          undefined,
+          blockNumber,
+        ),
+      60 * 60, // cache for 1 hour, as the access list is not likely to change
     );
   } catch (error) {
     console.error('Error generating access list:', error);
