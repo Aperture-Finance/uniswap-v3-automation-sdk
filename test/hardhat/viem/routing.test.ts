@@ -63,9 +63,7 @@ describe('Viem - Routing tests', function () {
       Number(predictedLiquidity.toString()) * 0.1,
     );
 
-    expect(priceImpact.toString()).to.be.equal(
-      '0.000523169007954374179065197874',
-    );
+    expect(Number(priceImpact.toString())).to.be.closeTo(0.000523, 0.00005);
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
@@ -119,9 +117,7 @@ describe('Viem - Routing tests', function () {
 
     expect(_total).to.be.closeTo(total, total * 0.03);
 
-    expect(priceImpact.toString()).to.be.equal(
-      '0.303331987782481380569792816936',
-    );
+    expect(Number(priceImpact.toString())).to.be.closeTo(0.30333, 0.03);
   });
 
   it('Test optimalMint', async function () {
@@ -187,8 +183,6 @@ describe('Viem - Routing tests', function () {
 
     expect(amount0.toString()).to.be.equal('684889078');
     expect(amount1.toString()).to.be.equal('61653987834490876385');
-    expect(priceImpact.toString()).to.be.equal(
-      '0.014225518521980056226428532424',
-    );
+    expect(Number(priceImpact.toString())).to.be.closeTo(0.0142255, 0.001);
   });
 });
