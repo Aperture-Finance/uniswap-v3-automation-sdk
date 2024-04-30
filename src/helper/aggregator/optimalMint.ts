@@ -1,25 +1,23 @@
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 
-import {
-  encodeOptimalSwapData,
-  getAutomanContract,
-  simulateMintOptimal,
-} from '../automan';
+import { simulateMintOptimal } from '../automan';
 import { StateOverrides, getERC20Overrides } from '../overrides';
-import { computePoolAddress } from '../pool';
-import { getApproveTarget } from './index';
-import { quote } from './quote';
+import { getOptimalMintSwapData } from './internal';
+import { SwapRoute } from './quote';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fee The pool fee tier.
@@ -32,6 +30,7 @@ import { quote } from './quote';
  */
 export async function optimalMint(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
   fee: FeeAmount,
@@ -58,8 +57,7 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: Math.floor(Date.now() / 1000 + 86400),
   };
-  const { aperture_uniswap_v3_automan, optimal_swap_router } =
-    getChainInfo(chainId);
+  const { apertureAutoman, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   let overrides: StateOverrides | undefined;
   if (provider instanceof JsonRpcProvider) {
     // forge token approvals and balances
@@ -67,14 +65,14 @@ export async function optimalMint(
       getERC20Overrides(
         mintParams.token0,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         mintParams.amount0Desired,
         provider,
       ),
       getERC20Overrides(
         mintParams.token1,
         fromAddress,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         mintParams.amount1Desired,
         provider,
       ),
@@ -86,19 +84,21 @@ export async function optimalMint(
   }
   const poolPromise = optimalMintPool(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
     overrides,
   );
   if (!usePool) {
-    if (optimal_swap_router === undefined) {
+    if (optimalSwapRouter === undefined) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
       optimalMintRouter(
         chainId,
+        amm,
         provider,
         fromAddress,
         mintParams,
@@ -119,6 +119,7 @@ export async function optimalMint(
 
 async function optimalMintPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
@@ -126,6 +127,7 @@ async function optimalMintPool(
 ) {
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
@@ -133,30 +135,57 @@ async function optimalMintPool(
     undefined,
     overrides,
   );
+  let swapRoute: SwapRoute = [];
+  if (mintParams.amount0Desired.toString() !== amount0.toString()) {
+    const [fromTokenAddress, toTokenAddress] = new Big(
+      mintParams.amount0Desired.toString(),
+    ).gt(amount0.toString())
+      ? [mintParams.token0, mintParams.token1]
+      : [mintParams.token1, mintParams.token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+
   return {
     amount0,
     amount1,
     liquidity,
     swapData: '0x',
+    swapRoute,
   };
 }
 
 async function optimalMintRouter(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   fromAddress: string,
   mintParams: INonfungiblePositionManager.MintParamsStruct,
   slippage: number,
   overrides?: StateOverrides,
 ) {
-  const swapData = await getOptimalMintSwapData(
+  const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
+    amm,
     provider,
     mintParams,
     slippage,
+    /** blockNumber= */ undefined,
+    /** includeRoute= */ true,
   );
   const { amount0, amount1, liquidity } = await simulateMintOptimal(
     chainId,
+    amm,
     provider,
     fromAddress,
     mintParams,
@@ -169,50 +198,6 @@ async function optimalMintRouter(
     amount1,
     liquidity,
     swapData,
+    swapRoute,
   };
-}
-
-async function getOptimalMintSwapData(
-  chainId: ApertureSupportedChainId,
-  provider: JsonRpcProvider | Provider,
-  mintParams: INonfungiblePositionManager.MintParamsStruct,
-  slippage: number,
-) {
-  const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-  const automan = getAutomanContract(chainId, provider);
-  const approveTarget = await getApproveTarget(chainId);
-  // get swap amounts using the same pool
-  const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
-    computePoolAddress(
-      uniswap_v3_factory,
-      mintParams.token0,
-      mintParams.token1,
-      mintParams.fee as FeeAmount,
-    ),
-    mintParams.tickLower,
-    mintParams.tickUpper,
-    mintParams.amount0Desired,
-    mintParams.amount1Desired,
-  );
-  // get a quote from 1inch
-  const { tx } = await quote(
-    chainId,
-    zeroForOne ? mintParams.token0 : mintParams.token1,
-    zeroForOne ? mintParams.token1 : mintParams.token0,
-    poolAmountIn.toString(),
-    optimal_swap_router!,
-    slippage * 100,
-  );
-  return encodeOptimalSwapData(
-    chainId,
-    mintParams.token0,
-    mintParams.token1,
-    mintParams.fee as FeeAmount,
-    mintParams.tickLower as number,
-    mintParams.tickUpper as number,
-    zeroForOne,
-    approveTarget,
-    tx.to,
-    tx.data,
-  );
 }

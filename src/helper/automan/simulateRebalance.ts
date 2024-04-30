@@ -1,13 +1,14 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
-  UniV3Automan,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish, BytesLike } from 'ethers';
 import { splitSignature } from 'ethers/lib/utils';
 
@@ -15,16 +16,16 @@ import {
   getNPMApprovalOverrides,
   tryStaticCallWithOverrides,
 } from '../overrides';
-import { UnwrapPromise, checkTicks } from './internal';
-import { AutomanCallInfo } from './internal';
+import { AutomanCallInfo, UnwrapPromise, checkTicks } from './automan';
 
 type RebalanceReturnType = UnwrapPromise<
-  ReturnType<UniV3Automan['callStatic'][GetAutomanFragment<'rebalance'>]>
+  ReturnType<Automan['callStatic'][GetAutomanFragment<'rebalance'>]>
 >;
 
 /**
  * Simulate a `rebalance` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to rebalance.
@@ -36,6 +37,7 @@ type RebalanceReturnType = UnwrapPromise<
  */
 export async function simulateRebalance(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   owner: string,
@@ -53,15 +55,15 @@ export async function simulateRebalance(
     undefined,
     swapData,
   );
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
-      getNPMApprovalOverrides(chainId, owner),
+      getNPMApprovalOverrides(chainId, amm, owner),
       provider,
       blockNumber,
     ),
@@ -80,7 +82,7 @@ export function getAutomanRebalanceCallInfo(
       'rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes)';
     return {
       functionFragment,
-      data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+      data: IAutoman__factory.createInterface().encodeFunctionData(
         functionFragment,
         [mintParams, tokenId, feeBips, swapData],
       ),
@@ -91,7 +93,7 @@ export function getAutomanRebalanceCallInfo(
     'rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)';
   return {
     functionFragment,
-    data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+    data: IAutoman__factory.createInterface().encodeFunctionData(
       functionFragment,
       [mintParams, tokenId, feeBips, swapData, permitInfo.deadline, v, r, s],
     ),

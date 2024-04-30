@@ -1,4 +1,4 @@
-import { Fraction, Price, Token } from '@uniswap/sdk-core';
+import { providers } from '@0xsequence/multicall';
 import {
   FeeAmount,
   Pool,
@@ -7,11 +7,15 @@ import {
   TickMath,
   nearestUsableTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import '@nomicfoundation/hardhat-viem';
+import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
+import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre from 'hardhat';
 import JSBI from 'jsbi';
 import {
@@ -27,6 +31,7 @@ import {
   http,
   parseAbiParameters,
   walletActions,
+  zeroAddress,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, mainnet } from 'viem/chains';
@@ -52,7 +57,7 @@ import {
   alignPriceToClosestUsableTick,
   convertRecurringCondition,
   fractionToBig,
-  getChainInfo,
+  getAMMInfo,
   getRawRelativePriceFromTokenValueProportion,
   getTokenHistoricalPricesFromCoingecko,
   getTokenPriceFromCoingecko,
@@ -70,6 +75,7 @@ import {
 } from '../../src';
 import {
   PositionDetails,
+  calculateIncreaseLiquidityOptimalPriceImpact,
   calculateMintOptimalPriceImpact,
   calculateRebalancePriceImpact,
   checkPositionApprovalStatus,
@@ -83,8 +89,10 @@ import {
   getAutomanReinvestCalldata,
   getERC20Overrides,
   getFeeTierDistribution,
+  getIncreaseLiquidityOptimalSwapInfo,
   getLiquidityArrayForPool,
   getNPM,
+  getOptimalMintSwapInfo,
   getPool,
   getPosition,
   getPositionAtPrice,
@@ -96,14 +104,17 @@ import {
   getTokenSvg,
   isPositionInRange,
   projectRebalancedPositionAtPrice,
+  simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
 } from '../../src/viem';
+import { hardhatForkProvider } from './helper/common';
 
 dotenvConfig();
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+const UNIV3_AMM = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 // A whale address (Avax bridge) on Ethereum mainnet with a lot of ethers and token balances.
 const WHALE_ADDRESS = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
@@ -119,9 +130,9 @@ const deadline = '4093484400';
 const TEST_WALLET_PRIVATE_KEY =
   '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
-async function resetFork(testClient: TestClient) {
+async function resetFork(testClient: TestClient, blockNumber = 19210000n) {
   await testClient.reset({
-    blockNumber: 17188000n,
+    blockNumber,
     jsonRpcUrl: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
   });
 }
@@ -154,7 +165,8 @@ describe('Estimate gas tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      UNIV3_AMM,
+      publicClient,
       blockNumber,
     );
     const mintParams = {
@@ -178,6 +190,7 @@ describe('Estimate gas tests', function () {
     };
     const gas = await estimateRebalanceGas(
       chainId,
+      UNIV3_AMM,
       publicClient,
       from,
       eoa,
@@ -197,6 +210,7 @@ describe('Estimate gas tests', function () {
     const amount1Desired = 1000000000000000n;
     const gas = await estimateReinvestGas(
       chainId,
+      UNIV3_AMM,
       publicClient,
       from,
       eoa,
@@ -213,22 +227,22 @@ describe('Estimate gas tests', function () {
 
   it('Test estimateRebalanceGas with owner', async function () {
     const gas = await estimateRebalanceGasWithFrom(eoa);
-    expect(gas).to.equal(775010n);
+    expect(gas).to.equal(779808n);
   });
 
   it('Test estimateRebalanceGas with whale', async function () {
     const gas = await estimateRebalanceGasWithFrom(undefined);
-    expect(gas).to.equal(777510n);
+    expect(gas).to.equal(782346n);
   });
 
   it('Test estimateReinvestGas with owner', async function () {
     const gas = await estimateReinvestGasWithFrom(eoa);
-    expect(gas).to.equal(528206n);
+    expect(gas).to.equal(530653n);
   });
 
   it('Test estimateReinvestGas with whale', async function () {
     const gas = await estimateReinvestGasWithFrom(undefined);
-    expect(gas).to.equal(528206n);
+    expect(gas).to.equal(530653n);
   });
 });
 
@@ -245,7 +259,7 @@ describe('State overrides tests', function () {
       account: WHALE_ADDRESS,
       chain: mainnet,
       args: [
-        getChainInfo(chainId).uniswap_v3_nonfungible_position_manager,
+        getAMMInfo(chainId, UNIV3_AMM)!.nonfungiblePositionManager,
         /*owner=*/ WHALE_ADDRESS,
       ],
       bytecode: UniV3Automan__factory.bytecode,
@@ -258,22 +272,24 @@ describe('State overrides tests', function () {
         }),
       ),
     });
-    const npm = getChainInfo(chainId).uniswap_v3_nonfungible_position_manager;
+    const npm = getAMMInfo(chainId, UNIV3_AMM)!.nonfungiblePositionManager;
     const slot = computeOperatorApprovalSlot(eoa, automanAddress);
     expect(slot).to.equal(
-      '0x51156c1de32f203e86d75e4e57e423f7f92397e1c16780f885a8a97775f56b6a',
+      '0xaf12655eb680e77b7549c03375fd65c7a46c2854e913a071f6412c5b3d693f31',
     );
     expect(await publicClient.getStorageAt({ address: npm, slot })).to.equal(
       encodeAbiParameters(parseAbiParameters('bool'), [false]),
     );
     await testClient.impersonateAccount({ address: eoa });
-    await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
-      [automanAddress, true],
-      {
-        account: eoa,
-        chain: mainnet,
-      },
-    );
+    await getNPM(
+      chainId,
+      UNIV3_AMM,
+      undefined,
+      walletClient,
+    ).write.setApprovalForAll([automanAddress, true], {
+      account: eoa,
+      chain: mainnet,
+    });
     expect(await publicClient.getStorageAt({ address: npm, slot })).to.equal(
       encodeAbiParameters(parseAbiParameters('bool'), [true]),
     );
@@ -288,7 +304,7 @@ describe('State overrides tests', function () {
     });
     const { accessList } = await generateAccessList(
       {
-        from: eoa,
+        from: zeroAddress,
         to: WETH_ADDRESS,
         data: balanceOfData,
       },
@@ -303,19 +319,19 @@ describe('State overrides tests', function () {
     const publicClient = getInfuraClient();
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(chainId, UNIV3_AMM)!;
     const stateOverrides = {
       ...(await getERC20Overrides(
         WETH_ADDRESS,
         eoa,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         amount0Desired,
         publicClient,
       )),
       ...(await getERC20Overrides(
         WBTC_ADDRESS,
         eoa,
-        aperture_uniswap_v3_automan,
+        apertureAutoman,
         amount1Desired,
         publicClient,
       )),
@@ -353,7 +369,8 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      UNIV3_AMM,
+      publicClient,
       blockNumber,
     );
     const mintParams = {
@@ -376,19 +393,24 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const priceImpact = await calculateMintOptimalPriceImpact({
-      chainId,
-      publicClient,
-      from: eoa,
-      mintParams,
-      swapData: undefined,
-      blockNumber,
-    });
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateMintOptimalPriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        mintParams,
+        swapData: undefined,
+        blockNumber,
+      });
 
     expect(priceImpact.toString()).to.equal('0.003010298098311076209996397317');
+    expect(finalAmount0.toString()).to.equal('51320357');
+    expect(finalAmount1.toString()).to.equal('8736560293857784398');
 
     const [, liquidity, amount0, amount1] = await simulateMintOptimal(
       chainId,
+      UNIV3_AMM,
       publicClient,
       eoa,
       mintParams,
@@ -398,6 +420,112 @@ describe('State overrides tests', function () {
     expect(liquidity.toString()).to.equal('716894157038546');
     expect(amount0.toString()).to.equal('51320357');
     expect(amount1.toString()).to.equal('8736560293857784398');
+  });
+
+  it('Test simulateIncreaseLiquidityOptimal', async function () {
+    const blockNumber = 17975698n;
+    const positionId = 4n;
+    const publicClient = getInfuraClient();
+    const amount0Desired = 100000000n;
+    const amount1Desired = 1000000000000000000n;
+    const position = await getPosition(
+      chainId,
+      UNIV3_AMM,
+      4n,
+      publicClient,
+      blockNumber,
+    );
+    const increaseParams = {
+      tokenId: positionId,
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateIncreaseLiquidityOptimalPriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        position,
+        increaseParams,
+        swapData: undefined,
+        blockNumber,
+      });
+
+    expect(priceImpact.toString()).to.equal('0.00300826277866017098015215935');
+    expect(finalAmount0.toString()).to.equal('61259538');
+    expect(finalAmount1.toString()).to.equal('7156958298534991565');
+
+    const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+      eoa as Address,
+      position,
+      increaseParams,
+      undefined,
+      blockNumber,
+    );
+    expect(amount0.toString()).to.equal('61259538');
+    expect(amount1.toString()).to.equal('7156958298534991565');
+  });
+
+  it('Test calculateMintOptimalPriceImpact 0 price impact', async function () {
+    const blockNumber = 17975698n;
+    const publicClient = getInfuraClient();
+    const token0 = WBTC_ADDRESS;
+    const token1 = WETH_ADDRESS;
+    const fee = FeeAmount.MEDIUM;
+    const amount0Desired = 96674n;
+    const amount1Desired = 16468879195954429n;
+    const pool = await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+      blockNumber,
+    );
+
+    const mintParams = {
+      token0: token0 as Address,
+      token1: token1 as Address,
+      fee,
+      tickLower: nearestUsableTick(
+        pool.tickCurrent - 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      tickUpper: nearestUsableTick(
+        pool.tickCurrent + 10 * pool.tickSpacing,
+        pool.tickSpacing,
+      ),
+      amount0Desired,
+      amount1Desired,
+      amount0Min: BigInt(0),
+      amount1Min: BigInt(0),
+      recipient: eoa as Address,
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    };
+
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateMintOptimalPriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        mintParams,
+        swapData: undefined,
+        blockNumber,
+      });
+
+    expect(priceImpact.toString()).to.equal('0');
+    expect(finalAmount0.toString()).to.equal('96674');
+    expect(finalAmount1.toString()).to.equal('16468879195954429');
   });
 
   it('Test calculateRebalancePriceImpact', async function () {
@@ -414,7 +542,8 @@ describe('State overrides tests', function () {
       token1,
       fee,
       chainId,
-      undefined,
+      UNIV3_AMM,
+      publicClient,
       blockNumber,
     );
     const mintParams = {
@@ -437,18 +566,22 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const impact = await calculateRebalancePriceImpact({
-      chainId,
-      publicClient,
-      from: eoa,
-      owner: eoa,
-      mintParams,
-      tokenId: 4n,
-      feeBips: undefined,
-      swapData: undefined,
-      blockNumber,
-    });
-    expect(impact.toString()).to.equal('0.00300526535105717178193071153');
+    const { priceImpact, finalAmount0, finalAmount1 } =
+      await calculateRebalancePriceImpact({
+        chainId,
+        amm: UNIV3_AMM,
+        publicClient,
+        from: eoa,
+        owner: eoa,
+        mintParams,
+        tokenId: 4n,
+        feeBips: undefined,
+        swapData: undefined,
+        blockNumber,
+      });
+    expect(priceImpact.toString()).to.equal('0.00300526535105717178193071153');
+    expect(finalAmount0.toString()).to.equal('23718330');
+    expect(finalAmount1.toString()).to.equal('4040287637285704807');
   });
 });
 
@@ -460,12 +593,12 @@ describe('Position util tests', function () {
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
-    inRangePosition = await getPosition(chainId, 4n, publicClient);
+    await resetFork(testClient, 17188000n);
+    inRangePosition = await getPosition(chainId, UNIV3_AMM, 4n, publicClient);
   });
 
   it('Position approval', async function () {
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(chainId, UNIV3_AMM)!;
     // This position is owned by `eoa`.
     const positionId = 4n;
     expect(
@@ -473,6 +606,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        UNIV3_AMM,
         publicClient,
       ),
     ).to.deep.equal({
@@ -483,8 +617,8 @@ describe('Position util tests', function () {
 
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
-    const npm = getNPM(chainId, undefined, walletClient);
-    await npm.write.setApprovalForAll([aperture_uniswap_v3_automan, true], {
+    const npm = getNPM(chainId, UNIV3_AMM, undefined, walletClient);
+    await npm.write.setApprovalForAll([apertureAutoman, true], {
       account: eoa,
       chain: walletClient.chain,
     });
@@ -493,6 +627,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        UNIV3_AMM,
         publicClient,
       ),
     ).to.deep.equal({
@@ -501,7 +636,7 @@ describe('Position util tests', function () {
       reason: 'onChainUserLevelApproval',
     });
 
-    await npm.write.approve([aperture_uniswap_v3_automan, positionId], {
+    await npm.write.approve([apertureAutoman, positionId], {
       account: eoa,
       chain: walletClient.chain,
     });
@@ -510,6 +645,7 @@ describe('Position util tests', function () {
         positionId,
         undefined,
         chainId,
+        UNIV3_AMM,
         publicClient,
       ),
     ).to.deep.include({
@@ -522,6 +658,7 @@ describe('Position util tests', function () {
         0n, // Nonexistent position id.
         undefined,
         chainId,
+        UNIV3_AMM,
         publicClient,
       ),
     ).to.deep.include({
@@ -535,7 +672,7 @@ describe('Position util tests', function () {
     const account = privateKeyToAccount(TEST_WALLET_PRIVATE_KEY);
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
-    const npm = getNPM(chainId, undefined, walletClient);
+    const npm = getNPM(chainId, UNIV3_AMM, undefined, walletClient);
 
     // Transfer position id 4 from `eoa` to the test wallet.
     await npm.write.transferFrom([eoa, account.address, positionId], {
@@ -551,6 +688,7 @@ describe('Position util tests', function () {
     });
     const permitTypedData = await generateTypedDataForPermit(
       chainId,
+      UNIV3_AMM,
       positionId,
       BigInt(deadline),
       publicClient,
@@ -568,6 +706,7 @@ describe('Position util tests', function () {
           signature,
         },
         chainId,
+        UNIV3_AMM,
         publicClient,
       ),
     ).to.deep.include({
@@ -578,6 +717,7 @@ describe('Position util tests', function () {
     // Test permit message with an incorrect position id.
     const anotherPermitTypedData = await generateTypedDataForPermit(
       chainId,
+      UNIV3_AMM,
       positionId + 1n,
       BigInt(deadline),
       publicClient,
@@ -593,6 +733,7 @@ describe('Position util tests', function () {
           signature: anotherSignature,
         },
         chainId,
+        UNIV3_AMM,
         publicClient,
       ),
     ).to.deep.include({
@@ -602,13 +743,18 @@ describe('Position util tests', function () {
   });
 
   it('Position in-range', async function () {
-    const outOfRangePosition = await getPosition(chainId, 7n, publicClient);
+    const outOfRangePosition = await getPosition(
+      chainId,
+      UNIV3_AMM,
+      7n,
+      publicClient,
+    );
     expect(isPositionInRange(inRangePosition)).to.equal(true);
     expect(isPositionInRange(outOfRangePosition)).to.equal(false);
   });
 
   it('Token Svg', async function () {
-    const url = await getTokenSvg(chainId, 4n, publicClient);
+    const url = await getTokenSvg(chainId, UNIV3_AMM, 4n, publicClient);
     expect(url.toString().slice(0, 60)).to.equal(
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjkwIiBoZWlnaHQ9Ij',
     );
@@ -793,11 +939,12 @@ describe('Position util tests', function () {
   it('Test viewCollectableTokenAmounts', async function () {
     const positionDetails = await PositionDetails.fromPositionId(
       chainId,
+      UNIV3_AMM,
       4n,
       publicClient,
     );
     const colletableTokenAmounts =
-      await positionDetails.getCollectableTokenAmounts(publicClient);
+      await positionDetails.getCollectableTokenAmounts(UNIV3_AMM, publicClient);
     expect(colletableTokenAmounts).to.deep.equal({
       token0Amount: positionDetails.tokensOwed0,
       token1Amount: positionDetails.tokensOwed1,
@@ -807,25 +954,27 @@ describe('Position util tests', function () {
   it('Test get position details', async function () {
     const { owner, position } = await PositionDetails.fromPositionId(
       chainId,
+      UNIV3_AMM,
       4n,
       publicClient,
     );
     expect(owner).to.equal(eoa);
     expect(position).to.deep.equal(
-      await getPosition(chainId, 4n, publicClient),
+      await getPosition(chainId, UNIV3_AMM, 4n, publicClient),
     );
   });
 
   it('Test getAllPositions', async function () {
-    const publicClient = getPublicClient(5);
+    const publicClient = getPublicClient(1);
     // an address with 90+ positions
     const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
     const positionDetails = await getAllPositions(
       address,
       chainId,
+      UNIV3_AMM,
       publicClient,
     );
-    const npm = getNPM(chainId, publicClient);
+    const npm = getNPM(chainId, UNIV3_AMM, publicClient);
     const numPositions = await npm.read.balanceOf([address]);
     const positionIds = await Promise.all(
       [...Array(Number(numPositions)).keys()].map((index) =>
@@ -837,7 +986,7 @@ describe('Position util tests', function () {
         positionIds.map(async (positionId) => {
           return [
             positionId.toString(),
-            await getPosition(chainId, positionId, publicClient),
+            await getPosition(chainId, UNIV3_AMM, positionId, publicClient),
           ] as const;
         }),
       ),
@@ -855,26 +1004,36 @@ describe('Position util tests', function () {
     }
   });
 
+  it('Test getAllPositions with large balances', async function () {
+    const publicClient = getPublicClient(1);
+    // An address with 7000+ positions on mainnet.
+    const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
+    const positionDetails = await getAllPositions(
+      address,
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+    );
+    expect(positionDetails.size).to.greaterThan(7000);
+  });
+
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const { aperture_uniswap_v3_automan } = getChainInfo(chainId);
+    const { apertureAutoman } = getAMMInfo(chainId, UNIV3_AMM)!;
     const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const positionId = 761879n;
     const blockNumber = 119626480n;
-    const npm = getNPM(chainId, publicClient);
+    const npm = getNPM(chainId, UNIV3_AMM, publicClient);
     const opts = {
       blockNumber,
     };
     const owner = await npm.read.ownerOf([positionId], opts);
-    expect(
-      await npm.read.isApprovedForAll(
-        [owner, aperture_uniswap_v3_automan],
-        opts,
-      ),
-    ).to.be.false;
+    expect(await npm.read.isApprovedForAll([owner, apertureAutoman], opts)).to
+      .be.false;
     const [liquidity] = await getReinvestedPosition(
       chainId,
+      UNIV3_AMM,
       positionId,
       publicClient,
       blockNumber,
@@ -885,17 +1044,20 @@ describe('Position util tests', function () {
     });
     await testClient.impersonateAccount({ address: owner });
     const walletClient = testClient.extend(walletActions);
-    await getNPM(chainId, undefined, walletClient).write.setApprovalForAll(
-      [aperture_uniswap_v3_automan, true],
-      {
-        account: owner,
-        chain: walletClient.chain,
-      },
-    );
+    await getNPM(
+      chainId,
+      UNIV3_AMM,
+      undefined,
+      walletClient,
+    ).write.setApprovalForAll([apertureAutoman, true], {
+      account: owner,
+      chain: walletClient.chain,
+    });
     {
       const publicClient = await hre.viem.getPublicClient();
       const { liquidity: liquidityBefore } = await getPosition(
         chainId,
+        UNIV3_AMM,
         positionId,
         publicClient,
       );
@@ -906,11 +1068,12 @@ describe('Position util tests', function () {
       await walletClient.sendTransaction({
         account: owner,
         chain: walletClient.chain,
-        to: aperture_uniswap_v3_automan,
+        to: apertureAutoman,
         data,
       });
       const { liquidity: liquidityAfter } = await getPosition(
         chainId,
+        UNIV3_AMM,
         positionId,
         publicClient,
       );
@@ -1162,10 +1325,20 @@ describe('Price to tick conversion', function () {
 });
 
 describe('Pool subgraph query tests', function () {
-  it('Fee tier distribution', async function () {
+  it('Fee tier distribution - Uniswap V3', async function () {
     const [distribution, distributionOppositeTokenOrder] = await Promise.all([
-      getFeeTierDistribution(chainId, WBTC_ADDRESS, WETH_ADDRESS),
-      getFeeTierDistribution(chainId, WETH_ADDRESS, WBTC_ADDRESS),
+      getFeeTierDistribution(
+        chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        WBTC_ADDRESS,
+        WETH_ADDRESS,
+      ),
+      getFeeTierDistribution(
+        chainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        WETH_ADDRESS,
+        WBTC_ADDRESS,
+      ),
     ]);
     expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
     expect(
@@ -1176,8 +1349,62 @@ describe('Pool subgraph query tests', function () {
     ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
   });
 
+  it('Fee tier distribution - PancakeSwap V3', async function () {
+    const USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+    const [distribution, distributionOppositeTokenOrder] = await Promise.all([
+      getFeeTierDistribution(
+        chainId,
+        AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
+        WETH_ADDRESS,
+        USDT_ADDRESS,
+      ),
+      getFeeTierDistribution(
+        chainId,
+        AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
+        USDT_ADDRESS,
+        WETH_ADDRESS,
+      ),
+    ]);
+    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
+    expect(
+      Object.values(distribution).reduce(
+        (partialSum, num) => partialSum + num,
+        0,
+      ),
+    ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
+  });
+
+  it('Fee tier distribution - UniswapV3 on BNB chain', async function () {
+    const bnbChainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
+    const WETH_BNB = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
+    const BTCB_BNB = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
+    const [distribution, distributionOppositeTokenOrder] = await Promise.all([
+      getFeeTierDistribution(
+        bnbChainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        WETH_BNB,
+        BTCB_BNB,
+      ),
+      getFeeTierDistribution(
+        bnbChainId,
+        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        BTCB_BNB,
+        WETH_BNB,
+      ),
+    ]);
+    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
+    expect(
+      Object.values(distribution).reduce(
+        (partialSum, num) => partialSum + num,
+        0,
+      ),
+    ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
+    console.log(distribution);
+  });
+
   async function testLiquidityDistribution(
     chainId: ApertureSupportedChainId,
+    amm: AutomatedMarketMakerEnum,
     pool: Pool,
   ) {
     const tickCurrentAligned =
@@ -1185,8 +1412,8 @@ describe('Pool subgraph query tests', function () {
     const tickLower = pool.tickCurrent - DOUBLE_TICK;
     const tickUpper = pool.tickCurrent + DOUBLE_TICK;
     const [liquidityArr, tickToLiquidityMap] = await Promise.all([
-      getLiquidityArrayForPool(chainId, pool, tickLower, tickUpper),
-      getTickToLiquidityMapForPool(chainId, pool, tickLower, tickUpper),
+      getLiquidityArrayForPool(chainId, amm, pool, tickLower, tickUpper),
+      getTickToLiquidityMapForPool(chainId, amm, pool, tickLower, tickUpper),
     ]);
     expect(liquidityArr.length).to.be.greaterThan(0);
     expect(tickToLiquidityMap.size).to.be.greaterThan(0);
@@ -1206,9 +1433,10 @@ describe('Pool subgraph query tests', function () {
       WETH_ADDRESS,
       FeeAmount.LOW,
       chainId,
+      UNIV3_AMM,
       getPublicClient(chainId),
     );
-    await testLiquidityDistribution(chainId, pool);
+    await testLiquidityDistribution(chainId, UNIV3_AMM, pool);
   });
 
   it('Tick liquidity distribution - Arbitrum mainnet', async function () {
@@ -1224,9 +1452,29 @@ describe('Pool subgraph query tests', function () {
       USDC_ARBITRUM,
       FeeAmount.LOW,
       arbitrumChainId,
+      UNIV3_AMM,
       getPublicClient(arbitrumChainId),
     );
-    await testLiquidityDistribution(arbitrumChainId, pool);
+    await testLiquidityDistribution(arbitrumChainId, UNIV3_AMM, pool);
+  });
+
+  it('Tick liquidity distribution - PCSV3 on the BNB chain', async function () {
+    const bnbChainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
+    const WETH_BNB = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
+    const BTCB_BNB = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
+    const pool = await getPool(
+      WETH_BNB,
+      BTCB_BNB,
+      FeeAmount.PCS_V3_MEDIUM,
+      bnbChainId,
+      AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
+      getPublicClient(bnbChainId),
+    );
+    await testLiquidityDistribution(
+      bnbChainId,
+      AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
+      pool,
+    );
   });
 });
 
@@ -1246,6 +1494,7 @@ describe('Recurring rebalance tests', function () {
       USDC_ARBITRUM,
       FeeAmount.LOW,
       arbitrumChainId,
+      UNIV3_AMM,
       getPublicClient(arbitrumChainId),
     );
   });
@@ -1347,5 +1596,147 @@ describe('Recurring rebalance tests', function () {
       expect(tickUpper).to.be.greaterThan(pool.tickCurrent);
       expect(tickUpper - tickLower).to.equal(action.tickRangeWidth);
     }
+  });
+});
+
+describe('Automan transaction tests', function () {
+  async function dealERC20(
+    token0: Address,
+    token1: Address,
+    amount0: bigint,
+    amount1: bigint,
+    from: Address,
+    to: Address,
+  ) {
+    const infuraClient = getInfuraClient();
+    const [token0Overrides, token1Overrides] = await Promise.all([
+      getERC20Overrides(token0, from, to, amount0, infuraClient),
+      getERC20Overrides(token1, from, to, amount1, infuraClient),
+    ]);
+    for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
+      await hardhatForkProvider.send('hardhat_setStorageAt', [
+        token0,
+        slot,
+        defaultAbiCoder.encode(['uint256'], [amount0]),
+      ]);
+    }
+    for (const slot of Object.keys(token1Overrides[token1].stateDiff!)) {
+      await hardhatForkProvider.send('hardhat_setStorageAt', [
+        token1,
+        slot,
+        defaultAbiCoder.encode(['uint256'], [amount1]),
+      ]);
+    }
+  }
+
+  it('Optimal mint no need swap', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const hypotheticalPosition = new Position({
+      pool,
+      liquidity: '10000000000000000',
+      tickLower,
+      tickUpper,
+    });
+
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      BigInt(hypotheticalPosition.amount0.quotient.toString()),
+      BigInt(hypotheticalPosition.amount1.quotient.toString()),
+      eoa,
+      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
+    );
+
+    const { swapRoute } = await getOptimalMintSwapInfo(
+      chainId,
+      UNIV3_AMM,
+      hypotheticalPosition.amount0,
+      hypotheticalPosition.amount1,
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      BigInt(Math.floor(Date.now() / 1000) + 60),
+      0.5,
+      publicClient,
+      // 1inch quote currently doesn't support the no-swap case.
+      false,
+    );
+
+    expect(swapRoute?.length).to.equal(0);
+  });
+
+  it('Increase liquidity optimal no need swap', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+    );
+    const positionId = 4;
+    const [, , , , , tickLower, tickUpper] = await getNPM(
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+    ).read.positions([BigInt(positionId)]);
+
+    const hypotheticalPosition = new Position({
+      pool,
+      liquidity: '10000000000000000',
+      tickLower,
+      tickUpper,
+    });
+
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      BigInt(hypotheticalPosition.amount0.quotient.toString()),
+      BigInt(hypotheticalPosition.amount1.quotient.toString()),
+      eoa,
+      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
+    );
+
+    const { swapRoute } = await getIncreaseLiquidityOptimalSwapInfo(
+      {
+        tokenId: positionId,
+        slippageTolerance: new Percent(5, 1000),
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      chainId,
+      UNIV3_AMM,
+      hypotheticalPosition.amount0,
+      hypotheticalPosition.amount1,
+      eoa as Address,
+      publicClient,
+      new providers.MulticallProvider(hardhatForkProvider),
+      hypotheticalPosition,
+      // 1inch quote currently doesn't support the no-swap case.
+      false,
+    );
+
+    expect(swapRoute?.length).to.equal(0);
   });
 });

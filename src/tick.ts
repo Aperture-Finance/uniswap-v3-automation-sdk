@@ -1,4 +1,3 @@
-import { Fraction, Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   TICK_SPACINGS,
@@ -6,7 +5,8 @@ import {
   nearestUsableTick,
   priceToClosestTick,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { Fraction, Price, Token } from '@uniswap/sdk-core';
 import Big from 'big.js';
 import JSBI from 'jsbi';
 

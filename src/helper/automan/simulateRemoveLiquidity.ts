@@ -1,13 +1,14 @@
 import { GetAutomanFragment } from '@/helper';
 import {
   ApertureSupportedChainId,
+  Automan,
+  IAutoman__factory,
   INonfungiblePositionManager,
-  IUniV3Automan__factory,
   PermitInfo,
-  UniV3Automan,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import { splitSignature } from 'ethers/lib/utils';
 
@@ -15,15 +16,16 @@ import {
   getNPMApprovalOverrides,
   tryStaticCallWithOverrides,
 } from '../overrides';
-import { AutomanCallInfo, UnwrapPromise } from './internal';
+import { AutomanCallInfo, UnwrapPromise } from './automan';
 
 type RemoveLiquidityReturnType = UnwrapPromise<
-  ReturnType<UniV3Automan['callStatic'][GetAutomanFragment<'removeLiquidity('>]>
+  ReturnType<Automan['callStatic'][GetAutomanFragment<'removeLiquidity('>]>
 >;
 
 /**
  * Simulate a `removeLiquidity` call.
  * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
  * @param provider A JSON RPC provider or a base provider.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to burn.
@@ -35,6 +37,7 @@ type RemoveLiquidityReturnType = UnwrapPromise<
  */
 export async function simulateRemoveLiquidity(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   provider: JsonRpcProvider | Provider,
   from: string,
   owner: string,
@@ -51,15 +54,15 @@ export async function simulateRemoveLiquidity(
     amount1Min,
     feeBips,
   );
-  return IUniV3Automan__factory.createInterface().decodeFunctionResult(
+  return IAutoman__factory.createInterface().decodeFunctionResult(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getChainInfo(chainId).aperture_uniswap_v3_automan,
+      getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
-      getNPMApprovalOverrides(chainId, owner),
+      getNPMApprovalOverrides(chainId, amm, owner),
       provider,
       blockNumber,
     ),
@@ -86,7 +89,7 @@ export function getAutomanRemoveLiquidityCallInfo(
       'removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256)';
     return {
       functionFragment,
-      data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+      data: IAutoman__factory.createInterface().encodeFunctionData(
         functionFragment,
         [params, feeBips],
       ),
@@ -97,7 +100,7 @@ export function getAutomanRemoveLiquidityCallInfo(
     'removeLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,uint8,bytes32,bytes32)';
   return {
     functionFragment,
-    data: IUniV3Automan__factory.createInterface().encodeFunctionData(
+    data: IAutoman__factory.createInterface().encodeFunctionData(
       functionFragment,
       [params, feeBips, permitInfo.deadline, v, r, s],
     ),

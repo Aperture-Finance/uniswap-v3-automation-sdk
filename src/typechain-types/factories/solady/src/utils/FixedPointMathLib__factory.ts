@@ -64,6 +64,16 @@ const _abi = [
     name: "RPowOverflow",
     type: "error",
   },
+  {
+    inputs: [],
+    name: "SDivWadFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SMulWadFailed",
+    type: "error",
+  },
 ] as const;
 
 const _bytecode =

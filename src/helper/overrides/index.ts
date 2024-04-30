@@ -1,16 +1,14 @@
-import {
-  ApertureSupportedChainId,
-  IERC20__factory,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
 import {
   JsonRpcProvider,
   Provider,
   TransactionRequest,
 } from '@ethersproject/providers';
 import { AccessList } from '@ethersproject/transactions';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 import { defaultAbiCoder as DAC, keccak256 } from 'ethers/lib/utils';
+import { zeroAddress } from 'viem';
 
 export type StateOverrides = {
   [address: string]: {
@@ -59,7 +57,6 @@ export async function generateAccessList(
       {
         ...tx,
         gas: '0x11E1A300',
-        gasPrice: '0x0',
       },
       // hexlify the block number.
       blockNumber ? '0x' + blockNumber.toString(16) : 'latest',
@@ -91,7 +88,7 @@ export async function getERC20Overrides(
   const [balanceOfAccessList, allowanceAccessList] = await Promise.all([
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: balanceOfData,
       },
@@ -99,7 +96,7 @@ export async function getERC20Overrides(
     ),
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: allowanceData,
       },
@@ -125,32 +122,36 @@ export async function getERC20Overrides(
     filteredAllowanceAccessList[0].storageKeys,
   );
   if (storageKeys.length !== 2) {
-    throw new Error('Invalid storage key number');
+    console.log('Invalid storage key number');
   }
   const encodedAmount = DAC.encode(['uint256'], [amount]);
+  const stateDiff: {
+    [key: string]: string;
+  } = {};
+  storageKeys.forEach((storageKey) => (stateDiff[storageKey] = encodedAmount));
   return {
     [token]: {
-      stateDiff: {
-        [storageKeys[0]]: encodedAmount,
-        [storageKeys[1]]: encodedAmount,
-      },
+      stateDiff,
     },
   };
 }
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   owner: string,
 ): StateOverrides {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    amm,
+  )!;
   return {
-    [uniswap_v3_nonfungible_position_manager]: {
+    [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
-          DAC.encode(['bool'], [true]),
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]: DAC.encode(
+          ['bool'],
+          [true],
+        ),
       },
     },
   };
@@ -158,10 +159,11 @@ export function getNPMApprovalOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   routerToWhitelist: string,
 ): StateOverrides {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           DAC.encode(

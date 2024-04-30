@@ -1,16 +1,17 @@
 import {
   ApertureSupportedChainId,
   INonfungiblePositionManager__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Log,
   TransactionReceipt,
   decodeEventLog,
   getAbiItem,
-  getEventSelector,
+  toEventSelector,
 } from 'viem';
 
 import { CollectableTokenAmounts } from './position';
@@ -25,24 +26,28 @@ export function filterLogsByEvent(
   receipt: TransactionReceipt,
   eventAbi: AbiEvent,
 ): Log[] {
-  const eventSig = getEventSelector(eventAbi);
+  const eventSig = toEventSelector(eventAbi);
   return receipt.logs.filter((log) => log.topics[0] === eventSig);
 }
 
 /**
  * Parses the specified transaction receipt and extracts the position id (token id) minted by NPM within the transaction.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param txReceipt The transaction receipt to parse.
  * @param recipientAddress The receipt address to which the position is minted.
  * @returns If a position is minted to `recipientAddress`, the position id is returned. If there is more than one, the first is returned. If there are none, `undefined` is returned.
  */
 export function getMintedPositionIdFromTxReceipt(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   txReceipt: TransactionReceipt,
   recipientAddress: string,
 ): bigint | undefined {
-  const npmAddress =
-    getChainInfo(chainId).uniswap_v3_nonfungible_position_manager.toLowerCase();
+  const npmAddress = getAMMInfo(
+    chainId,
+    amm,
+  )!.nonfungiblePositionManager.toLowerCase();
   const TransferEventAbi = getAbiItem({
     abi: INonfungiblePositionManager__factory.abi,
     name: 'Transfer',

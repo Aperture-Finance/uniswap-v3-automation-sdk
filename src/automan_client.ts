@@ -1,21 +1,37 @@
 import axios from 'axios';
 
 import {
+  AcceptInviteRequest,
+  BindSocialAccountRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
   CreateTriggerRequest,
   DeleteTriggerRequest,
+  GeneralResponse,
+  GetPointUserStatusRequest,
   GetStrategiesDetailRequest,
   GetStrategiesDetailResponse,
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
   HasSignedPrivateBetaAgreementRequest,
   HasSignedPrivateBetaAgreementResponse,
+  ListLeaderboardRequest,
+  ListLeaderboardResponse,
   ListTriggerRequest,
   ListTriggerResponse,
+  PointUserStatusResponse,
+  RaffleRequest,
+  RaffleResponse,
   SignPrivateBetaAgreementRequest,
+  SocialLoginRequest,
+  SocialLoginResponse,
   UpdatePositionPermitRequest,
   UpdateTriggerRequest,
+  UserActivityTrackingRequest,
+  ValidateInviteCodeRequest,
+  VerifySocialAccountRequest,
+  VerifySocialAccountResponse,
+  WalletTrackingRequest,
 } from './interfaces';
 
 async function buildAxiosGetRequest(
@@ -26,6 +42,8 @@ async function buildAxiosGetRequest(
     | CheckUserLimitRequest
     | GetStrategyDetailRequest
     | HasSignedPrivateBetaAgreementRequest
+    | ListLeaderboardRequest
+    | null
   >,
 ) {
   return axios.get(url.toString(), {
@@ -43,6 +61,14 @@ async function buildAxiosPostRequest(
     | DeleteTriggerRequest
     | UpdatePositionPermitRequest
     | SignPrivateBetaAgreementRequest
+    | WalletTrackingRequest
+    | UserActivityTrackingRequest
+    | VerifySocialAccountRequest
+    | AcceptInviteRequest
+    | RaffleRequest
+    | ValidateInviteCodeRequest
+    | SocialLoginRequest
+    | BindSocialAccountRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -128,5 +154,74 @@ export class AutomanClient {
   ): Promise<GetStrategiesDetailResponse> {
     const url = new URL('/getStrategiesDetail', this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
+  }
+
+  async trackWallet(request: Readonly<WalletTrackingRequest>): Promise<string> {
+    const url = new URL('/trackWallet', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async trackUserActivity(
+    request: Readonly<UserActivityTrackingRequest>,
+  ): Promise<string> {
+    const url = new URL('/trackUserActivity', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async listLeaderboard(
+    request: Readonly<ListLeaderboardRequest>,
+  ): Promise<ListLeaderboardResponse> {
+    const url = new URL('/listLeaderboard', this.endpoint);
+    return (await buildAxiosGetRequest(url, request)).data;
+  }
+
+  async verifySocialAccount(
+    request: Readonly<VerifySocialAccountRequest>,
+  ): Promise<VerifySocialAccountResponse> {
+    const url = new URL('/verifySocialAccount', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async socialLogin(
+    request: Readonly<SocialLoginRequest>,
+  ): Promise<SocialLoginResponse> {
+    const url = new URL('/social/login', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async bindSocialAccount(
+    request: Readonly<BindSocialAccountRequest>,
+  ): Promise<VerifySocialAccountResponse> {
+    const url = new URL('/social/bind', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async acceptInvitation(
+    request: Readonly<AcceptInviteRequest>,
+  ): Promise<GeneralResponse> {
+    const url = new URL('/invitations/accept', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async validateInviteCode(
+    request: Readonly<ValidateInviteCodeRequest>,
+  ): Promise<GeneralResponse> {
+    const url = new URL('/invitations/validate', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async raffle(request: Readonly<RaffleRequest>): Promise<RaffleResponse> {
+    const url = new URL('/raffle', this.endpoint);
+    return (await buildAxiosPostRequest(url, request)).data;
+  }
+
+  async getPointUserStatus(
+    request: Readonly<GetPointUserStatusRequest>,
+  ): Promise<PointUserStatusResponse> {
+    const url = new URL(
+      `/pointUserStatus/${request.userAddress}`,
+      this.endpoint,
+    );
+    return (await buildAxiosGetRequest(url, null)).data;
   }
 }

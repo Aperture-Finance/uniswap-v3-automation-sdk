@@ -1,25 +1,15 @@
-import {
-  ApertureSupportedChainId,
-  INonfungiblePositionManager,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, INonfungiblePositionManager } from '@/index';
 import { JsonRpcProvider, Provider } from '@ethersproject/providers';
-import { FeeAmount } from '@uniswap/v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumberish } from 'ethers';
 
-import {
-  encodeOptimalSwapData,
-  getAutomanContract,
-  simulateRebalance,
-  simulateRemoveLiquidity,
-} from '../automan';
-import { computePoolAddress } from '../pool';
+import { simulateRebalance, simulateRemoveLiquidity } from '../automan';
 import { PositionDetails } from '../position';
-import { getApproveTarget } from './index';
-import { quote } from './quote';
+import { getOptimalMintSwapData } from './internal';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   positionId: BigNumberish,
   newTickLower: number,
   newTickUpper: number,
@@ -28,15 +18,19 @@ export async function optimalRebalance(
   fromAddress: string,
   slippage: number,
   provider: JsonRpcProvider | Provider,
+  blockNumber?: number,
 ) {
   const position = await PositionDetails.fromPositionId(
     chainId,
+    amm,
     positionId,
     provider,
+    blockNumber,
   );
   const { amount0: receive0, amount1: receive1 } =
     await simulateRemoveLiquidity(
       chainId,
+      amm,
       provider,
       fromAddress,
       position.owner,
@@ -44,6 +38,7 @@ export async function optimalRebalance(
       0,
       0,
       feeBips,
+      blockNumber,
     );
   const mintParams: INonfungiblePositionManager.MintParamsStruct = {
     token0: position.token0.address,
@@ -60,19 +55,20 @@ export async function optimalRebalance(
   };
   let swapData = '0x';
   if (!usePool) {
-    try {
-      swapData = await getOptimalMintSwapData(
+    swapData = (
+      await getOptimalMintSwapData(
         chainId,
+        amm,
         provider,
         mintParams,
         slippage,
-      );
-    } catch (e) {
-      console.error(`Failed to get swap data: ${e}`);
-    }
+        blockNumber,
+      )
+    ).swapData;
   }
   const { amount0, amount1, liquidity } = await simulateRebalance(
     chainId,
+    amm,
     provider,
     fromAddress,
     position.owner,
@@ -80,6 +76,7 @@ export async function optimalRebalance(
     positionId,
     feeBips,
     swapData,
+    blockNumber,
   );
   return {
     amount0,
@@ -87,49 +84,4 @@ export async function optimalRebalance(
     liquidity,
     swapData,
   };
-}
-
-async function getOptimalMintSwapData(
-  chainId: ApertureSupportedChainId,
-  provider: JsonRpcProvider | Provider,
-  mintParams: INonfungiblePositionManager.MintParamsStruct,
-  slippage: number,
-) {
-  const { optimal_swap_router, uniswap_v3_factory } = getChainInfo(chainId);
-  const automan = getAutomanContract(chainId, provider);
-  const approveTarget = await getApproveTarget(chainId);
-  // get swap amounts using the same pool
-  const { amountIn: poolAmountIn, zeroForOne } = await automan.getOptimalSwap(
-    computePoolAddress(
-      uniswap_v3_factory,
-      mintParams.token0,
-      mintParams.token1,
-      mintParams.fee as FeeAmount,
-    ),
-    mintParams.tickLower,
-    mintParams.tickUpper,
-    mintParams.amount0Desired,
-    mintParams.amount1Desired,
-  );
-  // get a quote from 1inch
-  const { tx } = await quote(
-    chainId,
-    zeroForOne ? mintParams.token0 : mintParams.token1,
-    zeroForOne ? mintParams.token1 : mintParams.token0,
-    poolAmountIn.toString(),
-    optimal_swap_router!,
-    slippage * 100,
-  );
-  return encodeOptimalSwapData(
-    chainId,
-    mintParams.token0,
-    mintParams.token1,
-    mintParams.fee as FeeAmount,
-    mintParams.tickLower as number,
-    mintParams.tickUpper as number,
-    zeroForOne,
-    approveTarget,
-    tx.to,
-    tx.data,
-  );
 }

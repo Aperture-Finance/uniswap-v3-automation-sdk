@@ -6,17 +6,17 @@ import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
-  getChainInfo,
+  getAMMInfo,
 } from '@/index';
-import { Price, Token } from '@uniswap/sdk-core';
 import {
   FeeAmount,
   Pool,
   TickMath,
-  computePoolAddress as _computePoolAddress,
   tickToPrice,
-} from '@uniswap/v3-sdk';
+} from '@aperture_finance/uniswap-v3-sdk';
+import { Price, Token } from '@uniswap/sdk-core';
 import { viem } from 'aperture-lens';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
 import {
@@ -27,44 +27,16 @@ import {
   getContract,
 } from 'viem';
 
+import { computePoolAddress } from '../utils';
 import { getToken } from './currency';
 import { BasicPositionInfo } from './position';
 import { getPublicClient } from './public_client';
 
 /**
- * Computes a pool address
- * @param factoryAddress The Uniswap V3 factory address
- * @param token0 The first token of the pair, irrespective of sort order
- * @param token1 The second token of the pair, irrespective of sort order
- * @param fee The fee tier of the pool
- * @returns The pool address
- */
-export function computePoolAddress(
-  factoryAddress: Address,
-  token0: Token | string,
-  token1: Token | string,
-  fee: FeeAmount,
-): Address {
-  return _computePoolAddress({
-    factoryAddress,
-    tokenA: new Token(
-      1,
-      typeof token0 === 'string' ? token0 : token0.address,
-      18,
-    ),
-    tokenB: new Token(
-      1,
-      typeof token1 === 'string' ? token1 : token1.address,
-      18,
-    ),
-    fee,
-  }) as Address;
-}
-
-/**
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
  * @param basicInfo Basic position info.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns The constructed Uniswap SDK Pool object where the specified position resides.
@@ -72,6 +44,7 @@ export function computePoolAddress(
 export async function getPoolFromBasicPositionInfo(
   basicInfo: BasicPositionInfo,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
@@ -80,6 +53,7 @@ export async function getPoolFromBasicPositionInfo(
     basicInfo.token1,
     basicInfo.fee,
     chainId,
+    amm,
     publicClient,
     blockNumber,
   );
@@ -93,6 +67,7 @@ export function getPoolContract(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
@@ -100,12 +75,7 @@ export function getPoolContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: computePoolAddress(
-      getChainInfo(chainId).uniswap_v3_factory,
-      tokenA,
-      tokenB,
-      fee,
-    ) as Address,
+    address: computePoolAddress(chainId, amm, tokenA, tokenB, fee),
     abi: IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -118,6 +88,7 @@ export function getPoolContract(
  * @param tokenB The other token in the pool.
  * @param fee Fee tier of the pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @returns The constructed Uniswap SDK Pool object.
@@ -127,6 +98,7 @@ export async function getPool(
   tokenB: Token | string,
   fee: FeeAmount,
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
@@ -136,6 +108,7 @@ export async function getPool(
     tokenB,
     fee,
     chainId,
+    amm,
     publicClient,
   );
   const opts = { blockNumber };
@@ -192,16 +165,17 @@ export function getPoolPrice(pool: Pool): Price<Token, Token> {
  */
 export async function getFeeTierDistribution(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   tokenA: Address,
   tokenB: Address,
 ): Promise<Record<FeeAmount, number>> {
-  const { uniswap_subgraph_url } = getChainInfo(chainId);
-  if (uniswap_subgraph_url === undefined) {
-    throw 'Subgraph URL is not defined for the specified chain id';
+  const subgraph_url = getAMMInfo(chainId, amm)?.subgraph_url;
+  if (subgraph_url === undefined) {
+    throw 'Subgraph URL is not defined for the specified chain id and amm';
   }
   const [token0, token1] = [tokenA.toLowerCase(), tokenB.toLowerCase()].sort();
   const feeTierTotalValueLocked: FeeTierDistributionQuery = (
-    await axios.post(uniswap_subgraph_url, {
+    await axios.post(subgraph_url, {
       operationName: 'FeeTierDistribution',
       variables: {
         token0,
@@ -243,6 +217,7 @@ export async function getFeeTierDistribution(
     [FeeAmount.LOWEST]: getFeeTierFraction(FeeAmount.LOWEST),
     [FeeAmount.LOW]: getFeeTierFraction(FeeAmount.LOW),
     [FeeAmount.MEDIUM]: getFeeTierFraction(FeeAmount.MEDIUM),
+    [FeeAmount.PCS_V3_MEDIUM]: getFeeTierFraction(FeeAmount.PCS_V3_MEDIUM),
     [FeeAmount.HIGH]: getFeeTierFraction(FeeAmount.HIGH),
   };
 }
@@ -321,6 +296,7 @@ export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
 /**
  * Fetches the liquidity for all ticks for the specified pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
  * @param _tickLower The lower tick to fetch liquidity for, defaults to `TickMath.MIN_TICK`.
  * @param _tickUpper The upper tick to fetch liquidity for, defaults to `TickMath.MAX_TICK`.
@@ -328,28 +304,30 @@ export type TickToLiquidityMap = Map<TickNumber, LiquidityAmount>;
  */
 export async function getTickToLiquidityMapForPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   _tickLower = TickMath.MIN_TICK,
   _tickUpper = TickMath.MAX_TICK,
 ): Promise<TickToLiquidityMap> {
-  const { uniswap_v3_factory, uniswap_subgraph_url } = getChainInfo(chainId);
-  if (uniswap_subgraph_url === undefined) {
-    throw 'Subgraph URL is not defined for the specified chain id';
+  const subgraph_url = getAMMInfo(chainId, amm)?.subgraph_url;
+  if (subgraph_url === undefined) {
+    throw 'Subgraph URL is not defined for the specified chain id and amm';
   }
   const poolAddress = computePoolAddress(
-    uniswap_v3_factory,
+    chainId,
+    amm,
     pool.token0,
     pool.token1,
     pool.fee,
   ).toLowerCase();
   // Fetch current in-range liquidity from subgraph.
   const poolResponse = (
-    await axios.post(uniswap_subgraph_url, {
+    await axios.post(subgraph_url, {
       operationName: 'PoolLiquidity',
       variables: {},
       query: `
           query PoolLiquidity {
-            pool(id: "${poolAddress}") {
+            pool(id: "${poolAddress}", subgraphError: allow) {
               liquidity
               tick
             }
@@ -368,7 +346,7 @@ export async function getTickToLiquidityMapForPool(
   const numTicksPerQuery = 1000;
   for (let skip = 0; ; skip += numTicksPerQuery) {
     const response: AllV3TicksQuery | undefined = (
-      await axios.post(uniswap_subgraph_url, {
+      await axios.post(subgraph_url, {
         operationName: 'AllV3Ticks',
         variables: {
           poolAddress,
@@ -378,7 +356,7 @@ export async function getTickToLiquidityMapForPool(
         },
         query: `
           query AllV3Ticks($poolAddress: String, $skip: Int!, $tickLower: Int!, $tickUpper: Int!) {
-            ticks(first: 1000, skip: $skip, where: { poolAddress: $poolAddress, tickIdx_gte: $tickLower, tickIdx_lte: $tickUpper }, orderBy: tickIdx) {
+            ticks(first: 1000, skip: $skip, where: { poolAddress: $poolAddress, tickIdx_gte: $tickLower, tickIdx_lte: $tickUpper }, orderBy: tickIdx, subgraphError: allow) {
               tick: tickIdx
               liquidityNet
             }
@@ -440,6 +418,7 @@ export function readTickToLiquidityMap(
  * Each tick consumes about 100k gas, so this method may fail if the number of ticks exceeds 3k assuming the provider
  * gas limit is 300m.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
  * @param tickLower The lower tick to fetch liquidity for.
  * @param tickUpper The upper tick to fetch liquidity for.
@@ -448,6 +427,7 @@ export function readTickToLiquidityMap(
  */
 async function getPopulatedTicksInRange(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   tickLower: number,
   tickUpper: number,
@@ -455,12 +435,7 @@ async function getPopulatedTicksInRange(
   blockNumber?: bigint,
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
-    computePoolAddress(
-      getChainInfo(chainId).uniswap_v3_factory,
-      pool.token0,
-      pool.token1,
-      pool.fee,
-    ),
+    computePoolAddress(chainId, amm, pool.token0, pool.token1, pool.fee),
     tickLower,
     tickUpper,
     publicClient ?? getPublicClient(chainId),
@@ -479,6 +454,7 @@ export interface Liquidity {
 /**
  * Fetches the liquidity within the tick range for the specified pool.
  * @param chainId Chain id.
+ * @param amm Automated Market Maker.
  * @param pool The liquidity pool to fetch the tick to liquidity map for.
  * @param _tickLower The lower tick to fetch liquidity for, defaults to half of the current price.
  * @param _tickUpper The upper tick to fetch liquidity for, defaults to twice of the current price.
@@ -488,6 +464,7 @@ export interface Liquidity {
  */
 export async function getLiquidityArrayForPool(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   pool: Pool,
   _tickLower = pool.tickCurrent - DOUBLE_TICK,
   _tickUpper = pool.tickCurrent + DOUBLE_TICK,
@@ -504,6 +481,7 @@ export async function getLiquidityArrayForPool(
   const { token0, token1 } = pool;
   const populatedTicks = await getPopulatedTicksInRange(
     chainId,
+    amm,
     pool,
     tickLower,
     tickUpper,

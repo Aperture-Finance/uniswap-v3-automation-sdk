@@ -139,8 +139,6 @@ export function nativeOnChain(
   let nativeCurrency: NativeCurrency | Token;
   if (chainId === ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID) {
     nativeCurrency = new MaticNativeCurrency();
-  } else if (chainId === ApertureSupportedChainId.CELO_MAINNET_CHAIN_ID) {
-    nativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
   } else if (chainId === ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID) {
     nativeCurrency = new BscNativeCurrency();
   } else if (chainId === ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID) {

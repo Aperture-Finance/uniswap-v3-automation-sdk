@@ -116,7 +116,7 @@ export declare namespace INonfungiblePositionManager {
   };
 }
 
-export declare namespace UniV3Automan {
+export declare namespace Automan {
   export type FeeConfigStruct = {
     feeCollector: string;
     feeLimitPips: BigNumberish;
@@ -364,7 +364,7 @@ export interface UniV3AutomanInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeConfig",
-    values: [UniV3Automan.FeeConfigStruct]
+    values: [Automan.FeeConfigStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "setSwapRouters",
@@ -812,7 +812,7 @@ export interface UniV3Automan extends BaseContract {
     ): Promise<ContractTransaction>;
 
     setFeeConfig(
-      _feeConfig: UniV3Automan.FeeConfigStruct,
+      _feeConfig: Automan.FeeConfigStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -1015,7 +1015,7 @@ export interface UniV3Automan extends BaseContract {
   ): Promise<ContractTransaction>;
 
   setFeeConfig(
-    _feeConfig: UniV3Automan.FeeConfigStruct,
+    _feeConfig: Automan.FeeConfigStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1276,7 +1276,7 @@ export interface UniV3Automan extends BaseContract {
     ): Promise<void>;
 
     setFeeConfig(
-      _feeConfig: UniV3Automan.FeeConfigStruct,
+      _feeConfig: Automan.FeeConfigStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1532,7 +1532,7 @@ export interface UniV3Automan extends BaseContract {
     ): Promise<BigNumber>;
 
     setFeeConfig(
-      _feeConfig: UniV3Automan.FeeConfigStruct,
+      _feeConfig: Automan.FeeConfigStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1728,7 +1728,7 @@ export interface UniV3Automan extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     setFeeConfig(
-      _feeConfig: UniV3Automan.FeeConfigStruct,
+      _feeConfig: Automan.FeeConfigStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

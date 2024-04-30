@@ -1,8 +1,6 @@
-import {
-  ApertureSupportedChainId,
-  IERC20__factory,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import stringify from 'json-stable-stringify';
 import {
   AccessList,
   Address,
@@ -15,7 +13,10 @@ import {
   keccak256,
   parseAbiParameters,
   toHex,
+  zeroAddress,
 } from 'viem';
+
+import { getRequestCache } from './cached_request';
 
 type StateOverrides = {
   [address: Address]: {
@@ -52,7 +53,7 @@ export function computeOperatorApprovalSlot(
 }
 
 /**
- * Compute the storage slot for the isController mapping in UniV3Automan.
+ * Compute the storage slot for the isController mapping in Automan.
  * @param from The address of controller.
  * @returns The storage slot.
  */
@@ -67,16 +68,17 @@ export function computeIsControllerSlot(from: Address): Hex {
 
 export function getNPMApprovalOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   owner: Address,
 ): StateOverrides {
-  const {
-    aperture_uniswap_v3_automan,
-    uniswap_v3_nonfungible_position_manager,
-  } = getChainInfo(chainId);
+  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
+    chainId,
+    amm,
+  )!;
   return {
-    [uniswap_v3_nonfungible_position_manager]: {
+    [nonfungiblePositionManager]: {
       stateDiff: {
-        [computeOperatorApprovalSlot(owner, aperture_uniswap_v3_automan)]:
+        [computeOperatorApprovalSlot(owner, apertureAutoman)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
     },
@@ -85,10 +87,11 @@ export function getNPMApprovalOverrides(
 
 export function getControllerOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   from: Address,
 ) {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -101,10 +104,11 @@ export function getControllerOverrides(
 
 export function getAutomanWhitelistOverrides(
   chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
   routerToWhitelist: Address,
 ): StateOverrides {
   return {
-    [getChainInfo(chainId).aperture_uniswap_v3_automan]: {
+    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [
@@ -152,7 +156,7 @@ export async function getERC20Overrides(
   const [balanceOfAccessList, allowanceAccessList] = await Promise.all([
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: balanceOfData,
       },
@@ -160,7 +164,7 @@ export async function getERC20Overrides(
     ),
     generateAccessList(
       {
-        from,
+        from: zeroAddress,
         to: token,
         data: allowanceData,
       },
@@ -186,17 +190,18 @@ export async function getERC20Overrides(
     filteredAllowanceAccessList[0].storageKeys,
   );
   if (storageKeys.length !== 2) {
-    throw new Error('Invalid storage key number');
+    console.log('Invalid storage key number');
   }
   const encodedAmount = encodeAbiParameters(parseAbiParameters('uint256'), [
     amount,
   ]);
+  const stateDiff: {
+    [key: `0x${string}`]: `0x${string}`;
+  } = {};
+  storageKeys.forEach((storageKey) => (stateDiff[storageKey] = encodedAmount));
   return {
     [token]: {
-      stateDiff: {
-        [storageKeys[0]]: encodedAmount,
-        [storageKeys[1]]: encodedAmount,
-      },
+      stateDiff,
     },
   };
 }
@@ -257,17 +262,23 @@ export async function generateAccessList(
   blockNumber?: bigint,
 ): Promise<AccessListReturnType> {
   try {
-    return await requestWithOverrides(
-      'eth_createAccessList',
-      // @ts-expect-error viem doesn't include 'eth_createAccessList'
-      {
-        ...tx,
-        gas: '0x11E1A300',
-        gasPrice: '0x0',
-      },
-      publicClient,
-      undefined,
-      blockNumber,
+    const method = 'eth_createAccessList';
+    const key = `${method}_${keccak256(toHex(stringify(tx)))}`;
+    // viem cache seems not work, use custom request cache
+    return await getRequestCache().addRequest(
+      key,
+      () =>
+        requestWithOverrides(
+          method,
+          {
+            ...tx,
+            gas: '0x11E1A300',
+          },
+          publicClient,
+          undefined,
+          blockNumber,
+        ),
+      60 * 60, // cache for 1 hour, as the access list is not likely to change
     );
   } catch (error) {
     console.error('Error generating access list:', error);
