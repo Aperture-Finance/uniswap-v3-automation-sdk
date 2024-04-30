@@ -90,7 +90,7 @@ describe('Viem - Routing tests', function () {
       '1000000000000000000',
     );
 
-    const { amount0, amount1 } = await increaseLiquidityOptimal(
+    const { amount0, amount1, priceImpact } = await increaseLiquidityOptimal(
       chainId,
       amm,
       publicClient,
@@ -118,6 +118,10 @@ describe('Viem - Routing tests', function () {
     );
 
     expect(_total).to.be.closeTo(total, total * 0.03);
+
+    expect(priceImpact.toString()).to.be.equal(
+      '0.303331987782481380569792816936',
+    );
   });
 
   it('Test optimalMint', async function () {

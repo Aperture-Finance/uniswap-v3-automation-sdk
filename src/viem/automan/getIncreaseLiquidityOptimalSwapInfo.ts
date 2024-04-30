@@ -1,5 +1,4 @@
 import { ApertureSupportedChainId } from '@/index';
-import { calculateIncreaseLiquidityOptimalPriceImpact, getPool } from '@/viem';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
