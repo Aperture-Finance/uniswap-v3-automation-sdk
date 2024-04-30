@@ -11,9 +11,9 @@ import {
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
-import { calcPriceImpact } from '../automan/internal';
 import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
+import { calcPriceImpact } from './internal';
 import { SwapRoute, quote } from './quote';
 
 export async function optimalRebalance(

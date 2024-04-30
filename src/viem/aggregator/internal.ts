@@ -1,6 +1,8 @@
-import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { ApertureSupportedChainId, fractionToBig, getAMMInfo } from '@/index';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 import { Hex, PublicClient } from 'viem';
 
 import { computePoolAddress } from '../../utils';
@@ -81,3 +83,23 @@ export async function getOptimalMintSwapData(
     swapData: '0x',
   };
 }
+
+export const calcPriceImpact = (
+  pool: Pool,
+  initAmount0: bigint,
+  initAmount1: bigint,
+  finalAmount0: bigint,
+  finalAmount1: bigint,
+) => {
+  const currentPoolPrice = fractionToBig(pool.token0Price);
+  const exchangePrice =
+    initAmount0 === finalAmount0
+      ? new Big(0)
+      : new Big(finalAmount1.toString())
+          .minus(initAmount1.toString())
+          .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
+
+  return exchangePrice.eq(0)
+    ? exchangePrice
+    : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+};

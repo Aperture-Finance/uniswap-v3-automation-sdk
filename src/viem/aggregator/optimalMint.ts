@@ -6,8 +6,8 @@ import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
 import { MintParams, simulateMintOptimal } from '../automan';
-import { calcPriceImpact } from '../automan/internal';
 import { getPool } from '../pool';
+import { calcPriceImpact } from './internal';
 import { getOptimalMintSwapData } from './internal';
 import { SwapRoute } from './quote';
 

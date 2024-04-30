@@ -12,8 +12,8 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
-import { calcPriceImpact } from '../automan/internal';
 import { getApproveTarget } from './index';
+import { calcPriceImpact } from './internal';
 import { SwapRoute, quote } from './quote';
 
 /**
