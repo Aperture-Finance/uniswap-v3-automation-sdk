@@ -132,6 +132,9 @@ export const PointUserStatusSchema = z.object({
   referralPoints: z.number().nonnegative(),
   twitterFreeRaffleConsumed: z.boolean(),
   rafflePointsConsumed: z.number().nonnegative(),
+  streak: z.number().int(),
+  canDrawDailyRaffle: z.boolean(),
+  hasCompletedOnChainActivityForPoints: z.boolean(),
 });
 
 export type PointUserStatus = z.infer<typeof PointUserStatusSchema>;
