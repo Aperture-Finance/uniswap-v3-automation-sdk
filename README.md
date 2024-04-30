@@ -53,4 +53,4 @@ This project is licensed under the MIT License. See the LICENSE file for more in
 
 ## Contact
 
-If you have any questions, suggestions, or feedback, please feel free to reach out to us at contact@aperture-finance.com.
+If you have any questions, suggestions, or feedback, please feel free to reach out to us at engineering@aperture.finance
