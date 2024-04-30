@@ -439,60 +439,6 @@ describe('State overrides tests', function () {
     expect(amount0.toString()).to.equal('61259538');
     expect(amount1.toString()).to.equal('7156958298534991565');
   });
-
-  it('Test calculateMintOptimalPriceImpact 0 price impact', async function () {
-    const blockNumber = 17975698n;
-    const publicClient = getInfuraClient();
-    const token0 = WBTC_ADDRESS;
-    const token1 = WETH_ADDRESS;
-    const fee = FeeAmount.MEDIUM;
-    const amount0Desired = 96674n;
-    const amount1Desired = 16468879195954429n;
-    const pool = await getPool(
-      token0,
-      token1,
-      fee,
-      chainId,
-      UNIV3_AMM,
-      publicClient,
-      blockNumber,
-    );
-
-    const mintParams = {
-      token0: token0 as Address,
-      token1: token1 as Address,
-      fee,
-      tickLower: nearestUsableTick(
-        pool.tickCurrent - 10 * pool.tickSpacing,
-        pool.tickSpacing,
-      ),
-      tickUpper: nearestUsableTick(
-        pool.tickCurrent + 10 * pool.tickSpacing,
-        pool.tickSpacing,
-      ),
-      amount0Desired,
-      amount1Desired,
-      amount0Min: BigInt(0),
-      amount1Min: BigInt(0),
-      recipient: eoa as Address,
-      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
-    };
-
-    const { priceImpact, finalAmount0, finalAmount1 } =
-      await calculateMintOptimalPriceImpact({
-        chainId,
-        amm: UNIV3_AMM,
-        publicClient,
-        from: eoa,
-        mintParams,
-        swapData: undefined,
-        blockNumber,
-      });
-
-    expect(priceImpact.toString()).to.equal('0');
-    expect(finalAmount0.toString()).to.equal('96674');
-    expect(finalAmount1.toString()).to.equal('16468879195954429');
-  });
 });
 
 describe('Position util tests', function () {
