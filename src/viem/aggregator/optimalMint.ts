@@ -5,11 +5,9 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
-import {
-  MintParams,
-  calculateMintOptimalPriceImpact,
-  simulateMintOptimal,
-} from '../automan';
+import { MintParams, simulateMintOptimal } from '../automan';
+import { calcPriceImpact } from '../automan/internal';
+import { getPool } from '../pool';
 import { getOptimalMintSwapData } from './internal';
 import { SwapRoute } from './quote';
 
@@ -94,17 +92,23 @@ export async function optimalMint(
 
   const estimate = await getEstimate();
 
-  const { amount0, amount1 } = estimate;
-  const { priceImpact } = await calculateMintOptimalPriceImpact({
+  const pool = await getPool(
+    mintParams.token0,
+    mintParams.token1,
+    mintParams.fee,
     chainId,
     amm,
-    from: fromAddress,
-    mintParams,
     publicClient,
     blockNumber,
-    finalAmount0: amount0,
-    finalAmount1: amount1,
-  });
+  );
+
+  const priceImpact = calcPriceImpact(
+    pool,
+    mintParams.amount0Desired,
+    mintParams.amount1Desired,
+    estimate.amount0,
+    estimate.amount1,
+  );
 
   return {
     ...estimate,

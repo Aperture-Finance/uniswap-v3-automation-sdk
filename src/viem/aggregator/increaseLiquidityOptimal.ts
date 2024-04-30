@@ -12,6 +12,7 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
+import { calcPriceImpact } from '../automan/internal';
 import { getApproveTarget } from './index';
 import { SwapRoute, quote } from './quote';
 
@@ -50,21 +51,24 @@ export async function increaseLiquidityOptimal(
     amount1Min: 0n,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
 
-  const poolPromise = increaseLiquidityOptimalPool(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    position,
-    increaseParams,
-    blockNumber,
-  );
-  if (!usePool) {
-    if (optimalSwapRouter === undefined) {
+  const getEstimate = async () => {
+    const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
+
+    const poolPromise = increaseLiquidityOptimalPool(
+      chainId,
+      amm,
+      publicClient,
+      fromAddress,
+      position,
+      increaseParams,
+      blockNumber,
+    );
+
+    if (usePool || !optimalSwapRouter) {
       return await poolPromise;
     }
+
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
       increaseLiquidityOptimalRouter(
@@ -83,9 +87,22 @@ export async function increaseLiquidityOptimal(
     } else {
       return routerEstimate;
     }
-  } else {
-    return await poolPromise;
-  }
+  };
+
+  const estimate = await getEstimate();
+
+  const priceImpact = calcPriceImpact(
+    position.pool,
+    increaseParams.amount0Desired,
+    increaseParams.amount1Desired,
+    estimate.amount0,
+    estimate.amount1,
+  );
+
+  return {
+    ...estimate,
+    priceImpact,
+  };
 }
 
 async function increaseLiquidityOptimalPool(

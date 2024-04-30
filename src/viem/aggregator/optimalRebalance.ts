@@ -6,12 +6,12 @@ import { Address, Hex, PublicClient } from 'viem';
 import { computePoolAddress } from '../../utils';
 import {
   MintParams,
-  calculateRebalancePriceImpact,
   encodeOptimalSwapData,
   getAutomanContract,
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
+import { calcPriceImpact } from '../automan/internal';
 import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
 import { SwapRoute, quote } from './quote';
@@ -112,18 +112,14 @@ export async function optimalRebalance(
   };
 
   const estimate = await getEstimate();
-  const { amount0, amount1 } = estimate;
 
-  const { priceImpact } = await calculateRebalancePriceImpact({
-    chainId,
-    amm,
-    mintParams,
-    tokenId: positionId,
-    publicClient,
-    blockNumber,
-    finalAmount0: amount0,
-    finalAmount1: amount1,
-  });
+  const priceImpact = await calcPriceImpact(
+    position.pool,
+    mintParams.amount0Desired,
+    mintParams.amount1Desired,
+    estimate.amount0,
+    estimate.amount1,
+  );
 
   return {
     ...estimate,

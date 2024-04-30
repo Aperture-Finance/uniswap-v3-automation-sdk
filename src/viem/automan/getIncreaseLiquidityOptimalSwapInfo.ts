@@ -44,9 +44,8 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   const {
     amount0: expectedAmount0,
     amount1: expectedAmount1,
-    liquidity,
-    swapData,
     swapRoute,
+    priceImpact,
   } = await increaseLiquidityOptimal(
     chainId,
     amm,
@@ -61,55 +60,19 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   const token0 = (token0Amount.currency as Token).address as Address;
   const token1 = (token1Amount.currency as Token).address as Address;
 
-  // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
-  const incrementalPosition = new Position({
-    pool: await getPool(
-      token0,
-      token1,
-      position.pool.fee,
-      chainId,
-      amm,
-      publicClient,
-    ),
-    liquidity: liquidity.toString(),
-    tickLower: position.tickLower,
-    tickUpper: position.tickUpper,
-  });
-  const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
-    increaseOptions.slippageTolerance,
-  );
-  const increaseParams = {
-    tokenId: BigInt(increaseOptions.tokenId.toString()),
-    amount0Desired: BigInt(token0Amount.quotient.toString()),
-    amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: BigInt(amount0.toString()),
-    amount1Min: BigInt(amount1.toString()),
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
-
-  const { priceImpact, finalAmount0, finalAmount1 } =
-    await calculateIncreaseLiquidityOptimalPriceImpact({
-      chainId,
-      amm,
-      swapData: swapData as `0x${string}`,
-      from: recipient as `0x${string}`,
-      position,
-      increaseParams,
-      publicClient,
-    });
   return {
     swapRoute,
     swapPath: getSwapPath(
       token0,
       token1,
-      increaseParams.amount0Desired,
-      increaseParams.amount1Desired,
+      BigInt(token0Amount.quotient.toString()),
+      BigInt(token1Amount.quotient.toString()),
       expectedAmount0,
       expectedAmount1,
       Number(increaseOptions.slippageTolerance.toFixed()),
     ),
     priceImpact,
-    finalAmount0,
-    finalAmount1,
+    finalAmount0: expectedAmount0,
+    finalAmount1: expectedAmount1,
   };
 }
