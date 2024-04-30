@@ -1,4 +1,3 @@
-import { providers } from '@0xsequence/multicall';
 import {
   FeeAmount,
   Pool,
@@ -1688,6 +1687,7 @@ describe('Automan transaction tests', function () {
     const testClient = await hre.viem.getTestClient();
     const publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient);
+
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1731,7 +1731,6 @@ describe('Automan transaction tests', function () {
       hypotheticalPosition.amount1,
       eoa as Address,
       publicClient,
-      new providers.MulticallProvider(hardhatForkProvider),
       hypotheticalPosition,
       // 1inch quote currently doesn't support the no-swap case.
       false,

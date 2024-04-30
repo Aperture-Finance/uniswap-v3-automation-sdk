@@ -11,11 +11,6 @@ export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   'decreaseLiquidity'
 >[0];
 
-export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
-  'increaseLiquidity'
->[0];
-
 export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
 
 export type IncreaseLiquidityReturnType =
