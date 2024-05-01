@@ -4,12 +4,10 @@ import {
 } from '@/index';
 import {
   AbiStateMutability,
-  Address,
   ContractFunctionArgs,
   ContractFunctionReturnType,
 } from 'viem';
 
-import { SwapRoute } from '../aggregator';
 import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type AutomanActionName =
