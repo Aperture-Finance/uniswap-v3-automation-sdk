@@ -40,7 +40,7 @@ describe('Viem - Routing tests', function () {
     const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
       tokenId,
     ]);
-    const { liquidity, priceImpact } = await optimalRebalance(
+    const { liquidity, priceImpact, swapPath } = await optimalRebalance(
       chainId,
       UNIV3_AMM,
       tokenId,
@@ -52,6 +52,7 @@ describe('Viem - Routing tests', function () {
       0.1,
       publicClient,
       blockNumber,
+      true /** includeSwapInfo */,
     );
     const { liquidity: predictedLiquidity } = getRebalancedPosition(
       position,
@@ -63,7 +64,10 @@ describe('Viem - Routing tests', function () {
       Number(predictedLiquidity.toString()) * 0.1,
     );
 
-    expect(Number(priceImpact.toString())).to.be.closeTo(0.000523, 0.00005);
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.000523, 0.00005);
+
+    expect(swapPath!.tokenIn).to.equal(pool.token0.address);
+    expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
@@ -88,22 +92,24 @@ describe('Viem - Routing tests', function () {
       '1000000000000000000',
     );
 
-    const { amount0, amount1, priceImpact } = await increaseLiquidityOptimal(
-      chainId,
-      amm,
-      publicClient,
-      position,
-      {
-        tokenId: 4,
-        slippageTolerance: new Percent(5, 1000),
-        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-      },
-      token0Amount,
-      token1Amount,
-      eoa,
-      true, //don't use 1inch in unit test
-      blockNumber,
-    );
+    const { amount0, amount1, priceImpact, swapPath } =
+      await increaseLiquidityOptimal(
+        chainId,
+        amm,
+        publicClient,
+        position,
+        {
+          tokenId: 4,
+          slippageTolerance: new Percent(5, 1000),
+          deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+        },
+        token0Amount,
+        token1Amount,
+        eoa,
+        true, //don't use 1inch in unit test
+        blockNumber,
+        true /** includeSwapInfo */,
+      );
 
     const _total = Number(
       pool.token0Price
@@ -117,7 +123,10 @@ describe('Viem - Routing tests', function () {
 
     expect(_total).to.be.closeTo(total, total * 0.03);
 
-    expect(Number(priceImpact.toString())).to.be.closeTo(0.30333, 0.03);
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.30333, 0.03);
+
+    expect(swapPath!.tokenIn).to.equal(pool.token0.address);
+    expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
   it('Test optimalMint', async function () {
@@ -156,7 +165,7 @@ describe('Viem - Routing tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
-    const { amount0, amount1, priceImpact } = await optimalMint(
+    const { amount0, amount1, priceImpact, swapPath } = await optimalMint(
       chainId,
       amm,
       token0Amount,
@@ -169,6 +178,7 @@ describe('Viem - Routing tests', function () {
       publicClient,
       true, // don't use 1inch in unit test
       blockNumber,
+      true /** includeSwapInfo */,
     );
     const _total = Number(
       pool.token0Price
@@ -183,6 +193,8 @@ describe('Viem - Routing tests', function () {
 
     expect(amount0.toString()).to.be.equal('684889078');
     expect(amount1.toString()).to.be.equal('61653987834490876385');
-    expect(Number(priceImpact.toString())).to.be.closeTo(0.0142255, 0.001);
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.0142255, 0.001);
+    expect(swapPath!.tokenIn).to.equal(pool.token0.address);
+    expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 });
