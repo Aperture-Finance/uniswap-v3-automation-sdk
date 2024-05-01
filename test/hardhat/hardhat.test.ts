@@ -9,6 +9,7 @@ import {
 } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
+import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import chai from 'chai';
@@ -74,9 +75,6 @@ import {
 } from '../../src';
 import {
   PositionDetails,
-  calculateIncreaseLiquidityOptimalPriceImpact,
-  calculateMintOptimalPriceImpact,
-  calculateRebalancePriceImpact,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
   estimateRebalanceGas,
@@ -392,21 +390,6 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const { priceImpact, finalAmount0, finalAmount1 } =
-      await calculateMintOptimalPriceImpact({
-        chainId,
-        amm: UNIV3_AMM,
-        publicClient,
-        from: eoa,
-        mintParams,
-        swapData: undefined,
-        blockNumber,
-      });
-
-    expect(priceImpact.toString()).to.equal('0.003010298098311076209996397317');
-    expect(finalAmount0.toString()).to.equal('51320357');
-    expect(finalAmount1.toString()).to.equal('8736560293857784398');
-
     const [, liquidity, amount0, amount1] = await simulateMintOptimal(
       chainId,
       UNIV3_AMM,
@@ -443,22 +426,6 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const { priceImpact, finalAmount0, finalAmount1 } =
-      await calculateIncreaseLiquidityOptimalPriceImpact({
-        chainId,
-        amm: UNIV3_AMM,
-        publicClient,
-        from: eoa,
-        position,
-        increaseParams,
-        swapData: undefined,
-        blockNumber,
-      });
-
-    expect(priceImpact.toString()).to.equal('0.00300826277866017098015215935');
-    expect(finalAmount0.toString()).to.equal('61259538');
-    expect(finalAmount1.toString()).to.equal('7156958298534991565');
-
     const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
       chainId,
       UNIV3_AMM,
@@ -471,116 +438,6 @@ describe('State overrides tests', function () {
     );
     expect(amount0.toString()).to.equal('61259538');
     expect(amount1.toString()).to.equal('7156958298534991565');
-  });
-
-  it('Test calculateMintOptimalPriceImpact 0 price impact', async function () {
-    const blockNumber = 17975698n;
-    const publicClient = getInfuraClient();
-    const token0 = WBTC_ADDRESS;
-    const token1 = WETH_ADDRESS;
-    const fee = FeeAmount.MEDIUM;
-    const amount0Desired = 96674n;
-    const amount1Desired = 16468879195954429n;
-    const pool = await getPool(
-      token0,
-      token1,
-      fee,
-      chainId,
-      UNIV3_AMM,
-      publicClient,
-      blockNumber,
-    );
-
-    const mintParams = {
-      token0: token0 as Address,
-      token1: token1 as Address,
-      fee,
-      tickLower: nearestUsableTick(
-        pool.tickCurrent - 10 * pool.tickSpacing,
-        pool.tickSpacing,
-      ),
-      tickUpper: nearestUsableTick(
-        pool.tickCurrent + 10 * pool.tickSpacing,
-        pool.tickSpacing,
-      ),
-      amount0Desired,
-      amount1Desired,
-      amount0Min: BigInt(0),
-      amount1Min: BigInt(0),
-      recipient: eoa as Address,
-      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
-    };
-
-    const { priceImpact, finalAmount0, finalAmount1 } =
-      await calculateMintOptimalPriceImpact({
-        chainId,
-        amm: UNIV3_AMM,
-        publicClient,
-        from: eoa,
-        mintParams,
-        swapData: undefined,
-        blockNumber,
-      });
-
-    expect(priceImpact.toString()).to.equal('0');
-    expect(finalAmount0.toString()).to.equal('96674');
-    expect(finalAmount1.toString()).to.equal('16468879195954429');
-  });
-
-  it('Test calculateRebalancePriceImpact', async function () {
-    const blockNumber = 17975698n;
-    const publicClient = getInfuraClient();
-
-    const token0 = WBTC_ADDRESS;
-    const token1 = WETH_ADDRESS;
-    const fee = FeeAmount.MEDIUM;
-    const amount0Desired = 100000000n;
-    const amount1Desired = 1000000000000000000n;
-    const pool = await getPool(
-      token0,
-      token1,
-      fee,
-      chainId,
-      UNIV3_AMM,
-      publicClient,
-      blockNumber,
-    );
-    const mintParams = {
-      token0: token0 as Address,
-      token1: token1 as Address,
-      fee,
-      tickLower: nearestUsableTick(
-        pool.tickCurrent - 10 * pool.tickSpacing,
-        pool.tickSpacing,
-      ),
-      tickUpper: nearestUsableTick(
-        pool.tickCurrent + 10 * pool.tickSpacing,
-        pool.tickSpacing,
-      ),
-      amount0Desired,
-      amount1Desired,
-      amount0Min: BigInt(0),
-      amount1Min: BigInt(0),
-      recipient: eoa as Address,
-      deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
-    };
-
-    const { priceImpact, finalAmount0, finalAmount1 } =
-      await calculateRebalancePriceImpact({
-        chainId,
-        amm: UNIV3_AMM,
-        publicClient,
-        from: eoa,
-        owner: eoa,
-        mintParams,
-        tokenId: 4n,
-        feeBips: undefined,
-        swapData: undefined,
-        blockNumber,
-      });
-    expect(priceImpact.toString()).to.equal('0.00300526535105717178193071153');
-    expect(finalAmount0.toString()).to.equal('23718330');
-    expect(finalAmount1.toString()).to.equal('4040287637285704807');
   });
 });
 
@@ -1673,7 +1530,6 @@ describe('Automan transaction tests', function () {
       tickLower,
       tickUpper,
       eoa,
-      BigInt(Math.floor(Date.now() / 1000) + 60),
       0.5,
       publicClient,
       // 1inch quote currently doesn't support the no-swap case.
@@ -1681,6 +1537,68 @@ describe('Automan transaction tests', function () {
     );
 
     expect(swapRoute?.length).to.equal(0);
+  });
+
+  it('Optimal mint with swap', async function () {
+    const testClient = await hre.viem.getTestClient();
+    const publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+    const pool = await getPool(
+      WBTC_ADDRESS,
+      WETH_ADDRESS,
+      FeeAmount.MEDIUM,
+      chainId,
+      UNIV3_AMM,
+      publicClient,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+
+    const token0Amount = CurrencyAmount.fromRawAmount(
+      pool.token0,
+      '1000000000',
+    );
+    const token1Amount = CurrencyAmount.fromRawAmount(
+      pool.token1,
+      '1000000000000000000',
+    );
+
+    await dealERC20(
+      pool.token0.address as Address,
+      pool.token1.address as Address,
+      BigInt(token0Amount.quotient.toString()),
+      BigInt(token1Amount.quotient.toString()),
+      eoa,
+      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
+    );
+
+    const { swapRoute, swapPath } = await getOptimalMintSwapInfo(
+      chainId,
+      UNIV3_AMM,
+      token0Amount,
+      token1Amount,
+      FeeAmount.MEDIUM,
+      tickLower,
+      tickUpper,
+      eoa,
+      0.5,
+      publicClient,
+      // 1inch quote currently doesn't support the no-swap case.
+      false,
+    );
+
+    console.log('swapPath', swapPath);
+
+    expect(swapRoute?.length).to.gt(0);
+
+    expect(swapPath.tokenIn).to.equal(WBTC_ADDRESS);
+    expect(swapPath.tokenOut).to.equal(WETH_ADDRESS);
   });
 
   it('Increase liquidity optimal no need swap', async function () {

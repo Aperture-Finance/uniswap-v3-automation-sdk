@@ -16,7 +16,7 @@ import {
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
-describe('Routing tests', function () {
+describe('Viem - Routing tests', function () {
   it('Test optimalRebalance', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
@@ -40,18 +40,19 @@ describe('Routing tests', function () {
     const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
       tokenId,
     ]);
-    const { liquidity } = await optimalRebalance(
+    const { liquidity, priceImpact, swapPath } = await optimalRebalance(
       chainId,
       UNIV3_AMM,
       tokenId,
       tickLower,
       tickUpper,
       0n,
-      true,
+      /** usePool= */ true, // don't use 1inch in unit test
       owner,
       0.1,
       publicClient,
       blockNumber,
+      true /** includeSwapInfo */,
     );
     const { liquidity: predictedLiquidity } = getRebalancedPosition(
       position,
@@ -62,6 +63,11 @@ describe('Routing tests', function () {
       Number(predictedLiquidity.toString()),
       Number(predictedLiquidity.toString()) * 0.1,
     );
+
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.000523, 0.00005);
+
+    expect(swapPath!.tokenIn).to.equal(pool.token0.address);
+    expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
@@ -86,22 +92,24 @@ describe('Routing tests', function () {
       '1000000000000000000',
     );
 
-    const { amount0, amount1 } = await increaseLiquidityOptimal(
-      chainId,
-      amm,
-      publicClient,
-      position,
-      {
-        tokenId: 4,
-        slippageTolerance: new Percent(5, 1000),
-        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-      },
-      token0Amount,
-      token1Amount,
-      eoa,
-      true, //don't use 1inch in unit test
-      blockNumber,
-    );
+    const { amount0, amount1, priceImpact, swapPath } =
+      await increaseLiquidityOptimal(
+        chainId,
+        amm,
+        publicClient,
+        position,
+        {
+          tokenId: 4,
+          slippageTolerance: new Percent(5, 1000),
+          deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+        },
+        token0Amount,
+        token1Amount,
+        eoa,
+        true, //don't use 1inch in unit test
+        blockNumber,
+        true /** includeSwapInfo */,
+      );
 
     const _total = Number(
       pool.token0Price
@@ -114,6 +122,11 @@ describe('Routing tests', function () {
     );
 
     expect(_total).to.be.closeTo(total, total * 0.03);
+
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.30333, 0.03);
+
+    expect(swapPath!.tokenIn).to.equal(pool.token0.address);
+    expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
   it('Test optimalMint', async function () {
@@ -123,7 +136,19 @@ describe('Routing tests', function () {
     const token0 = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f';
     const token1 = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1';
     const fee = FeeAmount.MEDIUM;
-    const pool = await getPool(token0, token1, fee, chainId, amm);
+
+    const blockNumber = 205912340n;
+
+    const pool = await getPool(
+      token0,
+      token1,
+      fee,
+      chainId,
+      amm,
+      publicClient,
+      blockNumber,
+    );
+
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
       '1000000000',
@@ -140,7 +165,7 @@ describe('Routing tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
-    const { amount0, amount1 } = await optimalMint(
+    const { amount0, amount1, priceImpact, swapPath } = await optimalMint(
       chainId,
       amm,
       token0Amount,
@@ -151,6 +176,9 @@ describe('Routing tests', function () {
       eoa,
       0.1,
       publicClient,
+      true, // don't use 1inch in unit test
+      blockNumber,
+      true /** includeSwapInfo */,
     );
     const _total = Number(
       pool.token0Price
@@ -162,5 +190,11 @@ describe('Routing tests', function () {
       pool.token0Price.quote(token0Amount).add(token1Amount).toFixed(),
     );
     expect(_total).to.be.closeTo(total, total * 0.005);
+
+    expect(amount0.toString()).to.be.equal('684889078');
+    expect(amount1.toString()).to.be.equal('61653987834490876385');
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.0142255, 0.001);
+    expect(swapPath!.tokenIn).to.equal(pool.token0.address);
+    expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 });

@@ -1,5 +1,4 @@
 import { ApertureSupportedChainId } from '@/index';
-import { calculateIncreaseLiquidityOptimalPriceImpact, getPool } from '@/viem';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -7,7 +6,6 @@ import { Address, PublicClient } from 'viem';
 
 import { increaseLiquidityOptimal } from '../aggregator';
 import { PositionDetails } from '../position';
-import { getSwapPath } from './internal';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
@@ -31,6 +29,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   publicClient: PublicClient,
   position?: Position,
   use1inch?: boolean,
+  blockNumber?: bigint,
 ) {
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
@@ -42,11 +41,11 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   }
 
   const {
-    amount0: expectedAmount0,
-    amount1: expectedAmount1,
-    liquidity,
-    swapData,
+    amount0: finalAmount0,
+    amount1: finalAmount1,
     swapRoute,
+    priceImpact,
+    swapPath,
   } = await increaseLiquidityOptimal(
     chainId,
     amm,
@@ -57,58 +56,14 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     token1Amount as CurrencyAmount<Token>,
     recipient,
     !use1inch,
+    blockNumber /** blockNumber */,
+    true /** includeSwapInfo */,
   );
-  const token0 = (token0Amount.currency as Token).address as Address;
-  const token1 = (token1Amount.currency as Token).address as Address;
 
-  // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
-  const incrementalPosition = new Position({
-    pool: await getPool(
-      token0,
-      token1,
-      position.pool.fee,
-      chainId,
-      amm,
-      publicClient,
-    ),
-    liquidity: liquidity.toString(),
-    tickLower: position.tickLower,
-    tickUpper: position.tickUpper,
-  });
-  const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
-    increaseOptions.slippageTolerance,
-  );
-  const increaseParams = {
-    tokenId: BigInt(increaseOptions.tokenId.toString()),
-    amount0Desired: BigInt(token0Amount.quotient.toString()),
-    amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: BigInt(amount0.toString()),
-    amount1Min: BigInt(amount1.toString()),
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
-
-  const { priceImpact, finalAmount0, finalAmount1 } =
-    await calculateIncreaseLiquidityOptimalPriceImpact({
-      chainId,
-      amm,
-      swapData: swapData as `0x${string}`,
-      from: recipient as `0x${string}`,
-      position,
-      increaseParams,
-      publicClient,
-    });
   return {
     swapRoute,
-    swapPath: getSwapPath(
-      token0,
-      token1,
-      increaseParams.amount0Desired,
-      increaseParams.amount1Desired,
-      expectedAmount0,
-      expectedAmount1,
-      Number(increaseOptions.slippageTolerance.toFixed()),
-    ),
-    priceImpact,
+    swapPath: swapPath!,
+    priceImpact: priceImpact!,
     finalAmount0,
     finalAmount1,
   };

@@ -6,8 +6,13 @@ import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
 import { MintParams, simulateMintOptimal } from '../automan';
-import { getOptimalMintSwapData } from './internal';
-import { SwapRoute } from './quote';
+import { getPool } from '../pool';
+import {
+  calcPriceImpact,
+  getOptimalMintSwapData,
+  getSwapPath,
+} from './internal';
+import { SolverResult, SwapRoute } from './types';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
@@ -35,7 +40,9 @@ export async function optimalMint(
   slippage: number,
   publicClient: PublicClient,
   usePool = false,
-) {
+  blockNumber?: bigint,
+  includeSwapInfo?: boolean,
+): Promise<SolverResult> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
@@ -52,19 +59,22 @@ export async function optimalMint(
     recipient: fromAddress,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
 
-  const poolPromise = optimalMintPool(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    mintParams,
-  );
-  if (!usePool) {
-    if (optimalSwapRouter === undefined) {
+  const getEstimate = async () => {
+    const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
+    const poolPromise = optimalMintPool(
+      chainId,
+      amm,
+      publicClient,
+      fromAddress,
+      mintParams,
+      blockNumber,
+    );
+
+    if (usePool || !optimalSwapRouter) {
       return await poolPromise;
     }
+
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
       optimalMintRouter(
@@ -82,9 +92,44 @@ export async function optimalMint(
     } else {
       return routerEstimate;
     }
-  } else {
-    return await poolPromise;
+  };
+
+  const ret = await getEstimate();
+
+  if (includeSwapInfo) {
+    const pool = await getPool(
+      mintParams.token0,
+      mintParams.token1,
+      mintParams.fee,
+      chainId,
+      amm,
+      publicClient,
+      blockNumber,
+    );
+
+    ret.priceImpact = calcPriceImpact(
+      pool,
+      mintParams.amount0Desired,
+      mintParams.amount1Desired,
+      ret.amount0,
+      ret.amount1,
+    );
+
+    const token0 = (token0Amount.currency as Token).address as Address;
+    const token1 = (token1Amount.currency as Token).address as Address;
+
+    ret.swapPath = getSwapPath(
+      token0,
+      token1,
+      BigInt(token0Amount.quotient.toString()),
+      BigInt(token1Amount.quotient.toString()),
+      ret.amount0,
+      ret.amount1,
+      slippage,
+    );
   }
+
+  return ret;
 }
 
 async function optimalMintPool(
@@ -93,13 +138,16 @@ async function optimalMintPool(
   publicClient: PublicClient,
   fromAddress: Address,
   mintParams: MintParams,
-) {
+  blockNumber?: bigint,
+): Promise<SolverResult> {
   const [, liquidity, amount0, amount1] = await simulateMintOptimal(
     chainId,
     amm,
     publicClient,
     fromAddress,
     mintParams,
+    /** swapData= */ undefined,
+    /** blockNumber= */ blockNumber,
   );
   let swapRoute: SwapRoute = [];
   if (mintParams.amount0Desired.toString() !== amount0.toString()) {
@@ -138,7 +186,7 @@ async function optimalMintRouter(
   fromAddress: Address,
   mintParams: MintParams,
   slippage: number,
-) {
+): Promise<SolverResult> {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
     amm,
