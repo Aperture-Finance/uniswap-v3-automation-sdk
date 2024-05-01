@@ -3,7 +3,7 @@ import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import { Hex, PublicClient } from 'viem';
+import { Address, Hex, PublicClient } from 'viem';
 
 import { computePoolAddress } from '../../utils';
 import {
@@ -12,7 +12,8 @@ import {
   getAutomanContract,
 } from '../automan';
 import { getApproveTarget } from './aggregator';
-import { SwapRoute, quote } from './quote';
+import { quote } from './quote';
+import { SwapPath, SwapRoute } from './types';
 
 export async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,
@@ -102,4 +103,39 @@ export const calcPriceImpact = (
   return exchangePrice.eq(0)
     ? exchangePrice
     : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+};
+
+export const getSwapPath = (
+  token0Address: Address,
+  token1Address: Address,
+  initToken0Amount: bigint,
+  initToken1Amount: bigint,
+  finalToken0Amount: bigint,
+  finalToken1Amount: bigint,
+  slippage: number,
+): SwapPath => {
+  const [tokenIn, tokenOut, amountIn, amountOut] =
+    finalToken0Amount > initToken0Amount
+      ? [
+          token1Address,
+          token0Address,
+          initToken1Amount - finalToken1Amount,
+          finalToken0Amount - initToken0Amount,
+        ]
+      : [
+          token0Address,
+          token1Address,
+          initToken0Amount - finalToken0Amount,
+          finalToken1Amount - initToken1Amount,
+        ];
+
+  return {
+    tokenIn: tokenIn,
+    tokenOut: tokenOut,
+    amountIn: amountIn.toString(),
+    amountOut: amountOut.toString(),
+    minAmountOut: new Big(amountOut.toString())
+      .times(1 - slippage * 0.01)
+      .toFixed(0),
+  };
 };

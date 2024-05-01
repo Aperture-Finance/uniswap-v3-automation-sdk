@@ -1,13 +1,10 @@
-import { SwapRoute } from '@/helper/aggregator';
 import { ApertureSupportedChainId } from '@/index';
-import { SwapPath, optimalMint } from '@/viem';
+import { SwapPath, SwapRoute, optimalMint } from '@/viem';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
-
-import { getSwapPath } from './internal';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
@@ -35,6 +32,7 @@ export async function getOptimalMintSwapInfo(
   slippage: number,
   publicClient: PublicClient,
   use1inch?: boolean,
+  blockNumber?: bigint,
 ): Promise<{
   swapRoute: SwapRoute | undefined;
   swapPath: SwapPath;
@@ -43,9 +41,10 @@ export async function getOptimalMintSwapInfo(
   finalAmount1: bigint;
 }> {
   const {
-    amount0: expectedAmount0,
-    amount1: expectedAmount1,
+    amount0: finalAmount0,
+    amount1: finalAmount1,
     swapRoute,
+    swapPath,
     priceImpact,
   } = await optimalMint(
     chainId,
@@ -59,23 +58,15 @@ export async function getOptimalMintSwapInfo(
     slippage,
     publicClient,
     !use1inch,
+    blockNumber,
+    true /** includeSwapInfo */,
   );
-  const token0 = (token0Amount.currency as Token).address as Address;
-  const token1 = (token1Amount.currency as Token).address as Address;
 
   return {
     swapRoute,
-    swapPath: getSwapPath(
-      token0,
-      token1,
-      BigInt(token0Amount.quotient.toString()),
-      BigInt(token1Amount.quotient.toString()),
-      expectedAmount0,
-      expectedAmount1,
-      slippage,
-    ),
-    priceImpact,
-    finalAmount0: expectedAmount0,
-    finalAmount1: expectedAmount1,
+    swapPath: swapPath!,
+    priceImpact: priceImpact!,
+    finalAmount0,
+    finalAmount1,
   };
 }

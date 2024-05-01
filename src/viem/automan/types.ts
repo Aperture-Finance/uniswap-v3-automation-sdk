@@ -50,17 +50,3 @@ export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof INonfungiblePositionManager__factory.abi,
   'increaseLiquidity'
 >[0];
-
-export type SwapPath = {
-  tokenIn: Address;
-  tokenOut: Address;
-  amountIn: string;
-  amountOut: string;
-  minAmountOut: string;
-};
-
-export type SwapInfo = {
-  swapRoute?: SwapRoute;
-  swapPath: SwapPath;
-  priceImpact: Big.Big;
-};

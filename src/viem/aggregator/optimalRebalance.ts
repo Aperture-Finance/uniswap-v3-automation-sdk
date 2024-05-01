@@ -13,8 +13,9 @@ import {
 } from '../automan';
 import { PositionDetails } from '../position';
 import { getApproveTarget } from './aggregator';
-import { calcPriceImpact } from './internal';
-import { SwapRoute, quote } from './quote';
+import { calcPriceImpact, getSwapPath } from './internal';
+import { quote } from './quote';
+import { SolverResult, SwapRoute } from './types';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
@@ -28,16 +29,8 @@ export async function optimalRebalance(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-): Promise<{
-  amount0: bigint;
-  amount1: bigint;
-  receive0: bigint;
-  receive1: bigint;
-  liquidity: bigint;
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-  priceImpact: Big.Big;
-}> {
+  includeSwapInfo?: boolean,
+): Promise<SolverResult> {
   const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   const position = await PositionDetails.fromPositionId(
     chainId,
@@ -111,20 +104,29 @@ export async function optimalRebalance(
     }
   };
 
-  const estimate = await getEstimate();
+  const ret = await getEstimate();
 
-  const priceImpact = await calcPriceImpact(
-    position.pool,
-    mintParams.amount0Desired,
-    mintParams.amount1Desired,
-    estimate.amount0,
-    estimate.amount1,
-  );
+  if (includeSwapInfo) {
+    ret.priceImpact = calcPriceImpact(
+      position.pool,
+      mintParams.amount0Desired,
+      mintParams.amount1Desired,
+      ret.amount0,
+      ret.amount1,
+    );
 
-  return {
-    ...estimate,
-    priceImpact,
-  };
+    ret.swapPath = getSwapPath(
+      position.pool.token0.address as Address,
+      position.pool.token1.address as Address,
+      receive0,
+      receive1,
+      ret.amount0,
+      ret.amount1,
+      slippage,
+    );
+  }
+
+  return ret;
 }
 
 async function optimalMintPool(
@@ -137,13 +139,7 @@ async function optimalMintPool(
   positionOwner: Address,
   feeBips: bigint,
   blockNumber?: bigint,
-): Promise<{
-  amount0: bigint;
-  amount1: bigint;
-  liquidity: bigint;
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
+): Promise<SolverResult> {
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
     amm,
@@ -197,13 +193,7 @@ async function optimalMintRouter(
   positionOwner: Address,
   feeBips: bigint,
   blockNumber?: bigint,
-): Promise<{
-  amount0: bigint;
-  amount1: bigint;
-  liquidity: bigint;
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
+): Promise<SolverResult> {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
     amm,

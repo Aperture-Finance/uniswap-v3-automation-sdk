@@ -13,8 +13,9 @@ import {
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
 import { getApproveTarget } from './index';
-import { calcPriceImpact } from './internal';
-import { SwapRoute, quote } from './quote';
+import { calcPriceImpact, getSwapPath } from './internal';
+import { quote } from './quote';
+import { SolverResult, SwapRoute } from './types';
 
 /**
  * Get the optimal amount of liquidity to increase for a given pool and token amounts.
@@ -27,6 +28,8 @@ import { SwapRoute, quote } from './quote';
  * @param token1Amount The token1 amount.
  * @param fromAddress The address to increase liquidity from.
  * @param usePool Whether to use the pool or the aggregator for the swap.
+ * @param blockNumber Optional. The block number to simulate the call from.
+ * @param includeSwapInfo Optional. If set to true, the swap path and price impact will be included in the result.
  */
 export async function increaseLiquidityOptimal(
   chainId: ApertureSupportedChainId,
@@ -39,7 +42,8 @@ export async function increaseLiquidityOptimal(
   fromAddress: Address,
   usePool = false,
   blockNumber?: bigint,
-) {
+  includeSwapInfo?: boolean,
+): Promise<SolverResult> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
@@ -89,20 +93,31 @@ export async function increaseLiquidityOptimal(
     }
   };
 
-  const estimate = await getEstimate();
+  const ret = await getEstimate();
 
-  const priceImpact = calcPriceImpact(
-    position.pool,
-    increaseParams.amount0Desired,
-    increaseParams.amount1Desired,
-    estimate.amount0,
-    estimate.amount1,
-  );
+  if (includeSwapInfo) {
+    ret.priceImpact = calcPriceImpact(
+      position.pool,
+      increaseParams.amount0Desired,
+      increaseParams.amount1Desired,
+      ret.amount0,
+      ret.amount1,
+    );
 
-  return {
-    ...estimate,
-    priceImpact,
-  };
+    const token0 = (token0Amount.currency as Token).address as Address;
+    const token1 = (token1Amount.currency as Token).address as Address;
+    ret.swapPath = getSwapPath(
+      token0,
+      token1,
+      BigInt(token0Amount.quotient.toString()),
+      BigInt(token1Amount.quotient.toString()),
+      ret.amount0,
+      ret.amount1,
+      Number(increaseOptions.slippageTolerance.toFixed()),
+    );
+  }
+
+  return ret;
 }
 
 async function increaseLiquidityOptimalPool(
@@ -113,7 +128,7 @@ async function increaseLiquidityOptimalPool(
   position: Position,
   increaseParams: IncreaseLiquidityParams,
   blockNumber?: bigint,
-) {
+): Promise<SolverResult> {
   const [liquidity, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
     chainId,
     amm,
@@ -163,7 +178,7 @@ async function increaseLiquidityOptimalRouter(
   increaseParams: IncreaseLiquidityParams,
   slippage: number,
   blockNumber?: bigint,
-) {
+): Promise<SolverResult> {
   const { swapData, swapRoute } = await getIncreaseLiquidityOptimalSwapData(
     chainId,
     amm,

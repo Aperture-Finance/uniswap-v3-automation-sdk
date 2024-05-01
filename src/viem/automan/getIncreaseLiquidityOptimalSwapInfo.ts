@@ -6,7 +6,6 @@ import { Address, PublicClient } from 'viem';
 
 import { increaseLiquidityOptimal } from '../aggregator';
 import { PositionDetails } from '../position';
-import { getSwapPath } from './internal';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
@@ -30,6 +29,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   publicClient: PublicClient,
   position?: Position,
   use1inch?: boolean,
+  blockNumber?: bigint,
 ) {
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
@@ -41,10 +41,11 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   }
 
   const {
-    amount0: expectedAmount0,
-    amount1: expectedAmount1,
+    amount0: finalAmount0,
+    amount1: finalAmount1,
     swapRoute,
     priceImpact,
+    swapPath,
   } = await increaseLiquidityOptimal(
     chainId,
     amm,
@@ -55,23 +56,15 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     token1Amount as CurrencyAmount<Token>,
     recipient,
     !use1inch,
+    blockNumber /** blockNumber */,
+    true /** includeSwapInfo */,
   );
-  const token0 = (token0Amount.currency as Token).address as Address;
-  const token1 = (token1Amount.currency as Token).address as Address;
 
   return {
     swapRoute,
-    swapPath: getSwapPath(
-      token0,
-      token1,
-      BigInt(token0Amount.quotient.toString()),
-      BigInt(token1Amount.quotient.toString()),
-      expectedAmount0,
-      expectedAmount1,
-      Number(increaseOptions.slippageTolerance.toFixed()),
-    ),
-    priceImpact,
-    finalAmount0: expectedAmount0,
-    finalAmount1: expectedAmount1,
+    swapPath: swapPath!,
+    priceImpact: priceImpact!,
+    finalAmount0,
+    finalAmount1,
   };
 }

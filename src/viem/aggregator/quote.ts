@@ -2,15 +2,7 @@ import { ApertureSupportedChainId } from '@/index';
 import { Address, Hex } from 'viem';
 
 import { buildRequest } from './aggregator';
-
-type SelectedProtocol = {
-  name: string;
-  part: number;
-  fromTokenAddress: string;
-  toTokenAddress: string;
-};
-
-export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
+import { SwapRoute } from './types';
 
 /**
  * Get a quote for a swap.
