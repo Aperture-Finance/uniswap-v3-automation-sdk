@@ -8,7 +8,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { E_Solver, SolveRebalanceProps, getSolver } from '../solver';
+import { E_Solver, SolveRebalanceProps, SwapRoute, getSolver } from '../solver';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
@@ -130,6 +130,7 @@ async function solve(
 
   const { swapData } = swapInfo;
   if (!swapData) return failedResult;
+
   const { mintParams } = props;
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     props.chainId,
@@ -139,35 +140,12 @@ async function solve(
     props.positionOwner,
     mintParams,
     props.positionId,
-
     props.feeBips,
     swapData,
     props.blockNumber,
   );
 
-  let { swapRoute } = swapInfo;
-  if (!swapRoute) {
-    swapRoute = [];
-    if (mintParams.amount0Desired !== amount0) {
-      // need a swap
-      const [fromTokenAddress, toTokenAddress] =
-        mintParams.amount0Desired > amount0
-          ? [mintParams.token0, mintParams.token1]
-          : [mintParams.token1, mintParams.token0];
-      swapRoute = [
-        [
-          [
-            {
-              name: 'Pool',
-              part: 100,
-              fromTokenAddress: fromTokenAddress,
-              toTokenAddress: toTokenAddress,
-            },
-          ],
-        ],
-      ];
-    }
-  }
+  const swapRoute = getSwapRoute(mintParams, amount0, swapInfo.swapRoute);
 
   return {
     solver,
@@ -178,6 +156,37 @@ async function solve(
     swapRoute,
   };
 }
+
+const getSwapRoute = (
+  mintParams: MintParams,
+  amount0: bigint,
+  swapRoute?: SwapRoute,
+) => {
+  if (swapRoute) {
+    return swapRoute;
+  }
+  swapRoute = [];
+  if (mintParams.amount0Desired !== amount0) {
+    // need a swap
+    const [fromTokenAddress, toTokenAddress] =
+      mintParams.amount0Desired > amount0
+        ? [mintParams.token0, mintParams.token1]
+        : [mintParams.token1, mintParams.token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+  return swapRoute;
+};
 
 export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
