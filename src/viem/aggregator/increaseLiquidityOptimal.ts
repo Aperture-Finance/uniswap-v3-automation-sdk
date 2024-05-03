@@ -13,9 +13,9 @@ import {
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
 import { SwapRoute } from '../solver';
+import { quote } from '../solver/get1InchSolver';
 import { getApproveTarget } from './index';
 import { calcPriceImpact, getSwapPath } from './internal';
-import { quote } from './quote';
 import { SolverResult } from './types';
 
 /**
