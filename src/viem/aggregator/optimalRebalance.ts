@@ -8,7 +8,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { E_Solver, getSolver } from '../solver';
+import { E_Solver, SolveRebalanceProps, getSolver } from '../solver';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
@@ -114,19 +114,6 @@ export async function optimalRebalance(
   return ret;
 }
 
-interface SolveProps {
-  chainId: ApertureSupportedChainId;
-  amm: AutomatedMarketMakerEnum;
-  publicClient: PublicClient;
-  fromAddress: Address;
-  mintParams: MintParams;
-  slippage: number;
-  positionId: bigint;
-  positionOwner: Address;
-  feeBips: bigint;
-  blockNumber?: bigint;
-}
-
 const failedResult: SolverResult = {
   amount0: 0n,
   amount1: 0n,
@@ -136,7 +123,7 @@ const failedResult: SolverResult = {
 };
 
 async function solve(
-  props: SolveProps,
+  props: SolveRebalanceProps,
   solver: E_Solver,
 ): Promise<SolverResult> {
   const {
@@ -156,8 +143,6 @@ async function solve(
   const { swapData } = swapInfo;
   if (!swapData) return failedResult;
 
-  let { swapRoute } = swapInfo;
-
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
     amm,
@@ -171,6 +156,7 @@ async function solve(
     blockNumber,
   );
 
+  let { swapRoute } = swapInfo;
   if (!swapRoute) {
     swapRoute = [];
     if (mintParams.amount0Desired !== amount0) {
