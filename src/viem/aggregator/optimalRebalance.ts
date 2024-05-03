@@ -126,34 +126,23 @@ async function solve(
   props: SolveRebalanceProps,
   solver: E_Solver,
 ): Promise<SolverResult> {
-  const {
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    mintParams,
-    positionId,
-    positionOwner,
-    feeBips,
-    blockNumber,
-  } = props;
-
   const swapInfo = await getSolver(solver).rebalance(props);
 
   const { swapData } = swapInfo;
   if (!swapData) return failedResult;
-
+  const { mintParams } = props;
   const [, liquidity, amount0, amount1] = await simulateRebalance(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    positionOwner,
+    props.chainId,
+    props.amm,
+    props.publicClient,
+    props.fromAddress,
+    props.positionOwner,
     mintParams,
-    positionId,
-    feeBips,
+    props.positionId,
+
+    props.feeBips,
     swapData,
-    blockNumber,
+    props.blockNumber,
   );
 
   let { swapRoute } = swapInfo;
