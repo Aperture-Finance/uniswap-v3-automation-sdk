@@ -1,4 +1,4 @@
-export * from './optimalRebalance';
+export * from './optimalRebalanceV2';
 export * from './increaseLiquidityOptimal';
 export * from './optimalMint';
 export * from './types';
