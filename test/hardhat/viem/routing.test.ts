@@ -52,7 +52,6 @@ describe('Viem - Routing tests', function () {
       0.1,
       publicClient,
       blockNumber,
-      true /** includeSwapInfo */,
     );
     const { liquidity: predictedLiquidity } = getRebalancedPosition(
       position,

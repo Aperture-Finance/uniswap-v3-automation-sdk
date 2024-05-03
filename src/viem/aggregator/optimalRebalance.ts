@@ -8,7 +8,13 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { E_Solver, SolveRebalanceProps, SwapRoute, getSolver } from '../solver';
+import {
+  ALL_SOLVERS,
+  E_Solver,
+  SolveRebalanceProps,
+  SwapRoute,
+  getSolver,
+} from '../solver';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
@@ -24,94 +30,27 @@ export async function optimalRebalance(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSwapInfo?: boolean,
 ): Promise<SolverResult> {
-  const position = await PositionDetails.fromPositionId(
+  const results = await optimalRebalanceV2(
     chainId,
     amm,
     positionId,
-    publicClient,
-    blockNumber,
-  );
-  const [receive0, receive1] = await simulateRemoveLiquidity(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    position.owner,
-    BigInt(position.tokenId),
-    /*amount0Min =*/ undefined,
-    /*amount1Min =*/ undefined,
+    newTickLower,
+    newTickUpper,
     feeBips,
+    fromAddress,
+    slippage,
+    publicClient,
     blockNumber,
+    usePool ? ALL_SOLVERS.filter((s) => s !== E_Solver.UNISWAP) : [],
   );
 
-  const mintParams: MintParams = {
-    token0: position.token0.address as Address,
-    token1: position.token1.address as Address,
-    fee: position.fee,
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: receive0,
-    amount1Desired: receive1,
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: fromAddress, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
-
-  const getEstimate = async () => {
-    const props: SolveRebalanceProps = {
-      chainId,
-      amm,
-      publicClient,
-      fromAddress,
-      mintParams,
-      slippage,
-      positionId,
-      positionOwner: position.owner,
-      feeBips,
-      blockNumber,
-    };
-    const poolPromise = solve(props, E_Solver.UNISWAP);
-    if (usePool) {
-      return await poolPromise;
+  return results.reduce((prev, curr) => {
+    if (!prev || curr.liquidity > prev.liquidity) {
+      return curr;
     }
-    const [poolEstimate, routerEstimate] = await Promise.all([
-      poolPromise,
-      solve(props, E_Solver.OneInch),
-    ]);
-    // use the same pool if the quote isn't better
-    if (poolEstimate.liquidity >= routerEstimate.liquidity) {
-      return poolEstimate;
-    } else {
-      return routerEstimate;
-    }
-  };
-
-  const ret = await getEstimate();
-
-  if (includeSwapInfo) {
-    ret.priceImpact = calcPriceImpact(
-      position.pool,
-      mintParams.amount0Desired,
-      mintParams.amount1Desired,
-      ret.amount0,
-      ret.amount1,
-    );
-
-    ret.swapPath = getSwapPath(
-      position.pool.token0.address as Address,
-      position.pool.token1.address as Address,
-      receive0,
-      receive1,
-      ret.amount0,
-      ret.amount1,
-      slippage,
-    );
-  }
-
-  return ret;
+    return prev;
+  });
 }
 
 const failedResult: SolverResult = {
@@ -236,9 +175,8 @@ export async function optimalRebalanceV2(
   };
 
   return Promise.all(
-    Object.values(E_Solver)
-      .filter((solver) => !excludeSolvers.includes(solver))
-      .map(async (solver) => {
+    ALL_SOLVERS.filter((solver) => !excludeSolvers.includes(solver)).map(
+      async (solver) => {
         const result = await solve(
           {
             chainId,
@@ -274,6 +212,7 @@ export async function optimalRebalanceV2(
         );
 
         return result;
-      }),
+      },
+    ),
   );
 }

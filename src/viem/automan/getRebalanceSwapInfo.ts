@@ -57,7 +57,6 @@ export async function getRebalanceSwapInfo(
     slippageTolerance,
     publicClient,
     blockNumber,
-    true /** includeSwapInfo */,
   );
 
   return {
