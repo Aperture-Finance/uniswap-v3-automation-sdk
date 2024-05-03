@@ -1,18 +1,6 @@
 import { Address } from 'viem';
 
-type SelectedProtocol = {
-  name: string;
-  part: number;
-  fromTokenAddress: string;
-  toTokenAddress: string;
-};
-export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
-
-export enum E_Solver {
-  PH = 'PropellerHeads',
-  UNISWAP = 'Uniswap',
-  OneInch = '1Inch',
-}
+import { E_Solver, SwapRoute } from '../solver';
 
 export type SolverResult = {
   solver?: E_Solver; // TODO: make it required

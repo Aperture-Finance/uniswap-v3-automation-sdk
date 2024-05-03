@@ -1,8 +1,8 @@
 import { ApertureSupportedChainId } from '@/index';
 import { Address, Hex } from 'viem';
 
+import { SwapRoute } from '../solver';
 import { buildRequest } from './aggregator';
-import { SwapRoute } from './types';
 
 /**
  * Get a quote for a swap.

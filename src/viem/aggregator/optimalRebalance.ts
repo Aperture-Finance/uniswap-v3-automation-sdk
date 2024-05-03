@@ -1,6 +1,6 @@
-import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, PublicClient } from 'viem';
+import { Address, PublicClient } from 'viem';
 
 import {
   MintParams,
@@ -8,12 +8,9 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import {
-  calcPriceImpact,
-  getOptimalMintSwapData,
-  getSwapPath,
-} from './internal';
-import { E_Solver, SolverResult, SwapRoute } from './types';
+import { E_Solver, getSolver } from '../solver';
+import { calcPriceImpact, getSwapPath } from './internal';
+import { SolverResult } from './types';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
@@ -142,46 +139,24 @@ async function solve(
   props: SolveProps,
   solver: E_Solver,
 ): Promise<SolverResult> {
-  let swapData: Hex = '0x';
-  let swapRoute: SwapRoute | undefined;
   const {
     chainId,
     amm,
     publicClient,
     fromAddress,
     mintParams,
-    slippage,
     positionId,
     positionOwner,
     feeBips,
     blockNumber,
   } = props;
 
-  switch (solver) {
-    case E_Solver.OneInch:
-      const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
-      if (!optimalSwapRouter) {
-        return {
-          ...failedResult,
-          solver,
-        };
-      }
-      ({ swapData, swapRoute } = await getOptimalMintSwapData(
-        chainId,
-        amm,
-        publicClient,
-        mintParams,
-        slippage,
-        blockNumber,
-        /** includeRoute= */ true,
-      ));
-      break;
-    case E_Solver.PH:
-    case E_Solver.UNISWAP:
-      break;
-    default:
-      throw new Error('Invalid solver');
-  }
+  const swapInfo = await getSolver(solver).rebalance(props);
+
+  const { swapData } = swapInfo;
+  if (!swapData) return failedResult;
+
+  let { swapRoute } = swapInfo;
 
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,

@@ -7,12 +7,13 @@ import { Address, PublicClient } from 'viem';
 
 import { MintParams, simulateMintOptimal } from '../automan';
 import { getPool } from '../pool';
+import { SwapRoute } from '../solver';
 import {
   calcPriceImpact,
   getOptimalMintSwapData,
   getSwapPath,
 } from './internal';
-import { SolverResult, SwapRoute } from './types';
+import { SolverResult } from './types';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.

@@ -11,9 +11,10 @@ import {
   encodeOptimalSwapData,
   getAutomanContract,
 } from '../automan';
+import { SwapRoute } from '../solver';
 import { getApproveTarget } from './aggregator';
 import { quote } from './quote';
-import { SwapPath, SwapRoute } from './types';
+import { SwapPath } from './types';
 
 export async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,

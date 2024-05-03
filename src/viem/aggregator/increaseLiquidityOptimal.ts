@@ -12,10 +12,11 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
+import { SwapRoute } from '../solver';
 import { getApproveTarget } from './index';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { quote } from './quote';
-import { SolverResult, SwapRoute } from './types';
+import { SolverResult } from './types';
 
 /**
  * Get the optimal amount of liquidity to increase for a given pool and token amounts.
