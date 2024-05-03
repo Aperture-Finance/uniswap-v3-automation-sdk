@@ -61,7 +61,7 @@ export async function optimalRebalance(
   };
 
   const getEstimate = async () => {
-    const props: SolveProps = {
+    const props: SolveRebalanceProps = {
       chainId,
       amm,
       publicClient,
