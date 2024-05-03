@@ -12,8 +12,7 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
-import { SwapRoute } from '../solver';
-import { quote } from '../solver/get1InchSolver';
+import { SwapRoute, quote } from '../solver';
 import { getApproveTarget } from './index';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
