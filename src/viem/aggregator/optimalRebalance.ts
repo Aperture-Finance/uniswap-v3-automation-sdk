@@ -173,6 +173,8 @@ async function solve(
       ));
       break;
     case E_Solver.PH:
+    case E_Solver.UNISWAP:
+      break;
     default:
       throw new Error('Invalid solver');
   }
