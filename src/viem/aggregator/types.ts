@@ -8,6 +8,12 @@ type SelectedProtocol = {
 };
 export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
 
+export enum E_Solver {
+  PH = 'PropellerHeads',
+  UNISWAP = 'Uniswap',
+  OneInch = '1Inch',
+}
+
 export type SolverResult = {
   amount0: bigint;
   amount1: bigint;
