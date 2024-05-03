@@ -160,6 +160,7 @@ async function solve(
   if (!swapRoute) {
     swapRoute = [];
     if (mintParams.amount0Desired !== amount0) {
+      // need a swap
       const [fromTokenAddress, toTokenAddress] =
         mintParams.amount0Desired > amount0
           ? [mintParams.token0, mintParams.token1]

@@ -7,12 +7,8 @@ import { Address, PublicClient } from 'viem';
 
 import { MintParams, simulateMintOptimal } from '../automan';
 import { getPool } from '../pool';
-import { SwapRoute } from '../solver';
-import {
-  calcPriceImpact,
-  getOptimalMintSwapData,
-  getSwapPath,
-} from './internal';
+import { SwapRoute, getOptimalMintSwapData } from '../solver';
+import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
 /**

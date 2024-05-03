@@ -1,7 +1,7 @@
 import { get1InchSolver } from './get1InchSolver';
 import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
-export { quote } from './get1InchSolver'; // TODO: remove when complete refactor
+export { quote, getOptimalMintSwapData } from './get1InchSolver'; // TODO: remove when complete refactor
 
 export * from './types';
 
