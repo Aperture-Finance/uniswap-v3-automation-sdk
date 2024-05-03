@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, PublicClient } from 'viem';
+import { Address, Hex, PublicClient } from 'viem';
 
 import {
   MintParams,
@@ -29,7 +29,6 @@ export async function optimalRebalance(
   blockNumber?: bigint,
   includeSwapInfo?: boolean,
 ): Promise<SolverResult> {
-  const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   const position = await PositionDetails.fromPositionId(
     chainId,
     amm,
@@ -65,34 +64,25 @@ export async function optimalRebalance(
   };
 
   const getEstimate = async () => {
-    const poolPromise = optimalMintPool(
+    const props: SolveProps = {
       chainId,
       amm,
       publicClient,
       fromAddress,
       mintParams,
+      slippage,
       positionId,
-      position.owner,
+      positionOwner: position.owner,
       feeBips,
       blockNumber,
-    );
-    if (usePool || !optimalSwapRouter) {
+    };
+    const poolPromise = solve(props, E_Solver.UNISWAP);
+    if (usePool) {
       return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
-      optimalMintRouter(
-        chainId,
-        amm,
-        publicClient,
-        fromAddress,
-        mintParams,
-        slippage,
-        positionId,
-        position.owner,
-        feeBips,
-        blockNumber,
-      ),
+      solve(props, E_Solver.OneInch),
     ]);
     // use the same pool if the quote isn't better
     if (poolEstimate.liquidity >= routerEstimate.liquidity) {
@@ -127,17 +117,66 @@ export async function optimalRebalance(
   return ret;
 }
 
-async function optimalMintPool(
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  publicClient: PublicClient,
-  fromAddress: Address,
-  mintParams: MintParams,
-  positionId: bigint,
-  positionOwner: Address,
-  feeBips: bigint,
-  blockNumber?: bigint,
+interface SolveProps {
+  chainId: ApertureSupportedChainId;
+  amm: AutomatedMarketMakerEnum;
+  publicClient: PublicClient;
+  fromAddress: Address;
+  mintParams: MintParams;
+  slippage: number;
+  positionId: bigint;
+  positionOwner: Address;
+  feeBips: bigint;
+  blockNumber?: bigint;
+}
+
+async function solve(
+  props: SolveProps,
+  solver: E_Solver,
 ): Promise<SolverResult> {
+  let swapData: Hex = '0x';
+  let swapRoute: SwapRoute | undefined;
+  const {
+    chainId,
+    amm,
+    publicClient,
+    fromAddress,
+    mintParams,
+    slippage,
+    positionId,
+    positionOwner,
+    feeBips,
+    blockNumber,
+  } = props;
+
+  switch (solver) {
+    case E_Solver.OneInch:
+      const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
+      if (!optimalSwapRouter) {
+        return {
+          solver,
+          amount0: 0n,
+          amount1: 0n,
+          liquidity: 0n,
+          swapData: '0x',
+          swapRoute: [],
+        };
+      }
+      ({ swapData, swapRoute } = await getOptimalMintSwapData(
+        chainId,
+        amm,
+        publicClient,
+        mintParams,
+        slippage,
+        blockNumber,
+        /** includeRoute= */ true,
+      ));
+      break;
+    case E_Solver.PH:
+    default:
+      throw new Error('Invalid solver');
+  }
+
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
     amm,
@@ -147,79 +186,128 @@ async function optimalMintPool(
     mintParams,
     positionId,
     feeBips,
-    /*swapData =*/ '0x',
+    swapData,
     blockNumber,
   );
 
-  let swapRoute: SwapRoute = [];
-  if (mintParams.amount0Desired !== amount0) {
-    const [fromTokenAddress, toTokenAddress] =
-      mintParams.amount0Desired > amount0
-        ? [mintParams.token0, mintParams.token1]
-        : [mintParams.token1, mintParams.token0];
-    swapRoute = [
-      [
+  if (!swapRoute) {
+    swapRoute = [];
+    if (mintParams.amount0Desired !== amount0) {
+      const [fromTokenAddress, toTokenAddress] =
+        mintParams.amount0Desired > amount0
+          ? [mintParams.token0, mintParams.token1]
+          : [mintParams.token1, mintParams.token0];
+      swapRoute = [
         [
-          {
-            name: 'Pool',
-            part: 100,
-            fromTokenAddress: fromTokenAddress,
-            toTokenAddress: toTokenAddress,
-          },
+          [
+            {
+              name: 'Pool',
+              part: 100,
+              fromTokenAddress: fromTokenAddress,
+              toTokenAddress: toTokenAddress,
+            },
+          ],
         ],
-      ],
-    ];
+      ];
+    }
   }
 
   return {
-    solver: E_Solver.UNISWAP,
+    solver,
     amount0,
     amount1,
     liquidity,
-    swapData: '0x',
+    swapData,
     swapRoute,
   };
 }
 
-async function optimalMintRouter(
+export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  publicClient: PublicClient,
-  fromAddress: Address,
-  mintParams: MintParams,
-  slippage: number,
   positionId: bigint,
-  positionOwner: Address,
+  newTickLower: number,
+  newTickUpper: number,
   feeBips: bigint,
+  fromAddress: Address,
+  slippage: number,
+  publicClient: PublicClient,
   blockNumber?: bigint,
-): Promise<SolverResult> {
-  const { swapData, swapRoute } = await getOptimalMintSwapData(
+  excludeSolvers: E_Solver[] = [],
+): Promise<SolverResult[]> {
+  const position = await PositionDetails.fromPositionId(
     chainId,
     amm,
+    positionId,
     publicClient,
-    mintParams,
-    slippage,
     blockNumber,
-    /** includeRoute= */ true,
   );
-  const [, liquidity, amount0, amount1] = await simulateRebalance(
+  const [receive0, receive1] = await simulateRemoveLiquidity(
     chainId,
     amm,
     publicClient,
     fromAddress,
-    positionOwner,
-    mintParams,
-    positionId,
+    position.owner,
+    BigInt(position.tokenId),
+    /*amount0Min =*/ undefined,
+    /*amount1Min =*/ undefined,
     feeBips,
-    swapData,
     blockNumber,
   );
-  return {
-    solver: E_Solver.OneInch,
-    amount0,
-    amount1,
-    liquidity,
-    swapData,
-    swapRoute,
+
+  const mintParams: MintParams = {
+    token0: position.token0.address as Address,
+    token1: position.token1.address as Address,
+    fee: position.fee,
+    tickLower: newTickLower,
+    tickUpper: newTickUpper,
+    amount0Desired: receive0,
+    amount1Desired: receive1,
+    amount0Min: 0n, // Setting this to zero for tx simulation.
+    amount1Min: 0n, // Setting this to zero for tx simulation.
+    recipient: fromAddress, // Param value ignored by Automan for rebalance.
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
+
+  return Promise.all(
+    Object.values(E_Solver)
+      .filter((solver) => !excludeSolvers.includes(solver))
+      .map(async (solver) => {
+        const result = await solve(
+          {
+            chainId,
+            amm,
+            publicClient,
+            fromAddress,
+            mintParams,
+            slippage,
+            positionId,
+            positionOwner: position.owner,
+            feeBips,
+            blockNumber,
+          },
+          solver,
+        );
+
+        result.priceImpact = calcPriceImpact(
+          position.pool,
+          mintParams.amount0Desired,
+          mintParams.amount1Desired,
+          result.amount0,
+          result.amount1,
+        );
+
+        result.swapPath = getSwapPath(
+          position.pool.token0.address as Address,
+          position.pool.token1.address as Address,
+          receive0,
+          receive1,
+          result.amount0,
+          result.amount1,
+          slippage,
+        );
+
+        return result;
+      }),
+  );
 }
