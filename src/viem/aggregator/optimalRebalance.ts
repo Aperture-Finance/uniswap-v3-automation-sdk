@@ -15,6 +15,7 @@ import { PositionDetails } from '../position';
 import { SwapRoute, quote } from '../solver';
 import { getApproveTarget } from './aggregator';
 
+// deprecate soon
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

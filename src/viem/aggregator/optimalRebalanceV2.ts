@@ -18,41 +18,6 @@ import {
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
-export async function optimalRebalance(
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  positionId: bigint,
-  newTickLower: number,
-  newTickUpper: number,
-  feeBips: bigint,
-  usePool: boolean,
-  fromAddress: Address,
-  slippage: number,
-  publicClient: PublicClient,
-  blockNumber?: bigint,
-): Promise<SolverResult> {
-  const results = await optimalRebalanceV2(
-    chainId,
-    amm,
-    positionId,
-    newTickLower,
-    newTickUpper,
-    feeBips,
-    fromAddress,
-    slippage,
-    publicClient,
-    blockNumber,
-    usePool ? ALL_SOLVERS.filter((s) => s !== E_Solver.UNISWAP) : [],
-  );
-
-  return results.reduce((prev, curr) => {
-    if (!prev || curr.liquidity > prev.liquidity) {
-      return curr;
-    }
-    return prev;
-  });
-}
-
 const failedResult: SolverResult = {
   amount0: 0n,
   amount1: 0n,
