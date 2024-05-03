@@ -18,7 +18,7 @@ export interface SolvedSwapInfo {
   swapRoute?: SwapRoute;
 }
 
-export interface RebalanceSolveProps {
+export interface SolveRebalanceProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
   publicClient: PublicClient;
@@ -32,7 +32,7 @@ export interface RebalanceSolveProps {
 }
 
 export interface ISolver {
-  rebalance(props: RebalanceSolveProps): Promise<SolvedSwapInfo>;
+  rebalance(props: SolveRebalanceProps): Promise<SolvedSwapInfo>;
 }
 
 export enum E_Solver {
