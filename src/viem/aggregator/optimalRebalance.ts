@@ -130,6 +130,14 @@ interface SolveProps {
   blockNumber?: bigint;
 }
 
+const failedResult: SolverResult = {
+  amount0: 0n,
+  amount1: 0n,
+  liquidity: 0n,
+  swapData: '0x',
+  swapRoute: [],
+};
+
 async function solve(
   props: SolveProps,
   solver: E_Solver,
@@ -154,12 +162,8 @@ async function solve(
       const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
       if (!optimalSwapRouter) {
         return {
+          ...failedResult,
           solver,
-          amount0: 0n,
-          amount1: 0n,
-          liquidity: 0n,
-          swapData: '0x',
-          swapRoute: [],
         };
       }
       ({ swapData, swapRoute } = await getOptimalMintSwapData(
