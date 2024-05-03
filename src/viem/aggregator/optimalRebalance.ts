@@ -1,21 +1,19 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, PublicClient } from 'viem';
+import { Address, PublicClient } from 'viem';
 
-import { computePoolAddress } from '../../utils';
 import {
   MintParams,
-  encodeOptimalSwapData,
-  getAutomanContract,
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { getApproveTarget } from './aggregator';
-import { calcPriceImpact, getSwapPath } from './internal';
-import { quote } from './quote';
-import { SolverResult, SwapRoute } from './types';
+import {
+  calcPriceImpact,
+  getOptimalMintSwapData,
+  getSwapPath,
+} from './internal';
+import { E_Solver, SolverResult, SwapRoute } from './types';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
@@ -79,7 +77,7 @@ export async function optimalRebalance(
       blockNumber,
     );
     if (usePool || !optimalSwapRouter) {
-      return { ...(await poolPromise), receive0, receive1 };
+      return await poolPromise;
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
@@ -98,9 +96,9 @@ export async function optimalRebalance(
     ]);
     // use the same pool if the quote isn't better
     if (poolEstimate.liquidity >= routerEstimate.liquidity) {
-      return { ...poolEstimate, receive0, receive1 };
+      return poolEstimate;
     } else {
-      return { ...routerEstimate, receive0, receive1 };
+      return routerEstimate;
     }
   };
 
@@ -174,6 +172,7 @@ async function optimalMintPool(
   }
 
   return {
+    solver: E_Solver.UNISWAP,
     amount0,
     amount1,
     liquidity,
@@ -216,80 +215,11 @@ async function optimalMintRouter(
     blockNumber,
   );
   return {
+    solver: E_Solver.OneInch,
     amount0,
     amount1,
     liquidity,
     swapData,
     swapRoute,
-  };
-}
-
-async function getOptimalMintSwapData(
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  publicClient: PublicClient,
-  mintParams: MintParams,
-  slippage: number,
-  blockNumber?: bigint,
-  includeRoute?: boolean,
-): Promise<{
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
-  try {
-    const ammInfo = getAMMInfo(chainId, amm)!;
-    const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await getApproveTarget(chainId);
-    // get swap amounts using the same pool
-    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
-      [
-        computePoolAddress(
-          chainId,
-          amm,
-          mintParams.token0,
-          mintParams.token1,
-          mintParams.fee as FeeAmount,
-        ),
-        mintParams.tickLower,
-        mintParams.tickUpper,
-        mintParams.amount0Desired,
-        mintParams.amount1Desired,
-      ],
-      {
-        blockNumber,
-      },
-    );
-
-    // get a quote from 1inch
-    const { tx, protocols } = await quote(
-      chainId,
-      zeroForOne ? mintParams.token0 : mintParams.token1,
-      zeroForOne ? mintParams.token1 : mintParams.token0,
-      poolAmountIn.toString(),
-      ammInfo.optimalSwapRouter!,
-      slippage * 100,
-      includeRoute,
-    );
-    return {
-      swapData: encodeOptimalSwapData(
-        chainId,
-        amm,
-        mintParams.token0,
-        mintParams.token1,
-        mintParams.fee as FeeAmount,
-        mintParams.tickLower,
-        mintParams.tickUpper,
-        zeroForOne,
-        approveTarget,
-        tx.to,
-        tx.data,
-      ),
-      swapRoute: protocols,
-    };
-  } catch (e) {
-    console.warn(`Failed to get swap data: ${e}`);
-  }
-  return {
-    swapData: '0x',
   };
 }

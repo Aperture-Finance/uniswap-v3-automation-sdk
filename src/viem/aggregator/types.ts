@@ -15,6 +15,7 @@ export enum E_Solver {
 }
 
 export type SolverResult = {
+  solver?: E_Solver; // TODO: make it required
   amount0: bigint;
   amount1: bigint;
   liquidity: bigint;
