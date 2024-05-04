@@ -206,7 +206,7 @@ export async function optimalRebalanceV1ByV2(
     slippage,
     publicClient,
     blockNumber,
-    usePool ? ALL_SOLVERS.filter((s) => s !== E_Solver.UNISWAP) : [],
+    usePool ? ALL_SOLVERS.filter((s) => s !== E_Solver.SamePool) : [],
   );
   return results.reduce((prev, curr) => {
     if (!prev || prev.liquidity < curr.liquidity) {

@@ -36,9 +36,9 @@ export interface ISolver {
 }
 
 export enum E_Solver {
-  UNISWAP = 'Uniswap',
+  SamePool = 'SamePool',
   PH = 'PropellerHeads',
   OneInch = '1Inch',
 }
 
-export const ALL_SOLVERS = [E_Solver.UNISWAP, E_Solver.OneInch, E_Solver.PH]; // order matters
+export const ALL_SOLVERS = [E_Solver.SamePool, E_Solver.OneInch, E_Solver.PH]; // order matters

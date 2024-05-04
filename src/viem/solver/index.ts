@@ -15,7 +15,7 @@ export const getSolver = (solver: E_Solver): ISolver => {
       return get1InchSolver();
     case E_Solver.PH:
     // TODO: implement
-    case E_Solver.UNISWAP:
+    case E_Solver.SamePool:
       return {
         optimalMint: async () => defaultSwapInfo,
       };
