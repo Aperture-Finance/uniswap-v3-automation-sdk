@@ -17,7 +17,7 @@ import { SwapRoute } from './types';
 
 export const get1InchSolver = (): ISolver => {
   return {
-    rebalance: async (props) => {
+    optimalMint: async (props) => {
       const { chainId, amm, publicClient, mintParams, slippage, blockNumber } =
         props;
 

@@ -17,7 +17,7 @@ export const getSolver = (solver: E_Solver): ISolver => {
     // TODO: implement
     case E_Solver.UNISWAP:
       return {
-        rebalance: async () => defaultSwapInfo,
+        optimalMint: async () => defaultSwapInfo,
       };
     default:
       throw new Error('Invalid solver');

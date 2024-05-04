@@ -11,7 +11,7 @@ import { PositionDetails } from '../position';
 import {
   ALL_SOLVERS,
   E_Solver,
-  SolveRebalanceProps,
+  SolveOptimalMintProps,
   SwapRoute,
   getSolver,
 } from '../solver';
@@ -117,10 +117,10 @@ const failedResult: SolverResult = {
 };
 
 async function solve(
-  props: SolveRebalanceProps,
+  props: SolveOptimalMintProps,
   solver: E_Solver,
 ): Promise<SolverResult> {
-  const swapInfo = await getSolver(solver).rebalance(props);
+  const swapInfo = await getSolver(solver).optimalMint(props);
 
   const { swapData } = swapInfo;
   if (!swapData) return failedResult;
