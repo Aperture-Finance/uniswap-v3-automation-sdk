@@ -29,7 +29,7 @@ export async function optimalRebalance(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSwapInfo?: boolean,
+  includeSwapInfo: boolean = true,
 ): Promise<SolverResult> {
   const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   const position = await PositionDetails.fromPositionId(

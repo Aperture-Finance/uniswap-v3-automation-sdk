@@ -40,19 +40,22 @@ describe('Viem - Routing tests', function () {
     const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
       tokenId,
     ]);
-    const { liquidity, priceImpact, swapPath } = await optimalRebalance(
+    const resultV1 = await optimalRebalance(
       chainId,
       UNIV3_AMM,
       tokenId,
       tickLower,
       tickUpper,
       0n,
-      /** usePool= */ true, // don't use 1inch in unit test
+      /** usePool= */ false, // don't use 1inch in unit test
       owner,
       0.1,
       publicClient,
       blockNumber,
     );
+
+    const { liquidity, swapPath, priceImpact } = resultV1;
+
     const { liquidity: predictedLiquidity } = getRebalancedPosition(
       position,
       tickLower,

@@ -18,80 +18,6 @@ import {
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
-const failedResult: SolverResult = {
-  amount0: 0n,
-  amount1: 0n,
-  liquidity: 0n,
-  swapData: '0x',
-  swapRoute: [],
-};
-
-async function solve(
-  props: SolveRebalanceProps,
-  solver: E_Solver,
-): Promise<SolverResult> {
-  const swapInfo = await getSolver(solver).rebalance(props);
-
-  const { swapData } = swapInfo;
-  if (!swapData) return failedResult;
-
-  const { mintParams } = props;
-  const [, liquidity, amount0, amount1] = await simulateRebalance(
-    props.chainId,
-    props.amm,
-    props.publicClient,
-    props.fromAddress,
-    props.positionOwner,
-    mintParams,
-    props.positionId,
-    props.feeBips,
-    swapData,
-    props.blockNumber,
-  );
-
-  const swapRoute = getSwapRoute(mintParams, amount0, swapInfo.swapRoute);
-
-  return {
-    solver,
-    amount0,
-    amount1,
-    liquidity,
-    swapData,
-    swapRoute,
-  };
-}
-
-const getSwapRoute = (
-  mintParams: MintParams,
-  amount0: bigint,
-  swapRoute?: SwapRoute,
-) => {
-  if (swapRoute) {
-    return swapRoute;
-  }
-  swapRoute = [];
-  if (mintParams.amount0Desired !== amount0) {
-    // need a swap
-    const [fromTokenAddress, toTokenAddress] =
-      mintParams.amount0Desired > amount0
-        ? [mintParams.token0, mintParams.token1]
-        : [mintParams.token1, mintParams.token0];
-    swapRoute = [
-      [
-        [
-          {
-            name: 'Pool',
-            part: 100,
-            fromTokenAddress: fromTokenAddress,
-            toTokenAddress: toTokenAddress,
-          },
-        ],
-      ],
-    ];
-  }
-  return swapRoute;
-};
-
 export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -180,4 +106,112 @@ export async function optimalRebalanceV2(
       },
     ),
   );
+}
+
+const failedResult: SolverResult = {
+  amount0: 0n,
+  amount1: 0n,
+  liquidity: 0n,
+  swapData: '0x',
+  swapRoute: [],
+};
+
+async function solve(
+  props: SolveRebalanceProps,
+  solver: E_Solver,
+): Promise<SolverResult> {
+  const swapInfo = await getSolver(solver).rebalance(props);
+
+  const { swapData } = swapInfo;
+  if (!swapData) return failedResult;
+
+  const { mintParams } = props;
+  const [, liquidity, amount0, amount1] = await simulateRebalance(
+    props.chainId,
+    props.amm,
+    props.publicClient,
+    props.fromAddress,
+    props.positionOwner,
+    mintParams,
+    props.positionId,
+    props.feeBips,
+    swapData,
+    props.blockNumber,
+  );
+
+  const swapRoute = getSwapRoute(mintParams, amount0, swapInfo.swapRoute);
+
+  return {
+    solver,
+    amount0,
+    amount1,
+    liquidity,
+    swapData,
+    swapRoute,
+  };
+}
+
+const getSwapRoute = (
+  mintParams: MintParams,
+  amount0: bigint,
+  swapRoute?: SwapRoute,
+) => {
+  if (swapRoute) {
+    return swapRoute;
+  }
+  swapRoute = [];
+  if (mintParams.amount0Desired !== amount0) {
+    // need a swap
+    const [fromTokenAddress, toTokenAddress] =
+      mintParams.amount0Desired > amount0
+        ? [mintParams.token0, mintParams.token1]
+        : [mintParams.token1, mintParams.token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+  return swapRoute;
+};
+
+export async function optimalRebalanceV1ByV2(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  tokenId: bigint,
+  tickLower: number,
+  tickUpper: number,
+  fee: bigint,
+  usePool: boolean,
+  owner: Address,
+  slippage: number,
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+): Promise<SolverResult> {
+  const results = await optimalRebalanceV2(
+    chainId,
+    amm,
+    tokenId,
+    tickLower,
+    tickUpper,
+    fee,
+    owner,
+    slippage,
+    publicClient,
+    blockNumber,
+    usePool ? ALL_SOLVERS.filter((s) => s !== E_Solver.UNISWAP) : [],
+  );
+  return results.reduce((prev, curr) => {
+    if (!prev || prev.liquidity < curr.liquidity) {
+      return curr;
+    }
+    return prev;
+  });
 }
