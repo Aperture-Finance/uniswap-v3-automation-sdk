@@ -13,6 +13,7 @@ import {
   increaseLiquidityOptimal,
   optimalMint,
   optimalRebalance,
+  optimalRebalanceV2,
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
@@ -70,6 +71,45 @@ describe('Viem - Routing tests', function () {
 
     expect(swapPath!.tokenIn).to.equal(pool.token0.address);
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
+  });
+
+  it('Test optimalRebalanceV2', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const tokenId = 726230n;
+    const blockNumber = 119626480n;
+    const { pool } = await PositionDetails.fromPositionId(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      publicClient,
+      blockNumber,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
+      tokenId,
+    ]);
+    const resultV2 = await optimalRebalanceV2(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      tickLower,
+      tickUpper,
+      0n,
+      owner,
+      0.1,
+      publicClient,
+      blockNumber,
+    );
+
+    console.log('resultV2', resultV2);
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
