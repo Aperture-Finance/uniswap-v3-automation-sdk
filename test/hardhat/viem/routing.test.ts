@@ -13,7 +13,6 @@ import {
   increaseLiquidityOptimal,
   optimalMint,
   optimalRebalance,
-  optimalRebalanceV1ByV2,
   optimalRebalanceV2,
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
@@ -72,66 +71,6 @@ describe('Viem - Routing tests', function () {
 
     expect(swapPath!.tokenIn).to.equal(pool.token0.address);
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
-  });
-
-  it('Test optimalRebalanceV1ByV2', async function () {
-    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
-    const tokenId = 726230n;
-    const blockNumber = await publicClient.getBlockNumber();
-    const { pool } = await PositionDetails.fromPositionId(
-      chainId,
-      UNIV3_AMM,
-      tokenId,
-      publicClient,
-      blockNumber,
-    );
-    const tickLower = nearestUsableTick(
-      pool.tickCurrent - 10 * pool.tickSpacing,
-      pool.tickSpacing,
-    );
-    const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 10 * pool.tickSpacing,
-      pool.tickSpacing,
-    );
-    const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
-      tokenId,
-    ]);
-
-    const [resultV1, resultV2] = await Promise.all([
-      optimalRebalance(
-        chainId,
-        UNIV3_AMM,
-        tokenId,
-        tickLower,
-        tickUpper,
-        0n,
-        /** usePool= */ true,
-        owner,
-        0.1,
-        publicClient,
-        blockNumber,
-      ),
-      optimalRebalanceV1ByV2(
-        chainId,
-        UNIV3_AMM,
-        tokenId,
-        tickLower,
-        tickUpper,
-        0n,
-        /** usePool= */ true,
-        owner,
-        0.1,
-        publicClient,
-        blockNumber,
-      ),
-    ]);
-
-    expect(resultV1.solver).to.be.equal(resultV2.solver);
-    expect(resultV1.swapPath?.tokenIn).to.be.equal(resultV2.swapPath?.tokenIn);
-    expect(resultV1.swapPath?.tokenOut).to.be.equal(
-      resultV2.swapPath?.tokenOut,
-    );
   });
 
   it('Test optimalRebalanceV2', async function () {
