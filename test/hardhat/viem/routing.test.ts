@@ -13,7 +13,7 @@ import {
   increaseLiquidityOptimal,
   optimalMint,
   optimalRebalance,
-  optimalRebalanceV2,
+  optimalRebalanceV1ByV2,
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
@@ -77,7 +77,7 @@ describe('Viem - Routing tests', function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
-    const blockNumber = 119626480n;
+    const blockNumber = await publicClient.getBlockNumber();
     const { pool } = await PositionDetails.fromPositionId(
       chainId,
       UNIV3_AMM,
@@ -96,20 +96,43 @@ describe('Viem - Routing tests', function () {
     const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
       tokenId,
     ]);
-    const resultV2 = await optimalRebalanceV2(
+
+    const resultV2 = await optimalRebalanceV1ByV2(
       chainId,
       UNIV3_AMM,
       tokenId,
       tickLower,
       tickUpper,
       0n,
+      /** usePool= */ false,
       owner,
       0.1,
       publicClient,
       blockNumber,
     );
 
-    console.log('resultV2', resultV2);
+    const resultV1 = await optimalRebalance(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      tickLower,
+      tickUpper,
+      0n,
+      /** usePool= */ false,
+      owner,
+      0.1,
+      publicClient,
+      blockNumber,
+    );
+
+    expect(resultV1.liquidity.toString()).to.be.equal(
+      resultV2.liquidity.toString(),
+    );
+    expect(resultV1.swapData).to.be.equal(resultV2.swapData);
+    expect(resultV1.priceImpact!.toString()).to.be.equal(
+      resultV2.priceImpact!.toString(),
+    );
+    expect(resultV1.swapPath).to.be.deep.equal(resultV2.swapPath);
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
