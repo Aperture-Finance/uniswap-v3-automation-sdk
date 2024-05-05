@@ -37,7 +37,7 @@ export const get1InchSolver = (): ISolver => {
         }
       }
 
-      return {}; // return empty object if failed
+      throw new Error('1Inch failed to provide swap data');
     },
   };
 };

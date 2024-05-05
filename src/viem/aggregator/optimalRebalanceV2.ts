@@ -65,47 +65,56 @@ export async function optimalRebalanceV2(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
-  return Promise.all(
-    ALL_SOLVERS.filter((solver) => !excludeSolvers.includes(solver)).map(
-      async (solver) => {
-        const result = await solve(
-          {
-            chainId,
-            amm,
-            publicClient,
-            fromAddress,
-            mintParams,
-            slippage,
-            positionId,
-            positionOwner: position.owner,
-            feeBips,
-            blockNumber,
-          },
-          solver,
-        );
+  return (
+    await Promise.all(
+      ALL_SOLVERS.filter((solver) => !excludeSolvers.includes(solver)).map(
+        async (solver) => {
+          try {
+            const result = await solve(
+              {
+                chainId,
+                amm,
+                publicClient,
+                fromAddress,
+                mintParams,
+                slippage,
+                positionId,
+                positionOwner: position.owner,
+                feeBips,
+                blockNumber,
+              },
+              solver,
+            );
 
-        result.priceImpact = calcPriceImpact(
-          position.pool,
-          mintParams.amount0Desired,
-          mintParams.amount1Desired,
-          result.amount0,
-          result.amount1,
-        );
+            result.priceImpact = calcPriceImpact(
+              position.pool,
+              mintParams.amount0Desired,
+              mintParams.amount1Desired,
+              result.amount0,
+              result.amount1,
+            );
 
-        result.swapPath = getSwapPath(
-          position.pool.token0.address as Address,
-          position.pool.token1.address as Address,
-          receive0,
-          receive1,
-          result.amount0,
-          result.amount1,
-          slippage,
-        );
+            result.swapPath = getSwapPath(
+              position.pool.token0.address as Address,
+              position.pool.token1.address as Address,
+              receive0,
+              receive1,
+              result.amount0,
+              result.amount1,
+              slippage,
+            );
 
-        return result;
-      },
-    ),
-  );
+            return result;
+          } catch (e) {
+            if (process.env.NODE_ENV === 'development') {
+              console.error(`Solver ${solver} failed: ${e}`);
+            }
+            return null;
+          }
+        },
+      ),
+    )
+  ).filter((result): result is SolverResult => result !== null);
 }
 
 const failedResult: SolverResult = {
@@ -120,11 +129,7 @@ async function solve(
   props: SolveOptimalMintProps,
   solver: E_Solver,
 ): Promise<SolverResult> {
-  const swapInfo = await getSolver(solver).optimalMint(props);
-
-  const { swapData } = swapInfo;
-  if (!swapData) return failedResult;
-
+  const { swapData, swapRoute } = await getSolver(solver).optimalMint(props);
   const { mintParams } = props;
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     props.chainId,
@@ -139,15 +144,13 @@ async function solve(
     props.blockNumber,
   );
 
-  const swapRoute = getSwapRoute(mintParams, amount0, swapInfo.swapRoute);
-
   return {
     solver,
     amount0,
     amount1,
     liquidity,
     swapData,
-    swapRoute,
+    swapRoute: getSwapRoute(mintParams, amount0, swapRoute),
   };
 }
 
