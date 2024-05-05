@@ -14,6 +14,7 @@ import {
   optimalMint,
   optimalRebalance,
   optimalRebalanceV1ByV2,
+  optimalRebalanceV2,
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
@@ -73,7 +74,7 @@ describe('Viem - Routing tests', function () {
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
-  it('Test optimalRebalanceV2', async function () {
+  it('Test optimalRebalanceV1ByV2', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
@@ -131,6 +132,71 @@ describe('Viem - Routing tests', function () {
     expect(resultV1.swapPath?.tokenOut).to.be.equal(
       resultV2.swapPath?.tokenOut,
     );
+  });
+
+  it('Test optimalRebalanceV2', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const tokenId = 726230n;
+    const blockNumber = await publicClient.getBlockNumber();
+    const { pool } = await PositionDetails.fromPositionId(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      publicClient,
+      blockNumber,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
+      tokenId,
+    ]);
+
+    const resultV2 = await optimalRebalanceV2(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      tickLower,
+      tickUpper,
+      0n,
+      owner,
+      0.1,
+      publicClient,
+      blockNumber,
+    );
+
+    // console.log(
+    //   JSON.stringify(resultV2, (key, value) => {
+    //     // Convert BigInt to string
+    //     if (typeof value === 'bigint') {
+    //       return value.toString();
+    //     }
+    //     return value;
+    //   }),
+    // );
+
+    expect(resultV2.length).to.be.greaterThan(0);
+
+    for (let i = 0; i < resultV2.length; i++) {
+      expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
+
+      expect(resultV2[i].swapData!).to.be.not.empty;
+      expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
+      expect(resultV2[i].swapPath!.tokenIn).to.equal(pool.token1.address);
+      expect(resultV2[i].swapPath!.tokenOut).to.equal(pool.token0.address);
+      expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
+        Number(resultV2[i].swapPath?.amountOut.toString()),
+        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
+      );
+    }
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
