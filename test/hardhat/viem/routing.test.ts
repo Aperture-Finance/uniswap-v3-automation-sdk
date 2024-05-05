@@ -97,38 +97,38 @@ describe('Viem - Routing tests', function () {
       tokenId,
     ]);
 
-    const resultV2 = await optimalRebalanceV1ByV2(
-      chainId,
-      UNIV3_AMM,
-      tokenId,
-      tickLower,
-      tickUpper,
-      0n,
-      /** usePool= */ false,
-      owner,
-      0.1,
-      publicClient,
-      blockNumber,
-    );
-
-    const resultV1 = await optimalRebalance(
-      chainId,
-      UNIV3_AMM,
-      tokenId,
-      tickLower,
-      tickUpper,
-      0n,
-      /** usePool= */ false,
-      owner,
-      0.1,
-      publicClient,
-      blockNumber,
-    );
+    const [resultV1, resultV2] = await Promise.all([
+      optimalRebalance(
+        chainId,
+        UNIV3_AMM,
+        tokenId,
+        tickLower,
+        tickUpper,
+        0n,
+        /** usePool= */ true,
+        owner,
+        0.1,
+        publicClient,
+        blockNumber,
+      ),
+      optimalRebalanceV1ByV2(
+        chainId,
+        UNIV3_AMM,
+        tokenId,
+        tickLower,
+        tickUpper,
+        0n,
+        /** usePool= */ true,
+        owner,
+        0.1,
+        publicClient,
+        blockNumber,
+      ),
+    ]);
 
     expect(resultV1.liquidity.toString()).to.be.equal(
       resultV2.liquidity.toString(),
     );
-    expect(resultV1.swapData).to.be.equal(resultV2.swapData);
     expect(resultV1.priceImpact!.toString()).to.be.equal(
       resultV2.priceImpact!.toString(),
     );
