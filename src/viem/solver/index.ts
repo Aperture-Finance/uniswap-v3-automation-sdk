@@ -1,4 +1,5 @@
 import { get1InchSolver } from './get1InchSolver';
+import { getPropellerHeadsSolver } from './getPropellerHeadsSolver';
 import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
 export { quote, getOptimalMintSwapData } from './get1InchSolver'; // TODO: remove when complete refactor
@@ -14,7 +15,7 @@ export const getSolver = (solver: E_Solver): ISolver => {
     case E_Solver.OneInch:
       return get1InchSolver();
     case E_Solver.PH:
-    // TODO: implement
+      return getPropellerHeadsSolver();
     case E_Solver.SamePool:
       return {
         optimalMint: async () => defaultSwapInfo,
