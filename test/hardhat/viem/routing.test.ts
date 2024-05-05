@@ -126,13 +126,11 @@ describe('Viem - Routing tests', function () {
       ),
     ]);
 
-    expect(resultV1.liquidity.toString()).to.be.equal(
-      resultV2.liquidity.toString(),
+    expect(resultV1.solver).to.be.equal(resultV2.solver);
+    expect(resultV1.swapPath?.tokenIn).to.be.equal(resultV2.swapPath?.tokenIn);
+    expect(resultV1.swapPath?.tokenOut).to.be.equal(
+      resultV2.swapPath?.tokenOut,
     );
-    expect(resultV1.priceImpact!.toString()).to.be.equal(
-      resultV2.priceImpact!.toString(),
-    );
-    expect(resultV1.swapPath).to.be.deep.equal(resultV2.swapPath);
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {

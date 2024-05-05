@@ -12,7 +12,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { SwapRoute, quote } from '../solver';
+import { E_Solver, SwapRoute, quote } from '../solver';
 import { getApproveTarget } from './aggregator';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
@@ -79,7 +79,7 @@ export async function optimalRebalance(
       blockNumber,
     );
     if (usePool || !optimalSwapRouter) {
-      return { ...(await poolPromise), receive0, receive1 };
+      return { ...(await poolPromise), solver: E_Solver.SamePool };
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
@@ -98,9 +98,9 @@ export async function optimalRebalance(
     ]);
     // use the same pool if the quote isn't better
     if (poolEstimate.liquidity >= routerEstimate.liquidity) {
-      return { ...poolEstimate, receive0, receive1 };
+      return { ...poolEstimate, solver: E_Solver.SamePool };
     } else {
-      return { ...routerEstimate, receive0, receive1 };
+      return { ...routerEstimate, solver: E_Solver.OneInch };
     }
   };
 
