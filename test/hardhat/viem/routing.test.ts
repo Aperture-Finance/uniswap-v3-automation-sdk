@@ -47,7 +47,7 @@ describe('Viem - Routing tests', function () {
       tickLower,
       tickUpper,
       0n,
-      /** usePool= */ false, // don't use 1inch in unit test
+      /** usePool= */ true, // don't use 1inch in unit test
       owner,
       0.1,
       publicClient,
