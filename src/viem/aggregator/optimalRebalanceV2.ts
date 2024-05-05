@@ -182,6 +182,7 @@ const getSwapRoute = (
   return swapRoute;
 };
 
+// only used for unit test currently
 export async function optimalRebalanceV1ByV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -206,7 +207,9 @@ export async function optimalRebalanceV1ByV2(
     slippage,
     publicClient,
     blockNumber,
-    usePool ? ALL_SOLVERS.filter((s) => s !== E_Solver.SamePool) : [],
+    ALL_SOLVERS.filter(
+      (s) => s !== E_Solver.SamePool && s !== E_Solver.OneInch,
+    ), // v1 only support these solvers
   );
   return results.reduce((prev, curr) => {
     if (!prev || prev.liquidity < curr.liquidity) {

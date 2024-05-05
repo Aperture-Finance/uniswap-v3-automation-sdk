@@ -22,19 +22,22 @@ export const get1InchSolver = (): ISolver => {
         props;
 
       const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
-      if (!optimalSwapRouter) {
-        return {};
+      if (optimalSwapRouter) {
+        const res = await getOptimalMintSwapData(
+          chainId,
+          amm,
+          publicClient,
+          mintParams,
+          slippage,
+          blockNumber,
+          /** includeRoute= */ true,
+        );
+        if (res.swapData !== '0x') {
+          return res;
+        }
       }
 
-      return await getOptimalMintSwapData(
-        chainId,
-        amm,
-        publicClient,
-        mintParams,
-        slippage,
-        blockNumber,
-        /** includeRoute= */ true,
-      );
+      return {}; // return empty object if failed
     },
   };
 };
