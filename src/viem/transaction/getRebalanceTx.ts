@@ -23,6 +23,7 @@ import {
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
 
+// TODO: add unit test
 /**
  * Generates an unsigned transaction that rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
@@ -33,13 +34,12 @@ import { SimulatedAmounts } from './types';
  * @param newPositionTickUpper The upper tick of the new position.
  * @param slippageTolerance How much the amount of either token0 or token1 in the new position is allowed to change unfavorably.
  * @param deadlineEpochSeconds Timestamp when the tx expires (in seconds since epoch).
- * @param provider Ethers provider.
+ * @param publicClient Viem public client.
+ * @param swapData Swap data for the position.
  * @param position Optional, the existing position.
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with valid owner-signed permit info.
- * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
  * @returns The generated transaction request and expected amounts.
  */
-
 export async function getRebalanceTx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -53,7 +53,6 @@ export async function getRebalanceTx(
   swapData: Hex,
   position?: Position,
   permitInfo?: PermitInfo,
-  use1inch?: boolean,
 ): Promise<{
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
