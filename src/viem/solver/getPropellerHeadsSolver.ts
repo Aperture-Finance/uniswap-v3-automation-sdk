@@ -81,7 +81,12 @@ async function quote(
     call_data: Hex;
     gas: string; // not care currently
     target_address: Address;
-    orders: Array<unknown>; // not care currently
+    orders: Array<{
+      sell_amount: string;
+      executed_sell_amount: string;
+      buy_amount: string;
+      executed_buy_amount: string;
+    }>; // not care currently
   }>;
 }> {
   if (amount === '0') {
@@ -110,7 +115,7 @@ async function quote(
   }
 }
 
-const endpoint = 'https://api.propellerheads.xyz/partner';
+const endpoint = 'https://ph-api.aperture.finance/partner';
 const path = '/v2/solver/solve';
 
 const buildRequest = async (data: object) => {
@@ -119,7 +124,6 @@ const buildRequest = async (data: object) => {
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        'x-api-key': process.env.PH_API_KEY,
       },
     }),
   );
