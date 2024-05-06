@@ -107,12 +107,7 @@ async function quote(
       },
     ],
   };
-  try {
-    return (await buildRequest(data)).data;
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  return (await buildRequest(data)).data;
 }
 
 const endpoint = 'https://ph-api.aperture.finance/partner';
