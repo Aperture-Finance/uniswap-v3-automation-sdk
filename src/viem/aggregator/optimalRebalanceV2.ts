@@ -11,10 +11,11 @@ import { PositionDetails } from '../position';
 import { E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
+  calcPriceImpact,
   getOptimalSwapAmount,
+  getSwapPath,
   getSwapRoute,
-} from './aggregator';
-import { calcPriceImpact, getSwapPath } from './internal';
+} from './internal';
 import { SolverResult } from './types';
 
 export async function optimalRebalanceV2(
@@ -69,7 +70,13 @@ export async function optimalRebalanceV2(
     chainId,
     amm,
     publicClient,
-    mintParams,
+    mintParams.token0,
+    mintParams.token1,
+    mintParams.fee,
+    mintParams.tickLower,
+    mintParams.tickUpper,
+    mintParams.amount0Desired,
+    mintParams.amount1Desired,
     blockNumber,
   );
 

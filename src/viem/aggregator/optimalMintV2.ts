@@ -9,10 +9,11 @@ import { getPool } from '../pool';
 import { E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
+  calcPriceImpact,
   getOptimalSwapAmount,
+  getSwapPath,
   getSwapRoute,
-} from './aggregator';
-import { calcPriceImpact, getSwapPath } from './internal';
+} from './internal';
 import { SolverResult } from './types';
 
 /**
@@ -64,7 +65,13 @@ export async function optimalMintV2(
     chainId,
     amm,
     publicClient,
-    mintParams,
+    mintParams.token0,
+    mintParams.token1,
+    fee as FeeAmount,
+    tickLower,
+    tickUpper,
+    mintParams.amount0Desired,
+    mintParams.amount1Desired,
     blockNumber,
   );
 
