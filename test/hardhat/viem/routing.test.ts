@@ -137,7 +137,7 @@ describe('Viem - Routing tests', function () {
         Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
       );
 
-      expect(resultV2[i].solver).to.be.not(E_Solver.PH); // PH is only supported on mainnet
+      expect(resultV2[i].solver).to.be.not.equal(E_Solver.PH); // PH is only supported on mainnet
     }
   });
 
