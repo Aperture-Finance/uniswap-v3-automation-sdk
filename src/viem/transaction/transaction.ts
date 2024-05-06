@@ -14,7 +14,7 @@ import {
   toEventSelector,
 } from 'viem';
 
-import { CollectableTokenAmounts } from './position';
+import { CollectableTokenAmounts } from '../position';
 
 /**
  * Filter logs by event name.
