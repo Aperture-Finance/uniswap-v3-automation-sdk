@@ -1,15 +1,21 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { computePoolAddress } from '@/utils';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import { Address, PublicClient } from 'viem';
+import { Address, Hex, PublicClient } from 'viem';
 
-import { MintParams, simulateMintOptimal } from '../automan';
+import { SolverResult, getApproveTarget } from '../aggregator';
+import {
+  MintParams,
+  encodeOptimalSwapData,
+  getAutomanContract,
+  simulateMintOptimal,
+} from '../automan';
 import { getPool } from '../pool';
-import { SwapRoute, getOptimalMintSwapData } from '../solver';
+import { SwapRoute, quote } from '../solver';
 import { calcPriceImpact, getSwapPath } from './internal';
-import { SolverResult } from './types';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
@@ -208,5 +214,77 @@ async function optimalMintRouter(
     liquidity,
     swapData,
     swapRoute,
+  };
+}
+
+async function getOptimalMintSwapData(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  mintParams: MintParams,
+  slippage: number,
+  blockNumber?: bigint,
+  includeRoute?: boolean,
+): Promise<{
+  swapData: Hex;
+  swapRoute?: SwapRoute;
+}> {
+  try {
+    const automan = getAutomanContract(chainId, amm, publicClient);
+    // get swap amounts using the same pool
+    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
+      [
+        computePoolAddress(
+          chainId,
+          amm,
+          mintParams.token0,
+          mintParams.token1,
+          mintParams.fee as FeeAmount,
+        ),
+        mintParams.tickLower,
+        mintParams.tickUpper,
+        mintParams.amount0Desired,
+        mintParams.amount1Desired,
+      ],
+      {
+        blockNumber,
+      },
+    );
+
+    const ammInfo = getAMMInfo(chainId, amm)!;
+    // get a quote from 1inch
+    const { tx, protocols } = await quote(
+      chainId,
+      zeroForOne ? mintParams.token0 : mintParams.token1,
+      zeroForOne ? mintParams.token1 : mintParams.token0,
+      poolAmountIn.toString(),
+      ammInfo.optimalSwapRouter!,
+      slippage * 100,
+      includeRoute,
+    );
+
+    const approveTarget = await getApproveTarget(chainId);
+
+    return {
+      swapData: encodeOptimalSwapData(
+        chainId,
+        amm,
+        mintParams.token0,
+        mintParams.token1,
+        mintParams.fee as FeeAmount,
+        mintParams.tickLower,
+        mintParams.tickUpper,
+        zeroForOne,
+        approveTarget,
+        tx.to,
+        tx.data,
+      ),
+      swapRoute: protocols,
+    };
+  } catch (e) {
+    console.warn(`Failed to get swap data: ${e}`);
+  }
+  return {
+    swapData: '0x',
   };
 }

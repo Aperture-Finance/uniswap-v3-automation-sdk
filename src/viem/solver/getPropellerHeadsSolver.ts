@@ -1,5 +1,4 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { computePoolAddress } from '@/utils';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import axios from 'axios';
 import { Address, Hex } from 'viem';
@@ -19,7 +18,7 @@ const APPROVE_TARGET = '0x14f2b6ca0324cd2B013aD02a7D85541d215e2906';
 export const getPropellerHeadsSolver = (): ISolver => {
   return {
     optimalMint: async (props) => {
-      const { chainId, amm, publicClient, mintParams, slippage, blockNumber } =
+      const { chainId, amm, mintParams, slippage, poolAmountIn, zeroForOne } =
         props;
 
       if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) {
@@ -27,27 +26,6 @@ export const getPropellerHeadsSolver = (): ISolver => {
       }
 
       const ammInfo = getAMMInfo(chainId, amm)!;
-      const automan = getAutomanContract(chainId, amm, publicClient);
-      // get swap amounts using the same pool
-      const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
-        [
-          computePoolAddress(
-            chainId,
-            amm,
-            mintParams.token0,
-            mintParams.token1,
-            mintParams.fee as FeeAmount,
-          ),
-          mintParams.tickLower,
-          mintParams.tickUpper,
-          mintParams.amount0Desired,
-          mintParams.amount1Desired,
-        ],
-        {
-          blockNumber,
-        },
-      );
-
       // get a quote from PH
       const res = await quote(
         blockChainMap[chainId]!,
@@ -60,7 +38,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
 
       const { solutions } = res;
       if (solutions.length === 0) {
-        throw new Error('response solutions is empty');
+        throw new Error('got no solution');
       }
 
       return {
@@ -114,7 +92,7 @@ async function quote(
     blockchain,
     amms: ['+all'],
     slippage: slippage.toString(),
-    // return_routes: true, // ignore routes for now
+    return_routes: false, // TODO: handle later
     orders: [
       {
         origin_address: from,

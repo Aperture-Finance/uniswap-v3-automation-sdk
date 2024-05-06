@@ -21,14 +21,14 @@ export interface SolvedSwapInfo {
 export interface SolveOptimalMintProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
-  publicClient: PublicClient;
   fromAddress: Address;
   mintParams: MintParams;
   slippage: number;
   positionId: bigint;
   positionOwner: Address;
   feeBips: bigint;
-  blockNumber?: bigint;
+  poolAmountIn: bigint;
+  zeroForOne: boolean;
 }
 
 export interface ISolver {
