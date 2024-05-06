@@ -132,7 +132,7 @@ export const getSwapRoute = (
 
 export const buildOptimalSolutions = async (
   solve: (solver: E_Solver) => Promise<SolverResult | null>,
-  excludeSolvers: E_Solver[] = [],
+  excludeSolvers: E_Solver[],
 ) => {
   return (
     await Promise.all(
