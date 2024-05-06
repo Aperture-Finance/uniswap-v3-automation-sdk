@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
-import { PositionDetails, optimalRebalance } from '@/viem';
+import { PositionDetails, optimalRebalance, optimalRebalanceV2 } from '@/viem';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -14,8 +14,7 @@ import { Address, PublicClient } from 'viem';
  * @param newPositionTickUpper The upper tick of the new position.
  * @param slippageTolerance How much the amount of either token0 or token1 in the new position is allowed to change unfavorably.
  * @param position Optional, the existing position.
- * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
- * @returns The generated transaction request and expected amounts.
+ * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getRebalanceSwapInfo(
   chainId: ApertureSupportedChainId,
@@ -27,7 +26,6 @@ export async function getRebalanceSwapInfo(
   slippageTolerance: number,
   publicClient: PublicClient,
   position?: Position,
-  use1inch?: boolean,
   blockNumber?: bigint,
 ) {
   if (position === undefined) {
@@ -39,31 +37,16 @@ export async function getRebalanceSwapInfo(
     ));
   }
 
-  const {
-    amount0: finalAmount0,
-    amount1: finalAmount1,
-    swapRoute,
-    priceImpact,
-    swapPath,
-  } = await optimalRebalance(
+  return optimalRebalanceV2(
     chainId,
     amm,
     existingPositionId,
     newPositionTickLower,
     newPositionTickUpper,
     /**fee */ 0n,
-    !use1inch,
     ownerAddress,
     slippageTolerance,
     publicClient,
     blockNumber,
   );
-
-  return {
-    swapRoute,
-    swapPath: swapPath!,
-    priceImpact: priceImpact!,
-    finalAmount0,
-    finalAmount1,
-  };
 }
