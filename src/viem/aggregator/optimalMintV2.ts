@@ -1,13 +1,11 @@
 import { ApertureSupportedChainId } from '@/index';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
-import {
-  MintParams,
-  simulateRebalance,
-  simulateRemoveLiquidity,
-} from '../automan';
-import { PositionDetails } from '../position';
+import { MintParams, simulateMintOptimal } from '../automan';
+import { getPool } from '../pool';
 import { E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
@@ -17,51 +15,47 @@ import {
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
-export async function optimalRebalanceV2(
+/**
+ * Get the optimal amount of liquidity to mint for a given pool and token amounts.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param token0Amount The token0 amount.
+ * @param token1Amount The token1 amount.
+ * @param fee The pool fee tier.
+ * @param tickLower The lower tick of the range.
+ * @param tickUpper The upper tick of the range.
+ * @param fromAddress The address to mint from.
+ * @param slippage The slippage tolerance.
+ * @param publicClient Viem public client.
+ */
+export async function optimalMintV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  positionId: bigint,
-  newTickLower: number,
-  newTickUpper: number,
-  feeBips: bigint,
+  token0Amount: CurrencyAmount<Token>,
+  token1Amount: CurrencyAmount<Token>,
+  fee: FeeAmount,
+  tickLower: number,
+  tickUpper: number,
   fromAddress: Address,
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  excludeSolvers: E_Solver[] = [],
+  excludeSolvers?: E_Solver[],
 ): Promise<SolverResult[]> {
-  const position = await PositionDetails.fromPositionId(
-    chainId,
-    amm,
-    positionId,
-    publicClient,
-    blockNumber,
-  );
-
-  const [receive0, receive1] = await simulateRemoveLiquidity(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    position.owner,
-    BigInt(position.tokenId),
-    /*amount0Min =*/ undefined,
-    /*amount1Min =*/ undefined,
-    feeBips,
-    blockNumber,
-  );
-
+  if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
+    throw new Error('token0 must be sorted before token1');
+  }
   const mintParams: MintParams = {
-    token0: position.token0.address as Address,
-    token1: position.token1.address as Address,
-    fee: position.fee,
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: receive0,
-    amount1Desired: receive1,
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: fromAddress, // Param value ignored by Automan for rebalance.
+    token0: token0Amount.currency.address as Address,
+    token1: token1Amount.currency.address as Address,
+    fee,
+    tickLower,
+    tickUpper,
+    amount0Desired: BigInt(token0Amount.quotient.toString()),
+    amount1Desired: BigInt(token1Amount.quotient.toString()),
+    amount0Min: 0n,
+    amount1Min: 0n,
+    recipient: fromAddress,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
@@ -84,16 +78,23 @@ export async function optimalRebalanceV2(
         poolAmountIn,
         zeroForOne,
       });
-      const [, liquidity, amount0, amount1] = await simulateRebalance(
+      const [, liquidity, amount0, amount1] = await simulateMintOptimal(
         chainId,
         amm,
         publicClient,
         fromAddress,
-        position.owner,
         mintParams,
-        positionId,
-        feeBips,
         swapData,
+        blockNumber,
+      );
+
+      const pool = await getPool(
+        mintParams.token0,
+        mintParams.token1,
+        mintParams.fee,
+        chainId,
+        amm,
+        publicClient,
         blockNumber,
       );
 
@@ -105,7 +106,7 @@ export async function optimalRebalanceV2(
         swapData,
         swapRoute: getSwapRoute(mintParams, amount0, swapRoute),
         priceImpact: calcPriceImpact(
-          position.pool,
+          pool,
           mintParams.amount0Desired,
           mintParams.amount1Desired,
           amount0,

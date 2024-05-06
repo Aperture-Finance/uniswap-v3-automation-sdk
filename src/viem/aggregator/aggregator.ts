@@ -6,7 +6,8 @@ import Bottleneck from 'bottleneck';
 import { Address, PublicClient } from 'viem';
 
 import { MintParams, getAutomanContract } from '../automan';
-import { SwapRoute } from '../solver';
+import { ALL_SOLVERS, E_Solver, SwapRoute } from '../solver';
+import { SolverResult } from './types';
 
 const ApiBaseUrl = 'https://1inch-api.aperture.finance';
 const headers = {
@@ -109,4 +110,17 @@ export const getSwapRoute = (
     ];
   }
   return swapRoute;
+};
+
+export const buildOptimalSolutions = async (
+  solve: (solver: E_Solver) => Promise<SolverResult | null>,
+  excludeSolvers: E_Solver[] = [],
+) => {
+  return (
+    await Promise.all(
+      ALL_SOLVERS.filter((solver) => !excludeSolvers.includes(solver)).map(
+        solve,
+      ),
+    )
+  ).filter((result): result is SolverResult => result !== null);
 };

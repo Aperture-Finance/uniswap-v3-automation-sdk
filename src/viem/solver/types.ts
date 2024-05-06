@@ -24,9 +24,6 @@ export interface SolveOptimalMintProps {
   fromAddress: Address;
   mintParams: MintParams;
   slippage: number;
-  positionId: bigint;
-  positionOwner: Address;
-  feeBips: bigint;
   poolAmountIn: bigint;
   zeroForOne: boolean;
 }
