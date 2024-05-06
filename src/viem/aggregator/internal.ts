@@ -6,7 +6,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
-import { MintParams, getAutomanContract } from '../automan';
+import { getAutomanContract } from '../automan';
 import { ALL_SOLVERS, E_Solver, SwapRoute } from '../solver';
 import { SwapPath } from './types';
 import { SolverResult } from './types';
