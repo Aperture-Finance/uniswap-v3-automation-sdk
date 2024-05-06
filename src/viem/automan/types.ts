@@ -6,6 +6,7 @@ import {
   AbiStateMutability,
   ContractFunctionArgs,
   ContractFunctionReturnType,
+  Hex,
 } from 'viem';
 
 import { GetAbiFunctionParamsTypes } from '../generics';
@@ -48,3 +49,8 @@ export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof INonfungiblePositionManager__factory.abi,
   'increaseLiquidity'
 >[0];
+
+export type RebalanceReturnType = GetAutomanReturnTypes<
+  'rebalance',
+  [MintParams, bigint, bigint, Hex]
+>;

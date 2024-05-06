@@ -37,11 +37,14 @@ import {
   DecreaseLiquidityParams,
   IncreaseLiquidityReturnType,
   MintReturnType,
-  RebalanceReturnType,
   RemoveLiquidityReturnType,
   getFromAddress,
 } from './internal';
-import { IncreaseLiquidityParams, MintParams } from './types';
+import {
+  IncreaseLiquidityParams,
+  MintParams,
+  RebalanceReturnType,
+} from './types';
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,

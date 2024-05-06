@@ -20,11 +20,6 @@ export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
   [DecreaseLiquidityParams, bigint]
 >;
 
-export type RebalanceReturnType = GetAutomanReturnTypes<
-  'rebalance',
-  [MintParams, bigint, bigint, Hex]
->;
-
 export function getFromAddress(from?: Address) {
   if (from === undefined) {
     const privateKey = generatePrivateKey();
