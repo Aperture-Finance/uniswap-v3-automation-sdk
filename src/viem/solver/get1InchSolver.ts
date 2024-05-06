@@ -55,9 +55,7 @@ export async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [
@@ -78,6 +76,7 @@ export async function getOptimalMintSwapData(
       },
     );
 
+    const ammInfo = getAMMInfo(chainId, amm)!;
     // get a quote from 1inch
     const { tx, protocols } = await quote(
       chainId,
@@ -88,6 +87,9 @@ export async function getOptimalMintSwapData(
       slippage * 100,
       includeRoute,
     );
+
+    const approveTarget = await getApproveTarget(chainId);
+
     return {
       swapData: encodeOptimalSwapData(
         chainId,
