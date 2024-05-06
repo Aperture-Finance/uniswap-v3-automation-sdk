@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, PublicClient } from 'viem';
+import { Address, Hex } from 'viem';
 
 import { MintParams } from '../automan';
 

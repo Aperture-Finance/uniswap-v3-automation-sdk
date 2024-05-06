@@ -3,7 +3,7 @@ import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import axios from 'axios';
 import { Address, Hex } from 'viem';
 
-import { encodeOptimalSwapData, getAutomanContract } from '../automan';
+import { encodeOptimalSwapData } from '../automan';
 import { limiter } from './common';
 import { ISolver } from './types';
 
@@ -81,7 +81,7 @@ async function quote(
     call_data: Hex;
     gas: string; // not care currently
     target_address: Address;
-    orders: Array<any>; // not care currently
+    orders: Array<unknown>; // not care currently
   }>;
 }> {
   if (amount === '0') {
