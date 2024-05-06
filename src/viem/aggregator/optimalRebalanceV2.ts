@@ -52,9 +52,12 @@ export async function optimalRebalanceV2(
     blockNumber,
   );
 
+  const token0 = position.token0.address as Address;
+  const token1 = position.token1.address as Address;
+
   const mintParams: MintParams = {
-    token0: position.token0.address as Address,
-    token1: position.token1.address as Address,
+    token0,
+    token1,
     fee: position.fee,
     tickLower: newTickLower,
     tickUpper: newTickUpper,
@@ -70,8 +73,8 @@ export async function optimalRebalanceV2(
     chainId,
     amm,
     publicClient,
-    mintParams.token0,
-    mintParams.token1,
+    token0,
+    token1,
     mintParams.fee,
     mintParams.tickLower,
     mintParams.tickUpper,
@@ -110,7 +113,12 @@ export async function optimalRebalanceV2(
         amount1,
         liquidity,
         swapData,
-        swapRoute: getSwapRoute(mintParams, amount0, swapRoute),
+        swapRoute: getSwapRoute(
+          token0,
+          token1,
+          amount0 - mintParams.amount0Desired,
+          swapRoute,
+        ),
         priceImpact: calcPriceImpact(
           position.pool,
           mintParams.amount0Desired,

@@ -101,20 +101,19 @@ export const getOptimalSwapAmount = async (
 };
 
 export const getSwapRoute = (
-  mintParams: MintParams,
-  amount0: bigint,
+  token0: Address,
+  token1: Address,
+  deltaAmount0: bigint, // final - init
   swapRoute?: SwapRoute,
 ) => {
   if (swapRoute) {
     return swapRoute;
   }
   swapRoute = [];
-  if (mintParams.amount0Desired !== amount0) {
+  if (deltaAmount0 !== 0n) {
     // need a swap
     const [fromTokenAddress, toTokenAddress] =
-      mintParams.amount0Desired > amount0
-        ? [mintParams.token0, mintParams.token1]
-        : [mintParams.token1, mintParams.token0];
+      deltaAmount0 < 0 ? [token0, token1] : [token1, token0];
     swapRoute = [
       [
         [

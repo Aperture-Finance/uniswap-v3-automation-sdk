@@ -47,9 +47,11 @@ export async function optimalMintV2(
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
+  const token0 = token0Amount.currency.address as Address;
+  const token1 = token1Amount.currency.address as Address;
   const mintParams: MintParams = {
-    token0: token0Amount.currency.address as Address,
-    token1: token1Amount.currency.address as Address,
+    token0,
+    token1,
     fee,
     tickLower,
     tickUpper,
@@ -65,8 +67,8 @@ export async function optimalMintV2(
     chainId,
     amm,
     publicClient,
-    mintParams.token0,
-    mintParams.token1,
+    token0,
+    token1,
     fee as FeeAmount,
     tickLower,
     tickUpper,
@@ -97,8 +99,8 @@ export async function optimalMintV2(
       );
 
       const pool = await getPool(
-        mintParams.token0,
-        mintParams.token1,
+        token0,
+        token1,
         mintParams.fee,
         chainId,
         amm,
@@ -112,7 +114,12 @@ export async function optimalMintV2(
         amount1,
         liquidity,
         swapData,
-        swapRoute: getSwapRoute(mintParams, amount0, swapRoute),
+        swapRoute: getSwapRoute(
+          token0,
+          token1,
+          amount0 - mintParams.amount0Desired,
+          swapRoute,
+        ),
         priceImpact: calcPriceImpact(
           pool,
           mintParams.amount0Desired,
