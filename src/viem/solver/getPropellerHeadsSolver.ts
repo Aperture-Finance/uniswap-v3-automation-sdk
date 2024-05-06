@@ -62,7 +62,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
 
 /**
  * Get a quote for a swap.
- * @param chainId The chain ID.
+ * @param blockchain chain name.
  * @param src Contract address of a token to sell
  * @param dst Contract address of a token to buy
  * @param amount Amount of a token to sell, set in minimal divisible units
