@@ -19,8 +19,9 @@ import { PositionDetails } from '../position';
  * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param recipient The recipient address.
  * @param publicClient Viem public client.
+ * @param swapData Swap data for the position.
+ * @param liquidity The amount of liquidity to add to the existing position.
  * @param position The current position to simulate the call from.
  */
 export async function getIncreaseLiquidityOptimalTx(
@@ -29,7 +30,6 @@ export async function getIncreaseLiquidityOptimalTx(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  recipient: string,
   publicClient: PublicClient,
   swapData: Hex,
   liquidity: bigint,
