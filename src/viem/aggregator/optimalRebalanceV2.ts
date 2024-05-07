@@ -49,8 +49,6 @@ export async function optimalRebalanceV2(
       blockNumber,
     );
 
-    console.log('simulateRemoveLiquidity', receive0, receive1);
-
     const mintParams: MintParams = {
       token0: position.token0.address as Address,
       token1: position.token1.address as Address,

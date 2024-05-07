@@ -19,6 +19,7 @@ import {
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
 describe('Viem - Routing tests', function () {
+  // sometimes may fail, just rerun the test
   it('Test optimalRebalanceV2 in mainnet', async function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;

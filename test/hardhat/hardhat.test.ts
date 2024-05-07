@@ -148,7 +148,7 @@ function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
   });
 }
 
-describe('Estimate gas tests', function () {
+describe('Viem - Estimate gas tests', function () {
   async function estimateRebalanceGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
     const publicClient = getInfuraClient();
@@ -243,7 +243,7 @@ describe('Estimate gas tests', function () {
   });
 });
 
-describe('State overrides tests', function () {
+describe('Viem - State overrides tests', function () {
   it('Test computeOperatorApprovalSlot', async function () {
     const testClient = await hre.viem.getTestClient();
     const publicClient = await hre.viem.getPublicClient();
@@ -441,7 +441,7 @@ describe('State overrides tests', function () {
   });
 });
 
-describe('Position util tests', function () {
+describe('Viem - Position util tests', function () {
   let inRangePosition: Position;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -940,7 +940,7 @@ describe('Position util tests', function () {
   });
 });
 
-describe('CoinGecko tests', function () {
+describe('Viem - CoinGecko tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
 
@@ -1024,7 +1024,7 @@ describe('CoinGecko tests', function () {
   });
 });
 
-describe('Price to tick conversion', function () {
+describe('Viem - Price to tick conversion', function () {
   const token0 = new Token(1, WBTC_ADDRESS, 18);
   const token1 = new Token(1, WETH_ADDRESS, 18);
   const fee = FeeAmount.MEDIUM;
@@ -1180,7 +1180,7 @@ describe('Price to tick conversion', function () {
   });
 });
 
-describe('Pool subgraph query tests', function () {
+describe('Viem - Pool subgraph query tests', function () {
   it('Fee tier distribution - Uniswap V3', async function () {
     const [distribution, distributionOppositeTokenOrder] = await Promise.all([
       getFeeTierDistribution(
@@ -1334,7 +1334,7 @@ describe('Pool subgraph query tests', function () {
   });
 });
 
-describe('Recurring rebalance tests', function () {
+describe('Viem - Recurring rebalance tests', function () {
   const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const WETH_ARBITRUM = getAddress(
     '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
@@ -1455,7 +1455,7 @@ describe('Recurring rebalance tests', function () {
   });
 });
 
-describe('Automan transaction tests', function () {
+describe('Viem - Automan transaction tests', function () {
   async function dealERC20(
     token0: Address,
     token1: Address,
