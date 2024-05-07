@@ -22,7 +22,14 @@ import {
   optimalRebalance,
   optimalRebalanceV2,
 } from '../../../src/viem';
-import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
+import {
+  UNIV3_AMM,
+  WBTC_ADDRESS,
+  WETH_ADDRESS,
+  eoa,
+  expect,
+  getInfuraClient,
+} from '../common';
 
 describe('Viem - Routing tests', function () {
   it('Test optimalRebalance', async function () {
@@ -380,8 +387,8 @@ describe('Viem - Routing tests', function () {
 
       expect(resultV2[i].swapData!).to.be.not.empty;
       expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
-      expect(resultV2[i].swapPath!.tokenIn).to.equal(pool.token1.address);
-      expect(resultV2[i].swapPath!.tokenOut).to.equal(pool.token0.address);
+      expect(resultV2[i].swapPath!.tokenIn).to.equal(WBTC_ADDRESS);
+      expect(resultV2[i].swapPath!.tokenOut).to.equal(WETH_ADDRESS);
       expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
         Number(resultV2[i].swapPath?.amountOut.toString()),
         Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
