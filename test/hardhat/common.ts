@@ -48,8 +48,7 @@ export function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
   return createPublicClient({
     chain: infuraMap[chain],
     transport: http(
-      // `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`,
-      `https://${chain}.infura.io/v3/a070b986fc31498f9ec5ae1b4dd953cd`,
+      `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`,
     ),
   });
 }
