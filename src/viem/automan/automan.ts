@@ -493,6 +493,8 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     ...getNPMApprovalOverrides(chainId, amm, owner),
     ...getControllerOverrides(chainId, amm, from),
   };
+
+  console.log('overrides', overrides);
   return tryRequestWithOverrides(
     method,
     {
