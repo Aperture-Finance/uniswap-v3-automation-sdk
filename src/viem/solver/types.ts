@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, PublicClient } from 'viem';
+import { Address, Hex } from 'viem';
 
 import { MintParams } from '../automan';
 
@@ -21,14 +21,14 @@ export interface SolvedSwapInfo {
 export interface SolveOptimalMintProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
-  publicClient: PublicClient;
   fromAddress: Address;
   mintParams: MintParams;
   slippage: number;
   positionId: bigint;
   positionOwner: Address;
   feeBips: bigint;
-  blockNumber?: bigint;
+  poolAmountIn: bigint;
+  zeroForOne: boolean;
 }
 
 export interface ISolver {

@@ -6,6 +6,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
 import { ApertureSupportedChainId } from '../../../src';
 import {
+  E_Solver,
   PositionDetails,
   getNPM,
   getPool,
@@ -122,6 +123,74 @@ describe('Viem - Routing tests', function () {
 
     expect(resultV2.length).to.be.greaterThan(0);
 
+    for (let i = 0; i < resultV2.length; i++) {
+      expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
+
+      expect(resultV2[i].swapData!).to.be.not.empty;
+      expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
+      expect(resultV2[i].swapPath!.tokenIn).to.equal(pool.token1.address);
+      expect(resultV2[i].swapPath!.tokenOut).to.equal(pool.token0.address);
+      expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
+        Number(resultV2[i].swapPath?.amountOut.toString()),
+        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
+      );
+
+      expect(resultV2[i].solver).to.be.not.equal(E_Solver.PH); // PH is only supported on mainnet
+    }
+  });
+
+  it('Test optimalRebalanceV2 in mainnet', async function () {
+    const tokenId = 4n;
+    const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
+    const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
+    const publicClient = getInfuraClient();
+    const blockNumber = await publicClient.getBlockNumber();
+    const { pool } = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      tokenId,
+      publicClient,
+      blockNumber,
+    );
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const owner = await getNPM(chainId, amm, publicClient).read.ownerOf([
+      tokenId,
+    ]);
+
+    const resultV2 = await optimalRebalanceV2(
+      chainId,
+      amm,
+      tokenId,
+      tickLower,
+      tickUpper,
+      0n,
+      owner,
+      0.1,
+      publicClient,
+      blockNumber,
+    );
+
+    // console.log(
+    //   JSON.stringify(resultV2, (key, value) => {
+    //     // Convert BigInt to string
+    //     if (typeof value === 'bigint') {
+    //       return value.toString();
+    //     }
+    //     return value;
+    //   }),
+    // );
+
+    expect(resultV2.length).to.be.greaterThan(0);
+    expect(resultV2.map((r) => r.solver)).to.be.include(E_Solver.PH); // should include PH
     for (let i = 0; i < resultV2.length; i++) {
       expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
       expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
