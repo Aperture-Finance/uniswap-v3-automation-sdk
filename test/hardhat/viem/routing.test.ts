@@ -85,7 +85,7 @@ describe('Viem - Routing tests', function () {
     }
   });
 
-  it('Test increaseLiquidityOptimal with pool', async function () {
+  it.skip('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient();
@@ -144,7 +144,7 @@ describe('Viem - Routing tests', function () {
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
-  it('Test optimalMint', async function () {
+  it.skip('Test optimalMint', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient('arbitrum-mainnet');

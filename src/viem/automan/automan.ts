@@ -32,7 +32,6 @@ import {
   getNPMApprovalOverrides,
   staticCallWithOverrides,
   tryRequestWithOverrides,
-  tryStaticCallWithOverrides,
 } from '../overrides';
 import {
   DecreaseLiquidityParams,
