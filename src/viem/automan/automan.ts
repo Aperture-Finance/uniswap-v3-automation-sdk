@@ -494,7 +494,6 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     ...getControllerOverrides(chainId, amm, from),
   };
 
-  console.log('overrides', overrides, process.env.INFURA_API_KEY);
   return tryRequestWithOverrides(
     method,
     {
