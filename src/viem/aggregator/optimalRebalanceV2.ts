@@ -49,6 +49,8 @@ export async function optimalRebalanceV2(
       blockNumber,
     );
 
+    console.log('simulateRemoveLiquidity', receive0, receive1);
+
     const mintParams: MintParams = {
       token0: position.token0.address as Address,
       token1: position.token1.address as Address,
@@ -106,6 +108,8 @@ export async function optimalRebalanceV2(
         poolAmountIn,
         zeroForOne,
       });
+
+      console.log('start simulateRebalance');
       const [, liquidity, amount0, amount1] = await simulateRebalance(
         chainId,
         amm,
@@ -118,6 +122,7 @@ export async function optimalRebalanceV2(
         swapData,
         blockNumber,
       );
+      console.log('end simulateRebalance');
 
       return {
         solver,
