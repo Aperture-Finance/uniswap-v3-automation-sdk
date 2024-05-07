@@ -390,7 +390,6 @@ export async function tryRequestWithOverrides<M extends keyof RpcReturnType>(
       blockNumber,
     );
   } catch (e) {
-    console.log('requestWithOverrides failed, retry without override', e);
     const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
     return await publicClient.request({
       // @ts-expect-error viem doesn't include 'eth_createAccessList'

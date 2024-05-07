@@ -106,7 +106,6 @@ export async function optimalRebalanceV2(
         poolAmountIn,
         zeroForOne,
       });
-      console.log('solve swap data', swapData);
       const [, liquidity, amount0, amount1] = await simulateRebalance(
         chainId,
         amm,
