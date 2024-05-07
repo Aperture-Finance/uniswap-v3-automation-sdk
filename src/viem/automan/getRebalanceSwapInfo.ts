@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
-import { PositionDetails, optimalRebalance, optimalRebalanceV2 } from '@/viem';
+import { PositionDetails, optimalRebalanceV2 } from '@/viem';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
