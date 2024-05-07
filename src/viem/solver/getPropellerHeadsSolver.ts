@@ -32,7 +32,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
         zeroForOne ? mintParams.token0 : mintParams.token1,
         zeroForOne ? mintParams.token1 : mintParams.token0,
         poolAmountIn.toString(),
-        ammInfo.optimalSwapRouter!, // is it correct ?
+        ammInfo.optimalSwapRouter!,
         slippage,
       );
 
@@ -61,7 +61,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
 };
 
 /**
- * Get a quote for a swap.
+ * Get a quote for a swap with PropellerHeads
  * @param blockchain chain name.
  * @param src Contract address of a token to sell
  * @param dst Contract address of a token to buy
