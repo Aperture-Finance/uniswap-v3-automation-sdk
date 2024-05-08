@@ -1,9 +1,15 @@
 import { fractionToBig } from '@/index';
+import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import { Address } from 'viem';
+import { Address, PublicClient } from 'viem';
 
+import { getAutomanContract } from '../automan';
+import { ALL_SOLVERS, E_Solver, SwapRoute } from '../solver';
 import { SwapPath } from './types';
+import { SolverResult } from './types';
 
 export const calcPriceImpact = (
   pool: Pool,
@@ -58,4 +64,81 @@ export const getSwapPath = (
       .times(1 - slippage * 0.01)
       .toFixed(0),
   };
+};
+
+export const getOptimalSwapAmount = async (
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  token0: Address,
+  token1: Address,
+  feeAmount: FeeAmount,
+  tickLower: number,
+  tickUpper: number,
+  amount0Desired: bigint,
+  amount1Desired: bigint,
+  blockNumber?: bigint,
+) => {
+  const automan = getAutomanContract(chainId, amm, publicClient);
+  // get swap amounts using the same pool
+  const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
+    [
+      computePoolAddress(chainId, amm, token0, token1, feeAmount),
+      tickLower,
+      tickUpper,
+      amount0Desired,
+      amount1Desired,
+    ],
+    {
+      blockNumber,
+    },
+  );
+
+  return {
+    poolAmountIn,
+    zeroForOne,
+  };
+};
+
+export const getSwapRoute = (
+  token0: Address,
+  token1: Address,
+  deltaAmount0: bigint, // final - init
+  swapRoute?: SwapRoute,
+) => {
+  if (swapRoute) {
+    return swapRoute;
+  }
+  swapRoute = [];
+  if (deltaAmount0 !== 0n) {
+    // need a swap
+    const [fromTokenAddress, toTokenAddress] =
+      deltaAmount0 < 0 ? [token0, token1] : [token1, token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+  return swapRoute;
+};
+
+export const buildOptimalSolutions = async (
+  solve: (solver: E_Solver) => Promise<SolverResult | null>,
+  excludeSolvers: E_Solver[],
+) => {
+  return (
+    await Promise.all(
+      ALL_SOLVERS.filter((solver) => !excludeSolvers.includes(solver)).map(
+        solve,
+      ),
+    )
+  ).filter((result): result is SolverResult => result !== null);
 };

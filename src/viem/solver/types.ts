@@ -22,11 +22,11 @@ export interface SolveOptimalMintProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
   fromAddress: Address;
-  mintParams: MintParams;
-  slippage: number;
-  positionId: bigint;
-  positionOwner: Address;
-  feeBips: bigint;
+  mintParams: Pick<
+    MintParams,
+    'token0' | 'token1' | 'fee' | 'tickLower' | 'tickUpper'
+  >;
+  slippage: number; // 0.01 = 1%
   poolAmountIn: bigint;
   zeroForOne: boolean;
 }
