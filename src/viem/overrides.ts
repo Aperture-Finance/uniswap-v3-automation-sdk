@@ -143,6 +143,9 @@ export async function getERC20Overrides(
   amount: bigint,
   publicClient: PublicClient,
 ): Promise<StateOverrides> {
+  if (amount <= 0) {
+    return {};
+  }
   const balanceOfData = encodeFunctionData({
     abi: IERC20__factory.abi,
     args: [from] as const,
