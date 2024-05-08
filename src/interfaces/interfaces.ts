@@ -926,3 +926,13 @@ export const UserActivityTrackingRequestSchema = z.object({
 export type UserActivityTrackingRequest = z.infer<
   typeof UserActivityTrackingRequestSchema
 >;
+
+export const AptrBalanceRequestSchema = z.object({
+  addrTimeStampSecs: z
+    .string()
+    .describe(
+      'concat(walletAddress, timestampSec). walletAddress must be a checksum address. timestampSec must be within the past 5 minutes of the current time.',
+    ),
+  signature: SignatureSchema.describe('User signature.'),
+});
+export type AptrBalanceRequest = z.infer<typeof AptrBalanceRequestSchema>;

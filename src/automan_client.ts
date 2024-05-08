@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import {
   AcceptInviteRequest,
+  AptrBalanceRequest,
   BindSocialAccountRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
@@ -56,19 +57,20 @@ async function buildAxiosGetRequest(
 async function buildAxiosPostRequest(
   url: URL,
   request: Readonly<
-    | CreateTriggerRequest
-    | UpdateTriggerRequest
-    | DeleteTriggerRequest
-    | UpdatePositionPermitRequest
-    | SignPrivateBetaAgreementRequest
-    | WalletTrackingRequest
-    | UserActivityTrackingRequest
-    | VerifySocialAccountRequest
     | AcceptInviteRequest
-    | RaffleRequest
-    | ValidateInviteCodeRequest
-    | SocialLoginRequest
+    | AptrBalanceRequest
     | BindSocialAccountRequest
+    | CreateTriggerRequest
+    | DeleteTriggerRequest
+    | RaffleRequest
+    | SignPrivateBetaAgreementRequest
+    | SocialLoginRequest
+    | UpdatePositionPermitRequest
+    | UpdateTriggerRequest
+    | UserActivityTrackingRequest
+    | ValidateInviteCodeRequest
+    | VerifySocialAccountRequest
+    | WalletTrackingRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -223,5 +225,12 @@ export class AutomanClient {
       this.endpoint,
     );
     return (await buildAxiosGetRequest(url, null)).data;
+  }
+
+  async getAptrBalance(
+    request: Readonly<AptrBalanceRequest>,
+  ): Promise<string> {
+    const url = new URL(`/aptrBalance`, this.endpoint);
+    return (await buildAxiosGetRequest(url, request)).data;
   }
 }
