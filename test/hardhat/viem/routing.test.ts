@@ -26,7 +26,7 @@ describe('Viem - Routing tests', function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient();
+    const publicClient = getInfuraClient('mainnet', infura_mainnet_key);
     const blockNumber = await publicClient.getBlockNumber();
     const { pool } = await PositionDetails.fromPositionId(
       chainId,
@@ -91,7 +91,7 @@ describe('Viem - Routing tests', function () {
   it.skip('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient('mainnet', infura_mainnet_key);
+    const publicClient = getInfuraClient();
     const blockNumber = 17975698n;
 
     const { position, pool } = await PositionDetails.fromPositionId(
