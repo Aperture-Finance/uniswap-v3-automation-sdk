@@ -18,6 +18,8 @@ import {
 } from '../../../src/viem';
 import { UNIV3_AMM, eoa, expect, getInfuraClient } from '../common';
 
+const infura_mainnet_key = 'fef00769d5b74ad9bd8d1757391c704c'; // backup key for unit test
+
 describe('Viem - Routing tests', function () {
   // sometimes may fail, just rerun the test
   it('Test optimalRebalanceV2 in mainnet', async function () {
@@ -89,10 +91,7 @@ describe('Viem - Routing tests', function () {
   it.skip('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient(
-      'mainnet',
-      'a070b986fc31498f9ec5ae1b4dd953cd',
-    );
+    const publicClient = getInfuraClient('mainnet', infura_mainnet_key);
     const blockNumber = 17975698n;
 
     const { position, pool } = await PositionDetails.fromPositionId(
