@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
-import { optimalMintV2 } from '@/viem';
+import { E_Solver, optimalMintV2 } from '@/viem';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -30,6 +30,7 @@ export async function getOptimalMintSwapInfo(
   recipient: Address,
   slippage: number,
   publicClient: PublicClient,
+  includeSolvers?: E_Solver[],
   blockNumber?: bigint,
 ) {
   return optimalMintV2(
@@ -44,5 +45,6 @@ export async function getOptimalMintSwapInfo(
     slippage,
     publicClient,
     blockNumber,
+    includeSolvers,
   );
 }

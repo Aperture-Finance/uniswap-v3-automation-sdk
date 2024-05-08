@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
-import { PositionDetails, optimalRebalanceV2 } from '@/viem';
+import { E_Solver, PositionDetails, optimalRebalanceV2 } from '@/viem';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -25,6 +25,7 @@ export async function getRebalanceSwapInfo(
   newPositionTickUpper: number,
   slippageTolerance: number,
   publicClient: PublicClient,
+  includeSolvers?: E_Solver[],
   position?: Position,
   blockNumber?: bigint,
 ) {
@@ -48,5 +49,6 @@ export async function getRebalanceSwapInfo(
     slippageTolerance,
     publicClient,
     blockNumber,
+    includeSolvers,
   );
 }

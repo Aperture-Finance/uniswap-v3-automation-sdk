@@ -132,13 +132,9 @@ export const getSwapRoute = (
 
 export const buildOptimalSolutions = async (
   solve: (solver: E_Solver) => Promise<SolverResult | null>,
-  excludeSolvers: E_Solver[],
+  includeSolvers: E_Solver[],
 ) => {
-  return (
-    await Promise.all(
-      ALL_SOLVERS.filter((solver) => !excludeSolvers.includes(solver)).map(
-        solve,
-      ),
-    )
-  ).filter((result): result is SolverResult => result !== null);
+  return (await Promise.all(includeSolvers.map(solve))).filter(
+    (result): result is SolverResult => result !== null,
+  );
 };

@@ -6,6 +6,7 @@ import { Address, PublicClient } from 'viem';
 
 import { increaseLiquidityOptimalV2 } from '../aggregator/increaseLiquidityOptimalV2';
 import { PositionDetails } from '../position';
+import { E_Solver } from '../solver';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
@@ -27,6 +28,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   token1Amount: CurrencyAmount<Currency>,
   recipient: Address,
   publicClient: PublicClient,
+  includeSolvers?: E_Solver[],
   position?: Position,
   blockNumber?: bigint,
 ) {
@@ -48,6 +50,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
     recipient,
-    blockNumber /** blockNumber */,
+    blockNumber,
+    includeSolvers,
   );
 }

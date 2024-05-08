@@ -8,7 +8,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { E_Solver, getSolver } from '../solver';
+import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
@@ -29,7 +29,7 @@ export async function optimalRebalanceV2(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  excludeSolvers: E_Solver[] = [],
+  includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
   const position = await PositionDetails.fromPositionId(
     chainId,
@@ -144,5 +144,5 @@ export async function optimalRebalanceV2(
     }
   };
 
-  return buildOptimalSolutions(solve, excludeSolvers);
+  return buildOptimalSolutions(solve, includeSolvers);
 }
