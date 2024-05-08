@@ -8,7 +8,7 @@ import {
   IncreaseLiquidityParams,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
-import { E_Solver, getSolver } from '../solver';
+import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
@@ -29,7 +29,7 @@ import { SolverResult } from './types';
  * @param token1Amount The token1 amount.
  * @param fromAddress The address to increase liquidity from.
  * @param blockNumber Optional. The block number to simulate the call from.
- * @param excludeSolvers Optional. The solvers to exclude.
+ * @param includeSolvers Optional. The solvers to include.
  */
 export async function increaseLiquidityOptimalV2(
   chainId: ApertureSupportedChainId,
@@ -41,7 +41,7 @@ export async function increaseLiquidityOptimalV2(
   token1Amount: CurrencyAmount<Token>,
   fromAddress: Address,
   blockNumber?: bigint,
-  excludeSolvers: E_Solver[] = [],
+  includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -145,5 +145,5 @@ export async function increaseLiquidityOptimalV2(
     }
   };
 
-  return buildOptimalSolutions(solve, excludeSolvers);
+  return buildOptimalSolutions(solve, includeSolvers);
 }

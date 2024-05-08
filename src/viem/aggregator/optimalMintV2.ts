@@ -6,7 +6,7 @@ import { Address, PublicClient } from 'viem';
 
 import { MintParams, simulateMintOptimal } from '../automan';
 import { getPool } from '../pool';
-import { E_Solver, getSolver } from '../solver';
+import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
@@ -29,6 +29,7 @@ import { SolverResult } from './types';
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param blockNumber Optional. The block number to use for the simulation.
+ * @param includeSolvers Optional. The solvers to include.
  */
 export async function optimalMintV2(
   chainId: ApertureSupportedChainId,
@@ -42,7 +43,7 @@ export async function optimalMintV2(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  excludeSolvers: E_Solver[] = [],
+  includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -145,5 +146,5 @@ export async function optimalMintV2(
     }
   };
 
-  return buildOptimalSolutions(solve, excludeSolvers);
+  return buildOptimalSolutions(solve, includeSolvers);
 }

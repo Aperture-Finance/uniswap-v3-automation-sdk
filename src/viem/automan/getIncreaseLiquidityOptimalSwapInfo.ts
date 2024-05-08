@@ -4,8 +4,9 @@ import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
-import { increaseLiquidityOptimal } from '../aggregator';
+import { increaseLiquidityOptimalV2 } from '../aggregator';
 import { PositionDetails } from '../position';
+import { E_Solver } from '../solver';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
@@ -17,7 +18,7 @@ import { PositionDetails } from '../position';
  * @param recipient The recipient address.
  * @param publicClient Viem public client.
  * @param position The current position to simulate the call from.
- * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
+ * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getIncreaseLiquidityOptimalSwapInfo(
   increaseOptions: IncreaseOptions,
@@ -27,8 +28,8 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   token1Amount: CurrencyAmount<Currency>,
   recipient: Address,
   publicClient: PublicClient,
+  includeSolvers?: E_Solver[],
   position?: Position,
-  use1inch?: boolean,
   blockNumber?: bigint,
 ) {
   if (position === undefined) {
@@ -40,13 +41,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     ));
   }
 
-  const {
-    amount0: finalAmount0,
-    amount1: finalAmount1,
-    swapRoute,
-    priceImpact,
-    swapPath,
-  } = await increaseLiquidityOptimal(
+  return await increaseLiquidityOptimalV2(
     chainId,
     amm,
     publicClient,
@@ -55,16 +50,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
     recipient,
-    !use1inch,
-    blockNumber /** blockNumber */,
-    true /** includeSwapInfo */,
+    blockNumber,
+    includeSolvers,
   );
-
-  return {
-    swapRoute,
-    swapPath: swapPath!,
-    priceImpact: priceImpact!,
-    finalAmount0,
-    finalAmount1,
-  };
 }

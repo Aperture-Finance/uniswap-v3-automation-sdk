@@ -1,9 +1,8 @@
 import { ApertureSupportedChainId } from '@/index';
-import { SwapPath, SwapRoute, optimalMint } from '@/viem';
+import { E_Solver, optimalMintV2 } from '@/viem';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
 /**
@@ -18,7 +17,7 @@ import { Address, PublicClient } from 'viem';
  * @param recipient The recipient address.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
- * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
+ * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getOptimalMintSwapInfo(
   chainId: ApertureSupportedChainId,
@@ -31,22 +30,10 @@ export async function getOptimalMintSwapInfo(
   recipient: Address,
   slippage: number,
   publicClient: PublicClient,
-  use1inch?: boolean,
+  includeSolvers?: E_Solver[],
   blockNumber?: bigint,
-): Promise<{
-  swapRoute: SwapRoute | undefined;
-  swapPath: SwapPath;
-  priceImpact: Big.Big;
-  finalAmount0: bigint;
-  finalAmount1: bigint;
-}> {
-  const {
-    amount0: finalAmount0,
-    amount1: finalAmount1,
-    swapRoute,
-    swapPath,
-    priceImpact,
-  } = await optimalMint(
+) {
+  return optimalMintV2(
     chainId,
     amm,
     token0Amount as CurrencyAmount<Token>,
@@ -57,16 +44,7 @@ export async function getOptimalMintSwapInfo(
     recipient,
     slippage,
     publicClient,
-    !use1inch,
     blockNumber,
-    true /** includeSwapInfo */,
+    includeSolvers,
   );
-
-  return {
-    swapRoute,
-    swapPath: swapPath!,
-    priceImpact: priceImpact!,
-    finalAmount0,
-    finalAmount1,
-  };
 }

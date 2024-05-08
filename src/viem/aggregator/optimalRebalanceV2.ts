@@ -8,7 +8,7 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { E_Solver, getSolver } from '../solver';
+import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
@@ -18,6 +18,21 @@ import {
 } from './internal';
 import { SolverResult } from './types';
 
+/**
+ * Get the optimal amount of liquidity to rebalance for a given position.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param positionId The position ID.
+ * @param newTickLower The new lower tick.
+ * @param newTickUpper The new upper tick.
+ * @param feeBips The fee Aperture charge for the transaction.
+ * @param fromAddress The address to rebalance from.
+ * @param slippage The slippage tolerance.
+ * @param publicClient Viem public client.
+ * @param blockNumber Optional. The block number to use for the simulation.
+ * @param includeSolvers Optional. The solvers to include.
+ * @returns The optimal rebalance solutions.
+ */
 export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -29,7 +44,7 @@ export async function optimalRebalanceV2(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  excludeSolvers: E_Solver[] = [],
+  includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
   const position = await PositionDetails.fromPositionId(
     chainId,
@@ -75,11 +90,11 @@ export async function optimalRebalanceV2(
     publicClient,
     token0,
     token1,
-    mintParams.fee,
-    mintParams.tickLower,
-    mintParams.tickUpper,
-    mintParams.amount0Desired,
-    mintParams.amount1Desired,
+    position.fee,
+    newTickLower,
+    newTickUpper,
+    receive0,
+    receive1,
     blockNumber,
   );
 
@@ -113,24 +128,19 @@ export async function optimalRebalanceV2(
         amount1,
         liquidity,
         swapData,
-        swapRoute: getSwapRoute(
-          token0,
-          token1,
-          amount0 - mintParams.amount0Desired,
-          swapRoute,
-        ),
+        swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
           position.pool,
-          mintParams.amount0Desired,
-          mintParams.amount1Desired,
+          receive0,
+          receive1,
           amount0,
           amount1,
         ),
         swapPath: getSwapPath(
-          mintParams.token0,
-          mintParams.token1,
-          mintParams.amount0Desired,
-          mintParams.amount1Desired,
+          token0,
+          token1,
+          receive0,
+          receive1,
           amount0,
           amount1,
           slippage,
@@ -144,5 +154,5 @@ export async function optimalRebalanceV2(
     }
   };
 
-  return buildOptimalSolutions(solve, excludeSolvers);
+  return buildOptimalSolutions(solve, includeSolvers);
 }

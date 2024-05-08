@@ -74,6 +74,7 @@ import {
   tickToLimitOrderRange,
 } from '../../src';
 import {
+  E_Solver,
   PositionDetails,
   checkPositionApprovalStatus,
   computeOperatorApprovalSlot,
@@ -1521,20 +1522,21 @@ describe('Automan transaction tests', function () {
       getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
     );
 
-    const { swapRoute } = await getOptimalMintSwapInfo(
-      chainId,
-      UNIV3_AMM,
-      hypotheticalPosition.amount0,
-      hypotheticalPosition.amount1,
-      FeeAmount.MEDIUM,
-      tickLower,
-      tickUpper,
-      eoa,
-      0.5,
-      publicClient,
-      // 1inch quote currently doesn't support the no-swap case.
-      false,
-    );
+    const { swapRoute } = (
+      await getOptimalMintSwapInfo(
+        chainId,
+        UNIV3_AMM,
+        hypotheticalPosition.amount0,
+        hypotheticalPosition.amount1,
+        FeeAmount.MEDIUM,
+        tickLower,
+        tickUpper,
+        eoa,
+        0.5,
+        publicClient,
+        [E_Solver.SamePool],
+      )
+    )[0];
 
     expect(swapRoute?.length).to.equal(0);
   });
@@ -1578,20 +1580,21 @@ describe('Automan transaction tests', function () {
       getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
     );
 
-    const { swapRoute, swapPath } = await getOptimalMintSwapInfo(
-      chainId,
-      UNIV3_AMM,
-      token0Amount,
-      token1Amount,
-      FeeAmount.MEDIUM,
-      tickLower,
-      tickUpper,
-      eoa,
-      0.5,
-      publicClient,
-      // 1inch quote currently doesn't support the no-swap case.
-      false,
-    );
+    const { swapPath, swapRoute } = (
+      await getOptimalMintSwapInfo(
+        chainId,
+        UNIV3_AMM,
+        token0Amount,
+        token1Amount,
+        FeeAmount.MEDIUM,
+        tickLower,
+        tickUpper,
+        eoa,
+        0.5,
+        publicClient,
+        [E_Solver.SamePool],
+      )
+    )[0];
 
     console.log('swapPath', swapPath);
 
@@ -1637,22 +1640,23 @@ describe('Automan transaction tests', function () {
       getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
     );
 
-    const { swapRoute } = await getIncreaseLiquidityOptimalSwapInfo(
-      {
-        tokenId: positionId,
-        slippageTolerance: new Percent(5, 1000),
-        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-      },
-      chainId,
-      UNIV3_AMM,
-      hypotheticalPosition.amount0,
-      hypotheticalPosition.amount1,
-      eoa as Address,
-      publicClient,
-      hypotheticalPosition,
-      // 1inch quote currently doesn't support the no-swap case.
-      false,
-    );
+    const { swapRoute } = (
+      await getIncreaseLiquidityOptimalSwapInfo(
+        {
+          tokenId: positionId,
+          slippageTolerance: new Percent(5, 1000),
+          deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+        },
+        chainId,
+        UNIV3_AMM,
+        hypotheticalPosition.amount0,
+        hypotheticalPosition.amount1,
+        eoa as Address,
+        publicClient,
+        [E_Solver.SamePool],
+        hypotheticalPosition,
+      )
+    )[0];
 
     expect(swapRoute?.length).to.equal(0);
   });
