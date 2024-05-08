@@ -89,7 +89,10 @@ describe('Viem - Routing tests', function () {
   it.skip('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient();
+    const publicClient = getInfuraClient(
+      'mainnet',
+      'a070b986fc31498f9ec5ae1b4dd953cd',
+    );
     const blockNumber = 17975698n;
 
     const { position, pool } = await PositionDetails.fromPositionId(

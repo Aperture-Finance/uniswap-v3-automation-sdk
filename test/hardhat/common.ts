@@ -44,11 +44,12 @@ const infuraMap = {
   'arbitrum-mainnet': arbitrum,
 };
 
-export function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
+export function getInfuraClient(
+  chain: keyof typeof infuraMap = 'mainnet',
+  key = process.env.INFURA_API_KEY,
+) {
   return createPublicClient({
     chain: infuraMap[chain],
-    transport: http(
-      `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    ),
+    transport: http(`https://${chain}.infura.io/v3/${key}`),
   });
 }
