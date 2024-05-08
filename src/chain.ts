@@ -325,7 +325,7 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'avalanche',
     infura_network_id: 'avalanche',
-    rpc_url: 'https://api.avax.network/ext/bc/C/rpc',
+    rpc_url: 'https://avalanche-c-chain-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
