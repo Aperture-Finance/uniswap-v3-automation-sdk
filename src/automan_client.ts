@@ -227,9 +227,7 @@ export class AutomanClient {
     return (await buildAxiosGetRequest(url, null)).data;
   }
 
-  async getAptrBalance(
-    request: Readonly<AptrBalanceRequest>,
-  ): Promise<string> {
+  async getAptrBalance(request: Readonly<AptrBalanceRequest>): Promise<string> {
     const url = new URL(`/aptrBalance`, this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
