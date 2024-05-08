@@ -18,6 +18,21 @@ import {
 } from './internal';
 import { SolverResult } from './types';
 
+/**
+ * Get the optimal amount of liquidity to rebalance for a given position.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param positionId The position ID.
+ * @param newTickLower The new lower tick.
+ * @param newTickUpper The new upper tick.
+ * @param feeBips The fee Aperture charge for the transaction.
+ * @param fromAddress The address to rebalance from.
+ * @param slippage The slippage tolerance.
+ * @param publicClient Viem public client.
+ * @param blockNumber Optional. The block number to use for the simulation.
+ * @param includeSolvers Optional. The solvers to include.
+ * @returns The optimal rebalance solutions.
+ */
 export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

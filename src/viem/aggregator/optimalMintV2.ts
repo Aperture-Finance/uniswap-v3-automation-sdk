@@ -29,6 +29,7 @@ import { SolverResult } from './types';
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param blockNumber Optional. The block number to use for the simulation.
+ * @param includeSolvers Optional. The solvers to include.
  */
 export async function optimalMintV2(
   chainId: ApertureSupportedChainId,

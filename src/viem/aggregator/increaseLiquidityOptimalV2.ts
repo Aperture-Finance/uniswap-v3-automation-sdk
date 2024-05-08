@@ -29,7 +29,7 @@ import { SolverResult } from './types';
  * @param token1Amount The token1 amount.
  * @param fromAddress The address to increase liquidity from.
  * @param blockNumber Optional. The block number to simulate the call from.
- * @param includeSolvers Optional. The solvers to exclude.
+ * @param includeSolvers Optional. The solvers to include.
  */
 export async function increaseLiquidityOptimalV2(
   chainId: ApertureSupportedChainId,
