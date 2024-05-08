@@ -3,6 +3,7 @@ import axios from 'axios';
 import {
   AcceptInviteRequest,
   AptrBalanceRequest,
+  AptrBalanceResponse,
   BindSocialAccountRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
