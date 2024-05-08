@@ -38,12 +38,13 @@ import {
 async function buildAxiosGetRequest(
   url: URL,
   request: Readonly<
-    | ListTriggerRequest
+    | AptrBalanceRequest
     | CheckPositionPermitRequest
     | CheckUserLimitRequest
     | GetStrategyDetailRequest
     | HasSignedPrivateBetaAgreementRequest
     | ListLeaderboardRequest
+    | ListTriggerRequest
     | null
   >,
 ) {
@@ -58,7 +59,6 @@ async function buildAxiosPostRequest(
   url: URL,
   request: Readonly<
     | AcceptInviteRequest
-    | AptrBalanceRequest
     | BindSocialAccountRequest
     | CreateTriggerRequest
     | DeleteTriggerRequest
