@@ -936,3 +936,17 @@ export const AptrBalanceRequestSchema = z.object({
   signature: SignatureSchema.describe('User signature.'),
 });
 export type AptrBalanceRequest = z.infer<typeof AptrBalanceRequestSchema>;
+
+export const AptrBalanceResponseSchema = z.object({
+  wallet_address: AddressSchema.describe('The primary key.'),
+  reward_id: z.number().int().describe('The id of the allocation.'),
+  percentage: z.number().describe('The percentage of the user\'s weight in the reward allocation.'),
+  start: z.number().int().describe('When the allocation is allowed to be claimed.'),
+  cliff: z.number().int().describe('The vesting cliff (note: not all airdrop has vesting schedule. Some are vested 100% upfront).'),
+  end: z.number().int().describe('When the vesting ends.'),
+  expiration: z.number().int().describe('When the allocation expires, after which, no claim is possible.'),
+});
+
+export type AptrBalanceResponse = z.infer<
+  typeof AptrBalanceResponseSchema
+>;
