@@ -15,9 +15,11 @@ import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
+import { BigNumber } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
-import hre from 'hardhat';
+import hre, { ethers } from 'hardhat';
 import JSBI from 'jsbi';
+import _ from 'lodash';
 import {
   Address,
   PublicClient,
@@ -53,7 +55,9 @@ import {
   RecurringPriceCondition,
   RecurringRatioAction,
   RecurringRatioCondition,
+  UniV3Automan,
   UniV3Automan__factory,
+  UniV3OptimalSwapRouter__factory,
   alignPriceToClosestUsableTick,
   convertRecurringCondition,
   fractionToBig,
@@ -89,12 +93,14 @@ import {
   getFeeTierDistribution,
   getIncreaseLiquidityOptimalSwapInfo,
   getLiquidityArrayForPool,
+  getMintedPositionIdFromTxReceipt,
   getNPM,
   getOptimalMintSwapInfo,
   getPool,
   getPosition,
   getPositionAtPrice,
   getPublicClient,
+  getRebalanceTx,
   getRebalancedPosition,
   getReinvestedPosition,
   getTickToLiquidityMapForPool,
@@ -105,7 +111,7 @@ import {
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
 } from '../../src/viem';
-import { hardhatForkProvider } from './helper/common';
+import { amm, hardhatForkProvider } from './helper/common';
 
 dotenvConfig();
 
@@ -1457,6 +1463,65 @@ describe('Recurring rebalance tests', function () {
 });
 
 describe('Automan transaction tests', function () {
+  let testClient: TestClient;
+  let publicClient: PublicClient;
+  let automanContract: UniV3Automan;
+  const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+
+  beforeEach(async function () {
+    testClient = await hre.viem.getTestClient();
+
+    publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient);
+
+    // Without this, Hardhat throws an InvalidInputError saying that WHALE_ADDRESS is an unknown account.
+    // Likely a Hardhat bug.
+    // await hardhatForkProvider.getBalance(WHALE_ADDRESS);
+
+    // Deploy Automan.
+    automanContract = await new UniV3Automan__factory(
+      await ethers.getImpersonatedSigner(WHALE_ADDRESS),
+    ).deploy(
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      /*owner=*/ WHALE_ADDRESS,
+    );
+    await automanContract.deployed();
+    await automanContract.setFeeConfig({
+      feeCollector: WHALE_ADDRESS,
+      // Set the max fee deduction to 50%.
+      feeLimitPips: BigNumber.from('500000000000000000'),
+    });
+    await automanContract.setControllers([WHALE_ADDRESS], [true]);
+    const router = await new UniV3OptimalSwapRouter__factory(
+      await ethers.getImpersonatedSigner(WHALE_ADDRESS),
+    ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
+    await router.deployed();
+    await automanContract.setSwapRouters([router.address], [true]);
+
+    // Set Automan address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutoman =
+      automanContract.address as `0x${string}`;
+    getAMMInfo(chainId, amm)!.optimalSwapRouter =
+      router.address as `0x${string}`;
+
+    // Owner of position id 4 sets Automan as operator.
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+
+    await getNPM(chainId, amm, undefined, walletClient).write.setApprovalForAll(
+      [automanContract.address, true],
+      {
+        account: eoa,
+        chain: walletClient.chain,
+      },
+    );
+  });
+
+  after(() => {
+    // Reset Automan address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutoman = automanAddress;
+  });
+
   async function dealERC20(
     token0: Address,
     token1: Address,
@@ -1485,6 +1550,74 @@ describe('Automan transaction tests', function () {
       ]);
     }
   }
+
+  it('getRebalanceTx', async function () {
+    const positionId = 4n;
+
+    const existingPosition = await getPosition(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+
+    const { tx: txRequest } = await getRebalanceTx(
+      chainId,
+      amm,
+      eoa,
+      positionId,
+      240000,
+      300000,
+      /*slippageTolerance=*/ new Percent(1, 100),
+      /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
+      publicClient,
+      '0x',
+      existingPosition,
+    );
+    // Owner of position id 4 sets Automan as operator.
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      // from: txRequest.from,
+      chain: walletClient.chain,
+    });
+    const txReceipt = await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+    const newPositionId = getMintedPositionIdFromTxReceipt(
+      chainId,
+      amm,
+      txReceipt,
+      eoa,
+    )!;
+
+    const position = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      newPositionId,
+      publicClient,
+    );
+    expect(
+      _.pick(position, [
+        'token0',
+        'token1',
+        'fee',
+        'liquidity',
+        'tickLower',
+        'tickUpper',
+      ]),
+    ).to.deep.equal({
+      token0: existingPosition.pool.token0,
+      token1: existingPosition.pool.token1,
+      fee: existingPosition.pool.fee,
+      liquidity: '13324132541941',
+      tickLower: 240000,
+      tickUpper: 300000,
+    });
+  });
 
   it('Optimal mint no need swap', async function () {
     const testClient = await hre.viem.getTestClient();
