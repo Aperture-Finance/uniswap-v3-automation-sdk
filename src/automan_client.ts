@@ -2,8 +2,8 @@ import axios from 'axios';
 
 import {
   AcceptInviteRequest,
-  AptrBalanceRequest,
-  AptrBalanceResponse,
+  AptrAirdropStatusRequest,
+  AptrAirdropStatusResponse,
   BindSocialAccountRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
@@ -39,7 +39,7 @@ import {
 async function buildAxiosGetRequest(
   url: URL,
   request: Readonly<
-    | AptrBalanceRequest
+    | AptrAirdropStatusRequest
     | CheckPositionPermitRequest
     | CheckUserLimitRequest
     | GetStrategyDetailRequest
@@ -228,8 +228,10 @@ export class AutomanClient {
     return (await buildAxiosGetRequest(url, null)).data;
   }
 
-  async getAptrBalance(request: Readonly<AptrBalanceRequest>): Promise<AptrBalanceResponse> {
-    const url = new URL(`/aptrBalance`, this.endpoint);
+  async getAptrAirdropStatus(
+    request: Readonly<AptrAirdropStatusRequest>,
+  ): Promise<AptrAirdropStatusResponse> {
+    const url = new URL(`/aptrAirdropStatus`, this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 }

@@ -927,26 +927,38 @@ export type UserActivityTrackingRequest = z.infer<
   typeof UserActivityTrackingRequestSchema
 >;
 
-export const AptrBalanceRequestSchema = z.object({
-  addrTimeStampSecs: z
+export const AptrAirdropStatusRequestSchema = z.object({
+  addressTimeStampSecs: z
     .string()
     .describe(
-      'concat(walletAddress, timestampSec). walletAddress must be a checksum address. timestampSec must be within the past 5 minutes of the current time.',
+      "[address, timestampSec].join('-'). address is checksummed. timestampSec must be within the past 5 minutes of the current time.",
     ),
   signature: SignatureSchema.describe('User signature.'),
 });
-export type AptrBalanceRequest = z.infer<typeof AptrBalanceRequestSchema>;
+export type AptrAirdropStatusRequest = z.infer<
+  typeof AptrAirdropStatusRequestSchema
+>;
 
-export const AptrBalanceResponseSchema = z.object({
-  wallet_address: AddressSchema.describe('The primary key.'),
-  reward_id: z.number().int().describe('The id of the allocation.'),
-  percentage: z.number().describe('The percentage of the user\'s weight in the reward allocation.'),
-  start: z.number().int().describe('When the allocation is allowed to be claimed.'),
-  cliff: z.number().int().describe('The vesting cliff (note: not all airdrop has vesting schedule. Some are vested 100% upfront).'),
-  end: z.number().int().describe('When the vesting ends.'),
-  expiration: z.number().int().describe('When the allocation expires, after which, no claim is possible.'),
+export const AptrAirdropStatusResponseSchema = z.object({
+  address: AddressSchema.describe('The primary key.'),
+  airdropStatuses: z
+    .array(
+      z.object({
+        epochId: z
+          .number()
+          .int()
+          .describe(
+            'The sort key. An address may be eligible for multiple airdrop rewards.',
+          ),
+        amount: z
+          .number()
+          .int()
+          .describe('The amount of APTR tokens scaled up by 1e6.'),
+        merkleProof: z.string().describe('For validation.'),
+      }),
+    )
+    .describe('The list of airdrop statuses.'),
 });
-
-export type AptrBalanceResponse = z.infer<
-  typeof AptrBalanceResponseSchema
+export type AptrAirdropStatusResponse = z.infer<
+  typeof AptrAirdropStatusResponseSchema
 >;
