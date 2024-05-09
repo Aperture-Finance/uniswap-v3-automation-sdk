@@ -27,7 +27,6 @@ import { chunk, flatten } from 'lodash';
 import {
   AbiStateMutability,
   Address,
-  CallExecutionErrorType,
   ContractFunctionReturnType,
   GetContractReturnType,
   PublicClient,
@@ -173,47 +172,51 @@ export async function getAllPositions(
       blockNumber,
     );
   } catch (e) {
-    const error = e as CallExecutionErrorType;
-    // If out of gas, fallback to the following logic:
+    // const error = e as CallExecutionErrorType;
+    // The error.details maybe like 'out of gas' or 'execution reverted', fallback to the following logic:
     //   - Get the number of positions owned by the owner.
     //   - Batch fetch token ids.
     //   - Batch fetch position details using token ids.
-    if (error.details === 'out of gas') {
-      const npm = getNPM(chainId, amm, publicClient);
-      const numPositions = await npm.read.balanceOf([owner], { blockNumber });
-      const tokenIds = (
-        await publicClient.multicall({
-          contracts: [...Array(Number(numPositions)).keys()].map((i) => {
-            return {
-              address: npm.address,
-              abi: npm.abi,
-              functionName: 'tokenOfOwnerByIndex',
-              args: [owner, BigInt(i)],
-              blockNumber,
-            };
-          }),
-          allowFailure: false,
-          batchSize: 2_048,
-        })
-      ).map((i) => BigInt(i ?? 0));
+    const npm = getNPM(chainId, amm, publicClient);
+    const numPositions = await npm.read.balanceOf([owner], { blockNumber });
+    const tokenIds = (
+      await publicClient.multicall({
+        contracts: [...Array(Number(numPositions)).keys()].map((i) => {
+          return {
+            address: npm.address,
+            abi: npm.abi,
+            functionName: 'tokenOfOwnerByIndex',
+            args: [owner, BigInt(i)],
+            blockNumber,
+          };
+        }),
+        allowFailure: false,
+        batchSize: 2_048,
+      })
+    ).map((i) => BigInt(i ?? 0));
 
-      // Fetch position state.
-      positions = flatten(
-        await Promise.all(
-          chunk(tokenIds, 500).map((tokenIdsChunk) =>
-            viem.getPositions(
+    // Fetch position state.
+    positions = flatten(
+      await Promise.all(
+        chunk(tokenIds, 500).map((tokenIdsChunk) => {
+          try {
+            return viem.getPositions(
               npm.address,
               tokenIdsChunk,
               publicClient!,
               blockNumber,
-            ),
-          ),
-        ),
-      );
-    } else {
-      // Other type of error. Keep throwing.
-      throw e;
-    }
+            );
+          } catch (error) {
+            console.warn(
+              'Failed to getPositions on tokenIdsChunk',
+              tokenIdsChunk,
+              error,
+            );
+            return [];
+          }
+        }),
+      ),
+    );
   }
 
   return new Map(
