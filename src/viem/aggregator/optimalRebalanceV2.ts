@@ -95,22 +95,16 @@ export async function optimalRebalanceV2(
 
     const tokenInPrice = zeroForOne ? tokenPrices[0] : tokenPrices[1];
 
-    const decimal = zeroForOne
+    const decimals = zeroForOne
       ? position.pool.token0.decimals
       : position.pool.token1.decimals;
 
     // swap token value * 0.0007 + 0.15
     const feeUSD = new Big(poolAmountIn.toString())
-      .div(10 ** decimal)
+      .div(10 ** decimals)
       .mul(tokenInPrice)
       .mul(feeRatio)
       .add(0.15);
-
-    console.log(
-      new Big(poolAmountIn.toString()).div(10 ** decimal).toFixed(6),
-      tokenInPrice,
-      feeUSD.toFixed(6),
-    );
 
     const token0USD = new Big(
       position.position.amount0.multiply(tokenPrices[0]).toFixed(6),
@@ -120,17 +114,6 @@ export async function optimalRebalanceV2(
     );
 
     const positionUSD = token0USD.add(token1USD);
-
-    console.log(
-      position.position.amount0.toFixed(),
-      tokenPrices[0],
-      token0USD.toFixed(6),
-      position.position.amount1.toFixed(),
-      tokenPrices[1],
-      token1USD.toFixed(6),
-    );
-
-    console.log('fee', feeUSD.div(positionUSD).toFixed(6));
 
     return feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0);
   };

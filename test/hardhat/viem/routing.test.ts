@@ -146,20 +146,6 @@ describe('Viem - Routing tests', function () {
 
     expect(resultV2.length).to.be.greaterThan(0);
     expect(resultV2.map((r) => r.solver)).to.be.include(E_Solver.PH); // should include PH
-    for (let i = 0; i < resultV2.length; i++) {
-      expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
-      expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
-      expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
-
-      expect(resultV2[i].swapData!).to.be.not.empty;
-      expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
-      expect(resultV2[i].swapPath!.tokenIn).to.equal(WBTC_ADDRESS);
-      expect(resultV2[i].swapPath!.tokenOut).to.equal(WETH_ADDRESS);
-      expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
-        Number(resultV2[i].swapPath?.amountOut.toString()),
-        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
-      );
-    }
   });
 
   it('Test optimalRebalanceV2 in arbitrum', async function () {
@@ -187,9 +173,6 @@ describe('Viem - Routing tests', function () {
       tokenId,
     ]);
 
-    console.log(position.pool.token0.address); // WETH
-    console.log(position.pool.token1.address); //USDC
-
     const resultV2 = await optimalRebalanceV2(
       chainId,
       UNIV3_AMM,
@@ -205,6 +188,25 @@ describe('Viem - Routing tests', function () {
 
     expect(resultV2.length).to.be.greaterThan(0);
     expect(resultV2.map((r) => r.solver)).to.be.not.include(E_Solver.PH); // PH not support in arbitrum
+    for (let i = 0; i < resultV2.length; i++) {
+      expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.02, 0.005); // position 7.9 USDC, swap ~3.8 USDC, fee 0.152675, bips 0.152675/7.9 = 0.0193
+
+      expect(resultV2[i].swapData!).to.be.not.empty;
+      expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
+      expect(resultV2[i].swapPath!.tokenIn).to.equal(
+        position.pool.token1.address,
+      ); // USDC
+      expect(resultV2[i].swapPath!.tokenOut).to.equal(
+        position.pool.token0.address,
+      ); // WETH
+      expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
+        Number(resultV2[i].swapPath?.amountOut.toString()),
+        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
+      );
+    }
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {
