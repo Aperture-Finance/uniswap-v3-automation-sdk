@@ -1462,7 +1462,7 @@ describe('Recurring rebalance tests', function () {
   });
 });
 
-describe('Automan transaction tests', function () {
+describe('Viem - Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let automanContract: UniV3Automan;
@@ -1470,7 +1470,6 @@ describe('Automan transaction tests', function () {
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
-
     publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient);
 
@@ -1620,9 +1619,6 @@ describe('Automan transaction tests', function () {
   });
 
   it('Optimal mint no need swap', async function () {
-    const testClient = await hre.viem.getTestClient();
-    const publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1675,9 +1671,6 @@ describe('Automan transaction tests', function () {
   });
 
   it('Optimal mint with swap', async function () {
-    const testClient = await hre.viem.getTestClient();
-    const publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1738,10 +1731,6 @@ describe('Automan transaction tests', function () {
   });
 
   it('Increase liquidity optimal no need swap', async function () {
-    const testClient = await hre.viem.getTestClient();
-    const publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
-
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
