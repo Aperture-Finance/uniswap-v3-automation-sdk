@@ -113,28 +113,36 @@ describe('Viem - Routing tests', function () {
       tokenId,
     ]);
 
-    const resultV2 = await optimalRebalanceV2(
+    const position = await PositionDetails.fromPositionId(
       chainId,
       amm,
       tokenId,
-      tickLower,
-      tickUpper,
-      0n,
-      owner,
-      0.1,
       publicClient,
       blockNumber,
     );
 
-    // console.log(
-    //   JSON.stringify(resultV2, (key, value) => {
-    //     // Convert BigInt to string
-    //     if (typeof value === 'bigint') {
-    //       return value.toString();
-    //     }
-    //     return value;
-    //   }),
-    // );
+    const resultV2 = await optimalRebalanceV2(
+      chainId,
+      amm,
+      position,
+      tickLower,
+      tickUpper,
+      owner,
+      0.1,
+      ['60000', '3000'],
+      publicClient,
+      blockNumber,
+    );
+
+    console.log(
+      JSON.stringify(resultV2, (key, value) => {
+        // Convert BigInt to string
+        if (typeof value === 'bigint') {
+          return value.toString();
+        }
+        return value;
+      }),
+    );
 
     expect(resultV2.length).to.be.greaterThan(0);
     expect(resultV2.map((r) => r.solver)).to.be.include(E_Solver.PH); // should include PH
@@ -145,8 +153,8 @@ describe('Viem - Routing tests', function () {
 
       expect(resultV2[i].swapData!).to.be.not.empty;
       expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
-      expect(resultV2[i].swapPath!.tokenIn).to.equal(pool.token1.address);
-      expect(resultV2[i].swapPath!.tokenOut).to.equal(pool.token0.address);
+      expect(resultV2[i].swapPath!.tokenIn).to.equal(WBTC_ADDRESS);
+      expect(resultV2[i].swapPath!.tokenOut).to.equal(WETH_ADDRESS);
       expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
         Number(resultV2[i].swapPath?.amountOut.toString()),
         Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
@@ -159,13 +167,14 @@ describe('Viem - Routing tests', function () {
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
     const blockNumber = await publicClient.getBlockNumber();
-    const { pool } = await PositionDetails.fromPositionId(
+    const position = await PositionDetails.fromPositionId(
       chainId,
       UNIV3_AMM,
       tokenId,
       publicClient,
       blockNumber,
     );
+    const { pool } = position;
     const tickLower = nearestUsableTick(
       pool.tickCurrent - 10 * pool.tickSpacing,
       pool.tickSpacing,
@@ -178,15 +187,18 @@ describe('Viem - Routing tests', function () {
       tokenId,
     ]);
 
+    console.log(position.pool.token0.address); // WETH
+    console.log(position.pool.token1.address); //USDC
+
     const resultV2 = await optimalRebalanceV2(
       chainId,
       UNIV3_AMM,
-      tokenId,
+      position,
       tickLower,
       tickUpper,
-      0n,
       owner,
       0.1,
+      ['3000', '1'],
       publicClient,
       blockNumber,
     );

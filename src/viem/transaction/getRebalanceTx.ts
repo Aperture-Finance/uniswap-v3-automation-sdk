@@ -83,7 +83,7 @@ export async function getRebalanceTx(
   const data = getAutomanRebalanceCalldata(
     mintParams,
     existingPositionId,
-    0n,
+    0n, //feebips
     permitInfo,
     swapData,
   );
