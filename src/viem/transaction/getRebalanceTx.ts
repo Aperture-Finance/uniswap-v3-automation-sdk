@@ -36,6 +36,7 @@ import { SimulatedAmounts } from './types';
  * @param deadlineEpochSeconds Timestamp when the tx expires (in seconds since epoch).
  * @param publicClient Viem public client.
  * @param swapData Swap data for the position, returned by getRebalanceSwapInfo.
+ * @param feeBips The fee Aperture charges for the transaction.
  * @param position Optional, the existing position.
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with valid owner-signed permit info.
  * @returns The generated transaction request and expected amounts.
@@ -51,6 +52,7 @@ export async function getRebalanceTx(
   deadlineEpochSeconds: bigint,
   publicClient: PublicClient,
   swapData: Hex,
+  feeBips: bigint = 0n,
   position?: Position,
   permitInfo?: PermitInfo,
 ): Promise<{
@@ -83,7 +85,7 @@ export async function getRebalanceTx(
   const data = getAutomanRebalanceCalldata(
     mintParams,
     existingPositionId,
-    0n, //feebips
+    feeBips,
     permitInfo,
     swapData,
   );
@@ -106,7 +108,7 @@ export async function getRebalanceTx(
       data: getAutomanRebalanceCalldata(
         mintParams,
         existingPositionId,
-        0n,
+        feeBips,
         permitInfo,
         swapData,
       ),
