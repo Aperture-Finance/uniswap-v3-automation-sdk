@@ -134,15 +134,15 @@ describe('Viem - Routing tests', function () {
       blockNumber,
     );
 
-    console.log(
-      JSON.stringify(resultV2, (key, value) => {
-        // Convert BigInt to string
-        if (typeof value === 'bigint') {
-          return value.toString();
-        }
-        return value;
-      }),
-    );
+    // console.log(
+    //   JSON.stringify(resultV2, (key, value) => {
+    //     // Convert BigInt to string
+    //     if (typeof value === 'bigint') {
+    //       return value.toString();
+    //     }
+    //     return value;
+    //   }),
+    // );
 
     expect(resultV2.length).to.be.greaterThan(0);
     expect(resultV2.map((r) => r.solver)).to.be.include(E_Solver.PH); // should include PH
