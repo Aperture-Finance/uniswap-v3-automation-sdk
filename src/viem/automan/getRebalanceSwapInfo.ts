@@ -33,22 +33,23 @@ export async function getRebalanceSwapInfo(
   slippageTolerance: number,
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  position?: Position,
+  position?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
+    position = await PositionDetails.fromPositionId(
       chainId,
       amm,
       existingPositionId,
       publicClient,
-    ));
+      blockNumber,
+    );
   }
 
   return optimalRebalanceV2(
     chainId,
     amm,
-    existingPositionId,
+    position,
     newPositionTickLower,
     newPositionTickUpper,
     /**fee */ 0n,

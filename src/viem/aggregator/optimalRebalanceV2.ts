@@ -22,7 +22,7 @@ import { SolverResult } from './types';
  * Get the optimal amount of liquidity to rebalance for a given position.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
- * @param positionId The position ID.
+ * @param position Position details
  * @param newTickLower The new lower tick.
  * @param newTickUpper The new upper tick.
  * @param feeBips The fee Aperture charge for the transaction.
@@ -36,7 +36,7 @@ import { SolverResult } from './types';
 export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  positionId: bigint,
+  position: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
   feeBips: bigint,
@@ -46,14 +46,6 @@ export async function optimalRebalanceV2(
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
-  const position = await PositionDetails.fromPositionId(
-    chainId,
-    amm,
-    positionId,
-    publicClient,
-    blockNumber,
-  );
-
   const [receive0, receive1] = await simulateRemoveLiquidity(
     chainId,
     amm,
@@ -116,7 +108,7 @@ export async function optimalRebalanceV2(
         fromAddress,
         position.owner,
         mintParams,
-        positionId,
+        BigInt(position.tokenId),
         feeBips,
         swapData,
         blockNumber,
