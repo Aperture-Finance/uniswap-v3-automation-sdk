@@ -950,11 +950,11 @@ export const AptrAirdropStatusResponseSchema = z.object({
           .describe(
             'The sort key. An address may be eligible for multiple airdrop rewards.',
           ),
+        merkleProof: z.string().describe('For validation.'),
         amount: z
           .number()
           .int()
-          .describe('The amount of APTR tokens scaled up by 1e6.'),
-        merkleProof: z.string().describe('For validation.'),
+          .describe('The amount of APTR scaled up by 1e6.'),
       }),
     )
     .describe('The list of airdrop statuses.'),
