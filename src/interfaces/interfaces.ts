@@ -928,19 +928,23 @@ export type UserActivityTrackingRequest = z.infer<
 >;
 
 export const AptrAirdropStatusRequestSchema = z.object({
-  addressTimeStampSecs: z
-    .string()
+  addresss: AddressSchema.describe('The ERC-20 token contract address.'),
+  timestampSecs: z
+    .number()
+    .int()
     .describe(
-      "[address, timestampSec].join('-'). address is checksummed. timestampSec must be within the past 5 minutes of the current time.",
+      'timestampSecs for the signature, must be within APTR_AIRDROP_STATUS_EXPIRATION_SECONDS (decided on backend) of the current time to be valid.',
     ),
-  signature: SignatureSchema.describe('User signature.'),
+  signature: SignatureSchema.describe(
+    'User signature for "${GET_APTR_AIRDROP_STATUS_MSG}${timestampSecs}".',
+  ),
 });
 export type AptrAirdropStatusRequest = z.infer<
   typeof AptrAirdropStatusRequestSchema
 >;
 
 export const AptrAirdropStatusResponseSchema = z.object({
-  address: AddressSchema.describe('The primary key.'),
+  address: AddressSchema.describe('The ERC-20 token contract address.'),
   airdropStatuses: z
     .array(
       z.object({
@@ -950,7 +954,7 @@ export const AptrAirdropStatusResponseSchema = z.object({
           .describe(
             'The sort key. An address may be eligible for multiple airdrop rewards.',
           ),
-        merkleProof: z.string().describe('For validation.'),
+        merkleProof: z.array(z.string()).describe('For validation.'),
         amount: z
           .number()
           .int()
