@@ -1,16 +1,14 @@
-import {
-  ApertureSupportedChainId,
-  IAutoman__factory,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Hex, PublicClient } from 'viem';
+import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
+import { getAutomanIncreaseLiquidityOptimalCallData } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
 import { PositionDetails } from '../position';
+import { SimulatedAmounts } from './types';
 
 /**
  * Generates an unsigned transaction that increase the optimal amount of liquidity for the specified token amounts and position.
@@ -19,6 +17,7 @@ import { PositionDetails } from '../position';
  * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
+ * @param from The address to send the transaction from.
  * @param publicClient Viem public client.
  * @param swapData Swap data for the position.
  * @param liquidity The amount of liquidity to add to the existing position.
@@ -30,11 +29,15 @@ export async function getIncreaseLiquidityOptimalTx(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
+  from: Address,
   publicClient: PublicClient,
   swapData: Hex,
   liquidity: bigint,
   position?: Position,
-) {
+): Promise<{
+  tx: TransactionRequest;
+  amounts: SimulatedAmounts;
+}> {
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,
@@ -80,22 +83,25 @@ export async function getIncreaseLiquidityOptimalTx(
     increaseOptions.slippageTolerance,
   );
   const increaseParams = {
-    tokenId: increaseOptions.tokenId.toString(),
-    amount0Desired: token0Amount.quotient.toString(),
-    amount1Desired: token1Amount.quotient.toString(),
-    amount0Min: amount0.toString(),
-    amount1Min: amount1.toString(),
-    deadline: Math.floor(Date.now() / 1000 + 86400),
+    tokenId: BigInt(increaseOptions.tokenId.toString()),
+    amount0Desired: BigInt(token0Amount.quotient.toString()),
+    amount1Desired: BigInt(token1Amount.quotient.toString()),
+    amount0Min: BigInt(amount0.toString()),
+    amount1Min: BigInt(amount1.toString()),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  const data = IAutoman__factory.createInterface().encodeFunctionData(
-    'increaseLiquidityOptimal',
-    [increaseParams, swapData],
+
+  const data = getAutomanIncreaseLiquidityOptimalCallData(
+    increaseParams,
+    swapData,
   );
+
   return {
     tx: {
       to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       value,
+      from,
     },
     amounts: {
       amount0Min: amount0.toString(),
