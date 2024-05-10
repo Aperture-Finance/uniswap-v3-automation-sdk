@@ -17,6 +17,7 @@ import { SimulatedAmounts } from './types';
  * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
+ * @param from The address to send the transaction from.
  * @param publicClient Viem public client.
  * @param swapData Swap data for the position.
  * @param liquidity The amount of liquidity to add to the existing position.
@@ -28,7 +29,7 @@ export async function getIncreaseLiquidityOptimalTx(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  recipient: Address,
+  from: Address,
   publicClient: PublicClient,
   swapData: Hex,
   liquidity: bigint,
@@ -100,7 +101,7 @@ export async function getIncreaseLiquidityOptimalTx(
       to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data,
       value,
-      from: recipient,
+      from,
     },
     amounts: {
       amount0Min: amount0.toString(),

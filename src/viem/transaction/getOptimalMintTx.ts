@@ -23,7 +23,8 @@ import { SimulatedAmounts } from './types';
  * @param deadline The deadline in seconds before which the transaction must be mined.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
- * @param use1inch Optional. If set to true, the 1inch aggregator will be used to facilitate the swap.
+ * @param swapData Swap data for the position, returned by getRebalanceSwapInfo.
+ * @param liquidity The amount of liquidity to mint.
  */
 export async function getOptimalMintTx(
   chainId: ApertureSupportedChainId,
