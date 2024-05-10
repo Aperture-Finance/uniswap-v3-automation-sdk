@@ -1571,6 +1571,7 @@ describe('Viem - Automan transaction tests', function () {
       /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
       '0x',
+      0n,
       existingPosition,
     );
     // Owner of position id 4 sets Automan as operator.
