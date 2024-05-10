@@ -90,7 +90,7 @@ export async function optimalRebalanceV2(
   };
 
   const calcFeeBips = async () => {
-    const { poolAmountIn, zeroForOne } =
+    const { poolAmountIn, zeroForOne, receive0, receive1 } =
       await simulateAndGetOptimalSwapAmount(0n);
 
     const tokenInPrice = zeroForOne ? tokenPrices[0] : tokenPrices[1];
@@ -106,12 +106,13 @@ export async function optimalRebalanceV2(
       .mul(feeRatio)
       .add(0.15);
 
-    const token0USD = new Big(
-      position.position.amount0.multiply(tokenPrices[0]).toFixed(6),
-    );
-    const token1USD = new Big(
-      position.position.amount1.multiply(tokenPrices[1]).toFixed(6),
-    );
+    const token0USD = new Big(receive0.toString())
+      .mul(tokenPrices[0])
+      .div(10 ** position.token0.decimals);
+
+    const token1USD = new Big(receive1.toString())
+      .mul(tokenPrices[1])
+      .div(10 ** position.token1.decimals);
 
     const positionUSD = token0USD.add(token1USD);
 
