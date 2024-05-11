@@ -1,4 +1,5 @@
 export * from './automan_client';
+export * from './constants';
 export * from './chain';
 export * from './interfaces';
 export * from './price';
