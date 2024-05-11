@@ -926,3 +926,43 @@ export const UserActivityTrackingRequestSchema = z.object({
 export type UserActivityTrackingRequest = z.infer<
   typeof UserActivityTrackingRequestSchema
 >;
+
+export const AptrAirdropStatusRequestSchema = z.object({
+  address: AddressSchema.describe('The airdrop recipient address.'),
+  timestampSecs: z
+    .number()
+    .int()
+    .describe(
+      'timestampSecs for the signature, must be within APTR_AIRDROP_STATUS_EXPIRATION_SECONDS (decided on backend) from now for the request to be valid.',
+    ),
+  signature: SignatureSchema.describe(
+    'User\'s signature for "${GET_APTR_AIRDROP_STATUS_MSG}${timestampSecs}".',
+  ),
+});
+export type AptrAirdropStatusRequest = z.infer<
+  typeof AptrAirdropStatusRequestSchema
+>;
+
+export const AptrAirdropStatusResponseSchema = z.object({
+  address: AddressSchema.describe('The airdrop recipient address.'),
+  aptrAirdropStatuses: z
+    .array(
+      z.object({
+        epochId: z
+          .number()
+          .int()
+          .describe('The epochId of the airdrop reward.'),
+        merkleProof: z.array(z.string()).describe('For validation.'),
+        amount: z
+          .number()
+          .int()
+          .describe('The amount of APTR scaled up by 1e6.'),
+      }),
+    )
+    .describe(
+      'The list of APTR airdrop statuses because an address may be eligible for multiple airdrop rewards.',
+    ),
+});
+export type AptrAirdropStatusResponse = z.infer<
+  typeof AptrAirdropStatusResponseSchema
+>;
