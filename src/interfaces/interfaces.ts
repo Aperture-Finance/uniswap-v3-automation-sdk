@@ -928,7 +928,7 @@ export type UserActivityTrackingRequest = z.infer<
 >;
 
 export const AptrAirdropStatusRequestSchema = z.object({
-  addresss: AddressSchema.describe('The airdrop recipient address.'),
+  address: AddressSchema.describe('The airdrop recipient address.'),
   timestampSecs: z
     .number()
     .int()
