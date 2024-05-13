@@ -139,7 +139,7 @@ export async function increaseLiquidityOptimalV2(
       } as SolverResult;
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
-        console.error(`Solver ${solver} failed: ${e}`);
+        console.warn(`Solver ${solver} failed: ${e}`);
       }
       return null;
     }
