@@ -1,29 +1,13 @@
-import {
-  ApertureSupportedChainId,
-  Automan__factory,
-  PermitInfo,
-  getAMMInfo,
-} from '@/index';
-import { ADDRESS_ZERO, Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
+import { ADDRESS_ZERO, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import {
-  Address,
-  Hex,
-  PublicClient,
-  TransactionRequest,
-  decodeFunctionResult,
-} from 'viem';
+import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import {
-  MintParams,
-  RebalanceReturnType,
-  getAutomanRebalanceCalldata,
-} from '../automan';
+import { MintParams, getAutomanRebalanceCalldata } from '../automan';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
 
-// TODO: add unit test
 /**
  * Generates an unsigned transaction that rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
@@ -36,6 +20,7 @@ import { SimulatedAmounts } from './types';
  * @param deadlineEpochSeconds Timestamp when the tx expires (in seconds since epoch).
  * @param publicClient Viem public client.
  * @param swapData Swap data for the position, returned by getRebalanceSwapInfo.
+ * @param liquidity The amount of liquidity for the rebalanced position.
  * @param feeBips The fee Aperture charges for the transaction.
  * @param position Optional, the existing position.
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with valid owner-signed permit info.
@@ -52,6 +37,7 @@ export async function getRebalanceTx(
   deadlineEpochSeconds: bigint,
   publicClient: PublicClient,
   swapData: Hex,
+  liquidity: bigint,
   feeBips: bigint = 0n,
   position?: Position,
   permitInfo?: PermitInfo,
@@ -68,6 +54,15 @@ export async function getRebalanceTx(
     ));
   }
 
+  const newPosition = new Position({
+    pool: position.pool,
+    liquidity: liquidity.toString(),
+    tickLower: newPositionTickLower,
+    tickUpper: newPositionTickUpper,
+  });
+  const { amount0: amount0Min, amount1: amount1Min } =
+    newPosition.mintAmountsWithSlippage(slippageTolerance);
+
   const mintParams: MintParams = {
     token0: position.pool.token0.address as Address,
     token1: position.pool.token1.address as Address,
@@ -76,8 +71,8 @@ export async function getRebalanceTx(
     tickUpper: newPositionTickUpper,
     amount0Desired: 0n, // Param value ignored by Automan.
     amount1Desired: 0n, // Param value ignored by Automan.
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
+    amount0Min: BigInt(amount0Min.toString()),
+    amount1Min: BigInt(amount1Min.toString()),
     recipient: ADDRESS_ZERO, // Param value ignored by Automan.
     deadline: deadlineEpochSeconds,
   };
@@ -104,7 +99,7 @@ export async function getRebalanceTx(
   return {
     tx: {
       from: ownerAddress,
-      to: apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data: getAutomanRebalanceCalldata(
         mintParams,
         existingPositionId,
@@ -113,44 +108,9 @@ export async function getRebalanceTx(
         swapData,
       ),
     },
-    amounts,
-  };
-}
-
-async function getAmountsWithSlippage(
-  pool: Pool,
-  tickLower: number,
-  tickUpper: number,
-  automanAddress: Address,
-  ownerAddress: Address,
-  callData: Hex,
-  slippageTolerance: Percent,
-  publicClient: PublicClient,
-): Promise<SimulatedAmounts> {
-  const { data } = await publicClient.call({
-    account: ownerAddress,
-    to: automanAddress,
-    data: callData,
-  });
-  if (!data) throw new Error('No data returned from call');
-
-  const [, liquidity, amount0, amount1]: RebalanceReturnType =
-    decodeFunctionResult({
-      abi: Automan__factory.abi,
-      data,
-      functionName: 'rebalance',
-    });
-
-  const { amount0: amount0Min, amount1: amount1Min } = new Position({
-    pool,
-    liquidity: liquidity.toString(),
-    tickLower,
-    tickUpper,
-  }).mintAmountsWithSlippage(slippageTolerance);
-  return {
-    amount0,
-    amount1,
-    amount0Min: BigInt(amount0Min.toString()),
-    amount1Min: BigInt(amount1Min.toString()),
+    amounts: {
+      amount0Min: amount0Min.toString(),
+      amount1Min: amount1Min.toString(),
+    },
   };
 }

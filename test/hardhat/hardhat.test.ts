@@ -100,6 +100,7 @@ import {
   getPosition,
   getPositionAtPrice,
   getPublicClient,
+  getRebalanceSwapInfo,
   getRebalanceTx,
   getRebalancedPosition,
   getReinvestedPosition,
@@ -1559,6 +1560,23 @@ describe('Viem - Automan transaction tests', function () {
       positionId,
       publicClient,
     );
+
+    const { swapData, liquidity } = (
+      await getRebalanceSwapInfo(
+        chainId,
+        amm,
+        eoa,
+        positionId,
+
+        240000,
+        300000,
+
+        0.01 /*slippageTolerance*/,
+        publicClient,
+        [E_Solver.SamePool],
+        existingPosition,
+      )
+    )[0];
 
     const { tx: txRequest } = await getRebalanceTx(
       chainId,

@@ -12,6 +12,7 @@ export type SolverResult = {
   swapPath?: SwapPath;
   priceImpact?: Big;
   feeBips?: bigint;
+  feeUSD?: string;
 };
 
 export type SwapPath = {

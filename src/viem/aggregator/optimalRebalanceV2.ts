@@ -115,12 +115,13 @@ export async function optimalRebalanceV2(
       .div(10 ** position.token1.decimals);
 
     const positionUSD = token0USD.add(token1USD);
-
-    return feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0);
+    return {
+      feeBips: BigInt(feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0)),
+      feeUSD: feeUSD.toFixed(5),
+    };
   };
 
-  const feeBips = BigInt(await calcFeeBips());
-
+  const { feeBips, feeUSD } = await calcFeeBips();
   const { receive0, receive1, poolAmountIn, zeroForOne } =
     await simulateAndGetOptimalSwapAmount(feeBips);
 
@@ -168,6 +169,7 @@ export async function optimalRebalanceV2(
         liquidity,
         swapData,
         feeBips,
+        feeUSD,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
           position.pool,
@@ -188,7 +190,7 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
-        console.error(`Solver ${solver} failed: ${e}`);
+        console.warn(`Solver ${solver} failed: ${e}`);
       }
       return null;
     }
