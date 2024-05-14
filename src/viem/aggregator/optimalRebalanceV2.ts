@@ -117,7 +117,7 @@ export async function optimalRebalanceV2(
     const positionUSD = token0USD.add(token1USD);
     return {
       feeBips: BigInt(feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0)),
-      feeUSD: feeUSD.toFixed(2),
+      feeUSD: feeUSD.toFixed(5),
     };
   };
 
