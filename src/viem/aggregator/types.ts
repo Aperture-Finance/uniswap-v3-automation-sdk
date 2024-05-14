@@ -11,6 +11,7 @@ export type SolverResult = {
   swapRoute?: SwapRoute;
   swapPath?: SwapPath;
   priceImpact?: Big;
+  gasInRawNativeCurrency?: bigint;
 };
 
 export type SwapPath = {
