@@ -76,26 +76,7 @@ export async function getRebalanceTx(
     recipient: ADDRESS_ZERO, // Param value ignored by Automan.
     deadline: deadlineEpochSeconds,
   };
-  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
-  const data = getAutomanRebalanceCalldata(
-    mintParams,
-    existingPositionId,
-    feeBips,
-    permitInfo,
-    swapData,
-  );
-  const amounts = await getAmountsWithSlippage(
-    position.pool,
-    newPositionTickLower,
-    newPositionTickUpper,
-    apertureAutoman,
-    ownerAddress,
-    data,
-    slippageTolerance,
-    publicClient,
-  );
-  mintParams.amount0Min = amounts.amount0Min;
-  mintParams.amount1Min = amounts.amount1Min;
+
   return {
     tx: {
       from: ownerAddress,
