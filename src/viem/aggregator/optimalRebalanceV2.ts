@@ -5,6 +5,7 @@ import { Address, PublicClient } from 'viem';
 
 import {
   MintParams,
+  estimateRebalanceGas,
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
@@ -49,6 +50,7 @@ export async function optimalRebalanceV2(
   publicClient: PublicClient,
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
+  feesOn = true,
 ): Promise<SolverResult[]> {
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
@@ -121,7 +123,12 @@ export async function optimalRebalanceV2(
     };
   };
 
-  const { feeBips, feeUSD } = await calcFeeBips();
+  let feeBips = 0n,
+    feeUSD = '0';
+  if (feesOn) {
+    ({ feeBips, feeUSD } = await calcFeeBips());
+  }
+
   const { receive0, receive1, poolAmountIn, zeroForOne } =
     await simulateAndGetOptimalSwapAmount(feeBips);
 
@@ -149,7 +156,21 @@ export async function optimalRebalanceV2(
         poolAmountIn,
         zeroForOne,
       });
+
       const [, liquidity, amount0, amount1] = await simulateRebalance(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        position.owner,
+        mintParams,
+        BigInt(position.tokenId),
+        feeBips,
+        swapData,
+        blockNumber,
+      );
+
+      const gasInRawNativeCurrency = await estimateRebalanceGas(
         chainId,
         amm,
         publicClient,
@@ -170,6 +191,7 @@ export async function optimalRebalanceV2(
         swapData,
         feeBips,
         feeUSD,
+        gasInRawNativeCurrency,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
           position.pool,

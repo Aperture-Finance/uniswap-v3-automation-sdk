@@ -35,6 +35,7 @@ export async function getRebalanceSwapInfo(
   includeSolvers?: E_Solver[],
   position?: PositionDetails,
   blockNumber?: bigint,
+  feesOn?: boolean,
 ): Promise<SolverResult[]> {
   if (position === undefined) {
     position = await PositionDetails.fromPositionId(
@@ -58,5 +59,6 @@ export async function getRebalanceSwapInfo(
     publicClient,
     blockNumber,
     includeSolvers,
+    feesOn,
   );
 }
