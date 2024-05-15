@@ -1,83 +1,140 @@
-import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { fractionToBig } from '@/index';
+import { ApertureSupportedChainId, computePoolAddress } from '@/index';
+import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Hex, PublicClient } from 'viem';
+import Big from 'big.js';
+import { Address, PublicClient } from 'viem';
 
-import { computePoolAddress } from '../../utils';
-import {
-  MintParams,
-  encodeOptimalSwapData,
-  getAutomanContract,
-} from '../automan';
-import { getApproveTarget } from './aggregator';
-import { SwapRoute, quote } from './quote';
+import { getAutomanContract } from '../automan';
+import { E_Solver, SwapRoute } from '../solver';
+import { SwapPath } from './types';
+import { SolverResult } from './types';
 
-export async function getOptimalMintSwapData(
+export const calcPriceImpact = (
+  pool: Pool,
+  initAmount0: bigint,
+  initAmount1: bigint,
+  finalAmount0: bigint,
+  finalAmount1: bigint,
+) => {
+  const currentPoolPrice = fractionToBig(pool.token0Price);
+  const exchangePrice =
+    initAmount0 === finalAmount0
+      ? new Big(0)
+      : new Big(finalAmount1.toString())
+          .minus(initAmount1.toString())
+          .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
+
+  return exchangePrice.eq(0)
+    ? exchangePrice
+    : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+};
+
+export const getSwapPath = (
+  token0Address: Address,
+  token1Address: Address,
+  initToken0Amount: bigint,
+  initToken1Amount: bigint,
+  finalToken0Amount: bigint,
+  finalToken1Amount: bigint,
+  slippage: number,
+): SwapPath => {
+  const [tokenIn, tokenOut, amountIn, amountOut] =
+    finalToken0Amount > initToken0Amount
+      ? [
+          token1Address,
+          token0Address,
+          initToken1Amount - finalToken1Amount,
+          finalToken0Amount - initToken0Amount,
+        ]
+      : [
+          token0Address,
+          token1Address,
+          initToken0Amount - finalToken0Amount,
+          finalToken1Amount - initToken1Amount,
+        ];
+
+  return {
+    tokenIn: tokenIn,
+    tokenOut: tokenOut,
+    amountIn: amountIn.toString(),
+    amountOut: amountOut.toString(),
+    minAmountOut: new Big(amountOut.toString())
+      .times(1 - slippage * 0.01)
+      .toFixed(0),
+  };
+};
+
+export const getOptimalSwapAmount = async (
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  mintParams: MintParams,
-  slippage: number,
+  token0: Address,
+  token1: Address,
+  feeAmount: FeeAmount,
+  tickLower: number,
+  tickUpper: number,
+  amount0Desired: bigint,
+  amount1Desired: bigint,
   blockNumber?: bigint,
-  includeRoute?: boolean,
-): Promise<{
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
-  try {
-    const ammInfo = getAMMInfo(chainId, amm)!;
-    const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await getApproveTarget(chainId);
-    // get swap amounts using the same pool
-    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
-      [
-        computePoolAddress(
-          chainId,
-          amm,
-          mintParams.token0,
-          mintParams.token1,
-          mintParams.fee as FeeAmount,
-        ),
-        mintParams.tickLower,
-        mintParams.tickUpper,
-        mintParams.amount0Desired,
-        mintParams.amount1Desired,
-      ],
-      {
-        blockNumber,
-      },
-    );
+) => {
+  const automan = getAutomanContract(chainId, amm, publicClient);
+  // get swap amounts using the same pool
+  const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
+    [
+      computePoolAddress(chainId, amm, token0, token1, feeAmount),
+      tickLower,
+      tickUpper,
+      amount0Desired,
+      amount1Desired,
+    ],
+    {
+      blockNumber,
+    },
+  );
 
-    // get a quote from 1inch
-    const { tx, protocols } = await quote(
-      chainId,
-      zeroForOne ? mintParams.token0 : mintParams.token1,
-      zeroForOne ? mintParams.token1 : mintParams.token0,
-      poolAmountIn.toString(),
-      ammInfo.optimalSwapRouter!,
-      slippage * 100,
-      includeRoute,
-    );
-    return {
-      swapData: encodeOptimalSwapData(
-        chainId,
-        amm,
-        mintParams.token0,
-        mintParams.token1,
-        mintParams.fee as FeeAmount,
-        mintParams.tickLower,
-        mintParams.tickUpper,
-        zeroForOne,
-        approveTarget,
-        tx.to,
-        tx.data,
-      ),
-      swapRoute: protocols,
-    };
-  } catch (e) {
-    console.warn(`Failed to get swap data: ${e}`);
-  }
   return {
-    swapData: '0x',
+    poolAmountIn,
+    zeroForOne,
   };
-}
+};
+
+export const getSwapRoute = (
+  token0: Address,
+  token1: Address,
+  deltaAmount0: bigint, // final - init
+  swapRoute?: SwapRoute,
+) => {
+  if (swapRoute) {
+    return swapRoute;
+  }
+  swapRoute = [];
+  if (deltaAmount0 !== 0n) {
+    // need a swap
+    const [fromTokenAddress, toTokenAddress] =
+      deltaAmount0 < 0 ? [token0, token1] : [token1, token0];
+    swapRoute = [
+      [
+        [
+          {
+            name: 'Pool',
+            part: 100,
+            fromTokenAddress: fromTokenAddress,
+            toTokenAddress: toTokenAddress,
+          },
+        ],
+      ],
+    ];
+  }
+  return swapRoute;
+};
+
+export const buildOptimalSolutions = async (
+  solve: (solver: E_Solver) => Promise<SolverResult | null>,
+  includeSolvers: E_Solver[],
+) => {
+  return (await Promise.all(includeSolvers.map(solve))).filter(
+    (result): result is SolverResult => result !== null,
+  );
+};

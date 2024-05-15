@@ -12,8 +12,10 @@ import {
   simulateRemoveLiquidity,
 } from '../automan';
 import { PositionDetails } from '../position';
+import { E_Solver, SwapRoute, quote } from '../solver';
 import { getApproveTarget } from './aggregator';
-import { SwapRoute, quote } from './quote';
+import { calcPriceImpact, getSwapPath } from './internal';
+import { SolverResult } from './types';
 
 export async function optimalRebalance(
   chainId: ApertureSupportedChainId,
@@ -27,15 +29,8 @@ export async function optimalRebalance(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-): Promise<{
-  amount0: bigint;
-  amount1: bigint;
-  receive0: bigint;
-  receive1: bigint;
-  liquidity: bigint;
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
+  includeSwapInfo: boolean = true,
+): Promise<SolverResult> {
   const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
   const position = await PositionDetails.fromPositionId(
     chainId,
@@ -56,6 +51,7 @@ export async function optimalRebalance(
     feeBips,
     blockNumber,
   );
+
   const mintParams: MintParams = {
     token0: position.token0.address as Address,
     token1: position.token1.address as Address,
@@ -70,20 +66,20 @@ export async function optimalRebalance(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
-  const poolPromise = optimalMintPool(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    mintParams,
-    positionId,
-    position.owner,
-    feeBips,
-    blockNumber,
-  );
-  if (!usePool) {
-    if (optimalSwapRouter === undefined) {
-      return { ...(await poolPromise), receive0, receive1 };
+  const getEstimate = async () => {
+    const poolPromise = optimalMintPool(
+      chainId,
+      amm,
+      publicClient,
+      fromAddress,
+      mintParams,
+      positionId,
+      position.owner,
+      feeBips,
+      blockNumber,
+    );
+    if (usePool || !optimalSwapRouter) {
+      return { ...(await poolPromise), solver: E_Solver.SamePool };
     }
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
@@ -102,13 +98,35 @@ export async function optimalRebalance(
     ]);
     // use the same pool if the quote isn't better
     if (poolEstimate.liquidity >= routerEstimate.liquidity) {
-      return { ...poolEstimate, receive0, receive1 };
+      return { ...poolEstimate, solver: E_Solver.SamePool };
     } else {
-      return { ...routerEstimate, receive0, receive1 };
+      return { ...routerEstimate, solver: E_Solver.OneInch };
     }
-  } else {
-    return { ...(await poolPromise), receive0, receive1 };
+  };
+
+  const ret = await getEstimate();
+
+  if (includeSwapInfo) {
+    ret.priceImpact = calcPriceImpact(
+      position.pool,
+      mintParams.amount0Desired,
+      mintParams.amount1Desired,
+      ret.amount0,
+      ret.amount1,
+    );
+
+    ret.swapPath = getSwapPath(
+      position.pool.token0.address as Address,
+      position.pool.token1.address as Address,
+      receive0,
+      receive1,
+      ret.amount0,
+      ret.amount1,
+      slippage,
+    );
   }
+
+  return ret;
 }
 
 async function optimalMintPool(
@@ -121,13 +139,7 @@ async function optimalMintPool(
   positionOwner: Address,
   feeBips: bigint,
   blockNumber?: bigint,
-): Promise<{
-  amount0: bigint;
-  amount1: bigint;
-  liquidity: bigint;
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
+): Promise<SolverResult> {
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,
     amm,
@@ -137,7 +149,7 @@ async function optimalMintPool(
     mintParams,
     positionId,
     feeBips,
-    undefined,
+    /*swapData =*/ '0x',
     blockNumber,
   );
 
@@ -181,20 +193,14 @@ async function optimalMintRouter(
   positionOwner: Address,
   feeBips: bigint,
   blockNumber?: bigint,
-): Promise<{
-  amount0: bigint;
-  amount1: bigint;
-  liquidity: bigint;
-  swapData: Hex;
-  swapRoute?: SwapRoute;
-}> {
+): Promise<SolverResult> {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
     amm,
     publicClient,
     mintParams,
     slippage,
-    /** blockNumber= */ undefined,
+    blockNumber,
     /** includeRoute= */ true,
   );
   const [, liquidity, amount0, amount1] = await simulateRebalance(
