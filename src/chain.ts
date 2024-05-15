@@ -121,7 +121,7 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'ethereum',
     infura_network_id: 'mainnet',
-    rpc_url: 'https://ethereum.publicnode.com',
+    rpc_url: 'https://mainnet.infura.io/v3/84842078b09946638c03157f83405213',
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },

@@ -325,6 +325,7 @@ export async function simulateMintOptimal(
       blockNumber,
     );
   } catch (e) {
+    console.warn('staticCallWithOverrides fail', e);
     returnData = (
       await publicClient.call({
         account: from,
