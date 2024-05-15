@@ -199,13 +199,14 @@ describe('Viem - Routing tests', function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient();
-    const blockNumber = 17975698n;
+    const blockNumber = 19866218n;
 
     const { position, pool } = await PositionDetails.fromPositionId(
       chainId,
       amm,
       4n,
       publicClient,
+      blockNumber,
     );
 
     const token0Amount = CurrencyAmount.fromRawAmount(
@@ -248,7 +249,7 @@ describe('Viem - Routing tests', function () {
 
     expect(_total).to.be.closeTo(total, total * 0.03);
 
-    expect(Number(priceImpact!.toString())).to.be.closeTo(0.30333, 0.03);
+    expect(Number(priceImpact!.toString())).to.be.closeTo(0.2224, 0.01);
 
     expect(swapPath!.tokenIn).to.equal(pool.token0.address);
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
