@@ -16,7 +16,7 @@ export const get1InchSolver = (): ISolver => {
 
       const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
       if (!optimalSwapRouter) {
-        throw new Error('1Inch failed to provide swap data');
+        throw new Error('Chain or AMM not support');
       }
 
       // get a quote from 1inch

@@ -2,6 +2,8 @@ import axios from 'axios';
 
 import {
   AcceptInviteRequest,
+  AptrAirdropStatusRequest,
+  AptrAirdropStatusResponse,
   BindSocialAccountRequest,
   CheckPositionPermitRequest,
   CheckUserLimitRequest,
@@ -37,12 +39,13 @@ import {
 async function buildAxiosGetRequest(
   url: URL,
   request: Readonly<
-    | ListTriggerRequest
+    | AptrAirdropStatusRequest
     | CheckPositionPermitRequest
     | CheckUserLimitRequest
     | GetStrategyDetailRequest
     | HasSignedPrivateBetaAgreementRequest
     | ListLeaderboardRequest
+    | ListTriggerRequest
     | null
   >,
 ) {
@@ -56,19 +59,19 @@ async function buildAxiosGetRequest(
 async function buildAxiosPostRequest(
   url: URL,
   request: Readonly<
-    | CreateTriggerRequest
-    | UpdateTriggerRequest
-    | DeleteTriggerRequest
-    | UpdatePositionPermitRequest
-    | SignPrivateBetaAgreementRequest
-    | WalletTrackingRequest
-    | UserActivityTrackingRequest
-    | VerifySocialAccountRequest
     | AcceptInviteRequest
-    | RaffleRequest
-    | ValidateInviteCodeRequest
-    | SocialLoginRequest
     | BindSocialAccountRequest
+    | CreateTriggerRequest
+    | DeleteTriggerRequest
+    | RaffleRequest
+    | SignPrivateBetaAgreementRequest
+    | SocialLoginRequest
+    | UpdatePositionPermitRequest
+    | UpdateTriggerRequest
+    | UserActivityTrackingRequest
+    | ValidateInviteCodeRequest
+    | VerifySocialAccountRequest
+    | WalletTrackingRequest
   >,
 ) {
   return axios.post(url.toString(), request);
@@ -223,5 +226,12 @@ export class AutomanClient {
       this.endpoint,
     );
     return (await buildAxiosGetRequest(url, null)).data;
+  }
+
+  async getAptrAirdropStatus(
+    request: Readonly<AptrAirdropStatusRequest>,
+  ): Promise<AptrAirdropStatusResponse> {
+    const url = new URL(`/aptrAirdropStatus`, this.endpoint);
+    return (await buildAxiosGetRequest(url, request)).data;
   }
 }

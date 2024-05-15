@@ -22,7 +22,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
         props;
 
       if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) {
-        throw new Error('PropellerHeads failed to provide swap data');
+        throw new Error('Chain not supported');
       }
 
       const ammInfo = getAMMInfo(chainId, amm)!;
@@ -38,7 +38,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
 
       const { solutions } = res;
       if (solutions.length === 0) {
-        throw new Error('got no solution');
+        throw new Error('Got no solution');
       }
 
       return {

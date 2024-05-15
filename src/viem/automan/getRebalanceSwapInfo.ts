@@ -5,7 +5,6 @@ import {
   SolverResult,
   optimalRebalanceV2,
 } from '@/viem';
-import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
@@ -31,31 +30,35 @@ export async function getRebalanceSwapInfo(
   newPositionTickLower: number,
   newPositionTickUpper: number,
   slippageTolerance: number,
+  tokenPrices: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  position?: Position,
+  position?: PositionDetails,
   blockNumber?: bigint,
+  feesOn?: boolean,
 ): Promise<SolverResult[]> {
   if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
+    position = await PositionDetails.fromPositionId(
       chainId,
       amm,
       existingPositionId,
       publicClient,
-    ));
+      blockNumber,
+    );
   }
 
   return optimalRebalanceV2(
     chainId,
     amm,
-    existingPositionId,
+    position,
     newPositionTickLower,
     newPositionTickUpper,
-    /**fee */ 0n,
     ownerAddress,
     slippageTolerance,
+    tokenPrices,
     publicClient,
     blockNumber,
     includeSolvers,
+    feesOn,
   );
 }

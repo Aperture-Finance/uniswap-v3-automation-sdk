@@ -21,6 +21,7 @@ import { SimulatedAmounts } from './types';
  * @param publicClient Viem public client.
  * @param swapData Swap data for the position, returned by getRebalanceSwapInfo.
  * @param liquidity The amount of liquidity for the rebalanced position.
+ * @param feeBips The fee Aperture charges for the transaction.
  * @param position Optional, the existing position.
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with valid owner-signed permit info.
  * @returns The generated transaction request and expected amounts.
@@ -37,6 +38,7 @@ export async function getRebalanceTx(
   publicClient: PublicClient,
   swapData: Hex,
   liquidity: bigint,
+  feeBips: bigint = 0n,
   position?: Position,
   permitInfo?: PermitInfo,
 ): Promise<{
@@ -82,7 +84,7 @@ export async function getRebalanceTx(
       data: getAutomanRebalanceCalldata(
         mintParams,
         existingPositionId,
-        0n,
+        feeBips,
         permitInfo,
         swapData,
       ),
