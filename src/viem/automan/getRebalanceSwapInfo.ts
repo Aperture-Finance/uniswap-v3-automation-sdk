@@ -17,6 +17,7 @@ import { Address, PublicClient } from 'viem';
  * @param newPositionTickLower The lower tick of the new position.
  * @param newPositionTickUpper The upper tick of the new position.
  * @param slippageTolerance How much the amount of either token0 or token1 in the new position is allowed to change unfavorably.
+ * @param tokenPrices The prices of the two tokens in the pool.
  * @param publicClient Viem public client.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
  * @param position Optional, the existing position.
