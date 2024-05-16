@@ -48,6 +48,9 @@ export async function optimalMintV2(
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
+  if (!blockNumber) {
+    blockNumber = await publicClient.getBlockNumber();
+  }
   const token0 = token0Amount.currency.address as Address;
   const token1 = token1Amount.currency.address as Address;
   const mintParams: MintParams = {
