@@ -5,7 +5,6 @@ import {
   SolverResult,
   optimalRebalanceV2,
 } from '@/viem';
-import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
@@ -18,6 +17,7 @@ import { Address, PublicClient } from 'viem';
  * @param newPositionTickLower The lower tick of the new position.
  * @param newPositionTickUpper The upper tick of the new position.
  * @param slippageTolerance How much the amount of either token0 or token1 in the new position is allowed to change unfavorably.
+ * @param tokenPrices The prices of the two tokens in the pool.
  * @param publicClient Viem public client.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
  * @param position Optional, the existing position.
@@ -31,31 +31,35 @@ export async function getRebalanceSwapInfo(
   newPositionTickLower: number,
   newPositionTickUpper: number,
   slippageTolerance: number,
+  tokenPrices: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  position?: Position,
+  position?: PositionDetails,
   blockNumber?: bigint,
+  feesOn?: boolean,
 ): Promise<SolverResult[]> {
   if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
+    position = await PositionDetails.fromPositionId(
       chainId,
       amm,
       existingPositionId,
       publicClient,
-    ));
+      blockNumber,
+    );
   }
 
   return optimalRebalanceV2(
     chainId,
     amm,
-    existingPositionId,
+    position,
     newPositionTickLower,
     newPositionTickUpper,
-    /**fee */ 0n,
     ownerAddress,
     slippageTolerance,
+    tokenPrices,
     publicClient,
     blockNumber,
     includeSolvers,
+    feesOn,
   );
 }

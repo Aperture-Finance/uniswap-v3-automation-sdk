@@ -113,15 +113,23 @@ describe('Viem - Routing tests', function () {
       tokenId,
     ]);
 
-    const resultV2 = await optimalRebalanceV2(
+    const position = await PositionDetails.fromPositionId(
       chainId,
       amm,
       tokenId,
+      publicClient,
+      blockNumber,
+    );
+
+    const resultV2 = await optimalRebalanceV2(
+      chainId,
+      amm,
+      position,
       tickLower,
       tickUpper,
-      0n,
       owner,
       0.1,
+      ['60000', '3000'],
       publicClient,
       blockNumber,
     );
@@ -138,20 +146,6 @@ describe('Viem - Routing tests', function () {
 
     expect(resultV2.length).to.be.greaterThan(0);
     expect(resultV2.map((r) => r.solver)).to.be.include(E_Solver.PH); // should include PH
-    for (let i = 0; i < resultV2.length; i++) {
-      expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
-      expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
-      expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
-
-      expect(resultV2[i].swapData!).to.be.not.empty;
-      expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
-      expect(resultV2[i].swapPath!.tokenIn).to.equal(pool.token1.address);
-      expect(resultV2[i].swapPath!.tokenOut).to.equal(pool.token0.address);
-      expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
-        Number(resultV2[i].swapPath?.amountOut.toString()),
-        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
-      );
-    }
   });
 
   it('Test optimalRebalanceV2 in arbitrum', async function () {
@@ -159,13 +153,14 @@ describe('Viem - Routing tests', function () {
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
     const blockNumber = await publicClient.getBlockNumber();
-    const { pool } = await PositionDetails.fromPositionId(
+    const position = await PositionDetails.fromPositionId(
       chainId,
       UNIV3_AMM,
       tokenId,
       publicClient,
       blockNumber,
     );
+    const { pool } = position;
     const tickLower = nearestUsableTick(
       pool.tickCurrent - 10 * pool.tickSpacing,
       pool.tickSpacing,
@@ -181,18 +176,48 @@ describe('Viem - Routing tests', function () {
     const resultV2 = await optimalRebalanceV2(
       chainId,
       UNIV3_AMM,
-      tokenId,
+      position,
       tickLower,
       tickUpper,
-      0n,
       owner,
       0.1,
+      ['3000', '1'],
       publicClient,
       blockNumber,
     );
 
+    console.log(
+      JSON.stringify(resultV2, (key, value) => {
+        // Convert BigInt to string
+        if (typeof value === 'bigint') {
+          return value.toString();
+        }
+        return value;
+      }),
+    );
+
     expect(resultV2.length).to.be.greaterThan(0);
     expect(resultV2.map((r) => r.solver)).to.be.not.include(E_Solver.PH); // PH not support in arbitrum
+    for (let i = 0; i < resultV2.length; i++) {
+      expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
+      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.1527, 0.0003); // swap ~3.8 USDC, fee 0.1527
+      expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.017, 0.005); // position $8.87, bips 0.1527/8.87 = ~0.0172
+
+      expect(resultV2[i].swapData!).to.be.not.empty;
+      expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
+      expect(resultV2[i].swapPath!.tokenIn).to.equal(
+        position.pool.token1.address,
+      ); // USDC
+      expect(resultV2[i].swapPath!.tokenOut).to.equal(
+        position.pool.token0.address,
+      ); // WETH
+      expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
+        Number(resultV2[i].swapPath?.amountOut.toString()),
+        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
+      );
+    }
   });
 
   it('Test increaseLiquidityOptimal with pool', async function () {

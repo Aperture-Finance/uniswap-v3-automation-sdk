@@ -1554,7 +1554,7 @@ describe('Viem - Automan transaction tests', function () {
   it('getRebalanceTx', async function () {
     const positionId = 4n;
 
-    const existingPosition = await getPosition(
+    const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
       positionId,
@@ -1567,14 +1567,15 @@ describe('Viem - Automan transaction tests', function () {
         amm,
         eoa,
         positionId,
-
         240000,
         300000,
-
         0.01 /*slippageTolerance*/,
+        ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
         existingPosition,
+        undefined,
+        false,
       )
     )[0];
 
@@ -1588,9 +1589,10 @@ describe('Viem - Automan transaction tests', function () {
       /*slippageTolerance=*/ new Percent(1, 100),
       /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
-      swapData, // 0x
+      swapData,
       liquidity,
-      existingPosition,
+      0n /** feeBips */,
+      existingPosition.position,
     );
     // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });

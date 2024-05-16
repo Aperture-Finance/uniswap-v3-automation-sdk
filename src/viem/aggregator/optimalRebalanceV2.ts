@@ -1,9 +1,11 @@
 import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
 import {
   MintParams,
+  estimateRebalanceGas,
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
@@ -18,11 +20,14 @@ import {
 } from './internal';
 import { SolverResult } from './types';
 
+const feeRatio = 0.0007; // 0.07% fee
+const feeCoefficient = 1e18;
+
 /**
  * Get the optimal amount of liquidity to rebalance for a given position.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
- * @param positionId The position ID.
+ * @param position Position details
  * @param newTickLower The new lower tick.
  * @param newTickUpper The new upper tick.
  * @param feeBips The fee Aperture charge for the transaction.
@@ -36,39 +41,96 @@ import { SolverResult } from './types';
 export async function optimalRebalanceV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  positionId: bigint,
+  position: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
-  feeBips: bigint,
   fromAddress: Address,
   slippage: number,
+  tokenPrices: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
+  feesOn = true,
 ): Promise<SolverResult[]> {
-  const position = await PositionDetails.fromPositionId(
-    chainId,
-    amm,
-    positionId,
-    publicClient,
-    blockNumber,
-  );
-
-  const [receive0, receive1] = await simulateRemoveLiquidity(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    position.owner,
-    BigInt(position.tokenId),
-    /*amount0Min =*/ undefined,
-    /*amount1Min =*/ undefined,
-    feeBips,
-    blockNumber,
-  );
-
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
+
+  const simulateAndGetOptimalSwapAmount = async (feeBips: bigint) => {
+    const [receive0, receive1] = await simulateRemoveLiquidity(
+      chainId,
+      amm,
+      publicClient,
+      fromAddress,
+      position.owner,
+      BigInt(position.tokenId),
+      /*amount0Min =*/ undefined,
+      /*amount1Min =*/ undefined,
+      feeBips,
+      blockNumber,
+    );
+
+    const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
+      chainId,
+      amm,
+      publicClient,
+      token0,
+      token1,
+      position.fee,
+      newTickLower,
+      newTickUpper,
+      receive0,
+      receive1,
+      blockNumber,
+    );
+
+    return {
+      receive0,
+      receive1,
+      poolAmountIn,
+      zeroForOne,
+    };
+  };
+
+  const calcFeeBips = async () => {
+    const { poolAmountIn, zeroForOne, receive0, receive1 } =
+      await simulateAndGetOptimalSwapAmount(0n);
+
+    const tokenInPrice = zeroForOne ? tokenPrices[0] : tokenPrices[1];
+
+    const decimals = zeroForOne
+      ? position.pool.token0.decimals
+      : position.pool.token1.decimals;
+
+    // swap token value * 0.0007 + 0.15
+    const feeUSD = new Big(poolAmountIn.toString())
+      .div(10 ** decimals)
+      .mul(tokenInPrice)
+      .mul(feeRatio)
+      .add(0.15);
+
+    const token0USD = new Big(receive0.toString())
+      .mul(tokenPrices[0])
+      .div(10 ** position.token0.decimals);
+
+    const token1USD = new Big(receive1.toString())
+      .mul(tokenPrices[1])
+      .div(10 ** position.token1.decimals);
+
+    const positionUSD = token0USD.add(token1USD);
+    return {
+      feeBips: BigInt(feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0)),
+      feeUSD: feeUSD.toFixed(5),
+    };
+  };
+
+  let feeBips = 0n,
+    feeUSD = '0';
+  if (feesOn) {
+    ({ feeBips, feeUSD } = await calcFeeBips());
+  }
+
+  const { receive0, receive1, poolAmountIn, zeroForOne } =
+    await simulateAndGetOptimalSwapAmount(feeBips);
 
   const mintParams: MintParams = {
     token0,
@@ -83,21 +145,6 @@ export async function optimalRebalanceV2(
     recipient: fromAddress, // Param value ignored by Automan for rebalance.
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-
-  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
-    chainId,
-    amm,
-    publicClient,
-    token0,
-    token1,
-    position.fee,
-    newTickLower,
-    newTickUpper,
-    receive0,
-    receive1,
-    blockNumber,
-  );
-
   const solve = async (solver: E_Solver) => {
     try {
       const { swapData, swapRoute } = await getSolver(solver).optimalMint({
@@ -109,6 +156,7 @@ export async function optimalRebalanceV2(
         poolAmountIn,
         zeroForOne,
       });
+
       const [, liquidity, amount0, amount1] = await simulateRebalance(
         chainId,
         amm,
@@ -116,7 +164,20 @@ export async function optimalRebalanceV2(
         fromAddress,
         position.owner,
         mintParams,
-        positionId,
+        BigInt(position.tokenId),
+        feeBips,
+        swapData,
+        blockNumber,
+      );
+
+      const gasInRawNativeCurrency = await estimateRebalanceGas(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        position.owner,
+        mintParams,
+        BigInt(position.tokenId),
         feeBips,
         swapData,
         blockNumber,
@@ -128,6 +189,9 @@ export async function optimalRebalanceV2(
         amount1,
         liquidity,
         swapData,
+        feeBips,
+        feeUSD,
+        gasInRawNativeCurrency,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
           position.pool,
@@ -148,7 +212,7 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
-        console.error(`Solver ${solver} failed: ${e}`);
+        console.warn(`Solver ${solver} failed: ${e}`);
       }
       return null;
     }
