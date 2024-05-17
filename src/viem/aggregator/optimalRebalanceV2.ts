@@ -5,7 +5,6 @@ import { Address, PublicClient } from 'viem';
 
 import {
   MintParams,
-  estimateRebalanceGas,
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
@@ -170,18 +169,18 @@ export async function optimalRebalanceV2(
         blockNumber,
       );
 
-      const gasInRawNativeCurrency = await estimateRebalanceGas(
-        chainId,
-        amm,
-        publicClient,
-        fromAddress,
-        position.owner,
-        mintParams,
-        BigInt(position.tokenId),
-        feeBips,
-        swapData,
-        blockNumber,
-      );
+      // const gasInRawNativeCurrency = await estimateRebalanceGas(
+      //   chainId,
+      //   amm,
+      //   publicClient,
+      //   fromAddress,
+      //   position.owner,
+      //   mintParams,
+      //   BigInt(position.tokenId),
+      //   feeBips,
+      //   swapData,
+      //   blockNumber,
+      // );
 
       return {
         solver,
@@ -191,7 +190,7 @@ export async function optimalRebalanceV2(
         swapData,
         feeBips,
         feeUSD,
-        gasInRawNativeCurrency,
+        // gasInRawNativeCurrency,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
           position.pool,
