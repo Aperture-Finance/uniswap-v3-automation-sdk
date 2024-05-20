@@ -170,18 +170,23 @@ export async function optimalRebalanceV2(
         blockNumber,
       );
 
-      const gasInRawNativeCurrency = await estimateRebalanceGas(
-        chainId,
-        amm,
-        publicClient,
-        fromAddress,
-        position.owner,
-        mintParams,
-        BigInt(position.tokenId),
-        feeBips,
-        swapData,
-        blockNumber,
-      );
+      let gasInRawNativeCurrency = 0n;
+      try {
+        gasInRawNativeCurrency = await estimateRebalanceGas(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          position.owner,
+          mintParams,
+          BigInt(position.tokenId),
+          feeBips,
+          swapData,
+          blockNumber,
+        );
+      } catch (e) {
+        console.warn('Error estimating gas', e);
+      }
 
       return {
         solver,
