@@ -231,7 +231,7 @@ export class AutomanClient {
   async getAptrAirdropStatus(
     request: Readonly<AptrAirdropStatusRequest>,
   ): Promise<AptrAirdropStatusResponse> {
-    const url = new URL(`/aptrAirdropStatus`, this.endpoint);
+    const url = new URL(`/getAptrAirdropStatus`, this.endpoint);
     return (await buildAxiosGetRequest(url, request)).data;
   }
 }
