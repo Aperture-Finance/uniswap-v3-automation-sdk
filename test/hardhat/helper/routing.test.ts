@@ -246,4 +246,46 @@ describe('Helper - Routing tests', function () {
     ).to.equal('1');
     expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(false);
   });
+
+  it('Test automation eligiblity - BSC', async function () {
+    const bscProvider = getPublicProvider(
+      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+    );
+    const [DOGE, USDC, WBNB] = await Promise.all([
+      getToken(
+        '0xba2ae424d960c26247dd6c32edc70b295c744c43',
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        bscProvider,
+      ),
+      getToken(
+        '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        bscProvider,
+      ),
+      getToken(
+        '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        bscProvider,
+      ),
+    ]);
+    expect(
+      await checkTokenLiquidityAgainstChainNativeCurrency(
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        DOGE.address,
+      ),
+    ).to.equal('-1');
+    expect(
+      await checkTokenLiquidityAgainstChainNativeCurrency(
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        USDC.address,
+      ),
+    ).to.not.equal('-1');
+    expect(
+      await checkTokenLiquidityAgainstChainNativeCurrency(
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        WBNB.address,
+      ),
+    ).to.equal('1');
+    // expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(false);
+  });
 });

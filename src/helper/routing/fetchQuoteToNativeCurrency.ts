@@ -5,6 +5,7 @@ import {
 } from '@/index';
 import axios from 'axios';
 import { BigNumber, BigNumberish } from 'ethers';
+import { zeroAddress } from 'viem';
 
 import {
   RoutingApiQuoteResponse,
@@ -84,13 +85,58 @@ export async function fetchQuoteToNativeCurrency(
   tokenAddress: string,
   nativeCurrencyExactOutRawAmount: BigNumberish,
 ): Promise<string> {
-  return (
-    await fetchQuoteFromRoutingApi(
-      chainId,
-      tokenAddress,
-      getChainInfo(chainId).wrappedNativeCurrency.address,
-      nativeCurrencyExactOutRawAmount,
-      'exactOut',
-    )
-  ).quote;
+  try {
+    const res = (
+      await fetchQuoteFromRoutingApi(
+        chainId,
+        tokenAddress,
+        getChainInfo(chainId).wrappedNativeCurrency.address,
+        nativeCurrencyExactOutRawAmount,
+        'exactOut',
+      )
+    ).quote;
+
+    console.log('res', res);
+    throw new Error('test');
+    // return (
+    //   await fetchQuoteFromRoutingApi(
+    //     chainId,
+    //     tokenAddress,
+    //     getChainInfo(chainId).wrappedNativeCurrency.address,
+    //     nativeCurrencyExactOutRawAmount,
+    //     'exactOut',
+    //   )
+    // ).quote;
+  } catch (e) {
+    console.debug(
+      'fail to fetchQuoteToNativeCurrency from routing api, trying to get from 1inch',
+    );
+    const swapParams = {
+      src: getChainInfo(chainId).wrappedNativeCurrency.address,
+      dst: tokenAddress,
+      amount: BigNumber.from(nativeCurrencyExactOutRawAmount).toString(),
+      from: zeroAddress,
+      slippage: '0.5',
+    };
+    const { toAmount } =
+      (
+        await buildRequest(chainId, new URLSearchParams(swapParams)).catch(
+          console.error,
+        )
+      )?.data ?? {};
+
+    console.debug('toAmount', toAmount);
+    return toAmount;
+  }
+}
+
+const ApiBaseUrl = 'https://1inch-api.aperture.finance';
+
+function buildRequest(
+  chainId: ApertureSupportedChainId,
+  params: URLSearchParams,
+) {
+  return axios.get(`${ApiBaseUrl}/swap/v6.0/${chainId}/swap`, {
+    params,
+  });
 }
