@@ -1,8 +1,12 @@
 import {
   ApertureSupportedChainId,
   ChainSpecificRoutingAPIInfo,
+  computePoolAddress,
   getChainInfo,
 } from '@/index';
+import { getPool } from '@/viem';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import { BigNumber, BigNumberish } from 'ethers';
 import { zeroAddress } from 'viem';
@@ -85,8 +89,9 @@ export async function fetchQuoteToNativeCurrency(
   tokenAddress: string,
   nativeCurrencyExactOutRawAmount: BigNumberish,
 ): Promise<string> {
+  const wrappedNativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
   try {
-    const res = (
+    return (
       await fetchQuoteFromRoutingApi(
         chainId,
         tokenAddress,
@@ -95,29 +100,17 @@ export async function fetchQuoteToNativeCurrency(
         'exactOut',
       )
     ).quote;
-
-    console.log('res', res);
-    throw new Error('test');
-    // return (
-    //   await fetchQuoteFromRoutingApi(
-    //     chainId,
-    //     tokenAddress,
-    //     getChainInfo(chainId).wrappedNativeCurrency.address,
-    //     nativeCurrencyExactOutRawAmount,
-    //     'exactOut',
-    //   )
-    // ).quote;
   } catch (e) {
     console.debug(
       'fail to fetchQuoteToNativeCurrency from routing api, trying to get from 1inch',
     );
+
     const swapParams = {
-      src: getChainInfo(chainId).wrappedNativeCurrency.address,
+      src: wrappedNativeCurrency.address,
       dst: tokenAddress,
       amount: BigNumber.from(nativeCurrencyExactOutRawAmount).toString(),
-      from: zeroAddress,
-      slippage: '0.5',
     };
+
     const { toAmount } =
       (
         await buildRequest(chainId, new URLSearchParams(swapParams)).catch(
@@ -125,7 +118,6 @@ export async function fetchQuoteToNativeCurrency(
         )
       )?.data ?? {};
 
-    console.debug('toAmount', toAmount);
     return toAmount;
   }
 }
@@ -136,7 +128,7 @@ function buildRequest(
   chainId: ApertureSupportedChainId,
   params: URLSearchParams,
 ) {
-  return axios.get(`${ApiBaseUrl}/swap/v6.0/${chainId}/swap`, {
+  return axios.get(`${ApiBaseUrl}/swap/v5.2/${chainId}/quote`, {
     params,
   });
 }
