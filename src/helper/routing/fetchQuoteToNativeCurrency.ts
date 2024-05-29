@@ -84,13 +84,48 @@ export async function fetchQuoteToNativeCurrency(
   tokenAddress: string,
   nativeCurrencyExactOutRawAmount: BigNumberish,
 ): Promise<string> {
-  return (
-    await fetchQuoteFromRoutingApi(
-      chainId,
+  const wrappedNativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
+  try {
+    return (
+      await fetchQuoteFromRoutingApi(
+        chainId,
+        tokenAddress,
+        wrappedNativeCurrency.address,
+        nativeCurrencyExactOutRawAmount,
+        'exactOut',
+      )
+    ).quote;
+  } catch (e) {
+    console.debug(
+      'fail to fetchQuoteToNativeCurrency from routing api, trying to get from 1inch',
       tokenAddress,
-      getChainInfo(chainId).wrappedNativeCurrency.address,
-      nativeCurrencyExactOutRawAmount,
-      'exactOut',
-    )
-  ).quote;
+      wrappedNativeCurrency.address,
+    );
+
+    const swapParams = {
+      src: wrappedNativeCurrency.address,
+      dst: tokenAddress,
+      amount: BigNumber.from(nativeCurrencyExactOutRawAmount).toString(),
+    };
+
+    const { toAmount } =
+      (
+        await buildRequest(chainId, new URLSearchParams(swapParams)).catch(
+          console.error,
+        )
+      )?.data ?? {};
+
+    return toAmount;
+  }
+}
+
+const ApiBaseUrl = 'https://1inch-api.aperture.finance';
+
+function buildRequest(
+  chainId: ApertureSupportedChainId,
+  params: URLSearchParams,
+) {
+  return axios.get(`${ApiBaseUrl}/swap/v5.2/${chainId}/quote`, {
+    params,
+  });
 }
