@@ -90,7 +90,7 @@ export async function fetchQuoteToNativeCurrency(
       await fetchQuoteFromRoutingApi(
         chainId,
         tokenAddress,
-        getChainInfo(chainId).wrappedNativeCurrency.address,
+        wrappedNativeCurrency.address,
         nativeCurrencyExactOutRawAmount,
         'exactOut',
       )
@@ -98,6 +98,8 @@ export async function fetchQuoteToNativeCurrency(
   } catch (e) {
     console.debug(
       'fail to fetchQuoteToNativeCurrency from routing api, trying to get from 1inch',
+      tokenAddress,
+      wrappedNativeCurrency.address,
     );
 
     const swapParams = {
