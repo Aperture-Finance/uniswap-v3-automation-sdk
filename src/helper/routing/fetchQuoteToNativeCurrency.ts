@@ -1,15 +1,10 @@
 import {
   ApertureSupportedChainId,
   ChainSpecificRoutingAPIInfo,
-  computePoolAddress,
   getChainInfo,
 } from '@/index';
-import { getPool } from '@/viem';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import { BigNumber, BigNumberish } from 'ethers';
-import { zeroAddress } from 'viem';
 
 import {
   RoutingApiQuoteResponse,
