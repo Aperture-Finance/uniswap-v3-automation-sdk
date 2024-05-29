@@ -231,7 +231,7 @@ describe('Helper - Routing tests', function () {
         ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
         SHIBe.address,
       ),
-    ).to.equal('-1');
+    ).to.not.equal('-1');
     expect(
       await checkTokenLiquidityAgainstChainNativeCurrency(
         ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
@@ -244,6 +244,25 @@ describe('Helper - Routing tests', function () {
         WAVAX.address,
       ),
     ).to.equal('1');
-    expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(false);
+    expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
+  });
+
+  it('Test automation eligiblity - BSC', async function () {
+    const bscProvider = getPublicProvider(
+      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+    );
+
+    const BNX = await getToken(
+      '0x5b1f874d0b0c5ee17a495cbb70ab8bf64107a3bd',
+      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+      bscProvider,
+    );
+
+    expect(
+      await checkTokenLiquidityAgainstChainNativeCurrency(
+        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+        BNX.address,
+      ),
+    ).to.not.equal('-1');
   });
 });
