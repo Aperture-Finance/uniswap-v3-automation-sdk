@@ -385,91 +385,121 @@ export class PositionDetails implements BasicPositionInfo {
     blockNumber?: bigint,
   ): Promise<CollectableTokenAmounts> {
     publicClient = publicClient ?? getPublicClient(this.chainId);
-    const pool = getPoolContract(
-      this.token0,
-      this.token1,
-      this.fee,
+    return viewCollectableTokenAmounts(
       this.chainId,
       amm,
+      BigInt(this.tokenId),
       publicClient,
+      this,
+      blockNumber,
     );
-    const opts = { blockNumber };
-    const [
-      slot0,
-      feeGrowthGlobal0X128,
-      feeGrowthGlobal1X128,
-      lower,
-      upper,
-      position,
-    ] = await Promise.all([
-      pool.read.slot0(opts),
-      pool.read.feeGrowthGlobal0X128(opts),
-      pool.read.feeGrowthGlobal1X128(opts),
-      pool.read.ticks([this.tickLower], opts),
-      pool.read.ticks([this.tickUpper], opts),
-      getNPM(this.chainId, amm, publicClient).read.positions(
-        [BigInt(this.tokenId)],
-        opts,
-      ),
-    ]);
-    const tick = slot0[1];
-    const [, , feeGrowthOutside0X128Lower, feeGrowthOutside1X128Lower] = lower;
-    const [, , feeGrowthOutside0X128Upper, feeGrowthOutside1X128Upper] = upper;
+  }
+}
 
-    let feeGrowthInside0X128: bigint, feeGrowthInside1X128: bigint;
-    // https://github.com/Uniswap/v4-core/blob/f630c8ca8c669509d958353200953762fd15761a/contracts/libraries/Pool.sol#L566
-    if (tick < this.tickLower) {
-      feeGrowthInside0X128 =
-        feeGrowthOutside0X128Lower - feeGrowthOutside0X128Upper;
-      feeGrowthInside1X128 =
-        feeGrowthOutside1X128Lower - feeGrowthOutside1X128Upper;
-    } else if (tick >= this.tickUpper) {
-      feeGrowthInside0X128 =
-        feeGrowthOutside0X128Upper - feeGrowthOutside0X128Lower;
-      feeGrowthInside1X128 =
-        feeGrowthOutside1X128Upper - feeGrowthOutside1X128Lower;
-    } else {
-      feeGrowthInside0X128 =
-        feeGrowthGlobal0X128 -
-        feeGrowthOutside0X128Lower -
-        feeGrowthOutside0X128Upper;
-      feeGrowthInside1X128 =
-        feeGrowthGlobal1X128 -
-        feeGrowthOutside1X128Lower -
-        feeGrowthOutside1X128Upper;
-    }
-    const [
-      ,
-      ,
-      ,
-      ,
-      ,
-      ,
-      ,
-      liquidity,
-      feeGrowthInside0LastX128,
-      feeGrowthInside1LastX128,
-      tokensOwed0,
-      tokensOwed1,
-    ] = position;
-    const [fees0, fees1] = PositionLibrary.getTokensOwed(
-      JSBI.BigInt(feeGrowthInside0LastX128.toString()),
-      JSBI.BigInt(feeGrowthInside1LastX128.toString()),
-      JSBI.BigInt(liquidity.toString()),
-      JSBI.BigInt(feeGrowthInside0X128.toString()),
-      JSBI.BigInt(feeGrowthInside1X128.toString()),
-    );
-    return {
-      token0Amount: CurrencyAmount.fromRawAmount(
-        this.token0,
-        (tokensOwed0 + fees0.toString()).toString(),
-      ),
-      token1Amount: CurrencyAmount.fromRawAmount(
-        this.token1,
-        (tokensOwed1 + fees1.toString()).toString(),
-      ),
+export async function viewCollectableTokenAmounts(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  positionId: bigint,
+  publicClient?: PublicClient,
+  basicPositionInfo?: BasicPositionInfo,
+  blockNumber?: bigint,
+): Promise<CollectableTokenAmounts> {
+  if (basicPositionInfo === undefined) {
+    const position = await getPosition(chainId, amm, positionId, publicClient);
+    basicPositionInfo = {
+      token0: position.pool.token0,
+      token1: position.pool.token1,
+      fee: position.pool.fee,
+      liquidity: position.liquidity,
+      tickLower: position.tickLower,
+      tickUpper: position.tickUpper,
     };
   }
+
+  const pool = getPoolContract(
+    basicPositionInfo.token0,
+    basicPositionInfo.token1,
+    basicPositionInfo.fee,
+    chainId,
+    amm,
+    publicClient,
+  );
+  const opts = { blockNumber };
+  const [
+    slot0,
+    feeGrowthGlobal0X128,
+    feeGrowthGlobal1X128,
+    lower,
+    upper,
+    position,
+  ] = await Promise.all([
+    pool.read.slot0(opts),
+    pool.read.feeGrowthGlobal0X128(opts),
+    pool.read.feeGrowthGlobal1X128(opts),
+    pool.read.ticks([basicPositionInfo.tickLower], opts),
+    pool.read.ticks([basicPositionInfo.tickUpper], opts),
+    getNPM(chainId, amm, publicClient).read.positions(
+      [BigInt(positionId)],
+      opts,
+    ),
+  ]);
+  const tick = slot0[1];
+  const [, , feeGrowthOutside0X128Lower, feeGrowthOutside1X128Lower] = lower;
+  const [, , feeGrowthOutside0X128Upper, feeGrowthOutside1X128Upper] = upper;
+
+  let feeGrowthInside0X128: bigint, feeGrowthInside1X128: bigint;
+  // https://github.com/Uniswap/v4-core/blob/f630c8ca8c669509d958353200953762fd15761a/contracts/libraries/Pool.sol#L566
+  if (tick < basicPositionInfo.tickLower) {
+    feeGrowthInside0X128 =
+      feeGrowthOutside0X128Lower - feeGrowthOutside0X128Upper;
+    feeGrowthInside1X128 =
+      feeGrowthOutside1X128Lower - feeGrowthOutside1X128Upper;
+  } else if (tick >= basicPositionInfo.tickUpper) {
+    feeGrowthInside0X128 =
+      feeGrowthOutside0X128Upper - feeGrowthOutside0X128Lower;
+    feeGrowthInside1X128 =
+      feeGrowthOutside1X128Upper - feeGrowthOutside1X128Lower;
+  } else {
+    feeGrowthInside0X128 =
+      feeGrowthGlobal0X128 -
+      feeGrowthOutside0X128Lower -
+      feeGrowthOutside0X128Upper;
+    feeGrowthInside1X128 =
+      feeGrowthGlobal1X128 -
+      feeGrowthOutside1X128Lower -
+      feeGrowthOutside1X128Upper;
+  }
+  const [
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    liquidity,
+    feeGrowthInside0LastX128,
+    feeGrowthInside1LastX128,
+    tokensOwed0,
+    tokensOwed1,
+  ] = position;
+  const [fees0, fees1] = PositionLibrary.getTokensOwed(
+    JSBI.BigInt(feeGrowthInside0LastX128.toString()),
+    JSBI.BigInt(feeGrowthInside1LastX128.toString()),
+    JSBI.BigInt(liquidity.toString()),
+    JSBI.BigInt(feeGrowthInside0X128.toString()),
+    JSBI.BigInt(feeGrowthInside1X128.toString()),
+  );
+  return {
+    token0Amount: CurrencyAmount.fromRawAmount(
+      basicPositionInfo.token0,
+      (tokensOwed0 + fees0.toString()).toString(),
+    ),
+    token1Amount: CurrencyAmount.fromRawAmount(
+      basicPositionInfo.token1,
+      (tokensOwed1 + fees1.toString()).toString(),
+    ),
+  };
 }
 
 /**
