@@ -177,7 +177,7 @@ export async function getAllPositions(
     //   - Get the number of positions owned by the owner.
     //   - Batch fetch token ids.
     //   - Batch fetch position details using token ids.
-    const numPositions = await getPositionsNumberOwnedByOwner(
+    const numPositions = await getNumberOfPositionsOwnedByOwner(
       owner,
       chainId,
       amm,
@@ -221,7 +221,7 @@ export async function getAllPositions(
  * @param blockNumber Optional block number to query.
  * @returns The number of positions owned by the owner.
  */
-export async function getPositionsNumberOwnedByOwner(
+export async function getNumberOfPositionsOwnedByOwner(
   owner: Address,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
