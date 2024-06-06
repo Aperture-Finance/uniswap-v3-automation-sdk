@@ -18,7 +18,7 @@ type PositionStateArray = ContractFunctionReturnType<
   'allPositions'
 >;
 
-const FETCH_TIMEOUT = 5_000;
+const FETCH_TIMEOUT = 3_000;
 const MULTICALL_BATCH_SIZE = 10_000;
 const BATCH_FETCH_POSITION_SIZE = 500;
 
