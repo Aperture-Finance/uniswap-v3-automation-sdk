@@ -18,6 +18,10 @@ type PositionStateArray = ContractFunctionReturnType<
   'allPositions'
 >;
 
+const FETCH_TIMEOUT = 5_000;
+const MULTICALL_BATCH_SIZE = 10_000;
+const BATCH_FETCH_POSITION_SIZE = 500;
+
 /**
  * Get the state and pool for all positions of the specified owner by deploying an ephemeral contract via `eth_call`.
  * Each position consumes about 200k gas, so this method may fail if the number of positions exceeds 1500 assuming the
@@ -105,7 +109,7 @@ export async function getNumberOfPositionsOwnedByOwner(
   publicClient = publicClient ?? getPublicClient(chainId);
   const npm = getNPM(chainId, amm, publicClient);
   try {
-    const numPositions: bigint = await npm.read.balanceOf([owner], {
+    const numPositions = await npm.read.balanceOf([owner], {
       blockNumber,
     });
     return Number(numPositions);
@@ -134,45 +138,62 @@ export async function getTokenIds(
   numPositions: number,
   publicClient?: PublicClient,
   blockNumber?: bigint,
-  timeout?: number,
-  batchSize?: number,
+  timeout = FETCH_TIMEOUT,
+  batchSize = MULTICALL_BATCH_SIZE,
+  maxRetry = 3,
 ): Promise<bigint[]> {
   publicClient = publicClient ?? getPublicClient(chainId);
   const npm = getNPM(chainId, amm, publicClient);
-  batchSize = batchSize ?? 10_000;
-  timeout = timeout ?? 5_000;
+
+  const getCurrentBatchContracts = (startIdx: number) => {
+    const currentBatch = [];
+    for (let i = startIdx; i < startIdx + batchSize; i++) {
+      if (i < numPositions) {
+        currentBatch.push({
+          address: npm.address,
+          abi: npm.abi,
+          functionName: 'tokenOfOwnerByIndex',
+          args: [owner, BigInt(i)],
+          blockNumber,
+        });
+      }
+    }
+    return currentBatch;
+  };
+
+  let retryTimes = 0;
   let tokenIds: bigint[] = [];
-  const tokenIdsArray = [...Array(numPositions).keys()];
-  for (let i = 0; i < numPositions; i += batchSize) {
-    const currentBatch = tokenIdsArray.slice(i, i + batchSize);
-    let currentTokenIds: bigint[] = [];
+
+  for (let i = 0; i < numPositions && retryTimes < maxRetry; ) {
+    if (i > 0) {
+      await waitForMs(timeout);
+    }
+
     try {
-      currentTokenIds = (
+      const currentTokenIds = (
         await publicClient.multicall({
-          contracts: currentBatch.map((i) => {
-            return {
-              address: npm.address,
-              abi: npm.abi,
-              functionName: 'tokenOfOwnerByIndex',
-              args: [owner, BigInt(i)],
-              blockNumber,
-            };
-          }),
+          contracts: getCurrentBatchContracts(i),
           allowFailure: false,
-          batchSize: 102_400,
+          batchSize: MULTICALL_BATCH_SIZE,
         })
-      ).map((i) => BigInt(i ?? 0));
+      ).map((id) => BigInt(id ?? 0));
       tokenIds = tokenIds.concat(currentTokenIds);
+      i += batchSize;
     } catch (error) {
       console.warn(
         `Failed to getTokenIds on ${amm}-${chainId} from ${i} to ${i + batchSize}`,
         error,
       );
-    }
 
-    if (currentTokenIds.length && i + batchSize < numPositions) {
-      await new Promise((resolve) => setTimeout(resolve, timeout));
+      retryTimes++;
     }
+  }
+
+  if (retryTimes >= maxRetry) {
+    console.error(
+      `Failed to getTokenIds on ${amm}-${chainId} after ${maxRetry} retries`,
+    );
+    return [];
   }
 
   return tokenIds;
@@ -195,48 +216,71 @@ export async function getPositionsState(
   tokenIds: bigint[],
   publicClient?: PublicClient,
   blockNumber?: bigint,
-  timeout?: number,
-  batchSize?: number,
+  timeout = FETCH_TIMEOUT,
+  maxPromisesAtOnce = 20,
+  maxRetry = 3,
 ): Promise<PositionStateArray> {
+  if (!tokenIds.length) {
+    return [];
+  }
   publicClient = publicClient ?? getPublicClient(chainId);
-  batchSize = batchSize ?? 10_000;
-  timeout = timeout ?? 5_000;
   let positions: PositionStateArray = [];
+  let retryTimes = 0;
   const npm = getNPM(chainId, amm, publicClient);
-  if (tokenIds.length) {
-    for (let i = 0; i < tokenIds.length; i += batchSize) {
-      let currentPositions: PositionStateArray = [];
-      const currentBatch = tokenIds.slice(i, i + batchSize);
 
+  const batchSize = maxPromisesAtOnce * BATCH_FETCH_POSITION_SIZE;
+  for (let i = 0; i < tokenIds.length && retryTimes < maxRetry; ) {
+    if (i > 0) {
+      await waitForMs(timeout);
+    }
+    const currentBatch = tokenIds.slice(i, i + batchSize);
+
+    try {
       // Fetch position state.
-      currentPositions = flatten(
+      const currentPositions = flatten(
         await Promise.all(
-          chunk(currentBatch, 500).map((tokenIdsChunk) => {
-            try {
-              return viem.getPositions(
-                npm.address,
-                tokenIdsChunk,
-                publicClient!,
-                blockNumber,
-              );
-            } catch (error) {
-              console.warn(
-                `Failed to getPositions on ${amm}-${chainId}`,
-                tokenIdsChunk,
-                error,
-              );
-              return [];
-            }
-          }),
+          chunk(currentBatch, BATCH_FETCH_POSITION_SIZE).map(
+            (tokenIdsChunk) => {
+              try {
+                return viem.getPositions(
+                  npm.address,
+                  tokenIdsChunk,
+                  publicClient!,
+                  blockNumber,
+                );
+              } catch (error) {
+                console.warn(
+                  `Failed to getPositions on ${amm}-${chainId}`,
+                  tokenIdsChunk,
+                  error,
+                );
+                return [];
+              }
+            },
+          ),
         ),
       );
       positions = positions.concat(currentPositions);
-
-      if (currentPositions.length && i + batchSize < tokenIds.length) {
-        await new Promise((resolve) => setTimeout(resolve, timeout));
-      }
+      i += batchSize;
+    } catch (error) {
+      retryTimes++;
+      console.warn(
+        `Failed to getPositions on ${amm}-${chainId}`,
+        currentBatch,
+        error,
+      );
     }
+  }
+
+  if (retryTimes >= maxRetry) {
+    console.error(
+      `Failed to getPositions on ${amm}-${chainId} after ${maxRetry} retries`,
+    );
+    return [];
   }
 
   return positions;
 }
+
+const waitForMs = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
