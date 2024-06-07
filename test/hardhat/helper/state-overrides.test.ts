@@ -121,7 +121,8 @@ describe('Helper - State overrides tests', function () {
     });
   });
 
-  it('Test simulateMintOptimal', async function () {
+  // simulateMintOptimal is deprecated
+  it.skip('Test simulateMintOptimal', async function () {
     const blockNumber = 17975698;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const token0 = WBTC_ADDRESS;
