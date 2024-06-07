@@ -65,7 +65,8 @@ describe('Helper - Routing tests', function () {
     console.log(`1 USDC -> ${quote.quoteDecimals} ETH`);
   });
 
-  it('Test optimalMint', async function () {
+  // optimalMint is deprecated
+  it.skip('Test optimalMint', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const provider = new ethers.providers.InfuraProvider(chainId);

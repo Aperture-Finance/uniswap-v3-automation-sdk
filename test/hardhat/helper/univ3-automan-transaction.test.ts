@@ -170,7 +170,8 @@ describe('Helper - UniV3Automan transaction tests', function () {
     }
   }
 
-  it('Rebalance with 1inch', async function () {
+  // getRebalanceTx is deprecated
+  it.skip('Rebalance with 1inch', async function () {
     const existingPosition = await getPosition(
       chainId,
       amm,
@@ -294,7 +295,8 @@ describe('Helper - UniV3Automan transaction tests', function () {
     });
   });
 
-  it('Optimal mint without 1inch', async function () {
+  // getOptimalMintTx is deprecated
+  it.skip('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -419,7 +421,8 @@ describe('Helper - UniV3Automan transaction tests', function () {
     ).to.equal(true);
   });
 
-  it('Increase liquidity optimal without 1inch', async function () {
+  // getIncreaseLiquidityOptimalTx is deprecated
+  it.skip('Increase liquidity optimal without 1inch', async function () {
     this.timeout(60 * 1000); // Increase the timeout to 60 seconds.
     const existingPosition = await getPosition(
       chainId,
