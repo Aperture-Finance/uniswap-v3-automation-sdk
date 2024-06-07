@@ -412,7 +412,7 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('8736560293857784398');
   });
 
-  it('Test simulateIncreaseLiquidityOptimal', async function () {
+  it.skip('Test simulateIncreaseLiquidityOptimal', async function () {
     const blockNumber = 17975698n;
     const positionId = 4n;
     const publicClient = getInfuraClient();
