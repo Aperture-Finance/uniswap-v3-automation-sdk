@@ -412,7 +412,7 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('8736560293857784398');
   });
 
-  it.skip('Test simulateIncreaseLiquidityOptimal', async function () {
+  it('Test simulateIncreaseLiquidityOptimal', async function () {
     const blockNumber = 17975698n;
     const positionId = 4n;
     const publicClient = getInfuraClient();
@@ -828,7 +828,7 @@ describe('Position util tests', function () {
     );
   });
 
-  it.skip('Test getAllPositions', async function () {
+  it('Test getAllPositions', async function () {
     const publicClient = getPublicClient(1);
     // an address with 90+ positions
     const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
@@ -868,7 +868,7 @@ describe('Position util tests', function () {
     }
   });
 
-  it.skip('Test getAllPositions with large balances', async function () {
+  it('Test getAllPositions with large balances', async function () {
     const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
     // An address with 7000+ positions on mainnet.
     const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
