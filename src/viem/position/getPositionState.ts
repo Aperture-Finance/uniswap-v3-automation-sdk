@@ -1,7 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { EphemeralAllPositionsByOwner__factory, viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { chunk, flatten } from 'lodash';
 import {
   AbiStateMutability,
   ContractFunctionReturnType,
@@ -29,7 +28,7 @@ const BATCH_FETCH_POSITION_SIZE = 1000;
  * @param publicClient Viem public client.
  * @param blockNumber Optional block number to query.
  * @param timeout Optional delay time between promises.
- * @param batchSize Optional batch size to fetch.
+ * @param maxRetry Optional maximum retry times.
  * @returns Position state array.
  */
 export async function getPositionsState(
@@ -49,40 +48,22 @@ export async function getPositionsState(
   let retryTimes = 0;
   const npm = getNPM(chainId, amm, publicClient);
 
-  const batchSize = BATCH_FETCH_POSITION_SIZE;
   for (let i = 0; i < tokenIds.length && retryTimes < maxRetry; ) {
     if (i > 0) {
       await waitForMs(timeout);
     }
-    const currentBatch = tokenIds.slice(i, i + batchSize);
+    const currentBatch = tokenIds.slice(i, i + BATCH_FETCH_POSITION_SIZE);
 
     try {
-      // Fetch position state.
-      const currentPositions = flatten(
-        await Promise.all(
-          chunk(currentBatch, BATCH_FETCH_POSITION_SIZE).map(
-            async (tokenIdsChunk) => {
-              try {
-                return viem.getPositions(
-                  npm.address,
-                  tokenIdsChunk,
-                  publicClient,
-                  blockNumber,
-                );
-              } catch (error) {
-                console.warn(
-                  `Failed to getPositions on ${amm}-${chainId}`,
-                  tokenIdsChunk,
-                  error,
-                );
-                return [];
-              }
-            },
-          ),
-        ),
+      const currentPositions = await viem.getPositions(
+        npm.address,
+        currentBatch,
+        publicClient,
+        blockNumber,
       );
+
       positions = positions.concat(currentPositions);
-      i += batchSize;
+      i += BATCH_FETCH_POSITION_SIZE;
     } catch (error) {
       retryTimes++;
       waitForMs(timeout * 5);
