@@ -829,7 +829,7 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const publicClient = getPublicClient(1);
+    const publicClient = getInfuraClient();
     // an address with 90+ positions
     const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
     const positionDetails = await getAllPositions(
@@ -868,9 +868,7 @@ describe('Position util tests', function () {
     }
   });
 
-  // this case consume too much quota, should only run locally
-  // yarn test:hardhat --grep "Test getAllPositions with large balances"
-  it.skip('Test getAllPositions with large balances', async function () {
+  it('Test getAllPositions with large balances', async function () {
     const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
     // An address with 7000+ positions on mainnet.
     const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
