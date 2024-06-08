@@ -869,6 +869,7 @@ describe('Position util tests', function () {
   });
 
   // this case consume too much quota, should only run locally
+  // yarn test:hardhat --grep "Test getAllPositions with large balances"
   it.skip('Test getAllPositions with large balances', async function () {
     const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
     // An address with 7000+ positions on mainnet.
