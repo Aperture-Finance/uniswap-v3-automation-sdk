@@ -868,7 +868,8 @@ describe('Position util tests', function () {
     }
   });
 
-  it('Test getAllPositions with large balances', async function () {
+  // this case consume too much quota, should only run locally
+  it.skip('Test getAllPositions with large balances', async function () {
     const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
     // An address with 7000+ positions on mainnet.
     const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
