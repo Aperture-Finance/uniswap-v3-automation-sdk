@@ -121,7 +121,8 @@ describe('Helper - State overrides tests', function () {
     });
   });
 
-  it('Test simulateMintOptimal', async function () {
+  // simulateMintOptimal is deprecated
+  it.skip('Test simulateMintOptimal', async function () {
     const blockNumber = 17975698;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const token0 = WBTC_ADDRESS;
@@ -206,7 +207,8 @@ describe('Helper - State overrides tests', function () {
     expect(amount1.toString()).to.equal('3098315727923109118');
   });
 
-  it('Test simulateIncreaseLiquidityOptimal', async function () {
+  // simulateIncreaseLiquidityOptimal is deprecated
+  it.skip('Test simulateIncreaseLiquidityOptimal', async function () {
     const blockNumber = 17975698;
     const provider = new ethers.providers.InfuraProvider(chainId);
     const amount0Desired = '100000000';

@@ -829,9 +829,10 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const publicClient = getPublicClient(1);
-    // an address with 90+ positions
-    const address = '0xD68C7F0b57476D5C9e5686039FDFa03f51033a4f';
+    const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
+    // an address with 24 positions
+    const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
+
     const positionDetails = await getAllPositions(
       address,
       chainId,

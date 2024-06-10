@@ -205,7 +205,8 @@ describe('Helper - Position util tests', function () {
     );
   });
 
-  it('Token value proportion to price conversion', async function () {
+  // the test case and function used is the same as in ../hardhat.test.ts
+  it.skip('Token value proportion to price conversion', async function () {
     const price = getRawRelativePriceFromTokenValueProportion(
       inRangePosition.tickLower,
       inRangePosition.tickUpper,
@@ -445,7 +446,8 @@ describe('Helper - Position util tests', function () {
     );
   });
 
-  it('Test getAllPositions', async function () {
+  // getAllPositionsDetails is deprecated already in both frontend and backend.
+  it.skip('Test getAllPositions', async function () {
     const provider = getPublicProvider(chainId);
     // An address with 24 positions on mainnet.
     const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
