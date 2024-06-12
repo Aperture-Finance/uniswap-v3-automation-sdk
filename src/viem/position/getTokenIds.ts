@@ -70,7 +70,6 @@ export async function getTokenIds(
       ).map((id) => BigInt(id ?? 0));
       tokenIds = tokenIds.concat(currentTokenIds);
       i += batchSize;
-      console.log('getTokenIds', chainId, tokenIds[tokenIds.length - 1]);
     } catch (error) {
       console.warn(
         `Failed to getTokenIds on ${amm}-${chainId} from ${i} to ${i + batchSize}`,
