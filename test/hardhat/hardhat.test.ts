@@ -111,6 +111,7 @@ import {
   projectRebalancedPositionAtPrice,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
+  viewCollectableTokenAmounts,
 } from '../../src/viem';
 import { amm, hardhatForkProvider } from './helper/common';
 
@@ -801,18 +802,41 @@ describe('Position util tests', function () {
   });
 
   it('Test viewCollectableTokenAmounts', async function () {
-    const positionDetails = await PositionDetails.fromPositionId(
-      chainId,
-      UNIV3_AMM,
-      4n,
-      publicClient,
+    const publicClient = getPublicClient(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
     );
-    const colletableTokenAmounts =
-      await positionDetails.getCollectableTokenAmounts(UNIV3_AMM, publicClient);
-    expect(colletableTokenAmounts).to.deep.equal({
-      token0Amount: positionDetails.tokensOwed0,
-      token1Amount: positionDetails.tokensOwed1,
-    });
+    const positionId = 723522n;
+    const blockNumber = 20064066n;
+    const position = await getPosition(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      'UNISWAP_V3',
+      positionId,
+      publicClient,
+      blockNumber,
+    );
+    const pool = position.pool;
+    const viewAccruedFeeAmounts = await viewCollectableTokenAmounts(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      'UNISWAP_V3',
+      positionId,
+      publicClient,
+      {
+        token0: pool.token0,
+        token1: pool.token1,
+        liquidity: position.liquidity,
+        tickLower: position.tickLower,
+        tickUpper: position.tickUpper,
+        fee: pool.fee,
+      },
+      blockNumber,
+    );
+    expect(viewAccruedFeeAmounts.token0Amount.toFixed(10)).to.equal(
+      '1505323.1236760710',
+    );
+    expect(viewAccruedFeeAmounts.token1Amount.toFixed(10)).to.equal(
+      '0.0048152808',
+    );
   });
 
   it('Test get position details', async function () {

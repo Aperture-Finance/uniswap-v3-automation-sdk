@@ -400,11 +400,11 @@ export async function viewCollectableTokenAmounts(
   return {
     token0Amount: CurrencyAmount.fromRawAmount(
       basicPositionInfo.token0,
-      (tokensOwed0 + fees0.toString()).toString(),
+      (tokensOwed0 + BigInt(fees0.toString())).toString(),
     ),
     token1Amount: CurrencyAmount.fromRawAmount(
       basicPositionInfo.token1,
-      (tokensOwed1 + fees1.toString()).toString(),
+      (tokensOwed1 + BigInt(fees1.toString())).toString(),
     ),
   };
 }
