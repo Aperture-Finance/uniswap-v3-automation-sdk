@@ -9,3 +9,4 @@ export * from './public_client';
 export * from './transaction';
 export * from './aggregator';
 export * from './solver';
+export * from './routing';

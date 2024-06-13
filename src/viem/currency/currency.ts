@@ -12,7 +12,7 @@ import {
 } from '@uniswap/sdk-core';
 import { Address, PublicClient, getContract, parseUnits } from 'viem';
 
-import { getPublicClient } from './public_client';
+import { getPublicClient } from '../public_client';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.
 // When a liquidity pool involves ETH, i.e. WETH is one of the two tokens in the pool, the
