@@ -7,6 +7,7 @@ import { checkTokenLiquidityAgainstChainNativeCurrency } from '../currency';
  * @param tokenA One of the tokens in the pool.
  * @param tokenB The other token in the pool.
  */
+// seems not used?
 export async function checkAutomationSupportForPool(
   tokenA: Token,
   tokenB: Token,
