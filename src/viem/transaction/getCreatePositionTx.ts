@@ -6,6 +6,7 @@ import {
 } from '@/index';
 import {
   FeeAmount,
+  MintOptions,
   NonfungiblePositionManager,
   Position,
 } from '@aperture_finance/uniswap-v3-sdk';
@@ -122,5 +123,49 @@ export async function getCreatePositionTxForLimitOrder(
     to: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
     data: calldata as Hex,
     value: hexToBigInt(value as Hex),
+  };
+}
+
+/**
+ * Generates an unsigned transaction that creates a position as specified.
+ * @param position The position to create.
+ * @param options Options.
+ * @param chainId Chain id.
+ * @param amm Automated Market Maker.
+ * @param provider Ethers provider.
+ * @returns The unsigned tx.
+ */
+export async function getCreatePositionTx(
+  position: Position,
+  options: Omit<MintOptions, 'createPool'>,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  client: PublicClient,
+): Promise<TransactionRequest> {
+  let createPool = false;
+  try {
+    await getPool(
+      position.pool.token0,
+      position.pool.token1,
+      position.pool.fee,
+      chainId,
+      amm,
+      client,
+    );
+  } catch (e) {
+    createPool = true;
+  }
+  const { calldata, value } = NonfungiblePositionManager.addCallParameters(
+    position,
+    {
+      ...options,
+      createPool,
+    },
+  );
+  return {
+    to: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+    data: calldata as Hex,
+    value: hexToBigInt(value as Hex),
+    from: options.recipient as Address,
   };
 }
