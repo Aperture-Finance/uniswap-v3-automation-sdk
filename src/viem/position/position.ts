@@ -14,7 +14,7 @@ import {
   PositionLibrary,
   TickMath,
 } from '@aperture_finance/uniswap-v3-sdk';
-import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { EphemeralGetPosition__factory, viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
@@ -169,7 +169,7 @@ export class PositionDetails implements BasicPositionInfo {
     this.token0 = basicPositionInfo.token0;
     this.token1 = basicPositionInfo.token1;
     this.fee = basicPositionInfo.fee;
-    this.liquidity = basicPositionInfo.liquidity!.toString();
+    this.liquidity = basicPositionInfo.liquidity!;
     this.tickLower = basicPositionInfo.tickLower;
     this.tickUpper = basicPositionInfo.tickUpper;
     this.pool = new Pool(
