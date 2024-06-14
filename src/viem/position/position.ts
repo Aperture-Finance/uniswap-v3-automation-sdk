@@ -44,7 +44,7 @@ export interface BasicPositionInfo {
   token0: Token;
   token1: Token;
   fee: FeeAmount;
-  liquidity?: BigintIsh;
+  liquidity?: string;
   tickLower: number;
   tickUpper: number;
 }
@@ -303,6 +303,30 @@ export class PositionDetails implements BasicPositionInfo {
   }
 }
 
+export async function getBasicPositionInfo(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  positionId: bigint,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
+): Promise<BasicPositionInfo> {
+  const position = await getPosition(
+    chainId,
+    amm,
+    positionId,
+    publicClient,
+    blockNumber,
+  );
+  return {
+    token0: position.pool.token0,
+    token1: position.pool.token1,
+    fee: position.pool.fee,
+    liquidity: position.liquidity.toString(),
+    tickLower: position.tickLower,
+    tickUpper: position.tickUpper,
+  };
+}
+
 export async function viewCollectableTokenAmounts(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -312,15 +336,13 @@ export async function viewCollectableTokenAmounts(
   blockNumber?: bigint,
 ): Promise<CollectableTokenAmounts> {
   if (basicPositionInfo === undefined) {
-    const position = await getPosition(chainId, amm, positionId, publicClient);
-    basicPositionInfo = {
-      token0: position.pool.token0,
-      token1: position.pool.token1,
-      fee: position.pool.fee,
-      liquidity: position.liquidity,
-      tickLower: position.tickLower,
-      tickUpper: position.tickUpper,
-    };
+    basicPositionInfo = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+      blockNumber,
+    );
   }
 
   const pool = getPoolContract(
