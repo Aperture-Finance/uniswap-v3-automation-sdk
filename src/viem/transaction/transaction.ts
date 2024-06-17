@@ -19,6 +19,7 @@ import {
   TransactionRequest,
   decodeEventLog,
   decodeFunctionResult,
+  encodeFunctionData,
   getAbiItem,
   hexToBigInt,
   toEventSelector,
@@ -248,4 +249,27 @@ export async function getAmountsWithSlippage(
     amount0Min: amount0Min.toString(),
     amount1Min: amount1Min.toString(),
   };
+}
+
+/**
+ * Set or revoke Aperture Automan contract as an operator of the signer's positions.
+ * @param chainId Chain id.
+ * @param amm Automated Market Maker.
+ * @param approved True if setting approval, false if revoking approval.
+ * @returns The unsigned tx setting or revoking approval.
+ */
+export function getSetApprovalForAllTx(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  approved: boolean,
+): TransactionRequest {
+  const ammInfo = getAMMInfo(chainId, amm)!;
+  return getTxToNonfungiblePositionManager(
+    ammInfo,
+    encodeFunctionData({
+      functionName: 'setApprovalForAll',
+      abi: INonfungiblePositionManager__factory.abi,
+      args: [ammInfo.apertureAutoman, approved],
+    }),
+  );
 }
