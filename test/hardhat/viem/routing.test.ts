@@ -553,19 +553,19 @@ describe('Viem - Routing tests', function () {
         ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
         SHIBe.address,
       ),
-    ).to.not.equal(-1n);
+    ).to.not.equal('-1');
     expect(
       await checkTokenLiquidityAgainstChainNativeCurrency(
         ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
         USDC.address,
       ),
-    ).to.not.equal(-1n);
+    ).to.not.equal('-1');
     expect(
       await checkTokenLiquidityAgainstChainNativeCurrency(
         ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
         WAVAX.address,
       ),
-    ).to.equal(1n);
+    ).to.equal('1');
     expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
   });
 
@@ -585,6 +585,6 @@ describe('Viem - Routing tests', function () {
         ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
         BNX.address,
       ),
-    ).to.not.equal(-1n);
+    ).to.not.equal('-1');
   });
 });

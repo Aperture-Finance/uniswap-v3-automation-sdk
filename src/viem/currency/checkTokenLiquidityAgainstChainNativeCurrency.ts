@@ -1,4 +1,5 @@
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import Big from 'big.js';
 
 import { fetchQuoteToNativeCurrency } from '../routing';
 
@@ -13,9 +14,9 @@ import { fetchQuoteToNativeCurrency } from '../routing';
 export async function checkTokenLiquidityAgainstChainNativeCurrency(
   chainId: ApertureSupportedChainId,
   tokenAddress: string,
-): Promise<bigint> {
+): Promise<string> {
   const wrappedNativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
-  if (wrappedNativeCurrency.address === tokenAddress) return 1n;
+  if (wrappedNativeCurrency.address === tokenAddress) return '1';
   const rawNativeCurrencyAmount =
     CHAIN_ID_TO_RAW_WRAPPED_NATIVE_CURRENCY_AMOUNT[chainId];
   const rawTokenAmount: string | undefined = await fetchQuoteToNativeCurrency(
@@ -24,9 +25,11 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
     rawNativeCurrencyAmount,
   ).catch(() => undefined);
   if (rawTokenAmount === undefined) {
-    return -1n;
+    return '-1';
   }
-  return rawNativeCurrencyAmount / BigInt(rawTokenAmount);
+  return new Big(rawNativeCurrencyAmount.toString())
+    .div(rawTokenAmount)
+    .toString();
 }
 
 const ONE_TENTH_WETH_RAW_AMOUNT = BigInt(1e17);
