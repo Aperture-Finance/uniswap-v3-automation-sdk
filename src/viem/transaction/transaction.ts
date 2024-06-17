@@ -1,26 +1,33 @@
 import {
   AmmInfo,
   ApertureSupportedChainId,
+  Automan__factory,
   INonfungiblePositionManager__factory,
   getAMMInfo,
 } from '@/index';
+import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { Percent } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Address,
   Hex,
   Log,
+  PublicClient,
   TransactionReceipt,
   TransactionRequest,
   decodeEventLog,
+  decodeFunctionResult,
   getAbiItem,
   hexToBigInt,
   toEventSelector,
 } from 'viem';
 
+import { RebalanceReturnType, ReinvestReturnType } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { CollectableTokenAmounts } from '../position';
+import { SimulatedAmounts } from './types';
 
 /**
  * Filter logs by event name.
@@ -193,5 +200,52 @@ export function getTxToNonfungiblePositionManager(
     ...(value && {
       value: hexToBigInt(value as Hex),
     }),
+  };
+}
+
+export async function getAmountsWithSlippage(
+  pool: Pool,
+  tickLower: number,
+  tickUpper: number,
+  automanAddress: Address,
+  ownerAddress: Address,
+  functionName: 'rebalance' | 'reinvest',
+  data: Hex,
+  slippageTolerance: Percent,
+  client: PublicClient,
+): Promise<SimulatedAmounts> {
+  const returnData = (
+    await client.call({
+      account: ownerAddress,
+      to: automanAddress,
+      data,
+    })
+  ).data!;
+
+  const result = decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data: returnData,
+    functionName,
+  });
+
+  let amount0: bigint, amount1: bigint, liquidity: bigint;
+  if (functionName === 'rebalance') {
+    [, liquidity, amount0, amount1] = result as RebalanceReturnType;
+  } else {
+    [liquidity, amount0, amount1] = result as ReinvestReturnType;
+  }
+
+  const { amount0: amount0Min, amount1: amount1Min } = new Position({
+    pool,
+    liquidity: liquidity.toString(),
+    tickLower,
+    tickUpper,
+  }).mintAmountsWithSlippage(slippageTolerance);
+
+  return {
+    amount0,
+    amount1,
+    amount0Min: amount0Min.toString(),
+    amount1Min: amount1Min.toString(),
   };
 }
