@@ -33,17 +33,15 @@ import {
   staticCallWithOverrides,
   tryRequestWithOverrides,
 } from '../overrides';
+import { getFromAddress } from './internal';
 import {
   DecreaseLiquidityParams,
-  IncreaseLiquidityReturnType,
-  MintReturnType,
-  RemoveLiquidityReturnType,
-  getFromAddress,
-} from './internal';
-import {
   IncreaseLiquidityParams,
+  IncreaseLiquidityReturnType,
   MintParams,
+  MintReturnType,
   RebalanceReturnType,
+  RemoveLiquidityReturnType,
 } from './types';
 
 export function getAutomanContract(

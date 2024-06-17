@@ -11,7 +11,6 @@ import { PublicClient, TestClient } from 'viem';
 
 import {
   IERC20__factory,
-  WBTC,
   alignPriceToClosestUsableTick,
   getAMMInfo,
   parsePrice,
