@@ -175,7 +175,7 @@ export async function getCreatePositionTx(
  * @param increaseLiquidityOptions Increase liquidity options.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
- * @param provider Ethers provider.
+ * @param client Viem public client.
  * @param liquidityToAdd The amount of liquidity to add to the existing position.
  * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.
  * @returns The unsigned tx.

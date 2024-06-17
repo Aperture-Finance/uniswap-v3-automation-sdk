@@ -6,6 +6,5 @@ export * from './types';
 export * from './getAddLiquidityTxs';
 export * from './getCollectTx';
 export * from './getReinvestTx';
-export * from './getReinvestTx';
 export * from './getRemoveLiquidityTx';
 export * from './getWrapETHTx';
