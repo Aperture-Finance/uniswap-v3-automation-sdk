@@ -21,5 +21,5 @@ export async function checkAutomationSupportForPool(
       tokenB.address,
     ),
   ]);
-  return quoteA !== -1n && quoteB !== -1n;
+  return quoteA !== '-1' && quoteB !== '-1';
 }
