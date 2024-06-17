@@ -6,6 +6,7 @@ import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
   IUniswapV3Pool__factory,
+  computePoolAddress,
   getAMMInfo,
 } from '@/index';
 import {
@@ -27,10 +28,9 @@ import {
   getContract,
 } from 'viem';
 
-import { computePoolAddress } from '../utils';
-import { getToken } from './currency';
-import { BasicPositionInfo } from './position';
-import { getPublicClient } from './public_client';
+import { getToken } from '../currency';
+import { BasicPositionInfo } from '../position';
+import { getPublicClient } from '../public_client';
 
 /**
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
