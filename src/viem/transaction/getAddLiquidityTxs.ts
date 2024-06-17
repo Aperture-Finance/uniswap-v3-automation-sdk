@@ -20,17 +20,12 @@ import {
 } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import JSBI from 'jsbi';
-import {
-  Address,
-  Hex,
-  PublicClient,
-  TransactionRequest,
-  hexToBigInt,
-} from 'viem';
+import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
 import { PositionDetails } from '../position';
+import { getTxToNonfungiblePositionManager } from './transaction';
 
 /**
  * Generates an unsigned transaction that creates a position for the specified limit order.
@@ -120,12 +115,12 @@ export async function getCreatePositionTxForLimitOrder(
     },
   );
 
-  return {
-    from: recipient,
-    to: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-    data: calldata as Hex,
-    value: hexToBigInt(value as Hex),
-  };
+  return getTxToNonfungiblePositionManager(
+    getAMMInfo(chainId, amm)!,
+    calldata,
+    value,
+    recipient,
+  );
 }
 
 /**
@@ -164,12 +159,13 @@ export async function getCreatePositionTx(
       createPool,
     },
   );
-  return {
-    to: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-    data: calldata as Hex,
-    value: hexToBigInt(value as Hex),
-    from: options.recipient as Address,
-  };
+
+  return getTxToNonfungiblePositionManager(
+    getAMMInfo(chainId, amm)!,
+    calldata,
+    value,
+    options.recipient,
+  );
 }
 
 /**
@@ -211,10 +207,9 @@ export async function getAddLiquidityTx(
     incrementalPosition,
     increaseLiquidityOptions,
   );
-  return {
-    to: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-    data: calldata as Hex,
-    value: hexToBigInt(value as Hex),
-    from: '0x', // client should override it
-  };
+  return getTxToNonfungiblePositionManager(
+    getAMMInfo(chainId, amm)!,
+    calldata,
+    value,
+  );
 }

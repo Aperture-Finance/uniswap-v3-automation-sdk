@@ -1,19 +1,25 @@
 import {
+  AmmInfo,
   ApertureSupportedChainId,
   INonfungiblePositionManager__factory,
   getAMMInfo,
 } from '@/index';
-import { CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
+  Address,
+  Hex,
   Log,
   TransactionReceipt,
+  TransactionRequest,
   decodeEventLog,
   getAbiItem,
+  hexToBigInt,
   toEventSelector,
 } from 'viem';
 
+import { getNativeCurrency } from '../currency';
 import { CollectableTokenAmounts } from '../position';
 
 /**
@@ -132,5 +138,60 @@ export function getCollectedFeesFromReceipt(
       token1,
       (total1 - principal1).toString(),
     ),
+  };
+}
+
+export function convertCollectableTokenAmountToExpectedCurrencyOwed(
+  collectableTokenAmount: {
+    token0Amount: CurrencyAmount<Token>;
+    token1Amount: CurrencyAmount<Token>;
+  },
+  chainId: ApertureSupportedChainId,
+  token0: Token,
+  token1: Token,
+  receiveNativeEtherIfApplicable?: boolean,
+): {
+  expectedCurrencyOwed0: CurrencyAmount<Currency>;
+  expectedCurrencyOwed1: CurrencyAmount<Currency>;
+} {
+  let expectedCurrencyOwed0: CurrencyAmount<Currency> =
+    collectableTokenAmount.token0Amount;
+  let expectedCurrencyOwed1: CurrencyAmount<Currency> =
+    collectableTokenAmount.token1Amount;
+  if (receiveNativeEtherIfApplicable) {
+    const nativeEther = getNativeCurrency(chainId);
+    const weth = nativeEther.wrapped;
+    if (weth.equals(token0)) {
+      expectedCurrencyOwed0 = CurrencyAmount.fromRawAmount(
+        nativeEther,
+        collectableTokenAmount.token0Amount.quotient,
+      );
+    } else if (weth.equals(token1)) {
+      expectedCurrencyOwed1 = CurrencyAmount.fromRawAmount(
+        nativeEther,
+        collectableTokenAmount.token1Amount.quotient,
+      );
+    }
+  }
+  return {
+    expectedCurrencyOwed0,
+    expectedCurrencyOwed1,
+  };
+}
+
+export function getTxToNonfungiblePositionManager(
+  AmmInfo: AmmInfo,
+  data: string,
+  value?: string,
+  from?: string,
+): TransactionRequest {
+  from = from ?? '0x';
+  return {
+    from: from as Address,
+    to: AmmInfo.nonfungiblePositionManager,
+    data: data as Hex,
+    ...(value && {
+      value: hexToBigInt(value as Hex),
+    }),
   };
 }
