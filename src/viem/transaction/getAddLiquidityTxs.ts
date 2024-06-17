@@ -6,6 +6,7 @@ import {
 } from '@/index';
 import {
   FeeAmount,
+  IncreaseOptions,
   MintOptions,
   NonfungiblePositionManager,
   Position,
@@ -29,6 +30,7 @@ import {
 
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
+import { PositionDetails } from '../position';
 
 /**
  * Generates an unsigned transaction that creates a position for the specified limit order.
@@ -167,5 +169,52 @@ export async function getCreatePositionTx(
     data: calldata as Hex,
     value: hexToBigInt(value as Hex),
     from: options.recipient as Address,
+  };
+}
+
+/**
+ * Generates an unsigned transaction that adds liquidity to an existing position.
+ * Note that if the position involves ETH and the user wishes to provide native ether instead of WETH, then
+ * `increaseLiquidityOptions.useNative` should be set to `getNativeEther(chainId)`.
+ * @param increaseLiquidityOptions Increase liquidity options.
+ * @param chainId Chain id.
+ * @param amm Automated Market Maker.
+ * @param provider Ethers provider.
+ * @param liquidityToAdd The amount of liquidity to add to the existing position.
+ * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.
+ * @returns The unsigned tx.
+ */
+export async function getAddLiquidityTx(
+  increaseLiquidityOptions: IncreaseOptions,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  client: PublicClient,
+  liquidityToAdd: string,
+  position?: Position,
+): Promise<TransactionRequest> {
+  if (position === undefined) {
+    ({ position } = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      BigInt(increaseLiquidityOptions.tokenId.toString()),
+      client,
+    ));
+  }
+  // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
+  const incrementalPosition = new Position({
+    pool: position.pool,
+    liquidity: liquidityToAdd,
+    tickLower: position.tickLower,
+    tickUpper: position.tickUpper,
+  });
+  const { calldata, value } = NonfungiblePositionManager.addCallParameters(
+    incrementalPosition,
+    increaseLiquidityOptions,
+  );
+  return {
+    to: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+    data: calldata as Hex,
+    value: hexToBigInt(value as Hex),
+    from: '0x', // client should override it
   };
 }
