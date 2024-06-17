@@ -84,5 +84,6 @@ export async function getRemoveLiquidityTx(
     getAMMInfo(chainId, amm)!,
     calldata,
     value,
+    recipient,
   );
 }

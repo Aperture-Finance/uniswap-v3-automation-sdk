@@ -64,5 +64,6 @@ export async function getCollectTx(
     getAMMInfo(chainId, amm)!,
     calldata,
     value,
+    recipient,
   );
 }
