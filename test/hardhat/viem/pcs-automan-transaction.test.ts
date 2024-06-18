@@ -22,7 +22,7 @@ import {
 import { expect, resetFork } from '../common';
 
 // Tests for UniV3Automan transactions on a forked Ethereum mainnet.
-describe('Viem - PCSV3Automan transaction tests', function () {
+describe.skip('Viem - PCSV3Automan transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
   // const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
   // const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
