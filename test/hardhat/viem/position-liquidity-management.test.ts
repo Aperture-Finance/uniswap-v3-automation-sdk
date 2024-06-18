@@ -252,16 +252,12 @@ describe('Viem - Position liquidity management tests', function () {
       },
       chainId,
       amm,
+      eoa,
       publicClient,
       liquidityToAdd.toString(),
       position,
     );
-    await (
-      await eoaSigner.sendTransaction({
-        ...addLiquidityTxRequest,
-        from: eoa,
-      })
-    ).wait();
+    await (await eoaSigner.sendTransaction(addLiquidityTxRequest)).wait();
     expect(
       (await getBasicPositionInfo(chainId, amm, positionId, publicClient))
         .liquidity!,
