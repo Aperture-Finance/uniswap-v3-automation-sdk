@@ -1,7 +1,8 @@
 import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import { providers } from 'ethers';
-import type { Transport } from 'viem';
+import type { TransactionRequest, Transport } from 'viem';
 import { PublicClient, createPublicClient, http } from 'viem';
+import { publicActionsL2 } from 'viem/op-stack';
 
 /**
  * Creates a Viem public client for the specified chain id.
@@ -37,4 +38,19 @@ export function publicClientToProvider(client: PublicClient) {
     );
 
   return new providers.StaticJsonRpcProvider(transport.url, network);
+}
+
+export async function estimateTotalGas(
+  tx: TransactionRequest,
+  client: PublicClient,
+) {
+  const l2Client = client.extend(publicActionsL2());
+  const { from, to, value, data } = tx;
+  return l2Client.estimateTotalGas({
+    account: from,
+    to,
+    value,
+    data,
+    chain: client.chain,
+  });
 }
