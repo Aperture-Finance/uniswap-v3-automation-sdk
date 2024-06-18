@@ -114,7 +114,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     );
     // await (await impersonatedOwnerSigner.sendTransaction(txRequest)).wait();
 
-    impersonatedOwnerClient.sendTransaction({
+    await impersonatedOwnerClient.sendTransaction({
       ...txRequest,
       account: eoa,
       chain: mainnet,
