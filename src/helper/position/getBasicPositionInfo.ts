@@ -21,6 +21,7 @@ export async function getBasicPositionInfo(
     getToken(positionInfo.token0, chainId, provider, blockTag),
     getToken(positionInfo.token1, chainId, provider, blockTag),
   ]);
+
   return {
     token0,
     token1,

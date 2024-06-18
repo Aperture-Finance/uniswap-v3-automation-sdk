@@ -32,10 +32,11 @@ export const TEST_WALLET_PRIVATE_KEY =
 export async function resetFork(
   testClient: TestClient,
   blockNumber = 19210000n,
+  jsonRpcUrl = `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
 ) {
   await testClient.reset({
     blockNumber,
-    jsonRpcUrl: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+    jsonRpcUrl,
   });
 }
 
