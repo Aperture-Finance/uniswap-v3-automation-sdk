@@ -2,30 +2,36 @@ import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber } from 'ethers';
 import hre, { ethers } from 'hardhat';
-import { PublicClient, TestClient, WalletClient, walletActions } from 'viem';
+import {
+  Address,
+  PublicClient,
+  TestClient,
+  WalletClient,
+  parseEther,
+  walletActions,
+} from 'viem';
 import { mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
+  INonfungiblePositionManager__factory,
   PCSV3Automan,
   PCSV3Automan__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
-import { getNPM } from '../../../src/helper';
 import {
   generateAutoCompoundRequestPayload,
+  getBasicPositionInfo,
   getReinvestTx,
 } from '../../../src/viem';
 import { expect, resetFork } from '../common';
 
-// Tests for UniV3Automan transactions on a forked Ethereum mainnet.
-describe.skip('Viem - PCSV3Automan transaction tests', function () {
+// Tests for PCSV3Automan transactions on a forked Ethereum mainnet.
+describe('Viem - PCSV3Automan transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
-  // const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
-  // const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336n;
   const eoa = '0x4B104b883104d17E618d84f766d0be06F6F6f486';
@@ -75,11 +81,20 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
       router.address as `0x${string}`;
 
     // Owner of position id 528336 sets Automan as operator.
-    await getNPM(
-      chainId,
-      amm,
-      await ethers.getImpersonatedSigner(eoa),
-    ).setApprovalForAll(automanContract.address, true);
+    const { request } = await publicClient.simulateContract({
+      abi: INonfungiblePositionManager__factory.abi,
+      address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      functionName: 'setApprovalForAll',
+      args: [automanContract.address as Address, true] as const,
+      account: eoa,
+    });
+
+    await testClient.setBalance({
+      address: eoa,
+      value: parseEther('1'),
+    });
+
+    await impersonatedOwnerClient.writeContract(request);
   });
 
   after(() => {
@@ -91,10 +106,10 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
   });
 
   it('Reinvest', async function () {
-    // const liquidityBeforeReinvest = (
-    //   await getBasicPositionInfo(chainId, amm, positionId, publicClient)
-    // ).liquidity!;
-    // expect(liquidityBeforeReinvest.toString()).to.equal('17360687214921889114');
+    const liquidityBeforeReinvest = (
+      await getBasicPositionInfo(chainId, amm, positionId, publicClient)
+    ).liquidity!;
+    expect(liquidityBeforeReinvest.toString()).to.equal('17360687214921889114');
 
     const { tx: txRequest } = await getReinvestTx(
       chainId,
@@ -105,19 +120,17 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
       /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
     );
-    // await (await impersonatedOwnerSigner.sendTransaction(txRequest)).wait();
 
-    impersonatedOwnerClient.sendTransaction({
+    await impersonatedOwnerClient.sendTransaction({
       ...txRequest,
       account: eoa,
       chain: mainnet,
     });
 
-    // don't know why this test is failing
-    // const liquidityAfterReinvest = (
-    //   await getBasicPositionInfo(chainId, amm, positionId, publicClient)
-    // ).liquidity!;
-    // expect(liquidityAfterReinvest.toString()).to.equal('17369508569204326673');
+    const liquidityAfterReinvest = (
+      await getBasicPositionInfo(chainId, amm, positionId, publicClient)
+    ).liquidity!;
+    expect(liquidityAfterReinvest.toString()).to.equal('17369508569204326673');
 
     expect(
       generateAutoCompoundRequestPayload(

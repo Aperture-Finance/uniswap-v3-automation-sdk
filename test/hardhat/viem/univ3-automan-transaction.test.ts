@@ -112,7 +112,6 @@ describe('Viem - UniV3Automan transaction tests', function () {
       /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
     );
-    // await (await impersonatedOwnerSigner.sendTransaction(txRequest)).wait();
 
     await impersonatedOwnerClient.sendTransaction({
       ...txRequest,
