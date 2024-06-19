@@ -27,7 +27,6 @@ import {
   getControllerOverrides,
   getERC20Overrides,
   getNPMApprovalOverrides,
-  staticCallWithOverrides,
   tryRequestWithOverrides,
 } from '../overrides';
 import {
