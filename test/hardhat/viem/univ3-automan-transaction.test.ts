@@ -68,6 +68,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new UniV3OptimalSwapRouter__factory(
+      // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();

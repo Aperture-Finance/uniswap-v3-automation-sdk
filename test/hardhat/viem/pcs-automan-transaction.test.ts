@@ -57,6 +57,7 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
 
     // Deploy Automan.
     automanContract = await new PCSV3Automan__factory(
+      // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
