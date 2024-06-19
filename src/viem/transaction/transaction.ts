@@ -1,20 +1,34 @@
 import {
+  AmmInfo,
   ApertureSupportedChainId,
+  Automan__factory,
   INonfungiblePositionManager__factory,
   getAMMInfo,
 } from '@/index';
-import { CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { Percent } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
+  Address,
+  Hex,
   Log,
+  PublicClient,
   TransactionReceipt,
+  TransactionRequest,
   decodeEventLog,
+  decodeFunctionResult,
+  encodeFunctionData,
   getAbiItem,
+  hexToBigInt,
   toEventSelector,
 } from 'viem';
 
+import { RebalanceReturnType, ReinvestReturnType } from '../automan';
+import { getNativeCurrency } from '../currency';
 import { CollectableTokenAmounts } from '../position';
+import { SimulatedAmounts } from './types';
 
 /**
  * Filter logs by event name.
@@ -133,4 +147,129 @@ export function getCollectedFeesFromReceipt(
       (total1 - principal1).toString(),
     ),
   };
+}
+
+export function convertCollectableTokenAmountToExpectedCurrencyOwed(
+  collectableTokenAmount: {
+    token0Amount: CurrencyAmount<Token>;
+    token1Amount: CurrencyAmount<Token>;
+  },
+  chainId: ApertureSupportedChainId,
+  token0: Token,
+  token1: Token,
+  receiveNativeEtherIfApplicable?: boolean,
+): {
+  expectedCurrencyOwed0: CurrencyAmount<Currency>;
+  expectedCurrencyOwed1: CurrencyAmount<Currency>;
+} {
+  let expectedCurrencyOwed0: CurrencyAmount<Currency> =
+    collectableTokenAmount.token0Amount;
+  let expectedCurrencyOwed1: CurrencyAmount<Currency> =
+    collectableTokenAmount.token1Amount;
+  if (receiveNativeEtherIfApplicable) {
+    const nativeEther = getNativeCurrency(chainId);
+    const weth = nativeEther.wrapped;
+    if (weth.equals(token0)) {
+      expectedCurrencyOwed0 = CurrencyAmount.fromRawAmount(
+        nativeEther,
+        collectableTokenAmount.token0Amount.quotient,
+      );
+    } else if (weth.equals(token1)) {
+      expectedCurrencyOwed1 = CurrencyAmount.fromRawAmount(
+        nativeEther,
+        collectableTokenAmount.token1Amount.quotient,
+      );
+    }
+  }
+  return {
+    expectedCurrencyOwed0,
+    expectedCurrencyOwed1,
+  };
+}
+
+export function getTxToNonfungiblePositionManager(
+  AmmInfo: AmmInfo,
+  data: string,
+  value?: string,
+  from?: string,
+): TransactionRequest {
+  from = from ?? '0x';
+  return {
+    from: from as Address,
+    to: AmmInfo.nonfungiblePositionManager,
+    data: data as Hex,
+    ...(value && {
+      value: hexToBigInt(value as Hex),
+    }),
+  };
+}
+
+export async function getAmountsWithSlippage(
+  pool: Pool,
+  tickLower: number,
+  tickUpper: number,
+  automanAddress: Address,
+  ownerAddress: Address,
+  functionName: 'rebalance' | 'reinvest',
+  data: Hex,
+  slippageTolerance: Percent,
+  client: PublicClient,
+): Promise<SimulatedAmounts> {
+  const returnData = (
+    await client.call({
+      account: ownerAddress,
+      to: automanAddress,
+      data,
+    })
+  ).data!;
+
+  const result = decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data: returnData,
+    functionName,
+  });
+
+  let amount0: bigint, amount1: bigint, liquidity: bigint;
+  if (functionName === 'rebalance') {
+    [, liquidity, amount0, amount1] = result as RebalanceReturnType;
+  } else {
+    [liquidity, amount0, amount1] = result as ReinvestReturnType;
+  }
+
+  const { amount0: amount0Min, amount1: amount1Min } = new Position({
+    pool,
+    liquidity: liquidity.toString(),
+    tickLower,
+    tickUpper,
+  }).mintAmountsWithSlippage(slippageTolerance);
+
+  return {
+    amount0,
+    amount1,
+    amount0Min: amount0Min.toString(),
+    amount1Min: amount1Min.toString(),
+  };
+}
+
+/**
+ * Set or revoke Aperture Automan contract as an operator of the signer's positions.
+ * @param chainId Chain id.
+ * @param amm Automated Market Maker.
+ * @param approved True if setting approval, false if revoking approval.
+ * @returns The unsigned tx setting or revoking approval.
+ */
+export function getSetApprovalForAllTx(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  approved: boolean,
+): TransactionRequest {
+  const ammInfo = getAMMInfo(chainId, amm)!;
+  return getTxToNonfungiblePositionManager(
+    ammInfo,
+    encodeFunctionData({
+      functionName: 'setApprovalForAll',
+      abi: INonfungiblePositionManager__factory.abi,
+      args: [ammInfo.apertureAutoman, approved],
+    }),
+  );
 }

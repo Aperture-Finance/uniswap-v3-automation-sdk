@@ -54,3 +54,23 @@ export type RebalanceReturnType = GetAutomanReturnTypes<
   'rebalance',
   [MintParams, bigint, bigint, Hex]
 >;
+
+export type ReinvestReturnType = GetAutomanReturnTypes<
+  'reinvest',
+  [IncreaseLiquidityParams, bigint, Hex]
+>;
+
+export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
+
+export type IncreaseLiquidityReturnType =
+  GetAutomanReturnTypes<'increaseLiquidityOptimal'>;
+
+export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
+  'removeLiquidity',
+  [DecreaseLiquidityParams, bigint]
+>;
+
+export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
+  typeof INonfungiblePositionManager__factory.abi,
+  'decreaseLiquidity'
+>[0];
