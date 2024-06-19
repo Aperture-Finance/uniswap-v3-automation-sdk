@@ -30,7 +30,8 @@ import {
 import { expect, resetFork } from '../common';
 
 // Tests for PCSV3Automan transactions on a forked Ethereum mainnet.
-describe('Viem - PCSV3Automan transaction tests', function () {
+// These tests pass locally with a free QuickNode BSC key, but they time out on CI, so skipping them for now.
+describe.skip('Viem - PCSV3Automan transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336n;
