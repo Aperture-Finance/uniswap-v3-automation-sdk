@@ -1,7 +1,6 @@
 import {
   ApertureSupportedChainId,
   Automan__factory,
-  PermitInfo,
   getAMMInfo,
 } from '@/index';
 import {
@@ -18,11 +17,9 @@ import {
   PublicClient,
   WalletClient,
   decodeFunctionResult,
-  encodeFunctionData,
   encodePacked,
   getContract,
   hexToBigInt,
-  hexToSignature,
 } from 'viem';
 
 import {
@@ -30,12 +27,17 @@ import {
   getControllerOverrides,
   getERC20Overrides,
   getNPMApprovalOverrides,
-  staticCallWithOverrides,
   tryRequestWithOverrides,
 } from '../overrides';
+import {
+  getAutomanIncreaseLiquidityOptimalCallData,
+  getAutomanMintOptimalCalldata,
+  getAutomanRebalanceCalldata,
+  getAutomanReinvestCalldata,
+  getAutomanRemoveLiquidityCalldata,
+} from './getAutomanCallData';
 import { getFromAddress } from './internal';
 import {
-  DecreaseLiquidityParams,
   IncreaseLiquidityParams,
   IncreaseLiquidityReturnType,
   MintParams,
@@ -87,174 +89,6 @@ export function encodeOptimalSwapData(
   );
 }
 
-export function getAutomanMintOptimalCalldata(
-  mintParams: MintParams,
-  swapData: Hex = '0x',
-): Hex {
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [mintParams, swapData] as const,
-    functionName: 'mintOptimal',
-  });
-}
-
-export function getAutomanIncreaseLiquidityOptimalCallData(
-  increaseParams: IncreaseLiquidityParams,
-  swapData: Hex = '0x',
-): Hex {
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [increaseParams, swapData] as const,
-    functionName: 'increaseLiquidityOptimal',
-  });
-}
-
-export function getAutomanDecreaseLiquidityCalldata(
-  tokenId: bigint,
-  liquidity: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
-  feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
-): Hex {
-  const params: DecreaseLiquidityParams = {
-    tokenId,
-    liquidity,
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
-  if (permitInfo === undefined) {
-    return encodeFunctionData({
-      abi: Automan__factory.abi,
-      args: [params, feeBips] as const,
-      functionName: 'decreaseLiquidity',
-    });
-  }
-  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [
-      params,
-      feeBips,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
-    ] as const,
-    functionName: 'decreaseLiquidity',
-  });
-}
-
-export function getAutomanRebalanceCalldata(
-  mintParams: MintParams,
-  tokenId: bigint,
-  feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
-  swapData: Hex = '0x',
-): Hex {
-  if (permitInfo === undefined) {
-    return encodeFunctionData({
-      abi: Automan__factory.abi,
-      args: [mintParams, tokenId, feeBips, swapData] as const,
-      functionName: 'rebalance',
-    });
-  }
-  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [
-      mintParams,
-      tokenId,
-      feeBips,
-      swapData,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
-    ] as const,
-    functionName: 'rebalance',
-  });
-}
-
-export function getAutomanReinvestCalldata(
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
-  feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
-  swapData: Hex = '0x',
-): Hex {
-  const params: IncreaseLiquidityParams = {
-    tokenId,
-    amount0Desired: BigInt(0), // Param value ignored by Automan.
-    amount1Desired: BigInt(0), // Param value ignored by Automan.
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
-  if (permitInfo === undefined) {
-    return encodeFunctionData({
-      abi: Automan__factory.abi,
-      args: [params, feeBips, swapData] as const,
-      functionName: 'reinvest',
-    });
-  }
-  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [
-      params,
-      feeBips,
-      swapData,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
-    ] as const,
-    functionName: 'reinvest',
-  });
-}
-
-export function getAutomanRemoveLiquidityCalldata(
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
-  feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
-): Hex {
-  const params: DecreaseLiquidityParams = {
-    tokenId,
-    liquidity: BigInt(0), // Param value ignored by Automan.
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
-  if (permitInfo === undefined) {
-    return encodeFunctionData({
-      abi: Automan__factory.abi,
-      args: [params, feeBips] as const,
-      functionName: 'removeLiquidity',
-    });
-  }
-  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [
-      params,
-      feeBips,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
-    ] as const,
-    functionName: 'removeLiquidity',
-  });
-}
-
 function checkTicks(mintParams: MintParams) {
   const { tickLower, tickUpper } = mintParams;
   const fee = mintParams.fee as FeeAmount;
@@ -287,57 +121,89 @@ export async function simulateMintOptimal(
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
   checkTicks(mintParams);
-  const data = getAutomanMintOptimalCalldata(mintParams, swapData);
-  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
-  const tx = {
+  const returnData = await requestMintOptimal(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
     from,
-    to: apertureAutoman,
-    data,
-  };
-  let returnData: Hex;
-  try {
-    // forge token approvals and balances
-    const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(
-        mintParams.token0,
-        from,
-        apertureAutoman,
-        mintParams.amount0Desired,
-        publicClient,
-      ),
-      getERC20Overrides(
-        mintParams.token1,
-        from,
-        apertureAutoman,
-        mintParams.amount1Desired,
-        publicClient,
-      ),
-    ]);
-    returnData = await staticCallWithOverrides(
-      tx,
-      {
-        ...token0Overrides,
-        ...token1Overrides,
-      },
-      publicClient,
-      blockNumber,
-    );
-  } catch (e) {
-    console.warn('staticCallWithOverrides fail', e);
-    returnData = (
-      await publicClient.call({
-        account: from,
-        data: tx.data,
-        to: tx.to,
-        blockNumber,
-      })
-    ).data!;
-  }
+    mintParams,
+    swapData,
+    blockNumber,
+  );
   return decodeFunctionResult({
     abi: Automan__factory.abi,
     data: returnData,
     functionName: 'mintOptimal',
   });
+}
+
+export async function estimateMintOptimalGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: MintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestMintOptimal(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      mintParams,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function requestMintOptimal<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: MintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  checkTicks(mintParams);
+  const data = getAutomanMintOptimalCalldata(mintParams, swapData);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const [token0Overrides, token1Overrides] = await Promise.all([
+    getERC20Overrides(
+      mintParams.token0,
+      from,
+      apertureAutoman,
+      mintParams.amount0Desired,
+      publicClient,
+    ),
+    getERC20Overrides(
+      mintParams.token1,
+      from,
+      apertureAutoman,
+      mintParams.amount1Desired,
+      publicClient,
+    ),
+  ]);
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutoman,
+      data,
+    },
+    publicClient,
+    {
+      ...token0Overrides,
+      ...token1Overrides,
+    },
+    blockNumber,
+  );
 }
 
 /**
@@ -362,59 +228,99 @@ export async function simulateIncreaseLiquidityOptimal(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<IncreaseLiquidityReturnType> {
-  const data = getAutomanIncreaseLiquidityOptimalCallData(
+  const returnData = await requestIncreaseLiquidityOptimal(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    position,
     increaseParams,
     swapData,
+    blockNumber,
   );
-  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
-  const tx = {
-    from,
-    to: apertureAutoman,
-    data,
-  };
-  let returnData: Hex;
-  try {
-    // forge token approvals and balances
-    const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(
-        position.pool.token0.address as Address,
-        from,
-        apertureAutoman,
-        increaseParams.amount0Desired,
-        publicClient,
-      ),
-      getERC20Overrides(
-        position.pool.token1.address as Address,
-        from,
-        apertureAutoman,
-        increaseParams.amount1Desired,
-        publicClient,
-      ),
-    ]);
-    returnData = await staticCallWithOverrides(
-      tx,
-      {
-        ...token0Overrides,
-        ...token1Overrides,
-      },
-      publicClient,
-      blockNumber,
-    );
-  } catch (e) {
-    returnData = (
-      await publicClient.call({
-        account: from,
-        data: tx.data,
-        to: tx.to,
-        blockNumber,
-      })
-    ).data!;
-  }
   return decodeFunctionResult({
     abi: Automan__factory.abi,
     data: returnData,
     functionName: 'increaseLiquidityOptimal',
   });
+}
+
+export async function estimateIncreaseLiquidityOptimalGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestIncreaseLiquidityOptimal(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      position,
+      increaseParams,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function requestIncreaseLiquidityOptimal<
+  M extends keyof RpcReturnType,
+>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanIncreaseLiquidityOptimalCallData(
+    increaseParams,
+    swapData,
+  );
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+
+  const [token0Overrides, token1Overrides] = await Promise.all([
+    getERC20Overrides(
+      position.pool.token0.address as Address,
+      from,
+      apertureAutoman,
+      increaseParams.amount0Desired,
+      publicClient,
+    ),
+    getERC20Overrides(
+      position.pool.token1.address as Address,
+      from,
+      apertureAutoman,
+      increaseParams.amount1Desired,
+      publicClient,
+    ),
+  ]);
+
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutoman,
+      data,
+    },
+    publicClient,
+    {
+      ...token0Overrides,
+      ...token1Overrides,
+    },
+    blockNumber,
+  );
 }
 
 /**

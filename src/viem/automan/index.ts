@@ -3,3 +3,4 @@ export * from './getIncreaseLiquidityOptimalSwapInfo';
 export * from './getOptimalMintSwapInfo';
 export * from './getRebalanceSwapInfo';
 export * from './types';
+export * from './getAutomanCallData';

@@ -40,13 +40,13 @@ export function publicClientToProvider(client: PublicClient) {
   return new providers.StaticJsonRpcProvider(transport.url, network);
 }
 
-export async function estimateTotalGas(
+export async function estimateTotalFee(
   tx: TransactionRequest,
   client: PublicClient,
 ) {
   const l2Client = client.extend(publicActionsL2());
   const { from, to, value, data } = tx;
-  return l2Client.estimateTotalGas({
+  return l2Client.estimateTotalFee({
     account: from,
     to,
     value,

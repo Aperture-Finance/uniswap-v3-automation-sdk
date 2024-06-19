@@ -6,6 +6,7 @@ import { Address, PublicClient } from 'viem';
 
 import {
   IncreaseLiquidityParams,
+  estimateIncreaseLiquidityOptimalGas,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
 import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
@@ -108,12 +109,29 @@ export async function increaseLiquidityOptimalV2(
           blockNumber,
         );
 
+      let gasInRawNativeCurrency = 0n;
+      try {
+        gasInRawNativeCurrency = await estimateIncreaseLiquidityOptimalGas(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          position,
+          increaseParams,
+          swapData,
+          blockNumber,
+        );
+      } catch (e) {
+        console.warn(`Failed to estimate gas: ${e}`);
+      }
+
       return {
         solver,
         amount0,
         amount1,
         liquidity,
         swapData,
+        gasInRawNativeCurrency,
         swapRoute: getSwapRoute(
           token0,
           token1,

@@ -4,7 +4,11 @@ import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
-import { MintParams, simulateMintOptimal } from '../automan';
+import {
+  MintParams,
+  estimateMintOptimalGas,
+  simulateMintOptimal,
+} from '../automan';
 import { getPool } from '../pool';
 import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
@@ -112,12 +116,28 @@ export async function optimalMintV2(
         blockNumber,
       );
 
+      let gasInRawNativeCurrency = 0n;
+      try {
+        gasInRawNativeCurrency = await estimateMintOptimalGas(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          mintParams,
+          swapData,
+          blockNumber,
+        );
+      } catch (e) {
+        console.warn('Error estimating gas', e);
+      }
+
       return {
         solver,
         amount0,
         amount1,
         liquidity,
         swapData,
+        gasInRawNativeCurrency,
         swapRoute: getSwapRoute(
           token0,
           token1,
