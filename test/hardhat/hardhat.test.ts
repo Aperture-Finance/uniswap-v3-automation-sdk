@@ -110,13 +110,6 @@ const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 // Owner of position id 4 on Ethereum mainnet.
 const eoa = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
 // A fixed epoch second value representing a moment in the year 2099.
-const deadline = '4093484400';
-
-// Test wallet so we can test signing permit messages.
-// Public key: 0x035dcbb4b39244cef94d3263074f358a1d789e6b99f278d5911f9694da54312636
-// Address: 0x1ccaCD01fD2d973e134EC6d4F916b90A45634eCe
-const TEST_WALLET_PRIVATE_KEY =
-  '0x077646fb889571f9ce30e420c155812277271d4d914c799eef764f5709cafd5b';
 
 async function resetFork(testClient: TestClient, blockNumber = 19210000n) {
   await testClient.reset({
