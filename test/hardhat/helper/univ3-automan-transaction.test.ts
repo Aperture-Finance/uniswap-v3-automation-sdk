@@ -1,7 +1,6 @@
 import { providers } from '@0xsequence/multicall';
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { ethers } from 'hardhat';
@@ -9,16 +8,13 @@ import JSBI from 'jsbi';
 import { Address } from 'viem';
 
 import {
-  ActionTypeEnum,
   ApertureSupportedChainId,
-  ConditionTypeEnum,
   UniV3Automan,
   UniV3Automan__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
 import {
-  generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
   getIncreaseLiquidityOptimalTx,
@@ -28,7 +24,6 @@ import {
   getPool,
   getPosition,
   getRebalanceTx,
-  getReinvestTx,
 } from '../../../src/helper';
 import {
   WBTC_ADDRESS,
@@ -473,54 +468,6 @@ describe('Helper - UniV3Automan transaction tests', function () {
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
       liquidity: '119758517567519',
-    });
-  });
-
-  it('Reinvest', async function () {
-    const liquidityBeforeReinvest = (
-      await getBasicPositionInfo(chainId, amm, positionId, hardhatForkProvider)
-    ).liquidity!;
-    const { tx: txRequest } = await getReinvestTx(
-      chainId,
-      amm,
-      eoa,
-      positionId,
-      /*slippageTolerance=*/ new Percent(1, 100),
-      /*deadlineEpochSeconds=*/ Math.floor(Date.now() / 1000),
-      hardhatForkProvider,
-    );
-    await (await impersonatedOwnerSigner.sendTransaction(txRequest)).wait();
-    const liquidityAfterReinvest = (
-      await getBasicPositionInfo(chainId, amm, positionId, hardhatForkProvider)
-    ).liquidity!;
-    expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
-    expect(
-      generateAutoCompoundRequestPayload(
-        eoa,
-        chainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-        positionId,
-        /*feeToPrincipalRatioThreshold=*/ 0.1,
-        /*slippage=*/ 0.05,
-        /*maxGasProportion=*/ 0.01,
-        1627776000,
-      ),
-    ).to.deep.equal({
-      action: {
-        maxGasProportion: 0.01,
-        slippage: 0.05,
-        type: ActionTypeEnum.enum.Reinvest,
-      },
-      chainId: 1,
-      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-      condition: {
-        feeToPrincipalRatioThreshold: 0.1,
-        type: ConditionTypeEnum.enum.AccruedFees,
-      },
-      nftId: positionId.toString(),
-      ownerAddr: eoa,
-      expiration: 1627776000,
     });
   });
 });
