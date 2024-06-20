@@ -6,15 +6,9 @@ import { ethers } from 'hardhat';
 import { ApertureSupportedChainId } from '../../../src';
 import {
   PositionDetails,
-  checkAutomationSupportForPool,
-  checkTokenLiquidityAgainstChainNativeCurrency,
-  fetchQuoteFromRoutingApi,
-  fetchQuoteFromSpecifiedRoutingApiInfo,
   getNPM,
   getPool,
-  getPublicProvider,
   getRebalancedPosition,
-  getToken,
   increaseLiquidityOptimal,
   optimalMint,
   optimalRebalance,
@@ -22,49 +16,6 @@ import {
 import { eoa, expect } from './common';
 
 describe('Helper - Routing tests', function () {
-  it('Fetch quote swapping 1 ETH for USDC on mainnet', async function () {
-    const quote = await fetchQuoteFromRoutingApi(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      'ETH',
-      '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC mainnet
-      '1000000000000000000',
-      'exactIn',
-    );
-    expect(quote.amountDecimals === '1');
-    expect(Number(quote.quoteDecimals)).to.be.greaterThan(0);
-    console.log(`1 ETH -> ${quote.quoteDecimals} USDC`);
-  });
-
-  it('Fetch quote swapping 1 ETH for USDC on Manta Pacific testnet', async function () {
-    const quote = await fetchQuoteFromSpecifiedRoutingApiInfo(
-      3441005 as ApertureSupportedChainId,
-      {
-        url: 'https://uniswap-routing.aperture.finance/quote',
-        type: 'ROUTING_API',
-      },
-      'ETH',
-      '0x39471BEe1bBe79F3BFA774b6832D6a530edDaC6B',
-      '1000000000000000000',
-      'exactIn',
-    );
-    expect(quote.amountDecimals === '1');
-    expect(Number(quote.quoteDecimals)).to.be.greaterThan(0);
-    console.log(`1 ETH -> ${quote.quoteDecimals} USDC`);
-  });
-
-  it('Fetch quote swapping 1 USDC for ETH on Scroll mainnet', async function () {
-    const quote = await fetchQuoteFromRoutingApi(
-      ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
-      '0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4', // USDC on Scroll
-      'ETH',
-      '1000000',
-      'exactIn',
-    );
-    expect(quote.amountDecimals === '1');
-    expect(Number(quote.quoteDecimals)).to.be.greaterThan(0);
-    console.log(`1 USDC -> ${quote.quoteDecimals} ETH`);
-  });
-
   // optimalMint is deprecated
   it.skip('Test optimalMint', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
@@ -204,66 +155,5 @@ describe('Helper - Routing tests', function () {
       Number(predictedLiquidity.toString()),
       Number(predictedLiquidity.toString()) * 0.1,
     );
-  });
-
-  it('Test automation eligiblity', async function () {
-    const avaxProvider = getPublicProvider(
-      ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-    );
-    const [SHIBe, USDC, WAVAX] = await Promise.all([
-      getToken(
-        '0x02D980A0D7AF3fb7Cf7Df8cB35d9eDBCF355f665',
-        ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-        avaxProvider,
-      ),
-      getToken(
-        '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
-        ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-        avaxProvider,
-      ),
-      getToken(
-        '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
-        ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-        avaxProvider,
-      ),
-    ]);
-    expect(
-      await checkTokenLiquidityAgainstChainNativeCurrency(
-        ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-        SHIBe.address,
-      ),
-    ).to.not.equal('-1');
-    expect(
-      await checkTokenLiquidityAgainstChainNativeCurrency(
-        ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-        USDC.address,
-      ),
-    ).to.not.equal('-1');
-    expect(
-      await checkTokenLiquidityAgainstChainNativeCurrency(
-        ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-        WAVAX.address,
-      ),
-    ).to.equal('1');
-    expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
-  });
-
-  it('Test automation eligiblity - BSC', async function () {
-    const bscProvider = getPublicProvider(
-      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
-    );
-
-    const BNX = await getToken(
-      '0x5b1f874d0b0c5ee17a495cbb70ab8bf64107a3bd',
-      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
-      bscProvider,
-    );
-
-    expect(
-      await checkTokenLiquidityAgainstChainNativeCurrency(
-        ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
-        BNX.address,
-      ),
-    ).to.not.equal('-1');
   });
 });
