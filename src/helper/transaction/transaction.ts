@@ -51,6 +51,9 @@ export async function getAmountsWithSlippage(
       amount1: BigNumber;
       liquidity: BigNumber;
     };
+
+  console.log('slippageTolerance', slippageTolerance.toFixed(4));
+
   const { amount0: amount0Min, amount1: amount1Min } = new Position({
     pool,
     liquidity: liquidity.toString(),

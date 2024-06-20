@@ -48,6 +48,7 @@ export async function getReinvestTx(
     0,
     permitInfo,
   );
+
   const amounts = await getAmountsWithSlippage(
     pool,
     tickLower,
