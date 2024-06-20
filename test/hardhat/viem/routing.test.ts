@@ -186,7 +186,7 @@ describe('Viem - Routing tests', function () {
       tickLower,
       tickUpper,
       owner,
-      0.1,
+      0.01,
       ['3000', '1'],
       publicClient,
       blockNumber,
@@ -221,7 +221,7 @@ describe('Viem - Routing tests', function () {
       ); // WETH
       expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
         Number(resultV2[i].swapPath?.amountOut.toString()),
-        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
+        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.011,
       );
     }
   });
@@ -397,7 +397,7 @@ describe('Viem - Routing tests', function () {
       tickLower,
       tickUpper,
       eoa,
-      0.1,
+      0.01,
       publicClient,
       blockNumber,
     );
@@ -425,7 +425,7 @@ describe('Viem - Routing tests', function () {
       expect(resultV2[i].swapPath!.tokenOut).to.equal(WETH_ADDRESS);
       expect(Number(resultV2[i].swapPath!.minAmountOut)).to.closeTo(
         Number(resultV2[i].swapPath?.amountOut.toString()),
-        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.1,
+        Number(resultV2[i].swapPath?.amountOut.toString()) * 0.011,
       );
     }
   });
