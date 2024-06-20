@@ -81,7 +81,9 @@ export async function increaseLiquidityOptimalV2(
 
   const solve = async (solver: E_Solver) => {
     try {
-      const slippage = Number(increaseOptions.slippageTolerance.toFixed());
+      const slippage = Number(
+        increaseOptions.slippageTolerance.toSignificant(),
+      );
       const { swapData, swapRoute } = await getSolver(solver).optimalMint({
         chainId,
         amm,

@@ -242,7 +242,7 @@ async function getIncreaseLiquidityOptimalSwapData(
       zeroForOne ? position.pool.token1.address : position.pool.token0.address,
       poolAmountIn.toString(),
       ammInfo.optimalSwapRouter!,
-      Number(slippage.toFixed()),
+      Number(slippage.toSignificant()),
       includeRoute,
     );
     return {
