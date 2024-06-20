@@ -60,9 +60,7 @@ export const getSwapPath = (
     tokenOut: tokenOut,
     amountIn: amountIn.toString(),
     amountOut: amountOut.toString(),
-    minAmountOut: new Big(amountOut.toString())
-      .times(1 - slippage * 0.01)
-      .toFixed(0),
+    minAmountOut: new Big(amountOut.toString()).times(1 - slippage).toFixed(0),
   };
 };
 
