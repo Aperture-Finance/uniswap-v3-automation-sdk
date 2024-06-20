@@ -82,7 +82,7 @@ export async function increaseLiquidityOptimal(
         fromAddress,
         position,
         increaseParams,
-        Number(increaseOptions.slippageTolerance.toFixed()),
+        Number(increaseOptions.slippageTolerance.toSignificant()),
       ),
     ]);
     // use the same pool if the quote isn't better
@@ -113,7 +113,7 @@ export async function increaseLiquidityOptimal(
       BigInt(token1Amount.quotient.toString()),
       ret.amount0,
       ret.amount1,
-      Number(increaseOptions.slippageTolerance.toFixed()),
+      Number(increaseOptions.slippageTolerance.toSignificant()),
     );
   }
 
