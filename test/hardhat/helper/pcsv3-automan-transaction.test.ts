@@ -11,16 +11,13 @@ import JSBI from 'jsbi';
 import { Address } from 'viem';
 
 import {
-  ActionTypeEnum,
   ApertureSupportedChainId,
-  ConditionTypeEnum,
   PCSV3Automan,
   PCSV3Automan__factory,
   PCSV3OptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
 import {
-  generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
   getIncreaseLiquidityOptimalTx,
@@ -30,7 +27,6 @@ import {
   getPool,
   getPosition,
   getRebalanceTx,
-  getReinvestTx,
 } from '../../../src/helper';
 import { expect, hardhatForkProvider } from './common';
 
@@ -464,64 +460,6 @@ describe.skip('Helper - PCSV3Automan transaction tests', function () {
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
       liquidity: '133225009575497476219',
-    });
-  });
-
-  it('Reinvest', async function () {
-    const liquidityBeforeReinvest = (
-      await getBasicPositionInfo(
-        BNB_CHAIN_ID,
-        PCS_AMM,
-        positionId,
-        hardhatForkProvider,
-      )
-    ).liquidity!;
-    const { tx: txRequest } = await getReinvestTx(
-      BNB_CHAIN_ID,
-      PCS_AMM,
-      positionOwner,
-      positionId,
-      /*slippageTolerance=*/ new Percent(1, 100),
-      /*deadlineEpochSeconds=*/ Math.floor(Date.now() / 1000),
-      hardhatForkProvider,
-    );
-    await (await impersonatedOwnerSigner.sendTransaction(txRequest)).wait();
-    const liquidityAfterReinvest = (
-      await getBasicPositionInfo(
-        BNB_CHAIN_ID,
-        PCS_AMM,
-        positionId,
-        hardhatForkProvider,
-      )
-    ).liquidity!;
-    expect(liquidityBeforeReinvest.toString()).to.equal('17360687214921889114');
-    expect(liquidityAfterReinvest.toString()).to.equal('17369508569204326673');
-    expect(
-      generateAutoCompoundRequestPayload(
-        positionOwner,
-        BNB_CHAIN_ID,
-        PCS_AMM,
-        positionId,
-        /*feeToPrincipalRatioThreshold=*/ 0.1,
-        /*slippage=*/ 0.05,
-        /*maxGasProportion=*/ 0.01,
-        1627776000,
-      ),
-    ).to.deep.equal({
-      action: {
-        maxGasProportion: 0.01,
-        slippage: 0.05,
-        type: ActionTypeEnum.enum.Reinvest,
-      },
-      chainId: BNB_CHAIN_ID,
-      amm: PCS_AMM,
-      condition: {
-        feeToPrincipalRatioThreshold: 0.1,
-        type: ConditionTypeEnum.enum.AccruedFees,
-      },
-      nftId: positionId.toString(),
-      ownerAddr: positionOwner,
-      expiration: 1627776000,
     });
   });
 });
