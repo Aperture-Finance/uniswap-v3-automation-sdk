@@ -110,7 +110,9 @@ export async function fetchQuoteToNativeCurrency(
     const { toAmount } =
       (
         await buildRequest(chainId, new URLSearchParams(swapParams)).catch(
-          console.error,
+          (e) => {
+            console.error('fail to fetchQuoteToNativeCurrency from 1inch', e);
+          },
         )
       )?.data ?? {};
 
