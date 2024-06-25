@@ -13,7 +13,6 @@ import {
 import {
   E_Solver,
   PositionDetails,
-  checkAutomationSupportForPool,
   checkTokenLiquidityAgainstChainNativeCurrency,
   fetchQuoteFromRoutingApi,
   fetchQuoteFromSpecifiedRoutingApiInfo,
