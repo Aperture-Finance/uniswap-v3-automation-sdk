@@ -96,8 +96,6 @@ export async function estimateTotalGasCostForOptimismLikeL2Tx(
     nonce: await getNonceForTx(client, tx),
   };
 
-  const serializedTx = serializeTransaction(serializableTx);
-
   const [l1GasCost, l2GasPrice, l2GasAmount] = await Promise.all([
     client.readContract({
       address: ovmGasPriceOracleAddress,
@@ -111,7 +109,7 @@ export async function estimateTotalGasCostForOptimismLikeL2Tx(
         },
       ],
       functionName: 'getL1Fee',
-      args: [serializedTx],
+      args: [serializeTransaction(serializableTx)],
     }),
     client.getGasPrice(),
     client.estimateGas(tx),
