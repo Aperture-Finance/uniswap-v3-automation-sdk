@@ -47,7 +47,7 @@ export function publicClientToProvider(client: PublicClient) {
   return new providers.StaticJsonRpcProvider(transport.url, network);
 }
 
-// seems not support manta & scroll
+// seems not support manta
 export async function estimateTotalFee(
   tx: TransactionRequest,
   client: PublicClient,
@@ -100,6 +100,7 @@ export async function estimateTotalGasCostForOptimismLikeL2Tx(
   const serializableTx: TransactionSerializable = {
     data: tx.data,
     to: tx.to,
+    value: tx.value,
     type: 'legacy',
     nonce: await getNonceForTx(client, tx),
   };
