@@ -665,7 +665,8 @@ describe('Price to tick conversion', function () {
   });
 });
 
-describe('Pool subgraph query tests', function () {
+// subgragh endpoint has been deprecated
+describe.skip('Pool subgraph query tests', function () {
   it('Fee tier distribution - Uniswap V3', async function () {
     const [distribution, distributionOppositeTokenOrder] = await Promise.all([
       getFeeTierDistribution(
