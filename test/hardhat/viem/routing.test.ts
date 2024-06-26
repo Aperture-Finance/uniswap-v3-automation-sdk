@@ -13,7 +13,6 @@ import {
 import {
   E_Solver,
   PositionDetails,
-  checkAutomationSupportForPool,
   checkTokenLiquidityAgainstChainNativeCurrency,
   fetchQuoteFromRoutingApi,
   fetchQuoteFromSpecifiedRoutingApiInfo,
@@ -566,7 +565,9 @@ describe('Viem - Routing tests', function () {
         WAVAX.address,
       ),
     ).to.equal('1');
-    expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
+
+    // pool liquidity is not sufficient now, 06/25/2024
+    // expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
   });
 
   it('Test automation eligiblity - BSC', async function () {
