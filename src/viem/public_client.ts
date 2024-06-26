@@ -53,12 +53,20 @@ export async function estimateTotalFee(
   client: PublicClient,
 ) {
   const l2Client = client.extend(publicActionsL2());
+  const chainId = await client.getChainId();
+  const gasPriceOracleAddress =
+    chainId === ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID
+      ? '0x5300000000000000000000000000000000000002'
+      : '0x420000000000000000000000000000000000000F';
+
   const { from, to, value, data } = tx;
+
   return l2Client.estimateTotalFee({
     account: from,
     to,
     value,
     data,
+    gasPriceOracleAddress,
     chain: client.chain,
   });
 }
@@ -112,7 +120,10 @@ export async function estimateTotalGasCostForOptimismLikeL2Tx(
       args: [serializeTransaction(serializableTx)],
     }),
     client.getGasPrice(),
-    client.estimateGas(tx),
+    client.estimateGas({
+      ...tx,
+      account: tx.from,
+    }),
   ]);
 
   return {
