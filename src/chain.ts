@@ -424,7 +424,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'scroll',
-    rpc_url: 'https://1rpc.io/scroll',
+    rpc_url: 'https://scroll.drpc.org',
     maxGasCeiling: 0.2,
     routingApiInfo: {
       type: 'ROUTING_API',
