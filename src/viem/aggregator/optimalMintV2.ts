@@ -116,17 +116,21 @@ export async function optimalMintV2(
         blockNumber,
       );
 
-      let gasInRawNativeCurrency = 0n;
+      let gasFeeEstimation = 0n;
       try {
-        gasInRawNativeCurrency = await estimateMintOptimalGas(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          mintParams,
-          swapData,
-          blockNumber,
-        );
+        const [gasPrice, gasAmount] = await Promise.all([
+          publicClient.getGasPrice(),
+          estimateMintOptimalGas(
+            chainId,
+            amm,
+            publicClient,
+            fromAddress,
+            mintParams,
+            swapData,
+            blockNumber,
+          ),
+        ]);
+        gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
         console.warn('Error estimating gas', e);
       }
@@ -137,7 +141,7 @@ export async function optimalMintV2(
         amount1,
         liquidity,
         swapData,
-        gasInRawNativeCurrency,
+        gasFeeEstimation,
         swapRoute: getSwapRoute(
           token0,
           token1,
