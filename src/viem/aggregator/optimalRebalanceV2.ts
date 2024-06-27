@@ -131,6 +131,7 @@ export async function optimalRebalanceV2(
     }
   } catch (e) {
     console.warn('Error calculating fee', e);
+    // TODO: logging to datadog
   }
 
   const { receive0, receive1, poolAmountIn, zeroForOne } =
