@@ -125,8 +125,13 @@ export async function optimalRebalanceV2(
 
   let feeBips = 0n,
     feeUSD = '0';
-  if (feesOn) {
-    ({ feeBips, feeUSD } = await calcFeeBips());
+  try {
+    if (feesOn) {
+      ({ feeBips, feeUSD } = await calcFeeBips());
+    }
+  } catch (e) {
+    console.warn('Error calculating fee', e);
+    // TODO: logging to datadog
   }
 
   const { receive0, receive1, poolAmountIn, zeroForOne } =
