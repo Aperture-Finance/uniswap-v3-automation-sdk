@@ -526,7 +526,8 @@ describe('Viem - Routing tests', function () {
     console.log(`1 USDC -> ${quote.quoteDecimals} ETH`);
   });
 
-  it('Test automation eligiblity', async function () {
+  // skip this test as the pool liquidity is not sufficient now, 06/25/2024
+  it.skip('Test automation eligiblity', async function () {
     const client = getPublicClient(
       ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
     );
@@ -566,7 +567,6 @@ describe('Viem - Routing tests', function () {
       ),
     ).to.equal('1');
 
-    // pool liquidity is not sufficient now, 06/25/2024
     // expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
   });
 
