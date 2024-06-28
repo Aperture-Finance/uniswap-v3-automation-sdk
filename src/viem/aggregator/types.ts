@@ -13,7 +13,7 @@ export type SolverResult = {
   priceImpact?: Big;
   feeBips?: bigint;
   feeUSD?: string;
-  gasInRawNativeCurrency?: bigint;
+  gasFeeEstimation?: bigint;
 };
 
 export type SwapPath = {

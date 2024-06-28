@@ -347,7 +347,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
         ),
         subgraph_url:
-          'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture/uniswap-v3/gn',
+          'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-manta-pacific/uniswap-v3/gn',
       },
     },
     wrappedNativeCurrency: new Token(
