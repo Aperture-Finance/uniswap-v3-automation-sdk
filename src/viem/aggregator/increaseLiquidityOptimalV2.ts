@@ -110,18 +110,22 @@ export async function increaseLiquidityOptimalV2(
           blockNumber,
         );
 
-      let gasInRawNativeCurrency = 0n;
+      let gasFeeEstimation = 0n;
       try {
-        gasInRawNativeCurrency = await estimateIncreaseLiquidityOptimalGas(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          position,
-          increaseParams,
-          swapData,
-          blockNumber,
-        );
+        const [gasPrice, gasAmount] = await Promise.all([
+          publicClient.getGasPrice(),
+          estimateIncreaseLiquidityOptimalGas(
+            chainId,
+            amm,
+            publicClient,
+            fromAddress,
+            position,
+            increaseParams,
+            swapData,
+            blockNumber,
+          ),
+        ]);
+        gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
         console.warn(`Failed to estimate gas: ${e}`);
       }
@@ -132,7 +136,7 @@ export async function increaseLiquidityOptimalV2(
         amount1,
         liquidity,
         swapData,
-        gasInRawNativeCurrency,
+        gasFeeEstimation,
         swapRoute: getSwapRoute(
           token0,
           token1,

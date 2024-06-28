@@ -175,20 +175,24 @@ export async function optimalRebalanceV2(
         blockNumber,
       );
 
-      let gasInRawNativeCurrency = 0n;
+      let gasFeeEstimation = 0n;
       try {
-        gasInRawNativeCurrency = await estimateRebalanceGas(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          position.owner,
-          mintParams,
-          BigInt(position.tokenId),
-          feeBips,
-          swapData,
-          blockNumber,
-        );
+        const [gasPrice, gasAmount] = await Promise.all([
+          publicClient.getGasPrice(),
+          estimateRebalanceGas(
+            chainId,
+            amm,
+            publicClient,
+            fromAddress,
+            position.owner,
+            mintParams,
+            BigInt(position.tokenId),
+            feeBips,
+            swapData,
+            blockNumber,
+          ),
+        ]);
+        gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
         console.warn('Error estimating gas', e);
       }
@@ -201,7 +205,7 @@ export async function optimalRebalanceV2(
         swapData,
         feeBips,
         feeUSD,
-        gasInRawNativeCurrency,
+        gasFeeEstimation,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
           position.pool,
