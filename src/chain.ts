@@ -424,7 +424,9 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'scroll',
-    rpc_url: 'https://rpc.scroll.io',
+    rpc_url: 'https://scroll-mainnet.chainstacklabs.com',
+    // rpc_url: 'https://scroll-mainnet.public.blastapi.io', // backup
+    // rpc_url: 'https://rpc.scroll.io',  // not stable enough
     maxGasCeiling: 0.2,
     routingApiInfo: {
       type: 'ROUTING_API',
