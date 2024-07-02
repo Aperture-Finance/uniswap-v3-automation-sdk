@@ -82,6 +82,12 @@ export const ActionTypeEnum = z
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
 
+export const GeneralResponseSchema = z.object({
+  isError: z.boolean().optional().describe('True if an error occurred.'),
+  message: z.string().optional().describe('Optional success or error message.'),
+});
+export type GeneralResponse = z.infer<typeof GeneralResponseSchema>;
+
 // TODO: Create a constant for the maximum allowed `maxGasProportion` that matches Automan setting and use it here.
 const MaxGasProportionSchema = z
   .number()
@@ -807,7 +813,6 @@ export const StrategyDetailItemSchema = TriggerItemSchema.omit({
         'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
 });
-
 export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSchema>;
 
 export const GetStrategyDetailResponseSchema = z.object({
