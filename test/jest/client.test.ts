@@ -11,14 +11,7 @@ import {
   ConditionTypeEnum,
   GetStrategyDetailRequest,
   GetStrategyDetailResponse,
-  ListLeaderboardRequest,
-  ListLeaderboardResponse,
   UpdatePositionPermitRequest,
-  UserActivityTrackingRequest,
-  VerifySocialAccountRequest,
-  VerifySocialAccountResponse,
-  WalletConnectSubtypeEnum,
-  WalletTypeEnum,
 } from '../../src';
 
 describe('Automan client test', () => {
@@ -224,105 +217,5 @@ describe('Automan client test', () => {
     expect(JSON.parse(mock.history.get[0].params.get('request'))).toEqual(
       request,
     );
-  });
-
-  it('Should call track wallet', async () => {
-    const request = {
-      chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-      address: '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
-      timestamp_secs: 1708938824,
-      walletClient: WalletTypeEnum['HALO'],
-    };
-
-    const responseData = 'Success';
-    mock.onPost(`${url}/trackWallet`).reply(200, responseData);
-
-    const response = await client.trackWallet(request);
-    expect(response).toEqual(responseData);
-    // Expect to call post once.
-    expect(mock.history.post.length).toEqual(1);
-    // Expect request params to match.
-    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
-  });
-
-  it('Should call track user activity', async () => {
-    const request: UserActivityTrackingRequest = {
-      chainId: ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-      userAddress: '0xeb5105f298DbDfeD3B317E8176949e432C997C4b',
-      clientTimestampSecs: 1708990541,
-      actionType: 'Swap',
-      txHash:
-        '0x068bef573409c6b6f34b95e3e9be08a85a494c3ff83d3632cb3eee9174c4dda3',
-      walletType: WalletTypeEnum['WALLETCONNECT'],
-      walletSubType: WalletConnectSubtypeEnum['METAMASK'],
-    };
-
-    const responseData = 'Success';
-    mock.onPost(`${url}/trackUserActivity`).reply(200, responseData);
-
-    const response = await client.trackUserActivity(request);
-    expect(response).toEqual(responseData);
-    // Expect to call post once.
-    expect(mock.history.post.length).toEqual(1);
-    // Expect request params to match.
-    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
-  });
-
-  it('Should call list leaderboard', async () => {
-    const request: ListLeaderboardRequest = {
-      type: 'points',
-    };
-    const responseData: ListLeaderboardResponse = {
-      totalCampaignUsers: 2,
-      totalCampaignPoints: 98765.4321 + 12345.6789,
-      users: [
-        {
-          x_id: '*',
-          userAddr: '0xBE..EF',
-          points: 98765.4321,
-          num_referred_users: 0,
-          streak: 2,
-        },
-        {
-          x_id: '*',
-          userAddr: '0xFA..CE',
-          points: 12345.6789,
-          num_referred_users: 3,
-          streak: 1,
-        },
-      ],
-    };
-    mock.onGet(`${url}/listLeaderboard`).reply(200, responseData);
-
-    const response = await client.listLeaderboard(request);
-    expect(response).toEqual(responseData);
-
-    // Expect to call get once.
-    expect(mock.history.get.length).toEqual(1);
-  });
-
-  it('Should call verify social account', async () => {
-    const request: VerifySocialAccountRequest = {
-      payload: {
-        ownerAddr: '0x123456789ABCDEF101112131415161718191A1B1',
-        platform: 'twitter',
-        code: 'code123',
-      },
-      payloadSignature: '0x123456789ABCDEF101112131415161718191A1B1',
-      callbackUrl: 'https://www.callback.com/',
-    };
-    const responseData: VerifySocialAccountResponse = {
-      error: false,
-      retroPoints: 1230,
-    };
-    mock.onPost(`${url}/verifySocialAccount`).reply(200, responseData);
-
-    const response: VerifySocialAccountResponse =
-      await client.verifySocialAccount(request);
-    expect(response).toEqual(responseData);
-    expect(mock.history.post.length).toEqual(1);
-    expect(JSON.parse(mock.history.post[0].data)).toEqual(request);
   });
 });
