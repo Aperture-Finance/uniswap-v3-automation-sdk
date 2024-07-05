@@ -82,6 +82,12 @@ export const ActionTypeEnum = z
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
 
+export const GeneralResponseSchema = z.object({
+  isError: z.boolean().optional().describe('True if an error occurred.'),
+  message: z.string().optional().describe('Optional success or error message.'),
+});
+export type GeneralResponse = z.infer<typeof GeneralResponseSchema>;
+
 // TODO: Create a constant for the maximum allowed `maxGasProportion` that matches Automan setting and use it here.
 const MaxGasProportionSchema = z
   .number()
@@ -715,37 +721,6 @@ export const CheckUserLimitRequestSchema = ClientTypeSchema.extend({
 });
 export type CheckUserLimitRequest = z.infer<typeof CheckUserLimitRequestSchema>;
 
-export const SignPrivateBetaAgreementRequestSchema = ClientTypeSchema.extend({
-  ownerAddr: AddressSchema.describe(
-    'The user wallet address; must be a checksum address.',
-  ),
-  signature: SignatureSchema.describe('User signature.'),
-});
-export type SignPrivateBetaAgreementRequest = z.infer<
-  typeof SignPrivateBetaAgreementRequestSchema
->;
-
-export const HasSignedPrivateBetaAgreementRequestSchema =
-  ClientTypeSchema.extend({
-    ownerAddr: AddressSchema.describe(
-      'The user wallet address; must be a checksum address.',
-    ),
-  });
-export type HasSignedPrivateBetaAgreementRequest = z.infer<
-  typeof HasSignedPrivateBetaAgreementRequestSchema
->;
-
-export const HasSignedPrivateBetaAgreementResponseSchema = z.object({
-  hasSigned: z
-    .boolean()
-    .describe(
-      'True if the user has signed the private beta agreement; false otherwise.',
-    ),
-});
-export type HasSignedPrivateBetaAgreementResponse = z.infer<
-  typeof HasSignedPrivateBetaAgreementResponseSchema
->;
-
 const GetStrategyRequestBaseSchema = ClientTypeSchema.extend({
   ownerAddr: AddressSchema.describe(
     'The owner address of the request strategy/strategies; must be a checksum address.',
@@ -838,7 +813,6 @@ export const StrategyDetailItemSchema = TriggerItemSchema.omit({
         'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
 });
-
 export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSchema>;
 
 export const GetStrategyDetailResponseSchema = z.object({
@@ -868,103 +842,4 @@ export const GetStrategiesDetailResponseSchema = z.array(
 );
 export type GetStrategiesDetailResponse = z.infer<
   typeof GetStrategiesDetailResponseSchema
->;
-
-export const WalletTrackingRequestSchema = z.object({
-  chainId: ApertureSupportedChainIdEnum,
-  amm: ammEnumWithUniswapV3Default,
-  address: AddressSchema,
-  timestamp_secs: z.number().int().positive(),
-  walletClient: WalletTypeEnum,
-  walletConnectSubtype: WalletConnectSubtypeEnum.optional(),
-});
-export type WalletTrackingRequest = z.infer<typeof WalletTrackingRequestSchema>;
-
-export const GeneralResponseSchema = z.object({
-  error: z.boolean().optional().describe('True if an error occurred.'),
-  errorMessage: z.string().optional().describe('The error message.'),
-});
-
-export type GeneralResponse = z.infer<typeof GeneralResponseSchema>;
-
-export const GetHaloUsersRequestSchema = z.object({
-  utcDateString: z.coerce.date().describe('The date in UTC.'),
-});
-export type GetHaloUsersRequest = z.infer<typeof GetHaloUsersRequestSchema>;
-
-export const GetHaloUsersResponseSchema = z.object({
-  users: z.array(
-    z.object({
-      address: AddressSchema,
-      utcDateString: z.coerce.date().describe('The date in UTC.'),
-      didSwap: z.boolean().describe('True if the user did a swap.'),
-      didRebalance: z.boolean().describe('True if the user did a rebalance.'),
-      didOpenPosition: z
-        .boolean()
-        .describe('True if the user opened a position.'),
-    }),
-  ),
-});
-export type GetHaloUsersResponse = z.infer<typeof GetHaloUsersResponseSchema>;
-
-export const UserActivityTrackingRequestSchema = z.object({
-  userAddress: AddressSchema,
-  clientTimestampSecs: z.number().int().positive(),
-  chainId: ApertureSupportedChainIdEnum,
-  amm: ammEnumWithUniswapV3Default,
-  // In the user activity DynamoDB table, in addition to the five "instant" action types below, the action type value can also be 'CreateTrigger' or 'ExecuteTrigger'; these two are added to the table by the backend trigger handlers as appropriate.
-  actionType: z.enum([
-    'Swap',
-    'OpenPosition',
-    'AddLiquidity',
-    'RemoveLiquidity',
-    'Rebalance',
-    'Reinvest',
-  ]),
-  txHash: TxHashSchema,
-  walletType: WalletTypeEnum,
-  walletSubType: WalletConnectSubtypeEnum.optional(),
-});
-export type UserActivityTrackingRequest = z.infer<
-  typeof UserActivityTrackingRequestSchema
->;
-
-export const AptrAirdropStatusRequestSchema = z.object({
-  address: AddressSchema.describe('The airdrop recipient address.'),
-  timestampSecs: z
-    .number()
-    .int()
-    .describe(
-      'timestampSecs for the signature, must be within APTR_AIRDROP_STATUS_EXPIRATION_SECONDS (decided on backend) from now for the request to be valid.',
-    ),
-  signature: SignatureSchema.describe(
-    'User\'s signature for "${GET_APTR_AIRDROP_STATUS_MSG}${timestampSecs}".',
-  ),
-});
-export type AptrAirdropStatusRequest = z.infer<
-  typeof AptrAirdropStatusRequestSchema
->;
-
-export const AptrAirdropStatusResponseSchema = z.object({
-  address: AddressSchema.describe('The airdrop recipient address.'),
-  aptrAirdropStatuses: z
-    .array(
-      z.object({
-        epochId: z
-          .number()
-          .int()
-          .describe('The epochId of the airdrop reward.'),
-        merkleProof: z.array(z.string()).describe('For validation.'),
-        amount: z
-          .number()
-          .int()
-          .describe('The amount of APTR scaled up by 1e6.'),
-      }),
-    )
-    .describe(
-      'The list of APTR airdrop statuses because an address may be eligible for multiple airdrop rewards.',
-    ),
-});
-export type AptrAirdropStatusResponse = z.infer<
-  typeof AptrAirdropStatusResponseSchema
 >;
