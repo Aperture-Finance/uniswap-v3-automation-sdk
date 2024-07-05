@@ -55,6 +55,10 @@ export async function optimalRebalanceV2(
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
 
+  if (tokenPrices[0] === '0' || tokenPrices[1] === '0') {
+    throw new Error('Invalid token prices.');
+  }
+
   const simulateAndGetOptimalSwapAmount = async (feeBips: bigint) => {
     const [receive0, receive1] = await simulateRemoveLiquidity(
       chainId,
@@ -115,6 +119,10 @@ export async function optimalRebalanceV2(
     const token1USD = new Big(receive1.toString())
       .mul(tokenPrices[1])
       .div(10 ** position.token1.decimals);
+
+    if (token0USD.eq(0) || token1USD.eq(0)) {
+      throw new Error('Invalid token USD value.');
+    }
 
     const positionUSD = token0USD.add(token1USD);
     return {
