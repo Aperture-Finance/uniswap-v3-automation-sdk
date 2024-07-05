@@ -225,6 +225,50 @@ describe('Viem - Routing tests', function () {
     }
   });
 
+  it('Test optimalRebalanceV2 with invalid prices', async function () {
+    const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
+    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const tokenId = 726230n;
+    const blockNumber = await publicClient.getBlockNumber();
+    const position = await PositionDetails.fromPositionId(
+      chainId,
+      UNIV3_AMM,
+      tokenId,
+      publicClient,
+      blockNumber,
+    );
+    const { pool } = position;
+    const tickLower = nearestUsableTick(
+      pool.tickCurrent - 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      pool.tickCurrent + 10 * pool.tickSpacing,
+      pool.tickSpacing,
+    );
+    const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
+      tokenId,
+    ]);
+
+    try {
+      await optimalRebalanceV2(
+        chainId,
+        UNIV3_AMM,
+        position,
+        tickLower,
+        tickUpper,
+        owner,
+        0.01,
+        ['3000', '0'],
+        publicClient,
+        blockNumber,
+      );
+    } catch (e) {
+      console.log('e', e);
+      expect(e.message).to.be.equal('Invalid token prices.');
+    }
+  });
+
   it('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
