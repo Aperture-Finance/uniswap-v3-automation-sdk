@@ -496,15 +496,15 @@ describe('Viem - Routing tests', function () {
     console.log(`1 ETH -> ${quote.quoteDecimals} USDC`);
   });
 
-  it('Fetch quote swapping 1 ETH for USDC on Manta Pacific testnet', async function () {
+  it('Fetch quote swapping 1 ETH for USDC on Manta Pacific mainet', async function () {
     const quote = await fetchQuoteFromSpecifiedRoutingApiInfo(
-      3441005 as ApertureSupportedChainId,
+      ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       {
         url: 'https://uniswap-routing.aperture.finance/quote',
         type: 'ROUTING_API',
       },
       'ETH',
-      '0x39471BEe1bBe79F3BFA774b6832D6a530edDaC6B',
+      '0xb73603C5d87fA094B7314C74ACE2e64D165016fb',
       BigInt(1e18),
       'exactIn',
     );
@@ -526,7 +526,8 @@ describe('Viem - Routing tests', function () {
     console.log(`1 USDC -> ${quote.quoteDecimals} ETH`);
   });
 
-  it('Test automation eligiblity', async function () {
+  // skip this test as the pool liquidity is not sufficient now, 06/25/2024
+  it.skip('Test automation eligiblity', async function () {
     const client = getPublicClient(
       ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
     );
@@ -566,7 +567,6 @@ describe('Viem - Routing tests', function () {
       ),
     ).to.equal('1');
 
-    // pool liquidity is not sufficient now, 06/25/2024
     // expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
   });
 
