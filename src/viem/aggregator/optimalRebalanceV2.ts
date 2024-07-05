@@ -120,7 +120,7 @@ export async function optimalRebalanceV2(
       .mul(tokenPrices[1])
       .div(10 ** position.token1.decimals);
 
-    if (token0USD.eq(0) && token1USD.eq(0)) {
+    if (token0USD.eq(0) || token1USD.eq(0)) {
       throw new Error('Invalid token USD value.');
     }
 
