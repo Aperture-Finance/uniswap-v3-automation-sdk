@@ -526,9 +526,11 @@ export type RecurringPercentageDualAction = z.infer<
 
 export const RecurringPriceDualActionSchema = BaseRecurringActionSchema.extend({
   type: z.literal(ActionTypeEnum.enum.RecurringPriceDual),
-  baseToken: z
+  lteBaseToken: z
     .union([z.literal(0), z.literal(1)])
-    .describe('Either 0 or 1, representing token0 or token1, respectively.'),
+    .describe(
+      'Either 0 or 1, representing token0 or token1, respectively for lte condition.',
+    ),
   ltePriceLowerOffset: z
     .string()
     .min(1)
@@ -540,6 +542,11 @@ export const RecurringPriceDualActionSchema = BaseRecurringActionSchema.extend({
     .min(1)
     .describe(
       'The upper price offset in human-readable format for lte condition.',
+    ),
+  gteBaseToken: z
+    .union([z.literal(0), z.literal(1)])
+    .describe(
+      'Either 0 or 1, representing token0 or token1, respectively for gte condition.',
     ),
   gtePriceLowerOffset: z
     .string()

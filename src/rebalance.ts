@@ -173,18 +173,43 @@ export function convertRecurringCondition(
  * @param pool The underlying Uniswap V3 pool.
  * @returns The normalized tick range.
  */
-export function normalizeTicks(action: Action, pool: Pool) {
+export function normalizeTicks(
+  action: Action,
+  pool: Pool,
+  isLte: boolean = true,
+) {
   let tickLower: number, tickUpper: number;
   if (action.type == ActionTypeEnum.enum.Rebalance) {
     tickLower =
       action.tickLower + (action.isCurrentTickOffset ? pool.tickCurrent : 0);
     tickUpper =
       action.tickUpper + (action.isCurrentTickOffset ? pool.tickCurrent : 0);
-  } else if (action.type === ActionTypeEnum.enum.RecurringPercentage) {
-    tickLower = pool.tickCurrent + action.tickLowerOffset;
-    tickUpper = pool.tickCurrent + action.tickUpperOffset;
-  } else if (action.type === ActionTypeEnum.enum.RecurringPrice) {
-    const isToken0 = action.baseToken === 0;
+  } else if (
+    action.type === ActionTypeEnum.enum.RecurringPercentage ||
+    action.type === ActionTypeEnum.enum.RecurringPercentageDual
+  ) {
+    if (action.type === ActionTypeEnum.enum.RecurringPercentage) {
+      tickLower = pool.tickCurrent + action.tickLowerOffset;
+      tickUpper = pool.tickCurrent + action.tickUpperOffset;
+    } else {
+      tickLower =
+        pool.tickCurrent +
+        (isLte ? action.lteTickLowerOffset : action.gteTickLowerOffset);
+      tickUpper =
+        pool.tickCurrent +
+        (isLte ? action.lteTickUpperOffset : action.gteTickUpperOffset);
+    }
+  } else if (
+    action.type === ActionTypeEnum.enum.RecurringPrice ||
+    action.type === ActionTypeEnum.enum.RecurringPriceDual
+  ) {
+    const isDualAction = action.type === ActionTypeEnum.enum.RecurringPriceDual;
+    const isToken0 =
+      (isDualAction
+        ? isLte
+          ? action.lteBaseToken
+          : action.gteBaseToken
+        : action.baseToken) === 0;
     const price = isToken0 ? pool.token0Price : pool.token1Price;
     const bigPrice = fractionToBig(price).mul(
       new Big(10).pow(
@@ -193,8 +218,20 @@ export function normalizeTicks(action: Action, pool: Pool) {
           : pool.token1.decimals - pool.token0.decimals,
       ),
     );
-    const lowerPrice = bigPrice.add(action.priceLowerOffset);
-    const upperPrice = bigPrice.add(action.priceUpperOffset);
+    const lowerPrice = bigPrice.add(
+      isDualAction
+        ? isLte
+          ? action.ltePriceLowerOffset
+          : action.gtePriceLowerOffset
+        : action.priceLowerOffset,
+    );
+    const upperPrice = bigPrice.add(
+      isDualAction
+        ? isLte
+          ? action.ltePriceUpperOffset
+          : action.gtePriceUpperOffset
+        : action.priceUpperOffset,
+    );
     tickLower = humanPriceToClosestTick(
       isToken0 ? pool.token0 : pool.token1,
       isToken0 ? pool.token1 : pool.token0,
@@ -205,11 +242,25 @@ export function normalizeTicks(action: Action, pool: Pool) {
       isToken0 ? pool.token1 : pool.token0,
       upperPrice.toString(),
     );
-  } else if (action.type === ActionTypeEnum.enum.RecurringRatio) {
+  } else if (
+    action.type === ActionTypeEnum.enum.RecurringRatio ||
+    action.type === ActionTypeEnum.enum.RecurringRatioDual
+  ) {
+    const isDualAction = action.type === ActionTypeEnum.enum.RecurringRatioDual;
     ({ tickLower, tickUpper } = rangeWidthRatioToTicks(
-      action.tickRangeWidth,
+      isDualAction
+        ? isLte
+          ? action.lteTickRangeWidth
+          : action.gteTickRangeWidth
+        : action.tickRangeWidth,
       pool.tickCurrent,
-      new Big(action.token0ValueProportion),
+      new Big(
+        isDualAction
+          ? isLte
+            ? action.lteToken0ValueProportion
+            : action.gteToken0ValueProportion
+          : action.token0ValueProportion,
+      ),
     ));
   } else {
     throw new Error('Invalid action type');
