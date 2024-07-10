@@ -496,19 +496,19 @@ export const RecurringPercentageDualActionSchema =
     lteTickLowerOffset: z
       .number()
       .int()
-      .describe('The lower tick offset of the new price range.'),
+      .describe('The lower tick offset of the new price range for lte condition.'),
     lteTickUpperOffset: z
       .number()
       .int()
-      .describe('The upper tick offset of the new price range.'),
+      .describe('The upper tick offset of the new price range for lte condition.'),
     gteTickLowerOffset: z
       .number()
       .int()
-      .describe('The lower tick offset of the new price range.'),
+      .describe('The lower tick offset of the new price range for gte condition.'),
     gteTickUpperOffset: z
       .number()
       .int()
-      .describe('The upper tick offset of the new price range.'),
+      .describe('The upper tick offset of the new price range for gte condition.'),
   }).describe(
     'Rebalance to a new price range specified by the future pool tick and the tick offsets.',
   );
@@ -524,19 +524,19 @@ export const RecurringPriceDualActionSchema = BaseRecurringActionSchema.extend({
   ltePriceLowerOffset: z
     .string()
     .min(1)
-    .describe('The lower price offset in human-readable format.'),
+    .describe('The lower price offset in human-readable format for lte condition.'),
   ltePriceUpperOffset: z
     .string()
     .min(1)
-    .describe('The upper price offset in human-readable format.'),
+    .describe('The upper price offset in human-readable format for lte condition.'),
   gtePriceLowerOffset: z
     .string()
     .min(1)
-    .describe('The lower price offset in human-readable format.'),
+    .describe('The lower price offset in human-readable format for gte condition.'),
   gtePriceUpperOffset: z
     .string()
     .min(1)
-    .describe('The upper price offset in human-readable format.'),
+    .describe('The upper price offset in human-readable format for gte condition.'),
 }).describe(
   'Rebalance to a new price range specified by the future pool price of the base token and the price offsets.',
 );
@@ -546,16 +546,16 @@ export type RecurringPriceDualAction = z.infer<
 
 export const RecurringRatioDualActionSchema = BaseRecurringActionSchema.extend({
   type: z.literal(ActionTypeEnum.enum.RecurringRatioDual),
-  lteTickRangeWidth: z.number().int().describe('The width of the tick range.'),
+  lteTickRangeWidth: z.number().int().describe('The width of the tick range for lte condition.'),
   lteToken0ValueProportion: z
     .string()
     .min(1)
-    .describe('The proportion of the position value in token0.'),
-  gteTickRangeWidth: z.number().int().describe('The width of the tick range.'),
+    .describe('The proportion of the position value in token0 for lte condition.'),
+  gteTickRangeWidth: z.number().int().describe('The width of the tick range for gte condition.'),
   gteToken0ValueProportion: z
     .string()
     .min(1)
-    .describe('The proportion of the position value in token0.'),
+    .describe('The proportion of the position value in token0 for gte condition.'),
 }).describe(
   'Rebalance to a new price range specified by the tick range width and the proportion of the position value in token0.',
 );
