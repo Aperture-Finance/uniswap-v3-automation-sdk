@@ -487,21 +487,78 @@ export const RecurringRatioActionSchema = BaseRecurringActionSchema.extend({
 );
 export type RecurringRatioAction = z.infer<typeof RecurringRatioActionSchema>;
 
-export const RecurringActionSchema = z.discriminatedUnion('type', [
-  RecurringPercentageActionSchema,
-  RecurringPriceActionSchema,
-  RecurringRatioActionSchema,
-]);
-export type RecurringAction = z.infer<typeof RecurringActionSchema>;
+export const RecurringPercentageDualActionSchema =
+  BaseRecurringActionSchema.extend({
+    type: z.literal(ActionTypeEnum.enum.RecurringPercentage),
+    tickLowerOffset: z
+      .number()
+      .int()
+      .describe('The lower tick offset of the new price range.'),
+    tickUpperOffset: z
+      .number()
+      .int()
+      .describe('The upper tick offset of the new price range.'),
+  }).describe(
+    'Rebalance to a new price range specified by the future pool tick and the tick offsets.',
+  );
+export type RecurringPercentageDualAction = z.infer<
+  typeof RecurringPercentageDualActionSchema
+>;
 
-export const ActionSchema = z.discriminatedUnion('type', [
+export const RecurringPriceDualActionSchema = BaseRecurringActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.RecurringPrice),
+  baseToken: z
+    .union([z.literal(0), z.literal(1)])
+    .describe('Either 0 or 1, representing token0 or token1, respectively.'),
+  priceLowerOffset: z
+    .string()
+    .min(1)
+    .describe('The lower price offset in human-readable format.'),
+  priceUpperOffset: z
+    .string()
+    .min(1)
+    .describe('The upper price offset in human-readable format.'),
+}).describe(
+  'Rebalance to a new price range specified by the future pool price of the base token and the price offsets.',
+);
+export type RecurringPriceDualAction = z.infer<
+  typeof RecurringPriceDualActionSchema
+>;
+
+export const RecurringRatioDualActionSchema = BaseRecurringActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.RecurringRatio),
+  tickRangeWidth: z.number().int().describe('The width of the tick range.'),
+  token0ValueProportion: z
+    .string()
+    .min(1)
+    .describe('The proportion of the position value in token0.'),
+}).describe(
+  'Rebalance to a new price range specified by the tick range width and the proportion of the position value in token0.',
+);
+export type RecurringRatioDualAction = z.infer<
+  typeof RecurringRatioDualActionSchema
+>;
+
+export const NonRecurringActionSchema = z.discriminatedUnion('type', [
   CloseActionSchema,
   LimitOrderCloseActionSchema,
   ReinvestActionSchema,
   RebalanceActionSchema,
+]);
+
+export const RecurringActionSchema = z.discriminatedUnion('type', [
   RecurringPercentageActionSchema,
   RecurringPriceActionSchema,
   RecurringRatioActionSchema,
+  RecurringPercentageDualActionSchema,
+  RecurringPriceDualActionSchema,
+  RecurringRatioDualActionSchema,
+]);
+export type RecurringAction = z.infer<typeof RecurringActionSchema>;
+
+export const ActionSchema = z.union([
+  NonRecurringActionSchema,
+  RecurringActionSchema,
 ]);
 export type Action = z.infer<typeof ActionSchema>;
 
