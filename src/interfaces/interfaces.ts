@@ -78,6 +78,9 @@ export const ActionTypeEnum = z
     'RecurringPercentage',
     'RecurringPrice',
     'RecurringRatio',
+    'RecurringPercentageDual',
+    'RecurringPriceDual',
+    'RecurringRatioDual',
   ])
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
@@ -489,12 +492,20 @@ export type RecurringRatioAction = z.infer<typeof RecurringRatioActionSchema>;
 
 export const RecurringPercentageDualActionSchema =
   BaseRecurringActionSchema.extend({
-    type: z.literal(ActionTypeEnum.enum.RecurringPercentage),
-    tickLowerOffset: z
+    type: z.literal(ActionTypeEnum.enum.RecurringPercentageDual),
+    lteTickLowerOffset: z
       .number()
       .int()
       .describe('The lower tick offset of the new price range.'),
-    tickUpperOffset: z
+    lteTickUpperOffset: z
+      .number()
+      .int()
+      .describe('The upper tick offset of the new price range.'),
+    gteTickLowerOffset: z
+      .number()
+      .int()
+      .describe('The lower tick offset of the new price range.'),
+    gteTickUpperOffset: z
       .number()
       .int()
       .describe('The upper tick offset of the new price range.'),
@@ -506,15 +517,23 @@ export type RecurringPercentageDualAction = z.infer<
 >;
 
 export const RecurringPriceDualActionSchema = BaseRecurringActionSchema.extend({
-  type: z.literal(ActionTypeEnum.enum.RecurringPrice),
+  type: z.literal(ActionTypeEnum.enum.RecurringPriceDual),
   baseToken: z
     .union([z.literal(0), z.literal(1)])
     .describe('Either 0 or 1, representing token0 or token1, respectively.'),
-  priceLowerOffset: z
+  ltePriceLowerOffset: z
     .string()
     .min(1)
     .describe('The lower price offset in human-readable format.'),
-  priceUpperOffset: z
+  ltePriceUpperOffset: z
+    .string()
+    .min(1)
+    .describe('The upper price offset in human-readable format.'),
+  gtePriceLowerOffset: z
+    .string()
+    .min(1)
+    .describe('The lower price offset in human-readable format.'),
+  gtePriceUpperOffset: z
     .string()
     .min(1)
     .describe('The upper price offset in human-readable format.'),
@@ -526,9 +545,14 @@ export type RecurringPriceDualAction = z.infer<
 >;
 
 export const RecurringRatioDualActionSchema = BaseRecurringActionSchema.extend({
-  type: z.literal(ActionTypeEnum.enum.RecurringRatio),
-  tickRangeWidth: z.number().int().describe('The width of the tick range.'),
-  token0ValueProportion: z
+  type: z.literal(ActionTypeEnum.enum.RecurringRatioDual),
+  lteTickRangeWidth: z.number().int().describe('The width of the tick range.'),
+  lteToken0ValueProportion: z
+    .string()
+    .min(1)
+    .describe('The proportion of the position value in token0.'),
+  gteTickRangeWidth: z.number().int().describe('The width of the tick range.'),
+  gteToken0ValueProportion: z
     .string()
     .min(1)
     .describe('The proportion of the position value in token0.'),
