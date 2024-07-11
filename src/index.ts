@@ -10,3 +10,4 @@ export * from './utils';
 export * as viem from './viem';
 export * as helper from './helper';
 export * from './uniswap-constants';
+export * from './ioc';

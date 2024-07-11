@@ -1,18 +1,40 @@
-export class IoCContainer {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+type Constructor<T = any> = new (...args: any[]) => T;
+
+class IoCContainer {
   private dependencies: { [key: string]: any } = {};
 
-  register<T>(key: string, value: T): void {
-    this.dependencies[key] = value;
+  private singletons: { [key: string]: any } = {};
+
+  register<T>(key: string, constructor: Constructor<T>, ...args: any[]): void {
+    this.dependencies[key] = { constructor, args };
+  }
+
+  registerSingleton<T>(
+    key: string,
+    constructor: Constructor<T>,
+    ...args: any[]
+  ): void {
+    this.dependencies[key] = { constructor, args, singleton: true };
   }
 
   resolve<T>(key: string): T {
     const dependency = this.dependencies[key];
     if (!dependency) {
-      throw new Error(`Dependency ${key} is not registered.`);
+      throw new Error(`Dependency with key ${key} not found`);
     }
-    return dependency as T;
+
+    const { constructor, args, singleton } = dependency;
+
+    if (singleton) {
+      if (!this.singletons[key]) {
+        this.singletons[key] = new constructor(...args);
+      }
+      return this.singletons[key];
+    }
+
+    return new constructor(...args);
   }
 }
 
-export const iocContainer = new IoCContainer();
+export const ioc = new IoCContainer();

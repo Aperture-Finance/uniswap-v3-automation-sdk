@@ -22,7 +22,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
         props;
 
       if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) {
-        throw new Error('Chain not supported');
+        throw new Error('Expected: Chain not supported');
       }
 
       const ammInfo = getAMMInfo(chainId, amm)!;
