@@ -1,14 +1,18 @@
-import { ioc } from './IoCContainer';
+import { ioc } from './ioc';
 
 export interface ILogger {
-  log(message: string, messageContext?: object): void;
+  info(message: string, messageContext?: object): void;
+  debug(message: string, messageContext?: object): void;
   error(message: string, messageContext?: object): void;
   warn(message: string, messageContext?: object): void;
 }
 
 export class ConsoleLogger implements ILogger {
-  log(message: string, messageContext?: object): void {
-    console.log(`[ConsoleLogger] ${message}`, messageContext);
+  info(message: string, messageContext?: object): void {
+    console.info(`[ConsoleLogger] ${message}`, messageContext);
+  }
+  debug(message: string, messageContext?: object): void {
+    console.debug(`[ConsoleLogger] ${message}`, messageContext);
   }
   warn(message: string, messageContext?: object): void {
     console.warn(`[ConsoleLogger] ${message}`, messageContext);
