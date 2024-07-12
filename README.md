@@ -72,7 +72,7 @@ yarn link v1.22.22
 success Using linked package for "@aperture_finance/uniswap-v3-automation-sdk".
 ```
 
-4. After make changes on current repo, you will need to build again
+4. After make changes on current repo, you will need to run `yarn build` again
 
 5. Use unlink to clean up the soft link
 
