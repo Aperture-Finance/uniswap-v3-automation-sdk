@@ -596,7 +596,7 @@ export type RecurringRatioDualAction = z.infer<
   typeof RecurringRatioDualActionSchema
 >;
 
-export const NonRecurringActionSchema = z.discriminatedUnion('type', [
+const NonRecurringActionSchema = z.discriminatedUnion('type', [
   CloseActionSchema,
   LimitOrderCloseActionSchema,
   ReinvestActionSchema,
