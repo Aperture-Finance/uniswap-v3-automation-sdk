@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Constructor<T = any> = new (...args: any[]) => T;
 
+// inversion of control container, reference: https://hackernoon.com/beginners-guide-to-inversion-of-control
 class IoCContainer {
   private dependencies: { [key: string]: any } = {};
 
