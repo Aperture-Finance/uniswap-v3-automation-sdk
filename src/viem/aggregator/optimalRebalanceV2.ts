@@ -202,7 +202,8 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        console.warn('Error estimating gas', e);
+        // TODO: log to datadog
+        console.warn(`Solver ${solver} fail to estimating gas`, swapData, e);
       }
 
       return {
@@ -234,6 +235,7 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
+        // TODO: log to datadog
         console.warn(`Solver ${solver} failed: ${e}`);
       }
       return null;
