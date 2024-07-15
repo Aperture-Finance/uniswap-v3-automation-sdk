@@ -449,6 +449,7 @@ const PercentageActionSchema = z.object({
     .int()
     .describe('The upper tick offset of the new price range.'),
 });
+export type PercentageAction = z.infer<typeof PercentageActionSchema>;
 
 const PriceActionSchema = z.object({
   baseToken: z
@@ -463,6 +464,7 @@ const PriceActionSchema = z.object({
     .min(1)
     .describe('The upper price offset in human-readable format.'),
 });
+export type PriceAction = z.infer<typeof PriceActionSchema>;
 
 const RatioActionSchema = z.object({
   tickRangeWidth: z.number().int().describe('The width of the tick range.'),
@@ -471,11 +473,12 @@ const RatioActionSchema = z.object({
     .min(1)
     .describe('The proportion of the position value in token0.'),
 });
+export type RatioAction = z.infer<typeof RatioActionSchema>;
 
 export const RecurringPercentageActionSchema = BaseRecurringActionSchema.extend(
   {
     type: z.literal(ActionTypeEnum.enum.RecurringPercentage),
-    ...PercentageActionSchema,
+    ...PercentageActionSchema.shape,
   },
 ).describe(
   'Rebalance to a new price range specified by the future pool tick and the tick offsets.',
@@ -486,7 +489,7 @@ export type RecurringPercentageAction = z.infer<
 
 export const RecurringPriceActionSchema = BaseRecurringActionSchema.extend({
   type: z.literal(ActionTypeEnum.enum.RecurringPrice),
-  ...PriceActionSchema,
+  ...PriceActionSchema.shape,
 }).describe(
   'Rebalance to a new price range specified by the future pool price of the base token and the price offsets.',
 );
@@ -494,7 +497,7 @@ export type RecurringPriceAction = z.infer<typeof RecurringPriceActionSchema>;
 
 export const RecurringRatioActionSchema = BaseRecurringActionSchema.extend({
   type: z.literal(ActionTypeEnum.enum.RecurringRatio),
-  ...RatioActionSchema,
+  ...RatioActionSchema.shape,
 }).describe(
   'Rebalance to a new price range specified by the tick range width and the proportion of the position value in token0.',
 );
