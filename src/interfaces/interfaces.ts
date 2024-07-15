@@ -643,7 +643,7 @@ export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
   expiration: z
     .number()
     .int()
-    .positive()
+    .positive().refine((date: number) => date <= Date.now() / 1000)
     .describe('Unix timestamp in seconds when this trigger expires.'),
   autoCompound: z
     .object({
