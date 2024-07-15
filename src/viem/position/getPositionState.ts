@@ -18,7 +18,12 @@ export type PositionStateArray = ContractFunctionReturnType<
 >;
 
 const FETCH_TIMEOUT = 500;
-const BATCH_FETCH_POSITION_SIZE = 1000;
+const DEFAULT_CHAIN_BATCH_SIZE = 1000;
+
+// rpc node may has different limit on content length
+const CHAIN_BATCH_SIZE: Partial<Record<ApertureSupportedChainId, number>> = {
+  [ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID]: 120,
+};
 
 /**
  * Get positions state
@@ -43,6 +48,9 @@ export async function getPositionsState(
   if (!tokenIds.length) {
     return [];
   }
+
+  const batchSize = CHAIN_BATCH_SIZE[chainId] ?? DEFAULT_CHAIN_BATCH_SIZE;
+
   publicClient = publicClient ?? getPublicClient(chainId);
   let positions: PositionStateArray = [];
   let retryTimes = 0;
@@ -52,7 +60,7 @@ export async function getPositionsState(
     if (i > 0) {
       await waitForMs(timeout);
     }
-    const currentBatch = tokenIds.slice(i, i + BATCH_FETCH_POSITION_SIZE);
+    const currentBatch = tokenIds.slice(i, i + batchSize);
 
     try {
       const currentPositions = await viem.getPositions(
@@ -63,12 +71,12 @@ export async function getPositionsState(
       );
 
       positions = positions.concat(currentPositions);
-      i += BATCH_FETCH_POSITION_SIZE;
+      i += batchSize;
     } catch (error) {
       retryTimes++;
       waitForMs(timeout * 5);
       console.warn(
-        `Failed to getPositions on ${amm}-${chainId}`,
+        `Failed to getPositions on ${amm}-${chainId}, retrying...`,
         currentBatch,
         error,
       );
