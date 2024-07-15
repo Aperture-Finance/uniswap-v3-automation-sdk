@@ -31,14 +31,14 @@ To get started with the Uniswap V3 Automation SDK, follow these steps:
 1. Clone the repository:
 
 ```
-> git clone https://github.com/Aperture-Finance/uniswap-v3-automation-sdk.git
+git clone https://github.com/Aperture-Finance/uniswap-v3-automation-sdk.git
 ```
 
 2. Install the required dependencies:
 
 ```
-> npm i -g yarn
-> yarn
+npm i -g yarn
+yarn
 ```
 
 3. Explore the examples and code samples provided in the repository to understand the SDK's functionalities and usage patterns.
@@ -52,7 +52,7 @@ Here's the step:
 1. Build sdk
 
 ```
-> yarn build
+yarn build
 ```
 
 2. Run `yarn link` in current repo root
@@ -72,7 +72,12 @@ yarn link v1.22.22
 success Using linked package for "@aperture_finance/uniswap-v3-automation-sdk".
 ```
 
-4. After make changes on current repo, you will need to run `yarn build` again
+4. After make changes on current repo, you will need to run build again
+
+```
+yarn
+yarn build
+```
 
 5. Use unlink to clean up the soft link
 
