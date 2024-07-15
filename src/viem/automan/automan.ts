@@ -347,6 +347,7 @@ export async function simulateRemoveLiquidity(
   amount1Min = BigInt(0),
   feeBips = BigInt(0),
   blockNumber?: bigint,
+  customDestContract?: Address,
 ): Promise<RemoveLiquidityReturnType> {
   const data = getAutomanRemoveLiquidityCalldata(
     tokenId,
@@ -355,13 +356,15 @@ export async function simulateRemoveLiquidity(
     amount1Min,
     feeBips,
   );
+  const destContract =
+    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutoman;
   return decodeFunctionResult({
     abi: Automan__factory.abi,
     data: await tryRequestWithOverrides(
       'eth_call',
       {
         from,
-        to: getAMMInfo(chainId, amm)!.apertureAutoman,
+        to: destContract,
         data,
       },
       publicClient,

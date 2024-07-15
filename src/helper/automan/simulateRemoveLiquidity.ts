@@ -46,6 +46,7 @@ export async function simulateRemoveLiquidity(
   amount1Min: BigNumberish = 0,
   feeBips: BigNumberish = 0,
   blockNumber?: number,
+  customAmmContract?: string,
 ): Promise<RemoveLiquidityReturnType> {
   const { functionFragment, data } = getAutomanRemoveLiquidityCallInfo(
     tokenId,
@@ -54,13 +55,15 @@ export async function simulateRemoveLiquidity(
     amount1Min,
     feeBips,
   );
+  const destContract =
+    customAmmContract || getAMMInfo(chainId, amm)!.apertureAutoman;
   return IAutoman__factory.createInterface().decodeFunctionResult(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     functionFragment,
     await tryStaticCallWithOverrides(
       from,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      destContract,
       data,
       getNPMApprovalOverrides(chainId, amm, owner),
       provider,
