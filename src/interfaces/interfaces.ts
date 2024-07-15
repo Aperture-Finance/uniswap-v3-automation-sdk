@@ -96,10 +96,10 @@ const MaxGasProportionSchema = z
   .lte(0.5)
   .describe(
     'Aperture deducts tokens from the position to cover the cost of performing this action (gas). ' +
-    'The `maxGasProportion` value represents the largest allowed proportion of the position value to be deducted. ' +
-    'For example, a `maxGasProportion` of 0.10 represents 10% of the position, i.e. no more than 10% of the ' +
-    "position's tokens (principal and accrued fees) may be deducted. If network gas price is high and the deduction " +
-    'would exceed the specified ceiling, then the action will not be triggered.',
+      'The `maxGasProportion` value represents the largest allowed proportion of the position value to be deducted. ' +
+      'For example, a `maxGasProportion` of 0.10 represents 10% of the position, i.e. no more than 10% of the ' +
+      "position's tokens (principal and accrued fees) may be deducted. If network gas price is high and the deduction " +
+      'would exceed the specified ceiling, then the action will not be triggered.',
   );
 
 const SlippageSchema = z
@@ -108,7 +108,7 @@ const SlippageSchema = z
   .lte(1)
   .describe(
     'A number between 0 and 1, inclusive, which Aperture will use as the slippage setting when triggering ' +
-    'the action after condition is met. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.',
+      'the action after condition is met. Digits after the sixth decimal point are ignored, i.e. the precision is 0.000001.',
   );
 
 export const TriggerStatusEnum = z
@@ -131,7 +131,7 @@ export const TxHashSchema = HexSchema.length(66).describe(
 
 export const SignatureSchema = HexSchema.min(132).describe(
   'A raw signature of the ERC-712 typed message described in ERC-4494; the signature can be generated,' +
-  ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
+    ' for example, by https://docs.ethers.org/v5/api/signer/#Signer-signTypedData.',
 );
 
 export const TokenAmountSchema = z.object({
@@ -170,9 +170,9 @@ export const TokenAmountConditionSchema = z
   })
   .describe(
     'The "TokenAmount" condition is considered met if the specified token has a zero (principal) amount in ' +
-    'the position. `zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, ' +
-    'respectively. For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the ' +
-    'position is exactly zero. Note that only the principal amount is considered; accrued fees are not.',
+      'the position. `zeroAmountToken` can only be either 0 or 1, representing token0 or token1 in the position, ' +
+      'respectively. For example, if `zeroAmountToken` is 1, then the condition is considered met if token1 in the ' +
+      'position is exactly zero. Note that only the principal amount is considered; accrued fees are not.',
   );
 export type TokenAmountCondition = z.infer<typeof TokenAmountConditionSchema>;
 
@@ -183,9 +183,9 @@ const DurationSecSchema = z
   .optional()
   .describe(
     'If set, the condition is only considered met if the price remains satisfaction the threshold requirement' +
-    ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
-    'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
-    'price feed used is Coingecko.',
+      ' for at least the past `durationSec` seconds. For example, if `gte` is 10 and `durationSec` is set to 3600, ' +
+      'then the condition is only considered met if the price remains >= 10 for the entire past hour. The historical ' +
+      'price feed used is Coingecko.',
   );
 
 export const PriceConditionSchema = z
@@ -196,7 +196,7 @@ export const PriceConditionSchema = z
       .optional()
       .describe(
         'The type of the price condition to display on the frontend. This allows the frontend to ' +
-        'distinguish between ratio-based and relative-price-based contidions.',
+          'distinguish between ratio-based and relative-price-based contidions.',
       ),
     gte: z
       .string()
@@ -217,17 +217,17 @@ export const PriceConditionSchema = z
       .optional()
       .describe(
         'Deprecated. If `singleToken` is set, the condition is considered met if the current USD price of the specified' +
-        " token (either token0 or token1) meets the specified threshold; otherwise, token0's price denominated in " +
-        'token1 is compared against the specified threshold,',
+          " token (either token0 or token1) meets the specified threshold; otherwise, token0's price denominated in " +
+          'token1 is compared against the specified threshold,',
       ),
   })
   .describe(
     "The 'Price' condition checks either one token's price or the two tokens' relative price. If `singleToken`" +
-    " is set, the price condition compares the specified token's USD price against the specified threshold." +
-    "Otherwise, token0's price denominated in token1 is compared against the specified threshold, " +
-    'and we follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
-    '"Raw" means the raw uint256 integer amount used in the token contract. For example, if token A uses 8 decimals, ' +
-    'then 1 raw token A represents 10^(-8) tokens in human-readable form.',
+      " is set, the price condition compares the specified token's USD price against the specified threshold." +
+      "Otherwise, token0's price denominated in token1 is compared against the specified threshold, " +
+      'and we follow how a Uniswap V3 liquidity pool defines price, i.e. how much raw token1 equals 1 raw token0 in value. ' +
+      '"Raw" means the raw uint256 integer amount used in the token contract. For example, if token A uses 8 decimals, ' +
+      'then 1 raw token A represents 10^(-8) tokens in human-readable form.',
   );
 export type PriceCondition = z.infer<typeof PriceConditionSchema>;
 
@@ -243,8 +243,8 @@ export const AccruedFeesConditionSchema = z
   })
   .describe(
     'The accrued-fees condition specifies a threshold in the form of the ratio between the value of accrued ' +
-    'fees and that of principal tokens in a specific liquidity position. This condition serves "auto-compound" which ' +
-    'triggers a "reinvest" action whenever the accrued fees meet the threshold specified in this condition.',
+      'fees and that of principal tokens in a specific liquidity position. This condition serves "auto-compound" which ' +
+      'triggers a "reinvest" action whenever the accrued fees meet the threshold specified in this condition.',
   );
 export type AccruedFeesCondition = z.infer<typeof AccruedFeesConditionSchema>;
 
@@ -275,18 +275,18 @@ export const RecurringPercentageConditionSchema =
       .optional()
       .describe(
         'Next trigger price that gets triggered when the pool price is greater than or equal to it, ' +
-        'as a tick offset from the current tick.',
+          'as a tick offset from the current tick.',
       ),
     lteTickOffset: z
       .number()
       .optional()
       .describe(
         'Next trigger price that gets triggered when the pool price is less than or equal to it, ' +
-        'as a tick offset from the current tick.',
+          'as a tick offset from the current tick.',
       ),
   }).describe(
     'The "RecurringPercentage" condition defines the target prices in terms of a percentage offset from the ' +
-    'current price for the next trigger condition.',
+      'current price for the next trigger condition.',
   );
 export type RecurringPercentageCondition = z.infer<
   typeof RecurringPercentageConditionSchema
@@ -304,7 +304,7 @@ export const RecurringPriceConditionSchema =
       .optional()
       .describe(
         'The next trigger price that gets triggered when the pool price is greater than or equal to it, ' +
-        'as a price offset from the current price in human-readable format.',
+          'as a price offset from the current price in human-readable format.',
       ),
     ltePriceOffset: z
       .string()
@@ -312,11 +312,11 @@ export const RecurringPriceConditionSchema =
       .optional()
       .describe(
         'The next trigger price that gets triggered when the pool price is less than or equal to it, ' +
-        'as a price offset from the current price in human-readable format.',
+          'as a price offset from the current price in human-readable format.',
       ),
   }).describe(
     'The "RecurringPrice" condition defines the target prices in terms of a price offset from the current ' +
-    'price for the next trigger condition.',
+      'price for the next trigger condition.',
   );
 export type RecurringPriceCondition = z.infer<
   typeof RecurringPriceConditionSchema
@@ -331,7 +331,7 @@ export const RecurringRatioConditionSchema =
       .optional()
       .describe(
         'The proportion of the position value in token0 that defines the target price which gets ' +
-        'triggered when the pool price is greater than or equal to it.',
+          'triggered when the pool price is greater than or equal to it.',
       ),
     lteToken0ValueProportion: z
       .string()
@@ -339,11 +339,11 @@ export const RecurringRatioConditionSchema =
       .optional()
       .describe(
         'The proportion of the position value in token0 that defines the target price which gets ' +
-        'triggered when the pool price is less than or equal to it.',
+          'triggered when the pool price is less than or equal to it.',
       ),
   }).describe(
     'The "RecurringRatio" condition defines the target ratio in terms of the proportion of the position ' +
-    'value in token0 for the next trigger condition.',
+      'value in token0 for the next trigger condition.',
   );
 export type RecurringRatioCondition = z.infer<
   typeof RecurringRatioConditionSchema
@@ -370,7 +370,7 @@ export const ConditionSchema = z
   ])
   .describe(
     'The condition which triggers the action. If a trigger is successfully created with a condition that is' +
-    ' already met at the time of trigger creation, then the action is immediately eligible to be triggered.',
+      ' already met at the time of trigger creation, then the action is immediately eligible to be triggered.',
   );
 export type Condition = z.infer<typeof ConditionSchema>;
 
@@ -391,13 +391,13 @@ export const LimitOrderCloseActionSchema = z
     type: z.literal(ActionTypeEnum.enum.LimitOrderClose),
     inputTokenAddr: AddressSchema.describe(
       'The address of the input token for the limit order, i.e. the token which the user provided and ' +
-      'wants to sell. Must be one of the two tokens in the position.',
+        'wants to sell. Must be one of the two tokens in the position.',
     ),
     maxGasProportion: MaxGasProportionSchema,
   })
   .describe(
     "The 'LimitOrderClose' action behaves the same as 'Close' but the position serves a limit order placed through Aperture. " +
-    'No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.',
+      'No slippage needs to be specified as limit order positions are always closed with a zero slippage setting.',
   );
 export type LimitOrderCloseAction = z.infer<typeof LimitOrderCloseActionSchema>;
 
@@ -426,7 +426,7 @@ export const RebalanceActionSchema = BaseActionSchema.extend({
     ),
 }).describe(
   'The "Rebalance" action closes the position, and swap tokens (principal and collected fees) to the ' +
-  'ratio required by the specified new price range, and open a position with that price range.',
+    'ratio required by the specified new price range, and open a position with that price range.',
 );
 export type RebalanceAction = z.infer<typeof RebalanceActionSchema>;
 
@@ -500,17 +500,22 @@ export const RecurringRatioActionSchema = BaseRecurringActionSchema.extend({
 );
 export type RecurringRatioAction = z.infer<typeof RecurringRatioActionSchema>;
 
-export const RecurringDualActionSchema =
-  BaseRecurringActionSchema.extend({
-    type: z.literal(ActionTypeEnum.enum.RecurringDualAction),
-    lteAction: PercentageActionSchema | PriceActionSchema | RatioActionSchema,
-    gteAction: PercentageActionSchema | PriceActionSchema | RatioActionSchema,
-  }).describe(
-    'Rebalance to a new price range specified by an action if lte and another action if gte.',
-  );
-export type RecurringDualAction = z.infer<
-  typeof RecurringDualActionSchema
->;
+export const RecurringDualActionSchema = BaseRecurringActionSchema.extend({
+  type: z.literal(ActionTypeEnum.enum.RecurringDualAction),
+  lteAction: z.union([
+    PercentageActionSchema,
+    PriceActionSchema,
+    RatioActionSchema,
+  ]),
+  gteAction: z.union([
+    PercentageActionSchema,
+    PriceActionSchema,
+    RatioActionSchema,
+  ]),
+}).describe(
+  'Rebalance to a new price range specified by an action if lte and another action if gte.',
+);
+export type RecurringDualAction = z.infer<typeof RecurringDualActionSchema>;
 
 const NonRecurringActionSchema = z.discriminatedUnion('type', [
   CloseActionSchema,
@@ -599,8 +604,8 @@ export const PermitInfoSchema = z
   })
   .describe(
     'Information about a "permit" message signed by the position owner authorizing Aperture UniV3 Automan ' +
-    'contract to trigger actions on the position. See https://eips.ethereum.org/EIPS/eip-4494 for information on ' +
-    'the "permit" approval flow.',
+      'contract to trigger actions on the position. See https://eips.ethereum.org/EIPS/eip-4494 for information on ' +
+      'the "permit" approval flow.',
   );
 export type PermitInfo = z.infer<typeof PermitInfoSchema>;
 
@@ -632,7 +637,7 @@ export const CreateTriggerRequestSchema = PayloadSignatureSchema.extend({
   payload: CreateTriggerPayloadSchema,
   permitInfo: PermitInfoSchema.optional().describe(
     "If Aperture doesn't already have authority over the position, " +
-    'then `permitInfo` should be obtained from the user and populated here.',
+      'then `permitInfo` should be obtained from the user and populated here.',
   ),
 });
 export type CreateTriggerRequest = z.infer<typeof CreateTriggerRequestSchema>;
@@ -788,16 +793,16 @@ export const StrategyDetailItemSchema = TriggerItemSchema.omit({
     .optional()
     .describe(
       "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means " +
-      "that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated " +
-      'when the action is triggered and the task switches to STARTED status.',
+        "that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated " +
+        'when the action is triggered and the task switches to STARTED status.',
     ),
   positionEtherValueWhenCompleted: z
     .number()
     .optional()
     .describe(
       "The value of the position's prinpical tokens in the chain's native currency, e.g. a value of 2.3 means " +
-      "that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated " +
-      'when the action is completed and the task switches to COMPLETED status.',
+        "that the position's prinpical tokens are worth 2.3 ETH if the chain's native currency is ETH. Only populated " +
+        'when the action is completed and the task switches to COMPLETED status.',
     ),
   positionUsdValueWhenCompleted: z
     .number()
@@ -810,35 +815,35 @@ export const StrategyDetailItemSchema = TriggerItemSchema.omit({
     .optional()
     .describe(
       'A number representing the ratio between accrued fees in the position and principal value. Only populated ' +
-      'when the action is triggered and the task switches to STARTED status, and the condition is of type AccruedFees.',
+        'when the action is triggered and the task switches to STARTED status, and the condition is of type AccruedFees.',
     ),
   feeCollectedToken0: z
     .number()
     .optional()
     .describe(
       'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
-      'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
   feeCollectedToken1: z
     .number()
     .optional()
     .describe(
       'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
-      'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
   feeCollectedToken0UsdValue: z
     .number()
     .optional()
     .describe(
       'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
-      'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
   feeCollectedToken1UsdValue: z
     .number()
     .optional()
     .describe(
       'A number representing the fee collected on token0. Only populated when the action is triggered and the ' +
-      'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
+        'task switches to COMPLETED status, and the type is of Reinvest or Rebalance.',
     ),
 });
 export type StrategyDetailItem = z.infer<typeof StrategyDetailItemSchema>;
