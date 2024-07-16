@@ -1,4 +1,7 @@
-import { AUTOMATION_EXPIRATION_IN_SECS } from '@/constants';
+import {
+  AUTOMATION_EXPIRATION_IN_SECS,
+  AUTOMATION_SLACK_IN_SECS,
+} from '@/constants';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { z } from 'zod';
@@ -569,7 +572,10 @@ export const CreateTriggerPayloadSchema = BaseTriggerPayloadSchema.extend({
     .positive()
     .refine(
       (date: number) =>
-        date <= Math.floor(Date.now() / 1000) + AUTOMATION_EXPIRATION_IN_SECS,
+        date <=
+        Math.floor(Date.now() / 1000) +
+          AUTOMATION_EXPIRATION_IN_SECS +
+          AUTOMATION_SLACK_IN_SECS,
     )
     .describe('Unix timestamp in seconds when this trigger expires.'),
   autoCompound: z
@@ -598,7 +604,10 @@ export const UpdateTriggerPayloadSchema = TriggerIdentifierSchema.extend({
     .positive()
     .refine(
       (date: number) =>
-        date <= Math.floor(Date.now() / 1000) + AUTOMATION_EXPIRATION_IN_SECS,
+        date <=
+        Math.floor(Date.now() / 1000) +
+          AUTOMATION_EXPIRATION_IN_SECS +
+          AUTOMATION_SLACK_IN_SECS,
     )
     .describe('Unix timestamp in seconds when this trigger expires.'),
 });
