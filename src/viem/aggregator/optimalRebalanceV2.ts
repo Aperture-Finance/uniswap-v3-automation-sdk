@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId } from '@/index';
+import { ApertureSupportedChainId, getLogger } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
@@ -54,6 +54,17 @@ export async function optimalRebalanceV2(
 ): Promise<SolverResult[]> {
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
+
+  const logdata = {
+    chainId,
+    amm,
+    position: position.tokenId,
+    newTickLower,
+    newTickUpper,
+    fromAddress,
+    slippage,
+    tokenPrices,
+  };
 
   if (tokenPrices[0] === '0' || tokenPrices[1] === '0') {
     throw new Error('Invalid token prices.');
@@ -121,7 +132,20 @@ export async function optimalRebalanceV2(
       .div(10 ** position.token1.decimals);
 
     if (token0USD.eq(0) || token1USD.eq(0)) {
-      throw new Error('Invalid token USD value.');
+      getLogger().error('Invalid token USD value', {
+        poolAmountIn,
+        zeroForOne,
+        receive0,
+        receive1,
+        feeUSD: feeUSD.toFixed(5),
+        token0USD: token0USD.toFixed(5),
+        token1USD: token1USD.toFixed(5),
+        ...logdata,
+      });
+      return {
+        feeBips: 0n,
+        feeUSD: '0',
+      };
     }
 
     const positionUSD = token0USD.add(token1USD);
@@ -138,8 +162,10 @@ export async function optimalRebalanceV2(
       ({ feeBips, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
-    console.warn('Error calculating fee', e);
-    // TODO: logging to datadog
+    getLogger().error('Error calculating fee', {
+      error: JSON.stringify(e),
+      ...logdata,
+    });
   }
 
   const { receive0, receive1, poolAmountIn, zeroForOne } =
@@ -202,8 +228,12 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        // TODO: log to datadog
-        console.warn(`Solver ${solver} fail to estimating gas`, swapData, e);
+        getLogger().error('Error estimating gas', {
+          error: JSON.stringify(e),
+          swapData,
+          mintParams,
+          ...logdata,
+        });
       }
 
       return {
@@ -234,9 +264,13 @@ export async function optimalRebalanceV2(
         ),
       } as SolverResult;
     } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        // TODO: log to datadog
-        console.warn(`Solver ${solver} failed: ${e}`);
+      if (!(e as Error)?.message.startsWith('Expected')) {
+        getLogger().error('Solver failed', {
+          solver,
+          error: JSON.stringify(e),
+        });
+      } else {
+        console.warn('Solver failed', solver);
       }
       return null;
     }

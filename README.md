@@ -43,6 +43,50 @@ yarn
 
 3. Explore the examples and code samples provided in the repository to understand the SDK's functionalities and usage patterns.
 
+# Use `yarn link` for debugging
+
+When debugging with frontend / backend environment, you don't have to release a new version for every change. Instead, use `yarn link` can easily replace current module under `node_modules` with your local code.
+
+Here's the step:
+
+1. Build sdk
+
+```
+yarn build
+```
+
+2. Run `yarn link` in current repo root
+
+```
+❯ yarn link
+yarn link v1.22.22
+success Registered "@aperture_finance/uniswap-v3-automation-sdk".
+info You can now run `yarn link "@aperture_finance/uniswap-v3-automation-sdk"` in the projects where you want to use this package and it will be used instead.
+```
+
+3. Run `yarn link @aperture_finance/uniswap-v3-automation-sdk` in target project, it will create a soft link to sdk code.
+
+```
+❯ yarn link @aperture_finance/uniswap-v3-automation-sdk
+yarn link v1.22.22
+success Using linked package for "@aperture_finance/uniswap-v3-automation-sdk".
+```
+
+4. After make changes on current repo, you will need to run build again
+
+```
+yarn
+yarn build
+```
+
+5. Use unlink to clean up the soft link
+
+```
+❯ yarn unlink @aperture_finance/uniswap-v3-automation-sdk
+yarn unlink v1.22.22
+success Removed linked package "@aperture_finance/uniswap-v3-automation-sdk".
+```
+
 ## Contributing
 
 We welcome contributions from the community! If you would like to contribute to the Uniswap V3 Automation SDK, please follow the guidelines outlined in CONTRIBUTING.md: [Contributing Guidelines Link](https://your-contributing-guidelines-link).
