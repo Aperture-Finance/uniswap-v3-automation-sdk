@@ -5,7 +5,10 @@ import {
   Action,
   ActionTypeEnum,
   ConditionTypeEnum,
+  PercentageAction,
+  PriceAction,
   PriceCondition,
+  RatioAction,
   RecurringCondition,
   RecurringConditionTypeEnum,
 } from './interfaces';
@@ -186,30 +189,27 @@ export function normalizeTicks(
       action.tickUpper + (action.isCurrentTickOffset ? pool.tickCurrent : 0);
   } else if (
     action.type === ActionTypeEnum.enum.RecurringPercentage ||
-    action.type === ActionTypeEnum.enum.RecurringPercentageDual
+    (action.type === ActionTypeEnum.enum.RecurringDualAction &&
+      ((isLte && 'tickLowerOffset' in action.lteAction) ||
+        (!isLte && 'tickLowerOffset' in action.gteAction)))
   ) {
-    if (action.type === ActionTypeEnum.enum.RecurringPercentage) {
-      tickLower = pool.tickCurrent + action.tickLowerOffset;
-      tickUpper = pool.tickCurrent + action.tickUpperOffset;
-    } else {
-      tickLower =
-        pool.tickCurrent +
-        (isLte ? action.lteTickLowerOffset : action.gteTickLowerOffset);
-      tickUpper =
-        pool.tickCurrent +
-        (isLte ? action.lteTickUpperOffset : action.gteTickUpperOffset);
-    }
+    const recurringPercentageAction =
+      action.type === ActionTypeEnum.enum.RecurringPercentage
+        ? action
+        : ((isLte ? action.lteAction : action.gteAction) as PercentageAction);
+    tickLower = pool.tickCurrent + recurringPercentageAction.tickLowerOffset;
+    tickUpper = pool.tickCurrent + recurringPercentageAction.tickUpperOffset;
   } else if (
     action.type === ActionTypeEnum.enum.RecurringPrice ||
-    action.type === ActionTypeEnum.enum.RecurringPriceDual
+    (action.type === ActionTypeEnum.enum.RecurringDualAction &&
+      ((isLte && 'baseToken' in action.lteAction) ||
+        (!isLte && 'baseToken' in action.gteAction)))
   ) {
-    const isDualAction = action.type === ActionTypeEnum.enum.RecurringPriceDual;
-    const isToken0 =
-      (isDualAction
-        ? isLte
-          ? action.lteBaseToken
-          : action.gteBaseToken
-        : action.baseToken) === 0;
+    const recurringPriceAction =
+      action.type === ActionTypeEnum.enum.RecurringPrice
+        ? action
+        : ((isLte ? action.lteAction : action.gteAction) as PriceAction);
+    const isToken0 = recurringPriceAction.baseToken === 0;
     const price = isToken0 ? pool.token0Price : pool.token1Price;
     const bigPrice = fractionToBig(price).mul(
       new Big(10).pow(
@@ -218,20 +218,8 @@ export function normalizeTicks(
           : pool.token1.decimals - pool.token0.decimals,
       ),
     );
-    const lowerPrice = bigPrice.add(
-      isDualAction
-        ? isLte
-          ? action.ltePriceLowerOffset
-          : action.gtePriceLowerOffset
-        : action.priceLowerOffset,
-    );
-    const upperPrice = bigPrice.add(
-      isDualAction
-        ? isLte
-          ? action.ltePriceUpperOffset
-          : action.gtePriceUpperOffset
-        : action.priceUpperOffset,
-    );
+    const lowerPrice = bigPrice.add(recurringPriceAction.priceLowerOffset);
+    const upperPrice = bigPrice.add(recurringPriceAction.priceUpperOffset);
     tickLower = humanPriceToClosestTick(
       isToken0 ? pool.token0 : pool.token1,
       isToken0 ? pool.token1 : pool.token0,
@@ -244,23 +232,18 @@ export function normalizeTicks(
     );
   } else if (
     action.type === ActionTypeEnum.enum.RecurringRatio ||
-    action.type === ActionTypeEnum.enum.RecurringRatioDual
+    (action.type === ActionTypeEnum.enum.RecurringDualAction &&
+      ((isLte && 'tickRangeWidth' in action.lteAction) ||
+        (!isLte && 'tickRangeWidth' in action.gteAction)))
   ) {
-    const isDualAction = action.type === ActionTypeEnum.enum.RecurringRatioDual;
+    const recurringRatioAction =
+      action.type === ActionTypeEnum.enum.RecurringRatio
+        ? action
+        : ((isLte ? action.lteAction : action.gteAction) as RatioAction);
     ({ tickLower, tickUpper } = rangeWidthRatioToTicks(
-      isDualAction
-        ? isLte
-          ? action.lteTickRangeWidth
-          : action.gteTickRangeWidth
-        : action.tickRangeWidth,
+      recurringRatioAction.tickRangeWidth,
       pool.tickCurrent,
-      new Big(
-        isDualAction
-          ? isLte
-            ? action.lteToken0ValueProportion
-            : action.gteToken0ValueProportion
-          : action.token0ValueProportion,
-      ),
+      new Big(recurringRatioAction.token0ValueProportion),
     ));
   } else {
     throw new Error('Invalid action type');
