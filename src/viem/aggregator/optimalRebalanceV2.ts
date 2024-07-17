@@ -131,8 +131,10 @@ export async function optimalRebalanceV2(
       .mul(tokenPrices[1])
       .div(10 ** position.token1.decimals);
 
-    if (token0USD.eq(0) || token1USD.eq(0)) {
-      getLogger().error('Invalid token USD value', {
+    const positionUSD = token0USD.add(token1USD);
+
+    if (positionUSD.eq(0)) {
+      getLogger().error('Invalid position USD value', {
         poolAmountIn,
         zeroForOne,
         receive0,
@@ -142,13 +144,13 @@ export async function optimalRebalanceV2(
         token1USD: token1USD.toFixed(5),
         ...logdata,
       });
+
       return {
         feeBips: 0n,
         feeUSD: '0',
       };
     }
 
-    const positionUSD = token0USD.add(token1USD);
     return {
       feeBips: BigInt(feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0)),
       feeUSD: feeUSD.toFixed(5),
