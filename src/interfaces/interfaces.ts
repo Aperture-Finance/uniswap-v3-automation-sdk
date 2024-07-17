@@ -520,13 +520,6 @@ export const RecurringDualActionSchema = BaseRecurringActionSchema.extend({
 );
 export type RecurringDualAction = z.infer<typeof RecurringDualActionSchema>;
 
-const NonRecurringActionSchema = z.discriminatedUnion('type', [
-  CloseActionSchema,
-  LimitOrderCloseActionSchema,
-  ReinvestActionSchema,
-  RebalanceActionSchema,
-]);
-
 export const RecurringActionSchema = z.discriminatedUnion('type', [
   RecurringPercentageActionSchema,
   RecurringPriceActionSchema,
@@ -535,9 +528,15 @@ export const RecurringActionSchema = z.discriminatedUnion('type', [
 ]);
 export type RecurringAction = z.infer<typeof RecurringActionSchema>;
 
-export const ActionSchema = z.union([
-  NonRecurringActionSchema,
-  RecurringActionSchema,
+export const ActionSchema = z.discriminatedUnion('type', [
+  CloseActionSchema,
+  LimitOrderCloseActionSchema,
+  ReinvestActionSchema,
+  RebalanceActionSchema,
+  RecurringPercentageActionSchema,
+  RecurringPriceActionSchema,
+  RecurringRatioActionSchema,
+  RecurringDualActionSchema,
 ]);
 export type Action = z.infer<typeof ActionSchema>;
 
