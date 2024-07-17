@@ -611,6 +611,9 @@ export const UpdateTriggerPayloadSchema = TriggerIdentifierSchema.extend({
         Math.floor(Date.now() / 1000) +
           AUTOMATION_EXPIRATION_IN_SECS +
           AUTOMATION_SLACK_IN_SECS,
+      {
+        message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
+      },
     )
     .describe('Unix timestamp in seconds when this trigger expires.'),
 });
