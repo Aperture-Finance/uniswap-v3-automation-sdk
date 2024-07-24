@@ -16,6 +16,7 @@ import {
 
 import { ApertureSupportedChainId } from './interfaces';
 
+type _AutomatedMarketMakerEnum = AutomatedMarketMakerEnum | 'SlipStream';
 export interface ChainSpecificRoutingAPIInfo {
   url: string;
   // Routing API: https://github.com/Uniswap/routing-api/
@@ -61,7 +62,7 @@ export interface AmmInfo {
 export interface ChainInfo {
   chain: Chain;
   amms: {
-    [key in AutomatedMarketMakerEnum]?: AmmInfo;
+    [key in _AutomatedMarketMakerEnum]?: AmmInfo;
   };
   wrappedNativeCurrency: Token;
   routingApiInfo: ChainSpecificRoutingAPIInfo;

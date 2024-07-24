@@ -34,7 +34,7 @@ import {
   walletActions,
   zeroAddress,
 } from 'viem';
-import { arbitrum, mainnet } from 'viem/chains';
+import { arbitrum, base, mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -90,6 +90,7 @@ import {
   getPublicClient,
   getRebalanceSwapInfo,
   getRebalanceTx,
+  getSlipStreamPools,
   getTickToLiquidityMapForPool,
   getToken,
   simulateIncreaseLiquidityOptimal,
@@ -121,6 +122,7 @@ async function resetFork(testClient: TestClient, blockNumber = 19210000n) {
 const infuraMap = {
   mainnet: mainnet,
   'arbitrum-mainnet': arbitrum,
+  'base-mainnet': base,
 };
 
 function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
@@ -817,6 +819,18 @@ describe.skip('Pool subgraph query tests', function () {
       AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
       pool,
     );
+  });
+});
+
+describe('Pool tests', function () {
+  it('getSlipStreamPools', async () => {
+    const client = getPublicClient(
+      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    );
+
+    await client.getBlockNumber(); // 17514450n
+
+    await getSlipStreamPools(client);
   });
 });
 
