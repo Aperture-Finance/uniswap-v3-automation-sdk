@@ -2,55 +2,55 @@
 # yarn lockfile v1
 
 
-"@0xsequence/abi@1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/abi/-/abi-1.9.14.tgz#b51bfe0eabcb8c485fd1b2c3770636d05337c959"
-  integrity sha512-/d1I7GpDk1TEUR+D168vh4LxbMBeWX1sS4ZjVraSyQNyK45AfMuM9U756xgTORctLXC82LGU6ml+BPBgQSWZPA==
+"@0xsequence/abi@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/abi/-/abi-1.10.3.tgz#4f28a5ff456b79117100829eacf2d89d10ab0146"
+  integrity sha512-ZSHpcB46BaGpK6AXHFtE6BhslilIReWhX6ySmjI9vsBfvdesoq0nTtC0cbq3dmgBY42iDTEoYxN2eE2ToQJaFw==
 
-"@0xsequence/core@1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/core/-/core-1.9.14.tgz#c943eacf1a6fe274393df1771af682a49d16e419"
-  integrity sha512-3nvvFZnTgYvAzyFaT2FObH1bbrnaLQbFpUibunKi03dvyfbXFKfiRxmh3CrVq7fUDYC/K5MjdcW1QSLEvWx+xQ==
+"@0xsequence/core@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/core/-/core-1.10.3.tgz#b0615ea6f7dcf9d19a9b9f74d2677d1f9a4b9e18"
+  integrity sha512-6YXAw7AEcavZhxWiddZvyqmvEzgEnHus4QE4CxoMK0b2GMHCsFFumeJ3Lbv1d7o22CdUszInnstxVIIKiIkfbA==
   dependencies:
-    "@0xsequence/abi" "1.9.14"
+    "@0xsequence/abi" "1.10.3"
 
-"@0xsequence/indexer@1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/indexer/-/indexer-1.9.14.tgz#7ace2f2c31ab08ad134edf164c141ec34f6532bc"
-  integrity sha512-ISL+guT4gLYkBWxnjusPMJ7guargKWP2Dh54uBiGZXs0zaMGMXphSObXZaRT08eE2vjb7LLKWEXrqy8mAaADhw==
+"@0xsequence/indexer@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/indexer/-/indexer-1.10.3.tgz#3e8a150b7a1bc6299d62121e5eadc6a99844f327"
+  integrity sha512-N86tUs6AVUvg4cS5uMVCGe1fqcAbgrl4c0niuQFD4v7g1R3O8Z21Hb+R8WsOmH6wHtkzQlAKMfqHPPao48qq6A==
 
-"@0xsequence/multicall@^1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/multicall/-/multicall-1.9.14.tgz#9c1cd219f372e39b56911371d2a8122c5e0035ea"
-  integrity sha512-5zeU6rOJsLE0F8441fRVgrNQ+/SGFyqu+eCvOjAFE0e0OpOS01z7TfxosZofGF+RtgbNezN6LaK9Fb5aEHtUxg==
+"@0xsequence/multicall@^1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/multicall/-/multicall-1.10.3.tgz#19d93d44ffae53db8846f15180ccf03dc9c87963"
+  integrity sha512-MTjRmE0husjiLBHscXWXPcyJ2fNj7Il6YiBKNETSKe3YHzu7amh6DylmmH+e97pdpikHP4eLIEnFnBcODeJDpw==
   dependencies:
-    "@0xsequence/abi" "1.9.14"
-    "@0xsequence/network" "1.9.14"
-    "@0xsequence/utils" "1.9.14"
+    "@0xsequence/abi" "1.10.3"
+    "@0xsequence/network" "1.10.3"
+    "@0xsequence/utils" "1.10.3"
 
-"@0xsequence/network@1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/network/-/network-1.9.14.tgz#b0a05abeceaaa48de2d79b96a29f5f508891bd2b"
-  integrity sha512-xzjybRgCSn2TA4ty5woPtQ4pK/lAY1c4dRYAefOz/vvie+cEnre3RhWjRAGyxqDdYhGAPQlt1lvt2Co8XCygCg==
+"@0xsequence/network@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/network/-/network-1.10.3.tgz#97ed9b59b71dfa15d3a1d500f6f4a13e1805ca08"
+  integrity sha512-kHKZY884uoys71PwAkrw//q4u+V2WLnjvh5eqlluPlcH/2FawW8/jo92JTjVKYKvd+a+dFdT2NEvAMA6rLzsew==
   dependencies:
-    "@0xsequence/core" "1.9.14"
-    "@0xsequence/indexer" "1.9.14"
-    "@0xsequence/relayer" "1.9.14"
-    "@0xsequence/utils" "1.9.14"
+    "@0xsequence/core" "1.10.3"
+    "@0xsequence/indexer" "1.10.3"
+    "@0xsequence/relayer" "1.10.3"
+    "@0xsequence/utils" "1.10.3"
 
-"@0xsequence/relayer@1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/relayer/-/relayer-1.9.14.tgz#8265df184bc10feb1860f0ddef5ecc4bab3b6962"
-  integrity sha512-owuhulTYpYeZlVS9FeRadcwjz4jJQsKEalMeeMKDrixkwd63Y9AWt1AsaFhBgMbkc3Lmj2yV3SgaVU+TOqfCZw==
+"@0xsequence/relayer@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/relayer/-/relayer-1.10.3.tgz#0b4a13a810ef16ac2ceaf00ce11b440362ec5e3b"
+  integrity sha512-X9a5ib5YZZAT83OOXvqNpfLtdfNbBSXo/lU6qRnK8XLnkbAGRbq6A5pqCkel5mNU/FFmkjWlh6pllUs97Q8rcw==
   dependencies:
-    "@0xsequence/abi" "1.9.14"
-    "@0xsequence/core" "1.9.14"
-    "@0xsequence/utils" "1.9.14"
+    "@0xsequence/abi" "1.10.3"
+    "@0xsequence/core" "1.10.3"
+    "@0xsequence/utils" "1.10.3"
 
-"@0xsequence/utils@1.9.14":
-  version "1.9.14"
-  resolved "https://registry.yarnpkg.com/@0xsequence/utils/-/utils-1.9.14.tgz#90d9febfb018b5dd872c9eb16bf75989429a85aa"
-  integrity sha512-Qsz33jxisiqJ72pOkFhIk0vRH+m8Qi/RrhCX4tEFRlHeJ1mSS72SEOgI5JKyPKa1BMlOeQefub8l8SsCKOTQgg==
+"@0xsequence/utils@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@0xsequence/utils/-/utils-1.10.3.tgz#429b9355b68e3fe82f760f065988200e5b5b5509"
+  integrity sha512-4YFM6a3HuECwaBIeG1/mmZvA+aMqD5NmRw8yXJb/j91m3U7mTIC7oF6HSYBORR6neJZSKDCNE5mmfBA3aBAI7g==
   dependencies:
     js-base64 "^3.7.2"
 
@@ -3821,16 +3821,16 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aperture-lens@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-1.0.1.tgz#db585ee4e60e3c1e6e5121259a53bd42caa09718"
-  integrity sha512-YgxVJ+m64qyePZv/rCeDorGDUwvB9SjYcfmjXW2omthu7/lnLgtiTn+F92gOW38vK4cgTATwpK7Ya5O9E+v1Dg==
+aperture-lens@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-1.1.0.tgz#2c1a529273c3ac5488391ec1c50888a1f5ab3507"
+  integrity sha512-GG7CFEeR2BoG2SB4suk51Wu3sDxpfZGmaTkX9dt1M2BZgUy5a9Pf5pTkha9jTbH/EoZoxpSDAibaw0T17DCJdA==
   dependencies:
     "@aperture_finance/uni-v3-lib" "^2.0.1"
     "@openzeppelin/contracts" "^5.0.2"
     ethers "5.7.2"
     viem "^2.8.4"
-    zod "^3.22.4"
+    zod "^3.23.8"
 
 arg@^4.1.0:
   version "4.1.3"
@@ -4886,6 +4886,15 @@ dtrace-provider@~0.8:
   integrity sha512-b7Z7cNtHPhH9EJhNNbbeqTcXB8LGFFZhq1PGgEvpeHlzd36bhbdTWoE/Ba/YguqpBSlAPKnARWhVlhunCMwfxg==
   dependencies:
     nan "^2.14.0"
+
+eip1167@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/eip1167/-/eip1167-0.1.1.tgz#820469240625a30cc201e9c3ae273f5d791a744b"
+  integrity sha512-wLMkYaxp7OyijlBes2cKKnfQDXD78qOqixpm7yVpsx8uql0UA68MLvo4MM0RSWMGCD/M0VZYH+nxRTsC3GBeXQ==
+  dependencies:
+    "@ethersproject/address" "^5.7.0"
+    "@ethersproject/bytes" "^5.7.0"
+    "@ethersproject/keccak256" "^5.7.0"
 
 electron-to-chromium@^1.4.601:
   version "1.4.616"
@@ -8623,7 +8632,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zod@^3.22.4:
-  version "3.22.4"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
-  integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
+zod@^3.23.8:
+  version "3.23.8"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
+  integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
