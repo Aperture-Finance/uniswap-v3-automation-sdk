@@ -1,3 +1,3 @@
 export function getFeeBips() {
-    return 0n;
+  return 0n;
 }

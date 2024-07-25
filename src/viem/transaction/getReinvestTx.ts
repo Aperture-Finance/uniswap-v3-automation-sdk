@@ -4,10 +4,10 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import { getAutomanReinvestCalldata } from '../automan';
+import { getFeeBips } from '../automan/getFees';
 import { PositionDetails } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
-import { getFeeBips } from '../automan/getFees';
 
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.
