@@ -48,10 +48,14 @@ export async function getPoolFromBasicPositionInfo(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
+  const feeOrTickSpacing =
+    amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+      ? basicInfo.tickSpacing
+      : basicInfo.fee;
   return getPool(
     basicInfo.token0,
     basicInfo.token1,
-    basicInfo.fee,
+    feeOrTickSpacing,
     chainId,
     amm,
     publicClient,
@@ -75,7 +79,14 @@ export function getPoolContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: computePoolAddress(chainId, amm, tokenA, tokenB, feeOrTickSpacing),
+    address: computePoolAddress(
+      chainId,
+      amm,
+      tokenA,
+      tokenB,
+      feeOrTickSpacing,
+      feeOrTickSpacing,
+    ),
     abi: IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -132,6 +143,13 @@ export async function getPool(
       ),
     ],
   );
+  let fee = feeOrTickSpacing;
+  let tickSpacing: number | undefined = undefined;
+  if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
+    fee = await poolContract.read.fee(opts);
+    tickSpacing = feeOrTickSpacing;
+  }
+
   const [sqrtPriceX96, tick] = slot0;
   if (sqrtPriceX96 === BigInt(0)) {
     throw 'Pool has been created but not yet initialized';
@@ -143,6 +161,8 @@ export async function getPool(
     sqrtPriceX96.toString(),
     inRangeLiquidity.toString(),
     tick,
+    undefined,
+    tickSpacing,
   );
 }
 
@@ -319,6 +339,7 @@ export async function getTickToLiquidityMapForPool(
     pool.token0,
     pool.token1,
     pool.fee,
+    pool.tickSpacing,
   ).toLowerCase();
   // Fetch current in-range liquidity from subgraph.
   const poolResponse = (
@@ -435,7 +456,14 @@ async function getPopulatedTicksInRange(
   blockNumber?: bigint,
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
-    computePoolAddress(chainId, amm, pool.token0, pool.token1, pool.fee),
+    computePoolAddress(
+      chainId,
+      amm,
+      pool.token0,
+      pool.token1,
+      pool.fee,
+      pool.tickSpacing,
+    ),
     tickLower,
     tickUpper,
     publicClient ?? getPublicClient(chainId),

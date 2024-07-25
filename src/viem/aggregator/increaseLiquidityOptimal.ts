@@ -232,6 +232,7 @@ async function getIncreaseLiquidityOptimalSwapData(
         position.pool.token0.address,
         position.pool.token1.address,
         position.pool.fee,
+        position.pool.tickSpacing,
       ),
       position.tickLower,
       position.tickUpper,

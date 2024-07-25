@@ -70,7 +70,7 @@ export const getOptimalSwapAmount = async (
   publicClient: PublicClient,
   token0: Address,
   token1: Address,
-  feeAmount: FeeAmount,
+  feeAmount: number,
   tickLower: number,
   tickUpper: number,
   amount0Desired: bigint,
@@ -81,7 +81,7 @@ export const getOptimalSwapAmount = async (
   // get swap amounts using the same pool
   const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
     [
-      computePoolAddress(chainId, amm, token0, token1, feeAmount),
+      computePoolAddress(chainId, amm, token0, token1, feeAmount, feeAmount),
       tickLower,
       tickUpper,
       amount0Desired,
