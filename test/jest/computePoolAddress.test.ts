@@ -45,4 +45,27 @@ describe('Compute pool address test', () => {
       ),
     ).toBe('0x172fcD41E0913e95784454622d1c3724f546f849');
   });
+
+  it('Should compute SlipStream pool address', async () => {
+    expect(
+      computePoolAddress(
+        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+        AutomatedMarketMakerEnum.enum.SLIPSTREAM,
+        '0x4200000000000000000000000000000000000006', // WETH
+        '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
+        /*fee=*/ undefined,
+        /*tickSpacing=*/ 100,
+      ),
+    ).toBe('0xb2cc224c1c9feE385f8ad6a55b4d94E92359DC59');
+    expect(
+      computePoolAddress(
+        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+        AutomatedMarketMakerEnum.enum.SLIPSTREAM,
+        '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
+        '0x4200000000000000000000000000000000000006', // WETH
+        /*fee=*/ undefined,
+        /*tickSpacing=*/ 100,
+      ),
+    ).toBe('0xb2cc224c1c9feE385f8ad6a55b4d94E92359DC59');
+  });
 });
