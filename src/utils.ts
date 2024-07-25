@@ -104,7 +104,7 @@ export function computePoolAddress(
           parseAbiParameters(
             'address token0, address token1, int24 tickSpacing',
           ),
-          [token0Address, token1Address, feeOrTickSpacing!],
+          [token0Address, token1Address, feeOrTickSpacing],
         ),
       ),
       ammInfo.poolImplementation!,
