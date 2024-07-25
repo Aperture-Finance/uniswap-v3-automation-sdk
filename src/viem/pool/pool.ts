@@ -65,7 +65,7 @@ export async function getPoolFromBasicPositionInfo(
 export function getPoolContract(
   tokenA: Token | string,
   tokenB: Token | string,
-  fee: FeeAmount,
+  feeOrTickSpacing: number,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
@@ -75,7 +75,7 @@ export function getPoolContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: computePoolAddress(chainId, amm, tokenA, tokenB, fee),
+    address: computePoolAddress(chainId, amm, tokenA, tokenB, feeOrTickSpacing),
     abi: IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -96,7 +96,7 @@ export function getPoolContract(
 export async function getPool(
   tokenA: Token | string,
   tokenB: Token | string,
-  fee: FeeAmount,
+  feeOrTickSpacing: number,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
@@ -106,7 +106,7 @@ export async function getPool(
   const poolContract = getPoolContract(
     tokenA,
     tokenB,
-    fee,
+    feeOrTickSpacing,
     chainId,
     amm,
     publicClient,

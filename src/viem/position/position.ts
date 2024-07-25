@@ -43,7 +43,8 @@ import { getPublicClient } from '../public_client';
 export interface BasicPositionInfo {
   token0: Token;
   token1: Token;
-  fee: FeeAmount;
+  fee: number;
+  tickSpacing?: number;
   liquidity?: string;
   tickLower: number;
   tickUpper: number;
@@ -117,15 +118,24 @@ export async function getPosition(
   blockNumber?: bigint,
 ) {
   publicClient = publicClient ?? getPublicClient(chainId);
-  const [, , token0, token1, fee, tickLower, tickUpper, liquidity] =
-    await getNPM(chainId, amm, publicClient).read.positions([positionId], {
-      blockNumber,
-    });
+  const [
+    ,
+    ,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    tickLower,
+    tickUpper,
+    liquidity,
+  ] = await getNPM(chainId, amm, publicClient).read.positions([positionId], {
+    blockNumber,
+  });
+
   return new Position({
     pool: await getPool(
       token0,
       token1,
-      fee,
+      feeOrTickSpacing,
       chainId,
       amm,
       publicClient,
