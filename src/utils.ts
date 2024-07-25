@@ -70,8 +70,7 @@ export function signPayload(
  * @param ammInfo The AutomatedMarketMaker-specific info
  * @param tokenA The first token of the pair, irrespective of sort order
  * @param tokenB The second token of the pair, irrespective of sort order
- * @param fee The fee tier of the pool (only for UNISWAP_V3 and PANCAKESWAP_V3)
- * @param tickSpacing The tick spacing (only for SLIPSTREAM)
+ * @param feeOrTickSpacing The fee tier of the pool (only for UNISWAP_V3 and PANCAKESWAP_V3) or the tick spacing (only for SLIPSTREAM)
  * @returns The pool address
  */
 export function computePoolAddress(
@@ -79,8 +78,7 @@ export function computePoolAddress(
   amm: AutomatedMarketMakerEnum,
   tokenA: Token | string,
   tokenB: Token | string,
-  fee?: number,
-  tickSpacing?: number,
+  feeOrTickSpacing: number,
 ): Address {
   const ammInfo = getAMMInfo(chainId, amm);
   if (!ammInfo) {
@@ -99,9 +97,6 @@ export function computePoolAddress(
       : [tokenBAddress, tokenAAddress];
 
   if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
-    if (!tickSpacing) {
-      throw new Error('tickSpacing is required for SLIPSTREAM');
-    }
     return getEip1167Create2Address(
       ammInfo.factory,
       keccak256(
@@ -109,16 +104,13 @@ export function computePoolAddress(
           parseAbiParameters(
             'address token0, address token1, int24 tickSpacing',
           ),
-          [token0Address, token1Address, tickSpacing!],
+          [token0Address, token1Address, feeOrTickSpacing!],
         ),
       ),
       ammInfo.poolImplementation!,
     ) as Address;
   }
 
-  if (!fee) {
-    throw new Error('fee is required for UNISWAP_V3 and PANCAKESWAP_V3');
-  }
   return getContractAddress({
     opcode: 'CREATE2',
     from:
@@ -128,7 +120,7 @@ export function computePoolAddress(
     salt: keccak256(
       encodeAbiParameters(
         parseAbiParameters('address token0, address token1, uint24 fee'),
-        [token0Address, token1Address, fee],
+        [token0Address, token1Address, feeOrTickSpacing],
       ),
     ),
     bytecodeHash:
