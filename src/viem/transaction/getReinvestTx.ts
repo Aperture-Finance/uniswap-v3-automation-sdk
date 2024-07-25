@@ -7,6 +7,7 @@ import { getAutomanReinvestCalldata } from '../automan';
 import { PositionDetails } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
+import { getFeeBips } from '../automan/getFees';
 
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.
@@ -40,12 +41,13 @@ export async function getReinvestTx(
     client,
   );
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const feeBips = getFeeBips();
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,
     0n /*amount0Min*/, // Setting this to zero for tx simulation.
     0n /*amount1Min*/, // Setting this to zero for tx simulation.
-    0n /*feeBips*/,
+    feeBips,
     permitInfo,
   );
   const amounts = await getAmountsWithSlippage(
@@ -68,7 +70,7 @@ export async function getReinvestTx(
         deadlineEpochSeconds,
         BigInt(amounts.amount0Min),
         BigInt(amounts.amount1Min),
-        0n,
+        feeBips,
         permitInfo,
       ),
     },
