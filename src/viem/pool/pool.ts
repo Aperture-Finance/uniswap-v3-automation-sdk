@@ -79,14 +79,7 @@ export function getPoolContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: computePoolAddress(
-      chainId,
-      amm,
-      tokenA,
-      tokenB,
-      feeOrTickSpacing,
-      feeOrTickSpacing,
-    ),
+    address: computePoolAddress(chainId, amm, tokenA, tokenB, feeOrTickSpacing),
     abi: IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
@@ -338,8 +331,9 @@ export async function getTickToLiquidityMapForPool(
     amm,
     pool.token0,
     pool.token1,
-    pool.fee,
-    pool.tickSpacing,
+    amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+      ? pool.tickSpacing
+      : pool.fee,
   ).toLowerCase();
   // Fetch current in-range liquidity from subgraph.
   const poolResponse = (
