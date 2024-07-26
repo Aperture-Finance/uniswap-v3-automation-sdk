@@ -43,8 +43,8 @@ import { getPublicClient } from '../public_client';
 export interface BasicPositionInfo {
   token0: Token;
   token1: Token;
-  fee?: number;
-  tickSpacing?: number;
+  fee: number;
+  tickSpacing: number;
   liquidity?: string;
   tickLower: number;
   tickUpper: number;
@@ -155,8 +155,8 @@ export class PositionDetails implements BasicPositionInfo {
   public readonly owner: Address;
   public readonly token0: Token;
   public readonly token1: Token;
-  public readonly fee?: number;
-  public readonly tickSpacing?: number;
+  public readonly fee: number;
+  public readonly tickSpacing: number;
   public readonly liquidity: string;
   public readonly tickLower: number;
   public readonly tickUpper: number;
@@ -221,6 +221,7 @@ export class PositionDetails implements BasicPositionInfo {
     blockNumber?: bigint,
   ): Promise<PositionDetails> {
     const position = await viem.getPositionDetails(
+      amm,
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionId,
       publicClient ?? getPublicClient(chainId),
@@ -247,6 +248,9 @@ export class PositionDetails implements BasicPositionInfo {
       tokenId,
       owner,
       position,
+      poolFee,
+      poolTickSpacing,
+      // pool,
       slot0,
       activeLiquidity,
       decimals0,
@@ -259,8 +263,8 @@ export class PositionDetails implements BasicPositionInfo {
       {
         token0: new Token(chainId, position.token0, decimals0),
         token1: new Token(chainId, position.token1, decimals1),
-        fee: position.fee,
-        tickSpacing: position.tickSpacing,
+        fee: poolFee,
+        tickSpacing: poolTickSpacing,
         liquidity: position.liquidity.toString(),
         tickLower: position.tickLower,
         tickUpper: position.tickUpper,

@@ -81,7 +81,7 @@ export const getOptimalSwapAmount = async (
   // get swap amounts using the same pool
   const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
     [
-      computePoolAddress(chainId, amm, token0, token1, feeAmount, feeAmount),
+      computePoolAddress(chainId, amm, token0, token1, feeAmount),
       tickLower,
       tickUpper,
       amount0Desired,

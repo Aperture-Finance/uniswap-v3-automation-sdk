@@ -240,7 +240,6 @@ async function getOptimalMintSwapData(
           mintParams.token0,
           mintParams.token1,
           mintParams.fee as number,
-          mintParams.fee as number,
         ),
         mintParams.tickLower,
         mintParams.tickUpper,

@@ -461,8 +461,9 @@ async function getPopulatedTicksInRange(
       amm,
       pool.token0,
       pool.token1,
-      pool.fee,
-      pool.tickSpacing,
+      amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+        ? pool.tickSpacing
+        : pool.fee,
     ),
     tickLower,
     tickUpper,
