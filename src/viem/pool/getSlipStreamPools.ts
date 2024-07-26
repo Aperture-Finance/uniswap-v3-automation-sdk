@@ -1,10 +1,9 @@
 import { getAMMInfo } from '@/chain';
 import { ApertureSupportedChainId } from '@/interfaces';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { PublicClient } from 'viem';
 
 const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
-// const amm = AutomatedMarketMakerEnum.SLIPSTREAM;
-const amm = 'SlipStream';
 
 const CLFactoryABI = [
   {
@@ -24,7 +23,7 @@ const CLFactoryABI = [
 ] as const;
 
 export async function getSlipStreamPools(publicClient: PublicClient) {
-  const ammInfo = getAMMInfo(chainId, amm);
+  const ammInfo = getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.SLIPSTREAM);
 
   console.log('ammInfo', ammInfo);
   const length = await publicClient.readContract({
@@ -47,6 +46,5 @@ export async function getSlipStreamPools(publicClient: PublicClient) {
   ).map(({ result }) => result);
 
   // TODO: get pool detail
-
   console.log('poolAddresses', poolAddresses.length, poolAddresses);
 }

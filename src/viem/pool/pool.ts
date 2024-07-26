@@ -48,14 +48,12 @@ export async function getPoolFromBasicPositionInfo(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
-  const feeOrTickSpacing =
-    amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
-      ? basicInfo.tickSpacing
-      : basicInfo.fee;
   return getPool(
     basicInfo.token0,
     basicInfo.token1,
-    feeOrTickSpacing,
+    amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+      ? basicInfo.tickSpacing
+      : basicInfo.fee,
     chainId,
     amm,
     publicClient,

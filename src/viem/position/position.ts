@@ -250,7 +250,6 @@ export class PositionDetails implements BasicPositionInfo {
       position,
       poolFee,
       poolTickSpacing,
-      // pool,
       slot0,
       activeLiquidity,
       decimals0,
@@ -374,6 +373,8 @@ export async function viewCollectableTokenAmounts(
     publicClient,
   );
   const opts = { blockNumber };
+
+  // if can replace with viem.getPositionDetails?
   const [
     slot0,
     feeGrowthGlobal0X128,
