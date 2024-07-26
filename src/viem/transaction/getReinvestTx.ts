@@ -34,13 +34,17 @@ export async function getReinvestTx(
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
 }> {
-  const { pool, tickLower, tickUpper } = await PositionDetails.fromPositionId(
+  const { pool, fee, tickLower, tickUpper, position } = await PositionDetails.fromPositionId(
     chainId,
     amm,
     positionId,
     client,
   );
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  
+  // have position ID, can construct postion object. PositionDetails.position has get amount0() and get amount1()
+  // return viewCollectableTokenAmounts
+
   const feeBips = getFeeBips();
   const data = getAutomanReinvestCalldata(
     positionId,
