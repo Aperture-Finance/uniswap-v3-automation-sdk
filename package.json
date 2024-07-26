@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@0xsequence/multicall": "^1.10.3",
-    "@aperture_finance/uniswap-v3-sdk": "3.11.0-PCS",
+    "@aperture_finance/uniswap-v3-sdk": "3.11.0-APTR.1",
     "aperture-lens": "^1.1.0",
     "axios": "^1.6.8",
     "big.js": "^6.2.1",

@@ -84,10 +84,10 @@
     "@uniswap/v3-periphery" "^1.4.4"
     solady "^0.0.180"
 
-"@aperture_finance/uniswap-v3-sdk@3.11.0-PCS":
-  version "3.11.0-PCS"
-  resolved "https://registry.yarnpkg.com/@aperture_finance/uniswap-v3-sdk/-/uniswap-v3-sdk-3.11.0-PCS.tgz#501e0ecd9aa0d46e78015bdc2a4156359c98d238"
-  integrity sha512-CoyGgw0NnvleNU7bNkB8WhcOAJEvqkSlQ44WUUjakJpIdScJmKils59GGsEIpGB1eCljN4+L9QIlI3R48dvz4Q==
+"@aperture_finance/uniswap-v3-sdk@3.11.0-APTR.1":
+  version "3.11.0-APTR.1"
+  resolved "https://registry.yarnpkg.com/@aperture_finance/uniswap-v3-sdk/-/uniswap-v3-sdk-3.11.0-APTR.1.tgz#173ba36611f001b6dbfbe2822ecfabc5c13e71c8"
+  integrity sha512-MtQdk/+pL+k1Eh5OgkTCM2WD1Gectft21TUucxMeYUkwMY4PiMQ+Pv90WNM9fFgt6ABc6NnCjNNArnKkGrkvTA==
   dependencies:
     "@ethersproject/abi" "^5.0.12"
     "@ethersproject/solidity" "^5.0.9"
