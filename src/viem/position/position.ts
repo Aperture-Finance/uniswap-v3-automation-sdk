@@ -8,7 +8,6 @@ import {
   priceToSqrtRatioX96,
 } from '@/index';
 import {
-  FeeAmount,
   Pool,
   Position,
   PositionLibrary,
