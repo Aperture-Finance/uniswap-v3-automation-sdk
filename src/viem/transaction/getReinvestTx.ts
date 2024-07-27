@@ -45,7 +45,7 @@ export async function getReinvestTx(
   // have position ID, can construct postion object. PositionDetails.position has get amount0() and get amount1()
   // return viewCollectableTokenAmounts
 
-  const feeBips = getFeeBips();
+  const feeBips = 0n;//getFeeBips();
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,
