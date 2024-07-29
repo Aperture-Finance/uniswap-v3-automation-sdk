@@ -4,8 +4,8 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import { getAutomanReinvestCalldata } from '../automan';
-import { getFeeBips } from '../automan/getFees';
-import { PositionDetails } from '../position';
+import { getFeeBips, MAX_FEE_PIPS } from '../automan/getFees';
+import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
 
@@ -34,18 +34,15 @@ export async function getReinvestTx(
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
 }> {
-  const { pool, fee, tickLower, tickUpper, position } = await PositionDetails.fromPositionId(
+  const { pool, tickLower, tickUpper, position } = await PositionDetails.fromPositionId(
     chainId,
     amm,
     positionId,
     client,
   );
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
-  
-  // have position ID, can construct postion object. PositionDetails.position has get amount0() and get amount1()
-  // return viewCollectableTokenAmounts
 
-  const feeBips = 0n;//getFeeBips();
+  const feeBips = getFeeBips(position, await viewCollectableTokenAmounts(chainId, amm, positionId, client)).valueOf() * BigInt(MAX_FEE_PIPS);
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,

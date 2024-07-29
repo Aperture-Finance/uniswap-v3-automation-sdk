@@ -1,4 +1,4 @@
-import { FeeAmount } from "@aperture_finance/uniswap-v3-sdk";
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 
 const POOL_FEE_TO_APTR_FEE: {
   [key in FeeAmount]: number;
