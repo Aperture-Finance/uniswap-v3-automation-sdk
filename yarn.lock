@@ -72,10 +72,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aperture_finance/uni-v3-lib@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@aperture_finance/uni-v3-lib/-/uni-v3-lib-2.0.1.tgz#60a6f32a523a08491f884a39610fb224b1636b5f"
-  integrity sha512-m7R34aVy7WBGAOnA3Jw1uGVLUc1UoicN4nFoecFaTQcRz/INho9FF7KhvL7TbPqi3CUzSTkgntK+NSjo0tiVqA==
+"@aperture_finance/uni-v3-lib@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@aperture_finance/uni-v3-lib/-/uni-v3-lib-3.0.2.tgz#c0be18fa3035685415230a946acf848807b289c8"
+  integrity sha512-LvROLUy8BqVJ9BBLHGUZIyI2iTjfej7BCOiQ+N836viZfJZ1a36zZdl6E1SS4hMX9VLFJaMHjbt+RaYu7m80jA==
   dependencies:
     "@openzeppelin/contracts" "^5.0.2"
     "@pancakeswap/v3-core" "^1.0.2"
@@ -3821,12 +3821,12 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aperture-lens@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-1.1.0.tgz#2c1a529273c3ac5488391ec1c50888a1f5ab3507"
-  integrity sha512-GG7CFEeR2BoG2SB4suk51Wu3sDxpfZGmaTkX9dt1M2BZgUy5a9Pf5pTkha9jTbH/EoZoxpSDAibaw0T17DCJdA==
+aperture-lens@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-2.0.0.tgz#b8830dd219bc6130b4104b5c15513479d8464097"
+  integrity sha512-eN8QvpmOL5mdpUJ3/ctugMS04IHKYuEXpuA1jpG07UpF84XQ4r/6NOpnygTQw/XBHIBuocZp8FXU0k7ZW+xW0w==
   dependencies:
-    "@aperture_finance/uni-v3-lib" "^2.0.1"
+    "@aperture_finance/uni-v3-lib" "^3.0.2"
     "@openzeppelin/contracts" "^5.0.2"
     ethers "5.7.2"
     viem "^2.8.4"
