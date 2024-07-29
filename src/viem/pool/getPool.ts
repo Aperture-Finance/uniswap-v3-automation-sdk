@@ -32,7 +32,7 @@ import { getPublicClient } from '../public_client';
 export async function getPool(
   tokenA: Token | string,
   tokenB: Token | string,
-  feeOrTickSpacing: number,
+  feeOrTickSpacing: number, // TODO: check everywhere if compatible with SLIPSTREAM
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
