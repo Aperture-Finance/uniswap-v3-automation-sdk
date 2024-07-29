@@ -95,8 +95,9 @@ import {
   getToken,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
+  simulateRemoveLiquidity,
 } from '../../src/viem';
-import { amm, hardhatForkProvider } from './helper/common';
+import { UNIV3_AMM as amm, hardhatForkProvider } from './common';
 
 dotenvConfig();
 
@@ -390,6 +391,33 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('8736560293857784398');
   });
 
+  it('Test simulateRemoveLiquidity', async function () {
+    const blockNumber = 19142000n;
+    const positionId = 655629n;
+    const publicClient = getInfuraClient();
+    const position = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+      blockNumber,
+    );
+    const [amount0, amount1] = await simulateRemoveLiquidity(
+      chainId,
+      amm,
+      publicClient,
+      position.owner,
+      position.owner,
+      BigInt(position.tokenId),
+      undefined,
+      undefined,
+      0n,
+      blockNumber,
+    );
+    expect(amount0.toString()).to.equal('908858032032850671014');
+    expect(amount1.toString()).to.equal('3098315727923109118');
+  });
+
   it('Test simulateIncreaseLiquidityOptimal', async function () {
     const blockNumber = 17975698n;
     const positionId = 4n;
@@ -399,7 +427,7 @@ describe('State overrides tests', function () {
     const position = await getPosition(
       chainId,
       UNIV3_AMM,
-      4n,
+      positionId,
       publicClient,
       blockNumber,
     );
@@ -743,7 +771,6 @@ describe.skip('Pool subgraph query tests', function () {
         0,
       ),
     ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
-    console.log(distribution);
   });
 
   async function testLiquidityDistribution(
@@ -1233,11 +1260,7 @@ describe('Viem - Automan transaction tests', function () {
         [E_Solver.SamePool],
       )
     )[0];
-
-    console.log('swapPath', swapPath);
-
     expect(swapRoute?.length).to.gt(0);
-
     expect(swapPath.tokenIn).to.equal(WBTC_ADDRESS);
     expect(swapPath.tokenOut).to.equal(WETH_ADDRESS);
   });
