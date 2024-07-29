@@ -21,7 +21,7 @@ import { SimulatedAmounts } from './types';
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with a valid owner-signed permit info.
  * @returns The generated transaction request and expected amounts.
  */
-export async function vgetReinvestTx(
+export async function getReinvestTx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
