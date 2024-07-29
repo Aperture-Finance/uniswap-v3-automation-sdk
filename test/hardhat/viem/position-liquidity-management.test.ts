@@ -354,6 +354,7 @@ describe('Viem - Position liquidity management tests', function () {
       tickUpper: positionToCreate.tickUpper,
       token0: WBTC,
       token1: WETH,
+      tickSpacing: positionToCreate.pool.tickSpacing,
     });
   });
 });
