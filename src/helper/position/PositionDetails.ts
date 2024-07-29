@@ -8,7 +8,10 @@ import {
 import { BlockTag, Provider } from '@ethersproject/providers';
 import { BigintIsh, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { EphemeralGetPosition__factory } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import {
+  AutomatedMarketMakerEnum,
+  ammToSolidityDexEnum,
+} from 'aperture-lens/dist/src/viem';
 import { PositionStateStructOutput } from 'aperture-lens/dist/typechain/contracts/EphemeralGetPosition';
 import { BigNumber, BigNumberish } from 'ethers';
 import JSBI from 'jsbi';
@@ -88,6 +91,7 @@ export class PositionDetails implements BasicPositionInfo {
   ): Promise<PositionDetails> {
     const returnData = await provider.call(
       new EphemeralGetPosition__factory().getDeployTransaction(
+        ammToSolidityDexEnum(amm),
         getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
         positionId,
       ),
@@ -120,6 +124,7 @@ export class PositionDetails implements BasicPositionInfo {
       tokenId,
       owner,
       position,
+      poolFee,
       slot0,
       activeLiquidity,
       decimals0,
@@ -132,7 +137,7 @@ export class PositionDetails implements BasicPositionInfo {
       {
         token0: new Token(chainId, position.token0, decimals0),
         token1: new Token(chainId, position.token1, decimals1),
-        fee: position.fee,
+        fee: poolFee,
         liquidity: position.liquidity.toString(),
         tickLower: position.tickLower,
         tickUpper: position.tickUpper,
