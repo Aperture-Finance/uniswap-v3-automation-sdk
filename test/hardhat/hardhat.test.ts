@@ -827,10 +827,9 @@ describe('Pool tests', function () {
     const client = getPublicClient(
       ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
     );
-
-    await client.getBlockNumber(); // 17514450n
-
-    await getSlipStreamPools(client);
+    const blockNumber = 17514450n;
+    const pools = await getSlipStreamPools(client, blockNumber);
+    expect(Object.keys(pools).length).to.be.equal(107);
   });
 });
 
