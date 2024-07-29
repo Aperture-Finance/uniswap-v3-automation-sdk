@@ -4,7 +4,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import { getAutomanReinvestCalldata } from '../automan';
-import { getFeeBips, MAX_FEE_PIPS } from '../automan/getFees';
+import { getFeeBips } from '../automan/getFees';
 import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
@@ -21,7 +21,7 @@ import { SimulatedAmounts } from './types';
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with a valid owner-signed permit info.
  * @returns The generated transaction request and expected amounts.
  */
-export async function getReinvestTx(
+export async function vgetReinvestTx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
@@ -34,15 +34,14 @@ export async function getReinvestTx(
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
 }> {
-  const { pool, tickLower, tickUpper, position } = await PositionDetails.fromPositionId(
-    chainId,
-    amm,
-    positionId,
-    client,
-  );
+  const { pool, tickLower, tickUpper, position } =
+    await PositionDetails.fromPositionId(chainId, amm, positionId, client);
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
 
-  const feeBips = getFeeBips(position, await viewCollectableTokenAmounts(chainId, amm, positionId, client)).valueOf() * BigInt(MAX_FEE_PIPS);
+  const feeBips = getFeeBips(
+    position,
+    await viewCollectableTokenAmounts(chainId, amm, positionId, client),
+  );
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,
