@@ -5,9 +5,13 @@ import { HardhatUserConfig } from 'hardhat/config';
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
-      chainId: 1,
+      // chainId: 1,
       loggingEnabled: false,
       accounts: [],
+      forking: {
+        url: 'https://base-mainnet.g.alchemy.com/v2/MpxnCbzEh385Sd2xMzXVipRtSDCukug-',
+        blockNumber: 17775451,
+      },
     },
   },
   paths: {
