@@ -269,6 +269,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       liquidity: '13291498909567',
       tickLower: 240000,
       tickUpper: 300000,
+      tickSpacing: 60,
     });
   });
 
