@@ -14,19 +14,19 @@ async function main() {
 
   const { pool, fee, tickLower, tickUpper, position } =
     await PositionDetails.fromPositionId(chainId, amm, positionId, client);
-  console.log(`pool=${pool}`);
+  console.log(`pool=${JSON.stringify(pool)}`);
   console.log(`fee=${fee}`);
   console.log(`tickLower=${tickLower}`);
   console.log(`tickUpper=${tickUpper}`);
-  console.log(`position=${position}`);
+  console.log(`position=${JSON.stringify(position)}`);
   console.log(
     `position.amount0.currency.decimals=${position.amount0.currency.decimals}`,
   );
   console.log(
     `position.amount1.currency.decimals=${position.amount1.currency.decimals}`,
   );
-  console.log(`tommyamount0 = ${position.amount0.toSignificant()}`);
-  console.log(`tommyamount1 = ${position.amount1.toSignificant()}`);
+  console.log(`amount0 = ${position.amount0.toSignificant()}`);
+  console.log(`amount1 = ${position.amount1.toSignificant()}`);
   const collectableTokenAmounts = await viewCollectableTokenAmounts(
     chainId,
     amm,
@@ -35,52 +35,52 @@ async function main() {
     undefined,
   );
   console.log(
-    `tommyamount0 collectable=${collectableTokenAmounts.token0Amount.toSignificant()}`,
+    `collectable0=${collectableTokenAmounts.token0Amount.toSignificant()}`,
   );
   console.log(
-    `tommyamount1 collectable=${collectableTokenAmounts.token1Amount.toSignificant()}`,
+    `collectable1=${collectableTokenAmounts.token1Amount.toSignificant()}`,
   );
   // percentage /bips should be 0.001 for 0.1%, but it gets applied to the principal amount
   // so fee = min(token0fee * 0.001 / amount0, token0fee * 0.001 / amount1)
-  const t0 = collectableTokenAmounts.token0Amount.divide(position.amount0);
-  const t1 = collectableTokenAmounts.token1Amount.divide(position.amount1);
-  console.log(`collectable0/amount0.toSignificant()=${t0.toSignificant()}`);
-  console.log(`collectable1/amount1.toSignificant()=${t1.toSignificant()}`);
+  const fee0 = collectableTokenAmounts.token0Amount.divide(position.amount0);
+  const fee1 = collectableTokenAmounts.token1Amount.divide(position.amount1);
+  console.log(`collectable0/amount0.toSignificant()=${fee0.toSignificant()}`);
+  console.log(`collectable1/amount1.toSignificant()=${fee1.toSignificant()}`);
   console.log(
-    `10^position.amount0.currency.decimals=${10 ** position.amount0.currency.decimals}`,
+    `10**position.amount0.currency.decimals=${10 ** position.amount0.currency.decimals}`,
   );
   console.log(
-    `t0*decimals.toSignificant()=${t0.multiply(10 ** position.amount0.currency.decimals).toSignificant()}`,
+    `collectable0/amount0*decimals.toSignificant()=${fee0.multiply(10 ** position.amount0.currency.decimals).toSignificant()}`,
   );
   console.log(
-    `t1*decimals.toSignificant()=${t1.multiply(10 ** position.amount1.currency.decimals).toSignificant()}`,
+    `collectable1/amount1*decimals.toSignificant()=${fee0.multiply(10 ** position.amount1.currency.decimals).toSignificant()}`,
   );
   console.log(
-    `t0 fee percent=${collectableTokenAmounts.token0Amount
+    `collectable0/amount0*fee*decimals=${collectableTokenAmounts.token0Amount
       .divide(position.amount0)
       .multiply(0.07 * 10 ** position.amount0.currency.decimals)
       .toSignificant()}`,
   );
   console.log(
-    `t1 fee percent=${collectableTokenAmounts.token1Amount
+    `collectable1/amount1*fee*decimals=${collectableTokenAmounts.token1Amount
       .divide(position.amount1)
       .multiply(0.07 * 10 ** position.amount1.currency.decimals)
       .toSignificant()}`,
   );
   console.log(
-    `t0 fee percent=${collectableTokenAmounts.token0Amount
+    `collectable0*fee*decimals/amount0=${collectableTokenAmounts.token0Amount
       .multiply(0.07 * 10 ** position.amount0.currency.decimals)
       .divide(position.amount0)
       .toSignificant()}`,
   );
   console.log(
-    `t1 fee percent=${collectableTokenAmounts.token1Amount
+    `collectable1*fee*decimals/amount1=${collectableTokenAmounts.token1Amount
       .multiply(0.07 * 10 ** position.amount1.currency.decimals)
       .divide(position.amount1)
       .toSignificant()}`,
   );
   console.log(
-    `t1 fee percent=${Number(
+    `number(collectable1*fee*decimals/amount1.toSignif)=${Number(
       collectableTokenAmounts.token1Amount
         .multiply(0.07 * 10 ** position.amount1.currency.decimals)
         .divide(position.amount1)
@@ -88,10 +88,10 @@ async function main() {
     )}`,
   );
   console.log(
-    `t1 fee percent=${Number(collectableTokenAmounts.token1Amount.multiply(0.07 * 10 ** position.amount1.currency.decimals).divide(position.amount1))}`,
+    `number(collectable1*fee*decimals/amount1)=${Number(collectableTokenAmounts.token1Amount.multiply(0.07 * 10 ** position.amount1.currency.decimals).divide(position.amount1))}`,
   );
   console.log(
-    `t1 fee percent=${BigInt(
+    `BigInt(floor(number(collectable1*fee*decimals/amount1.toSignif)))=${BigInt(
       floor(
         Number(
           collectableTokenAmounts.token1Amount
