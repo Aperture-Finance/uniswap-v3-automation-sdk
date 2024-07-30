@@ -18,7 +18,7 @@ import {
 } from '@/uniswap-constants';
 import { Currency } from '@uniswap/sdk-core';
 import axios from 'axios';
-import { getAddress } from 'ethers/lib/utils';
+import { getAddress } from 'viem';
 
 export type TransactionReceipt = AssetActivityPartsFragment['transaction'];
 
@@ -75,7 +75,6 @@ const GRAPHQL_CHAIN_NAME_TO_CHAIN_ID: {
 function isAddress(value: any): string | false {
   try {
     // Alphabetical letters must be made lowercase for getAddress to work.
-    // See documentation here: https://docs.ethers.io/v5/api/utils/address/
     return getAddress(value.toLowerCase());
   } catch {
     return false;
