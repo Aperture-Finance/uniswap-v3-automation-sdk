@@ -1,6 +1,5 @@
 import { getAptrFee } from '@/fee';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
-import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { floor } from 'lodash';
 
 import { CollectableTokenAmounts } from '../position';
