@@ -80,6 +80,7 @@ async function getPopulatedTicksInRange(
   // Deploy the ephemeral contract to query the liquidity within the specified tick range.
   const returnData = await (provider ?? getPublicProvider(chainId)).call(
     new EphemeralGetPopulatedTicksInRange__factory().getDeployTransaction(
+      0,
       Pool.getAddress(pool.token0, pool.token1, pool.fee),
       tickLower,
       tickUpper,

@@ -5,7 +5,6 @@ import {
 import {
   ApertureSupportedChainId,
   DOUBLE_TICK,
-  IUniswapV3Pool__factory,
   computePoolAddress,
   getAMMInfo,
 } from '@/index';
@@ -20,17 +19,11 @@ import { viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
-import {
-  Address,
-  GetContractReturnType,
-  PublicClient,
-  WalletClient,
-  getContract,
-} from 'viem';
+import { Address, PublicClient } from 'viem';
 
-import { getToken } from '../currency';
 import { BasicPositionInfo } from '../position';
 import { getPublicClient } from '../public_client';
+import { getPool } from './getPool';
 
 /**
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.
@@ -51,98 +44,13 @@ export async function getPoolFromBasicPositionInfo(
   return getPool(
     basicInfo.token0,
     basicInfo.token1,
-    basicInfo.fee,
+    amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+      ? basicInfo.tickSpacing
+      : basicInfo.fee,
     chainId,
     amm,
     publicClient,
     blockNumber,
-  );
-}
-
-/**
- * Get the `IUniswapV3Pool` contract.
- */
-export function getPoolContract(
-  tokenA: Token | string,
-  tokenB: Token | string,
-  fee: FeeAmount,
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  publicClient?: PublicClient,
-  walletClient?: WalletClient,
-): GetContractReturnType<
-  typeof IUniswapV3Pool__factory.abi,
-  PublicClient | WalletClient
-> {
-  return getContract({
-    address: computePoolAddress(chainId, amm, tokenA, tokenB, fee),
-    abi: IUniswapV3Pool__factory.abi,
-    client: walletClient ?? publicClient!,
-  });
-}
-
-/**
- * Constructs a Uniswap SDK Pool object for an existing and initialized pool.
- * Note that the constructed pool's `token0` and `token1` will be sorted, but the input `tokenA` and `tokenB` don't have to be.
- * @param tokenA One of the tokens in the pool.
- * @param tokenB The other token in the pool.
- * @param fee Fee tier of the pool.
- * @param chainId Chain id.
- * @param amm Automated Market Maker.
- * @param publicClient Viem public client.
- * @param blockNumber Optional block number to query.
- * @returns The constructed Uniswap SDK Pool object.
- */
-export async function getPool(
-  tokenA: Token | string,
-  tokenB: Token | string,
-  fee: FeeAmount,
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  publicClient?: PublicClient,
-  blockNumber?: bigint,
-): Promise<Pool> {
-  publicClient = publicClient ?? getPublicClient(chainId);
-  const poolContract = getPoolContract(
-    tokenA,
-    tokenB,
-    fee,
-    chainId,
-    amm,
-    publicClient,
-  );
-  const opts = { blockNumber };
-  // If the specified pool has not been created yet, then the slot0() and liquidity() calls should fail (and throw an error).
-  // Also update the tokens to the canonical type.
-  const [slot0, inRangeLiquidity, tokenACanon, tokenBCanon] = await Promise.all(
-    [
-      poolContract.read.slot0(opts),
-      poolContract.read.liquidity(opts),
-      getToken(
-        (typeof tokenA === 'string' ? tokenA : tokenA.address) as Address,
-        chainId,
-        publicClient,
-        blockNumber,
-      ),
-      getToken(
-        (typeof tokenB === 'string' ? tokenB : tokenB.address) as Address,
-        chainId,
-        publicClient,
-        blockNumber,
-      ),
-    ],
-  );
-  const [sqrtPriceX96, tick] = slot0;
-  if (sqrtPriceX96 === BigInt(0)) {
-    throw 'Pool has been created but not yet initialized';
-  }
-  return new Pool(
-    tokenACanon,
-    tokenBCanon,
-    fee,
-    sqrtPriceX96.toString(),
-    inRangeLiquidity.toString(),
-    tick,
   );
 }
 
@@ -318,7 +226,9 @@ export async function getTickToLiquidityMapForPool(
     amm,
     pool.token0,
     pool.token1,
-    pool.fee,
+    amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+      ? pool.tickSpacing
+      : pool.fee,
   ).toLowerCase();
   // Fetch current in-range liquidity from subgraph.
   const poolResponse = (
@@ -435,7 +345,16 @@ async function getPopulatedTicksInRange(
   blockNumber?: bigint,
 ) {
   const ticks = await viem.getPopulatedTicksInRange(
-    computePoolAddress(chainId, amm, pool.token0, pool.token1, pool.fee),
+    amm,
+    computePoolAddress(
+      chainId,
+      amm,
+      pool.token0,
+      pool.token1,
+      amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+        ? pool.tickSpacing
+        : pool.fee,
+    ),
     tickLower,
     tickUpper,
     publicClient ?? getPublicClient(chainId),

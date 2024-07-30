@@ -64,6 +64,7 @@ export async function getPositionsState(
 
     try {
       const currentPositions = await viem.getPositions(
+        amm,
         npm.address,
         currentBatch,
         publicClient,

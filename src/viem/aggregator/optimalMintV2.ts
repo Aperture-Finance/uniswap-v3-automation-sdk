@@ -109,7 +109,7 @@ export async function optimalMintV2(
       const pool = await getPool(
         token0,
         token1,
-        mintParams.fee,
+        mintParams.fee, // TOOD: check with SLIPSTREAM
         chainId,
         amm,
         publicClient,

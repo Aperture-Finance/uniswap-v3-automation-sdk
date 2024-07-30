@@ -79,8 +79,7 @@ export function computePoolAddress(
   amm: AutomatedMarketMakerEnum,
   tokenA: Token | string,
   tokenB: Token | string,
-  fee?: number,
-  tickSpacing?: number,
+  feeOrTickSpacing: number,
 ): Address {
   const ammInfo = getAMMInfo(chainId, amm);
   if (!ammInfo) {
@@ -99,9 +98,6 @@ export function computePoolAddress(
       : [tokenBAddress, tokenAAddress];
 
   if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
-    if (!tickSpacing) {
-      throw new Error('tickSpacing is required for SLIPSTREAM');
-    }
     return getEip1167Create2Address(
       ammInfo.factory,
       keccak256(
@@ -109,16 +105,13 @@ export function computePoolAddress(
           parseAbiParameters(
             'address token0, address token1, int24 tickSpacing',
           ),
-          [token0Address, token1Address, tickSpacing!],
+          [token0Address, token1Address, feeOrTickSpacing],
         ),
       ),
       ammInfo.poolImplementation!,
     ) as Address;
   }
 
-  if (!fee) {
-    throw new Error('fee is required for UNISWAP_V3 and PANCAKESWAP_V3');
-  }
   return getContractAddress({
     opcode: 'CREATE2',
     from:
@@ -128,7 +121,7 @@ export function computePoolAddress(
     salt: keccak256(
       encodeAbiParameters(
         parseAbiParameters('address token0, address token1, uint24 fee'),
-        [token0Address, token1Address, fee],
+        [token0Address, token1Address, feeOrTickSpacing],
       ),
     ),
     bytecodeHash:

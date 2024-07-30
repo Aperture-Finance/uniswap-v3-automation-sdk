@@ -30,6 +30,7 @@ export async function getAllPositions(
   publicClient = publicClient ?? getPublicClient(chainId);
   try {
     positions = await viem.getAllPositionsByOwner(
+      amm,
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       owner,
       publicClient,

@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.5.1",
+  "version": "3.6.0",
   "description": "SDK for Aperture's Uniswap V3 automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
@@ -41,8 +41,8 @@
   },
   "dependencies": {
     "@0xsequence/multicall": "^1.10.3",
-    "@aperture_finance/uniswap-v3-sdk": "3.11.0-PCS",
-    "aperture-lens": "^1.1.0",
+    "@aperture_finance/uniswap-v3-sdk": "3.11.0-APTR.1",
+    "aperture-lens": "^2.0.0",
     "axios": "^1.6.8",
     "big.js": "^6.2.1",
     "bottleneck": "^2.19.5",
