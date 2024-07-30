@@ -22,7 +22,7 @@ import { getPublicClient } from '../public_client';
  * Note that the constructed pool's `token0` and `token1` will be sorted, but the input `tokenA` and `tokenB` don't have to be.
  * @param tokenA One of the tokens in the pool.
  * @param tokenB The other token in the pool.
- * @param fee Fee tier of the pool.
+ * @param feeOrTickSpacing Fee tier (for UniV3 / PCSV3 ) ot tickSpacing (for SlipStream) of the pool.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param publicClient Viem public client.

@@ -381,7 +381,7 @@ export async function viewCollectableTokenAmounts(
   );
   const opts = { blockNumber };
 
-  // if can replace with viem.getPositionDetails?
+  // TODO: replace with viem.getPositionDetails
   const [
     slot0,
     feeGrowthGlobal0X128,
