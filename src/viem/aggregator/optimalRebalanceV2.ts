@@ -20,7 +20,7 @@ import {
 } from './internal';
 import { SolverResult } from './types';
 
-const feeRatio = 0.0007; // 0.07% fee
+const feeRatio = 0.0015; // 0.15% fee
 const feeCoefficient = 1e18;
 
 /**
@@ -116,7 +116,7 @@ export async function optimalRebalanceV2(
       ? position.pool.token0.decimals
       : position.pool.token1.decimals;
 
-    // swap token value * 0.0007 + 0.15
+    // swap token value * 0.0015 + 0.15
     const feeUSD = new Big(poolAmountIn.toString())
       .div(10 ** decimals)
       .mul(tokenInPrice)
