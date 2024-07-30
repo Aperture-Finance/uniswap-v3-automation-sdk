@@ -173,8 +173,6 @@ describe('getFeeBips', () => {
     });
     expect(position.amount0.toSignificant()).toBe('0');
     expect(position.amount1.toSignificant()).toBe('54.3777');
-    console.log(position.amount0.toSignificant());
-    console.log(position.amount1.toSignificant());
     const collectableTokenAmounts: CollectableTokenAmounts = {
       token0Amount: CurrencyAmount.fromRawAmount(
         new Token(
