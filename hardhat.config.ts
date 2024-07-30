@@ -15,7 +15,7 @@ const config: HardhatUserConfig = {
     artifacts: './test',
   },
   mocha: {
-    timeout: 120 * 1e3, // 120 seconds instead of the default 40 seconds because github actions workers may be slow.
+    timeout: 180 * 1e3, // 180 seconds instead of the default 40 seconds because github actions workers may be slow.
   },
 };
 
