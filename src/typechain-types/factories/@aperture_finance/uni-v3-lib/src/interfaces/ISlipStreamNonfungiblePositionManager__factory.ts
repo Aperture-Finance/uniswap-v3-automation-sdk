@@ -5,9 +5,9 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  INonfungiblePositionManager,
-  INonfungiblePositionManagerInterface,
-} from "../../../../../../@aperture_finance/uni-v3-lib/src/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager";
+  ISlipStreamNonfungiblePositionManager,
+  ISlipStreamNonfungiblePositionManagerInterface,
+} from "../../../../../@aperture_finance/uni-v3-lib/src/interfaces/ISlipStreamNonfungiblePositionManager";
 
 const _abi = [
   {
@@ -159,6 +159,19 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
+        name: "tokenDescriptor",
+        type: "address",
+      },
+    ],
+    name: "TokenDescriptorChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
         name: "from",
         type: "address",
       },
@@ -176,6 +189,19 @@ const _abi = [
       },
     ],
     name: "Transfer",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "TransferOwnership",
     type: "event",
   },
   {
@@ -292,7 +318,7 @@ const _abi = [
             type: "uint128",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.CollectParams",
+        internalType: "struct ICommonNonfungiblePositionManager.CollectParams",
         name: "params",
         type: "tuple",
       },
@@ -308,40 +334,6 @@ const _abi = [
         internalType: "uint256",
         name: "amount1",
         type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "token0",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "token1",
-        type: "address",
-      },
-      {
-        internalType: "uint24",
-        name: "fee",
-        type: "uint24",
-      },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceX96",
-        type: "uint160",
-      },
-    ],
-    name: "createAndInitializePoolIfNecessary",
-    outputs: [
-      {
-        internalType: "address",
-        name: "pool",
-        type: "address",
       },
     ],
     stateMutability: "payable",
@@ -378,7 +370,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -467,7 +459,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -532,9 +524,9 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "uint24",
-            name: "fee",
-            type: "uint24",
+            internalType: "int24",
+            name: "tickSpacing",
+            type: "int24",
           },
           {
             internalType: "int24",
@@ -576,8 +568,13 @@ const _abi = [
             name: "deadline",
             type: "uint256",
           },
+          {
+            internalType: "uint160",
+            name: "sqrtPriceX96",
+            type: "uint160",
+          },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct ISlipStreamNonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -616,6 +613,19 @@ const _abi = [
         internalType: "string",
         name: "",
         type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -709,9 +719,9 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint24",
-        name: "fee",
-        type: "uint24",
+        internalType: "int24",
+        name: "tickSpacing",
+        type: "int24",
       },
       {
         internalType: "int24",
@@ -831,6 +841,32 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "_owner",
+        type: "address",
+      },
+    ],
+    name: "setOwner",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_tokenDescriptor",
+        type: "address",
+      },
+    ],
+    name: "setTokenDescriptor",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "bytes4",
         name: "interfaceId",
         type: "bytes4",
@@ -897,6 +933,19 @@ const _abi = [
         internalType: "uint256",
         name: "",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "tokenDescriptor",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -1001,19 +1050,21 @@ const _abi = [
   },
 ] as const;
 
-export class INonfungiblePositionManager__factory {
+export class ISlipStreamNonfungiblePositionManager__factory {
   static readonly abi = _abi;
-  static createInterface(): INonfungiblePositionManagerInterface {
-    return new utils.Interface(_abi) as INonfungiblePositionManagerInterface;
+  static createInterface(): ISlipStreamNonfungiblePositionManagerInterface {
+    return new utils.Interface(
+      _abi
+    ) as ISlipStreamNonfungiblePositionManagerInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): INonfungiblePositionManager {
+  ): ISlipStreamNonfungiblePositionManager {
     return new Contract(
       address,
       _abi,
       signerOrProvider
-    ) as INonfungiblePositionManager;
+    ) as ISlipStreamNonfungiblePositionManager;
   }
 }

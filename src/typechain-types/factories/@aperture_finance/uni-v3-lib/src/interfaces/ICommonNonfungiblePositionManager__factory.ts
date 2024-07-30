@@ -5,9 +5,9 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  IPCSV3NonfungiblePositionManager,
-  IPCSV3NonfungiblePositionManagerInterface,
-} from "../../../../../../@aperture_finance/uni-v3-lib/src/interfaces/INonfungiblePositionManager.sol/IPCSV3NonfungiblePositionManager";
+  ICommonNonfungiblePositionManager,
+  ICommonNonfungiblePositionManagerInterface,
+} from "../../../../../@aperture_finance/uni-v3-lib/src/interfaces/ICommonNonfungiblePositionManager";
 
 const _abi = [
   {
@@ -292,7 +292,7 @@ const _abi = [
             type: "uint128",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.CollectParams",
+        internalType: "struct ICommonNonfungiblePositionManager.CollectParams",
         name: "params",
         type: "tuple",
       },
@@ -308,40 +308,6 @@ const _abi = [
         internalType: "uint256",
         name: "amount1",
         type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "token0",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "token1",
-        type: "address",
-      },
-      {
-        internalType: "uint24",
-        name: "fee",
-        type: "uint24",
-      },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceX96",
-        type: "uint160",
-      },
-    ],
-    name: "createAndInitializePoolIfNecessary",
-    outputs: [
-      {
-        internalType: "address",
-        name: "pool",
-        type: "address",
       },
     ],
     stateMutability: "payable",
@@ -378,7 +344,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -397,19 +363,6 @@ const _abi = [
       },
     ],
     stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "deployer",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -480,7 +433,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -528,97 +481,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "token0",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "token1",
-            type: "address",
-          },
-          {
-            internalType: "uint24",
-            name: "fee",
-            type: "uint24",
-          },
-          {
-            internalType: "int24",
-            name: "tickLower",
-            type: "int24",
-          },
-          {
-            internalType: "int24",
-            name: "tickUpper",
-            type: "int24",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Desired",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Desired",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Min",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "deadline",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
-        name: "params",
-        type: "tuple",
-      },
-    ],
-    name: "mint",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint128",
-        name: "liquidity",
-        type: "uint128",
-      },
-      {
-        internalType: "uint256",
-        name: "amount0",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount1",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
     type: "function",
   },
   {
@@ -689,80 +551,6 @@ const _abi = [
     name: "permit",
     outputs: [],
     stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "positions",
-    outputs: [
-      {
-        internalType: "uint96",
-        name: "nonce",
-        type: "uint96",
-      },
-      {
-        internalType: "address",
-        name: "operator",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "token0",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "token1",
-        type: "address",
-      },
-      {
-        internalType: "uint24",
-        name: "fee",
-        type: "uint24",
-      },
-      {
-        internalType: "int24",
-        name: "tickLower",
-        type: "int24",
-      },
-      {
-        internalType: "int24",
-        name: "tickUpper",
-        type: "int24",
-      },
-      {
-        internalType: "uint128",
-        name: "liquidity",
-        type: "uint128",
-      },
-      {
-        internalType: "uint256",
-        name: "feeGrowthInside0LastX128",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "feeGrowthInside1LastX128",
-        type: "uint256",
-      },
-      {
-        internalType: "uint128",
-        name: "tokensOwed0",
-        type: "uint128",
-      },
-      {
-        internalType: "uint128",
-        name: "tokensOwed1",
-        type: "uint128",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -1014,21 +802,21 @@ const _abi = [
   },
 ] as const;
 
-export class IPCSV3NonfungiblePositionManager__factory {
+export class ICommonNonfungiblePositionManager__factory {
   static readonly abi = _abi;
-  static createInterface(): IPCSV3NonfungiblePositionManagerInterface {
+  static createInterface(): ICommonNonfungiblePositionManagerInterface {
     return new utils.Interface(
       _abi
-    ) as IPCSV3NonfungiblePositionManagerInterface;
+    ) as ICommonNonfungiblePositionManagerInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IPCSV3NonfungiblePositionManager {
+  ): ICommonNonfungiblePositionManager {
     return new Contract(
       address,
       _abi,
       signerOrProvider
-    ) as IPCSV3NonfungiblePositionManager;
+    ) as ICommonNonfungiblePositionManager;
   }
 }

@@ -267,7 +267,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -344,7 +344,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -401,7 +401,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -483,7 +483,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -622,7 +622,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -684,7 +684,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -813,7 +813,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -904,7 +904,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -945,7 +945,7 @@ const _abi = [
     name: "npm",
     outputs: [
       {
-        internalType: "contract INonfungiblePositionManager",
+        internalType: "contract ICommonNonfungiblePositionManager",
         name: "",
         type: "address",
       },
@@ -1026,7 +1026,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -1132,7 +1132,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -1234,7 +1234,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1306,7 +1306,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1393,7 +1393,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1450,7 +1450,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1527,7 +1527,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1609,7 +1609,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1680,7 +1680,7 @@ const _abi = [
             type: "uint96",
           },
         ],
-        internalType: "struct Automan.FeeConfig",
+        internalType: "struct IAutomanCommon.FeeConfig",
         name: "_feeConfig",
         type: "tuple",
       },

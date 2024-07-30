@@ -1,7 +1,6 @@
 import {
   ApertureSupportedChainId,
   Automan__factory,
-  INonfungiblePositionManager__factory,
   fractionToBig,
   getAMMInfo,
   getTokenValueProportionFromPriceRatio,
@@ -14,7 +13,12 @@ import {
   TickMath,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { EphemeralGetPosition__factory, viem } from 'aperture-lens';
+import {
+  EphemeralGetPosition__factory,
+  ISlipStreamNonfungiblePositionManager__factory,
+  IUniswapV3NonfungiblePositionManager__factory,
+  viem,
+} from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import JSBI from 'jsbi';
@@ -66,12 +70,16 @@ export function getNPM(
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof INonfungiblePositionManager__factory.abi,
+  | typeof ISlipStreamNonfungiblePositionManager__factory.abi
+  | typeof IUniswapV3NonfungiblePositionManager__factory.abi,
   PublicClient | WalletClient
 > {
   return getContract({
     address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-    abi: INonfungiblePositionManager__factory.abi,
+    abi:
+      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+        ? ISlipStreamNonfungiblePositionManager__factory.abi
+        : IUniswapV3NonfungiblePositionManager__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }
