@@ -103,7 +103,7 @@ export async function optimalMint(
     const pool = await getPool(
       mintParams.token0,
       mintParams.token1,
-      mintParams.fee,
+      mintParams.fee, // TOOD: check with SLIPSTREAM
       chainId,
       amm,
       publicClient,
@@ -239,7 +239,7 @@ async function getOptimalMintSwapData(
           amm,
           mintParams.token0,
           mintParams.token1,
-          mintParams.fee as FeeAmount,
+          mintParams.fee,
         ),
         mintParams.tickLower,
         mintParams.tickUpper,

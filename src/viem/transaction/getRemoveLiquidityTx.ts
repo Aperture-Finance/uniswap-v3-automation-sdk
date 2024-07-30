@@ -54,6 +54,7 @@ export async function getRemoveLiquidityTx(
       tickLower: position.tickLower,
       tickUpper: position.tickUpper,
       fee: position.pool.fee,
+      tickSpacing: position.pool.tickSpacing,
     },
     blockNumber,
   );

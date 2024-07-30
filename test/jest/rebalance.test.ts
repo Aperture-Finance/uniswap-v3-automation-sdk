@@ -7,7 +7,7 @@ import { ActionTypeEnum, ApertureSupportedChainId } from '../../src/interfaces';
 import { normalizeTicks } from '../../src/rebalance';
 import { rangeWidthRatioToTicks } from '../../src/tick';
 import { getToken } from '../../src/viem/currency/currency';
-import { getPool } from '../../src/viem/pool/pool';
+import { getPool } from '../../src/viem/pool';
 
 const ETHEREUM_MAINNET_ETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 const ETHEREUM_MAINNET_USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
