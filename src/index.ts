@@ -10,4 +10,4 @@ export * from './tick';
 export * from './typechain-types';
 export * from './uniswap-constants';
 export * from './utils';
-export * as viem from './viem';
+export * from './viem';
