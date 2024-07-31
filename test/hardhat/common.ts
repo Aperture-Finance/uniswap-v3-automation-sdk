@@ -3,6 +3,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
+import { ethers } from 'hardhat';
 import { TestClient, createPublicClient, http } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
@@ -11,6 +12,7 @@ import { ApertureSupportedChainId } from '../../src';
 dotenvConfig();
 
 chai.use(chaiAsPromised);
+export const hardhatForkProvider = ethers.provider;
 export const expect = chai.expect;
 export const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
 export const UNIV3_AMM = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
