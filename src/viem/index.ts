@@ -1,3 +1,5 @@
+export * from './activity';
+export * from './aggregator';
 export * from './automan';
 export * from './currency';
 export * from './overrides';
@@ -6,7 +8,6 @@ export * from './permission';
 export * from './pool';
 export * from './position';
 export * from './public_client';
-export * from './transaction';
-export * from './aggregator';
-export * from './solver';
 export * from './routing';
+export * from './solver';
+export * from './transaction';
