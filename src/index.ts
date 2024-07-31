@@ -1,6 +1,7 @@
 export * from './automan_client';
 export * from './chain';
 export * from './constants';
+export * from './data';
 export * from './interfaces';
 export * from './ioc';
 export * from './logger';
