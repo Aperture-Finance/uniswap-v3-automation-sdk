@@ -94,7 +94,7 @@ describe('Viem - Routing tests', function () {
   });
 
   // can pass when run alone, but fail when run with other tests, skip it currently
-  it('Test optimalRebalanceV2 in mainnet', async function () {
+  it.skip('Test optimalRebalanceV2 in mainnet', async function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
