@@ -40,10 +40,11 @@ import { getFromAddress } from './internal';
 import {
   IncreaseLiquidityParams,
   IncreaseLiquidityReturnType,
-  MintParams,
   MintReturnType,
   RebalanceReturnType,
   RemoveLiquidityReturnType,
+  SlipStreamMintParams,
+  UniV3MintParams,
 } from './types';
 
 export function getAutomanContract(
@@ -67,7 +68,7 @@ export function encodeOptimalSwapData(
   amm: AutomatedMarketMakerEnum,
   token0: Address,
   token1: Address,
-  fee: FeeAmount,
+  feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
   zeroForOne: boolean,
@@ -83,18 +84,24 @@ export function encodeOptimalSwapData(
         // prettier-ignore
         ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],
         // prettier-ignore
-        [token0, token1, fee, tickLower, tickUpper, zeroForOne, approveTarget, router, data],
+        [token0, token1, feeOrTickSpacing, tickLower, tickUpper, zeroForOne, approveTarget, router, data],
       ),
     ],
   );
 }
 
-function checkTicks(mintParams: MintParams) {
+function checkTicks(
+  amm: AutomatedMarketMakerEnum,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+) {
   const { tickLower, tickUpper } = mintParams;
-  const fee = mintParams.fee as FeeAmount;
+  const tickSpacing =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? (mintParams as SlipStreamMintParams).tickSpacing
+      : TICK_SPACINGS[(mintParams as UniV3MintParams).fee as FeeAmount];
   if (
-    tickLower !== nearestUsableTick(tickLower, TICK_SPACINGS[fee]) ||
-    tickUpper !== nearestUsableTick(tickUpper, TICK_SPACINGS[fee])
+    tickLower !== nearestUsableTick(tickLower, tickSpacing) ||
+    tickUpper !== nearestUsableTick(tickUpper, tickSpacing)
   ) {
     throw new Error('tickLower or tickUpper not valid');
   }
@@ -116,11 +123,11 @@ export async function simulateMintOptimal(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
-  mintParams: MintParams,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
-  checkTicks(mintParams);
+  checkTicks(amm, mintParams);
   const returnData = await requestMintOptimal(
     'eth_call',
     chainId,
@@ -143,7 +150,7 @@ export async function estimateMintOptimalGas(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
-  mintParams: MintParams,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<bigint> {
@@ -167,12 +174,12 @@ export async function requestMintOptimal<M extends keyof RpcReturnType>(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
-  mintParams: MintParams,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  checkTicks(mintParams);
-  const data = getAutomanMintOptimalCalldata(mintParams, swapData);
+  checkTicks(amm, mintParams);
+  const data = getAutomanMintOptimalCalldata(amm, mintParams, swapData);
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(
@@ -382,14 +389,15 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  mintParams: MintParams,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
   feeBips = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  checkTicks(mintParams);
+  checkTicks(amm, mintParams);
   const data = getAutomanRebalanceCalldata(
+    amm,
     mintParams,
     tokenId,
     feeBips,
@@ -433,7 +441,7 @@ export async function simulateRebalance(
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  mintParams: MintParams,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
   feeBips = BigInt(0),
   swapData: Hex = '0x',
@@ -465,7 +473,7 @@ export async function estimateRebalanceGas(
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  mintParams: MintParams,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
   feeBips = BigInt(0),
   swapData: Hex = '0x',

@@ -214,7 +214,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -291,7 +291,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -348,7 +348,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -430,7 +430,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -564,7 +564,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -626,7 +626,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -655,6 +655,25 @@ const _abi = [
       },
     ],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "addressToCheck",
+        type: "address",
+      },
+    ],
+    name: "isController",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -717,7 +736,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -808,7 +827,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -849,7 +868,7 @@ const _abi = [
     name: "npm",
     outputs: [
       {
-        internalType: "contract INonfungiblePositionManager",
+        internalType: "contract ICommonNonfungiblePositionManager",
         name: "",
         type: "address",
       },
@@ -917,7 +936,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -1023,7 +1042,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct INonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -1125,7 +1144,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1197,7 +1216,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1284,7 +1303,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1341,7 +1360,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1418,7 +1437,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1500,7 +1519,7 @@ const _abi = [
           },
         ],
         internalType:
-          "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
         name: "params",
         type: "tuple",
       },
@@ -1529,6 +1548,67 @@ const _abi = [
       },
     ],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "controllers",
+        type: "address[]",
+      },
+      {
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "setControllers",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "feeCollector",
+            type: "address",
+          },
+          {
+            internalType: "uint96",
+            name: "feeLimitPips",
+            type: "uint96",
+          },
+        ],
+        internalType: "struct IAutomanCommon.FeeConfig",
+        name: "_feeConfig",
+        type: "tuple",
+      },
+    ],
+    name: "setFeeConfig",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "routers",
+        type: "address[]",
+      },
+      {
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "setSwapRouters",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {

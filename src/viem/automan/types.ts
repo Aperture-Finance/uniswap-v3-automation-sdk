@@ -1,6 +1,8 @@
 import {
   Automan__factory,
-  INonfungiblePositionManager__factory,
+  ICommonNonfungiblePositionManager__factory,
+  ISlipStreamNonfungiblePositionManager__factory,
+  IUniswapV3NonfungiblePositionManager__factory,
 } from '@/index';
 import {
   AbiStateMutability,
@@ -40,19 +42,24 @@ export type GetAutomanReturnTypes<
   args // to dedup function name
 >;
 
-export type MintParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
+export type UniV3MintParams = GetAbiFunctionParamsTypes<
+  typeof IUniswapV3NonfungiblePositionManager__factory.abi,
+  'mint'
+>[0];
+
+export type SlipStreamMintParams = GetAbiFunctionParamsTypes<
+  typeof ISlipStreamNonfungiblePositionManager__factory.abi,
   'mint'
 >[0];
 
 export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
+  typeof ICommonNonfungiblePositionManager__factory.abi,
   'increaseLiquidity'
 >[0];
 
 export type RebalanceReturnType = GetAutomanReturnTypes<
   'rebalance',
-  [MintParams, bigint, bigint, Hex]
+  [UniV3MintParams, bigint, bigint, Hex]
 >;
 
 export type ReinvestReturnType = GetAutomanReturnTypes<
@@ -71,6 +78,6 @@ export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
 >;
 
 export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
-  typeof INonfungiblePositionManager__factory.abi,
+  typeof ICommonNonfungiblePositionManager__factory.abi,
   'decreaseLiquidity'
 >[0];

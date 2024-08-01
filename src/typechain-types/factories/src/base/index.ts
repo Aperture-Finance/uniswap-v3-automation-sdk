@@ -7,3 +7,4 @@ export * as swapRouterSol from "./SwapRouter.sol";
 export { Automan__factory } from "./Automan__factory";
 export { OptimalSwapRouter__factory } from "./OptimalSwapRouter__factory";
 export { Payments__factory } from "./Payments__factory";
+export { SlipStreamSwapRouter__factory } from "./SlipStreamSwapRouter__factory";

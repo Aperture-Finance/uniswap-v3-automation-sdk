@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { PancakeV3Callback__factory } from "./PancakeV3Callback__factory";
+export { SlipStreamCallback__factory } from "./SlipStreamCallback__factory";
 export { UniswapV3Callback__factory } from "./UniswapV3Callback__factory";
