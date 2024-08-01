@@ -432,8 +432,8 @@ describe('Slipstream Position liquidity management tests', function () {
       ).toExact(),
     ).to.equal('0.568256298587835347'); // TODO: update
 
-    // Approve Uniswap NPM to spend WBTC.
-    await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
+    // Approve Uniswap NPM to spend USDC.
+    await IERC20__factory.connect(USDC_ADDRESS, eoaSigner).approve(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount0.toString(),
     );
