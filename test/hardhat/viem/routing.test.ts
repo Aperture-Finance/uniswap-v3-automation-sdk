@@ -37,7 +37,8 @@ import {
 } from '../common';
 
 describe('Viem - Routing tests', function () {
-  it('Test optimalRebalance', async function () {
+  // optimalRebalance is deprecated now, use optimalRebalanceV2 instead
+  it.skip('Test optimalRebalance', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
@@ -93,7 +94,7 @@ describe('Viem - Routing tests', function () {
   });
 
   // can pass when run alone, but fail when run with other tests, skip it currently
-  it.skip('Test optimalRebalanceV2 in mainnet', async function () {
+  it('Test optimalRebalanceV2 in mainnet', async function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
@@ -329,7 +330,8 @@ describe('Viem - Routing tests', function () {
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
-  it('Test optimalMint', async function () {
+  // optimalMint is deprecated now, use optimalMintV2 instead
+  it.skip('Test optimalMint', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient('arbitrum-mainnet');
