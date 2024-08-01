@@ -17,11 +17,14 @@ import { mainnet } from 'viem/chains';
 import {
   ActionTypeEnum,
   ConditionTypeEnum,
+  ConsoleLogger,
   INonfungiblePositionManager__factory,
+  IOCKEY_LOGGER,
   UniV3Automan,
   UniV3Automan__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
+  ioc,
 } from '../../../src';
 import {
   E_Solver,
@@ -61,6 +64,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
+
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();

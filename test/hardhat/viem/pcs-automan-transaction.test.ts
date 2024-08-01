@@ -19,11 +19,14 @@ import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
+  ConsoleLogger,
   INonfungiblePositionManager__factory,
+  IOCKEY_LOGGER,
   PCSV3Automan,
   PCSV3Automan__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
+  ioc,
 } from '../../../src';
 import {
   E_Solver,
@@ -66,6 +69,8 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
+
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
@@ -305,8 +310,8 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
         publicClient,
         [E_Solver.OneInch],
         existingPosition,
-        undefined,
-        false,
+        undefined /**blockNumber */,
+        false /** feesOn */,
       )
     )[0];
     const { tx: txRequest } = await getRebalanceTx(
