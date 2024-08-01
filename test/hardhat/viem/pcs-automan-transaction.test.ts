@@ -290,7 +290,8 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
     });
   });
 
-  it('Rebalance with 1inch', async function () {
+  // skip 1inch test because it is unstable
+  it.skip('Rebalance with 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -310,8 +311,8 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
         publicClient,
         [E_Solver.OneInch],
         existingPosition,
-        undefined,
-        false,
+        undefined /**blockNumber */,
+        false /** feesOn */,
       )
     )[0];
     const { tx: txRequest } = await getRebalanceTx(
