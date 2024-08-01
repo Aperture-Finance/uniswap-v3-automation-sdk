@@ -290,8 +290,7 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
     });
   });
 
-  // skip 1inch test because it is unstable
-  it.skip('Rebalance with 1inch', async function () {
+  it('Rebalance with 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,

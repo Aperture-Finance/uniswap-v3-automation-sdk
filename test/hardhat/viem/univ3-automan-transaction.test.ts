@@ -278,7 +278,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
-  it.skip('Rebalance with 1inch', async function () {
+  it('Rebalance with 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
