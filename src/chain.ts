@@ -43,10 +43,11 @@ export type InfuraNetworkId =
 
 export interface AmmInfo {
   factory: Address;
+  poolImplementation?: Address; // Only applicable to SLIPSTREAM.
   poolDeployer?: Address; // Only applicable to PANCAKESWAP_V3.
   nonfungiblePositionManager: Address;
-  // This is SwapRouter02 for UNISWAP_V3 and SmartRouter for PANCAKESWAP_V3.
-  swapRouter: Address;
+  // This is SwapRouter02 for UNISWAP_V3 and SmartRouter for PANCAKESWAP_V3, undefined for SLIPSTREAM.
+  swapRouter?: Address;
   // Aperture's optimal swap router. Only populated for chains with an aggregator service like 1inch.
   optimalSwapRouter?: Address;
   // Aperture's Automan contract address.
@@ -285,6 +286,23 @@ const CHAIN_ID_TO_INFO: {
         ),
         subgraph_url:
           'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
+      },
+      [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
+        factory: getAddress('0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A'),
+        poolImplementation: getAddress(
+          '0xeC8E5342B19977B4eF8892e02D8DAEcfa1315831',
+        ),
+        nonfungiblePositionManager: getAddress(
+          '0x827922686190790b37229fd06084350E74485b72',
+        ),
+        // Placeholder address to be updated after actual deployment.
+        optimalSwapRouter: getAddress(
+          '0xCc06600868DdDab1073DEEC925E9D8c22fA8b889',
+        ),
+        // Placeholder address to be updated after actual deployment.
+        apertureAutoman: getAddress(
+          '0x00000000EDb4489cB49FE07246f39345c9f838cD',
+        ),
       },
     },
     wrappedNativeCurrency: new Token(

@@ -34,7 +34,7 @@ import {
   walletActions,
   zeroAddress,
 } from 'viem';
-import { arbitrum, mainnet } from 'viem/chains';
+import { arbitrum, base, mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -90,12 +90,14 @@ import {
   getPublicClient,
   getRebalanceSwapInfo,
   getRebalanceTx,
+  getSlipStreamPools,
   getTickToLiquidityMapForPool,
   getToken,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
+  simulateRemoveLiquidity,
 } from '../../src/viem';
-import { amm, hardhatForkProvider } from './helper/common';
+import { UNIV3_AMM as amm, hardhatForkProvider } from './common';
 
 dotenvConfig();
 
@@ -121,6 +123,7 @@ async function resetFork(testClient: TestClient, blockNumber = 19210000n) {
 const infuraMap = {
   mainnet: mainnet,
   'arbitrum-mainnet': arbitrum,
+  'base-mainnet': base,
 };
 
 function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
@@ -388,6 +391,33 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('8736560293857784398');
   });
 
+  it('Test simulateRemoveLiquidity', async function () {
+    const blockNumber = 19142000n;
+    const positionId = 655629n;
+    const publicClient = getInfuraClient();
+    const position = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+      blockNumber,
+    );
+    const [amount0, amount1] = await simulateRemoveLiquidity(
+      chainId,
+      amm,
+      publicClient,
+      position.owner,
+      position.owner,
+      BigInt(position.tokenId),
+      undefined,
+      undefined,
+      0n,
+      blockNumber,
+    );
+    expect(amount0.toString()).to.equal('908858032032850671014');
+    expect(amount1.toString()).to.equal('3098315727923109118');
+  });
+
   it('Test simulateIncreaseLiquidityOptimal', async function () {
     const blockNumber = 17975698n;
     const positionId = 4n;
@@ -397,7 +427,7 @@ describe('State overrides tests', function () {
     const position = await getPosition(
       chainId,
       UNIV3_AMM,
-      4n,
+      positionId,
       publicClient,
       blockNumber,
     );
@@ -741,7 +771,6 @@ describe.skip('Pool subgraph query tests', function () {
         0,
       ),
     ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
-    console.log(distribution);
   });
 
   async function testLiquidityDistribution(
@@ -817,6 +846,17 @@ describe.skip('Pool subgraph query tests', function () {
       AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
       pool,
     );
+  });
+});
+
+describe('Pool tests', function () {
+  it('getSlipStreamPools', async () => {
+    const client = getPublicClient(
+      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    );
+    const blockNumber = 17514450n;
+    const pools = await getSlipStreamPools(client, blockNumber);
+    expect(Object.keys(pools).length).to.be.equal(107);
   });
 });
 
@@ -1220,11 +1260,7 @@ describe('Viem - Automan transaction tests', function () {
         [E_Solver.SamePool],
       )
     )[0];
-
-    console.log('swapPath', swapPath);
-
     expect(swapRoute?.length).to.gt(0);
-
     expect(swapPath.tokenIn).to.equal(WBTC_ADDRESS);
     expect(swapPath.tokenOut).to.equal(WETH_ADDRESS);
   });

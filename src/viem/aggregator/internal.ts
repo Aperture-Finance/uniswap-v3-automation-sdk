@@ -1,7 +1,6 @@
 import { fractionToBig } from '@/index';
 import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
@@ -70,7 +69,7 @@ export const getOptimalSwapAmount = async (
   publicClient: PublicClient,
   token0: Address,
   token1: Address,
-  feeAmount: FeeAmount,
+  feeAmount: number,
   tickLower: number,
   tickUpper: number,
   amount0Desired: bigint,

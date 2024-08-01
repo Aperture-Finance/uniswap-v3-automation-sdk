@@ -231,7 +231,9 @@ async function getIncreaseLiquidityOptimalSwapData(
         amm,
         position.pool.token0.address,
         position.pool.token1.address,
-        position.pool.fee,
+        amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+          ? position.pool.tickSpacing
+          : position.pool.fee,
       ),
       position.tickLower,
       position.tickUpper,

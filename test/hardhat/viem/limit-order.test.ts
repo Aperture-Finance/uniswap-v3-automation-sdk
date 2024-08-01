@@ -151,6 +151,7 @@ describe('Viem - Limit order tests', function () {
       tickLower,
       tickUpper,
       fee: poolFee,
+      tickSpacing: TICK_SPACINGS[poolFee],
     });
     const position = await getPositionFromBasicInfo(
       basicPositionInfo,
@@ -266,6 +267,7 @@ describe('Viem - Limit order tests', function () {
       tickLower: priceToClosestTick(alignedLimitPrice),
       tickUpper: priceToClosestTick(alignedLimitPrice) + TICK_SPACINGS[poolFee],
       fee: poolFee,
+      tickSpacing: TICK_SPACINGS[poolFee],
     });
     const position = await getPositionFromBasicInfo(
       basicPositionInfo,
@@ -346,6 +348,7 @@ describe('Viem - Limit order tests', function () {
       tickLower: priceToClosestTick(alignedLimitPrice),
       tickUpper: priceToClosestTick(alignedLimitPrice) + TICK_SPACINGS[poolFee],
       fee: poolFee,
+      tickSpacing: TICK_SPACINGS[poolFee],
     });
     expect(
       generateLimitOrderCloseRequestPayload(

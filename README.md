@@ -91,9 +91,9 @@ success Removed linked package "@aperture_finance/uniswap-v3-automation-sdk".
 
 We welcome contributions from the community! If you would like to contribute to the Uniswap V3 Automation SDK, please follow the guidelines outlined in CONTRIBUTING.md: [Contributing Guidelines Link](https://your-contributing-guidelines-link).
 
-## License
+## Licensing
 
-This project is licensed under the MIT License. See the LICENSE file for more information.
+The license for Aperture Automation SDK is the Business Source License 1.1 (BUSL-1.1), see [LICENSE](./License).
 
 ## Contact
 
