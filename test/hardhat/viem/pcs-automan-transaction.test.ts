@@ -70,9 +70,7 @@ describe.skip('Viem - PCSV3Automan transaction tests', function () {
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
 
-  beforeAll(function () {
-    ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
-  });
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
