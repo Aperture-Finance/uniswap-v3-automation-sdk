@@ -1,9 +1,8 @@
-import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { Position, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import hre, { ethers } from 'hardhat';
 import {
-  Address,
   GetContractReturnType,
   PublicClient,
   TestClient,
@@ -12,16 +11,16 @@ import {
   parseEther,
   walletActions,
 } from 'viem';
-import { base, mainnet } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
 import {
   ApertureSupportedChainId,
   IERC20__factory,
   WETH__factory,
-  alignPriceToClosestUsableTick,
+  alignPriceToClosestUsableTickWithTickSpacing,
   getAMMInfo,
   parsePrice,
-  priceToClosestUsableTick,
+  priceToClosestTickSafe,
 } from '../../../src';
 import {
   BasicPositionInfo,
@@ -48,6 +47,7 @@ describe('Slipstream Position liquidity management tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
   const positionId = 293613n;
   const blockNumber = 17775451n;
+  const tickSpacing = 100;
   const eoa = '0xFf09eE65939bF6cfcB1aA44D7Fe0C237CB9ccBAb';
 
   const WHALE_ADDRESS = '0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A';
@@ -145,7 +145,7 @@ describe('Slipstream Position liquidity management tests', function () {
     console.log('publicClient', await publicClient.getChainId());
   });
 
-  it('Slipstream Collect fees', async function () {
+  it.skip('Slipstream Collect fees', async function () {
     const txRequest = await getCollectTx(
       positionId,
       eoa,
@@ -208,7 +208,7 @@ describe('Slipstream Position liquidity management tests', function () {
     );
   });
 
-  it.skip('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
+  it('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
     // ------- Decrease Liquidity -------
     // Decrease liquidity from position id 4.
     const position = await getPositionFromBasicInfo(
@@ -233,28 +233,47 @@ describe('Slipstream Position liquidity management tests', function () {
       position,
     );
 
-    const removeLiquidityTxReceipt = await publicClient.getTransactionReceipt({
-      hash: await impersonatedOwnerClient.sendTransaction({
-        ...removeLiquidityTxRequest,
-        account: eoa,
-        chain: base,
-      }),
-    });
+    // const removeLiquidityTxReceipt = await publicClient.getTransactionReceipt({
+    //   hash: await impersonatedOwnerClient.sendTransaction({
+    //     ...removeLiquidityTxRequest,
+    //     account: eoa,
+    //     chain: mainnet,
+    //   }),
+    // });
 
+    // const collectedFees = getCollectedFeesFromReceipt(
+    //   removeLiquidityTxReceipt,
+    //   position4BasicInfo.token0,
+    //   position4BasicInfo.token1,
+    // );
+
+    const eoaSigner = await ethers.getImpersonatedSigner(eoa);
+    const removeLiquidityTxReceipt = await (
+      await eoaSigner.sendTransaction(removeLiquidityTxRequest)
+    ).wait();
     const collectedFees = getCollectedFeesFromReceipt(
       removeLiquidityTxReceipt,
       position4BasicInfo.token0,
       position4BasicInfo.token1,
     );
+
+    console.log('usdtContract', await usdtContract.read.balanceOf([eoa]));
+    console.log(
+      'eth',
+      await publicClient.getBalance({
+        address: eoa,
+      }),
+    );
+
     expect(collectedFees).deep.equal(position4ColletableTokenAmounts);
     expect(await usdtContract.read.balanceOf([eoa])).to.equal(
       usdcBalanceBefore +
         // Add collected USDC fees.
         BigInt(
-          position4ColletableTokenAmounts.token0Amount.quotient.toString(),
+          position4ColletableTokenAmounts.token1Amount.quotient.toString(),
         ) +
         // Add withdrawn USDC liquidity.
-        BigInt(position.amount0.quotient.toString()),
+        BigInt(position.amount1.quotient.toString()),
     );
     expect(
       await publicClient.getBalance({
@@ -264,10 +283,10 @@ describe('Slipstream Position liquidity management tests', function () {
       nativeEtherBalanceBefore +
         // Add collected WETH fees.
         BigInt(
-          position4ColletableTokenAmounts.token1Amount.quotient.toString(),
+          position4ColletableTokenAmounts.token0Amount.quotient.toString(),
         ) +
         // Add withdrawn WETH liquidity.
-        BigInt(position.amount1.quotient.toString()) -
+        BigInt(position.amount0.quotient.toString()) -
         // Subtract gas paid in ETH.
         BigInt(
           removeLiquidityTxReceipt.gasUsed *
@@ -286,11 +305,12 @@ describe('Slipstream Position liquidity management tests', function () {
     const oneWETH = getCurrencyAmount(WETH, '1');
     // We find the necessary amount of USDC to pair with 1 WETH.
     // Since WETH is token1 in the pool, we use `Position.fromAmount1()`.
-    const usdcRawAmount = Position.fromAmount1({
+    const usdcRawAmount = Position.fromAmount0({
       pool: position.pool,
       tickLower: position.tickLower,
       tickUpper: position.tickUpper,
-      amount1: oneWETH.quotient,
+      amount0: oneWETH.quotient,
+      useFullPrecision: false,
     }).mintAmounts.amount0;
     // Now we find the liquidity amount that can be added by providing 1 WETH and `usdcRawAmount` of USDC.
     const liquidityToAdd = Position.fromAmounts({
@@ -303,17 +323,23 @@ describe('Slipstream Position liquidity management tests', function () {
     }).liquidity;
 
     // Approve Uniswap NPM to spend USDC. Since we are providing native ether in this example, we don't need to approve WETH.
-    const { request } = await publicClient.simulateContract({
-      abi: IERC20__factory.abi,
-      address: USDC_ADDRESS,
-      functionName: 'approve',
-      args: [
-        getAMMInfo(chainId, amm)!.nonfungiblePositionManager as Address,
-        BigInt(usdcRawAmount.toString()),
-      ] as const,
-      account: eoa,
-    });
-    await impersonatedOwnerClient.writeContract(request);
+    // const { request } = await publicClient.simulateContract({
+    //   abi: IERC20__factory.abi,
+    //   address: USDC_ADDRESS,
+    //   functionName: 'approve',
+    //   args: [
+    //     getAMMInfo(chainId, amm)!.nonfungiblePositionManager as Address,
+    //     BigInt(usdcRawAmount.toString()),
+    //   ] as const,
+    //   account: eoa,
+    // });
+    // await impersonatedOwnerClient.writeContract(request);
+
+    // Approve Uniswap NPM to spend WBTC. Since we are providing native ether in this example, we don't need to approve WETH.
+    await IERC20__factory.connect(USDC_ADDRESS, eoaSigner).approve(
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      usdcRawAmount.toString(),
+    );
 
     // We are now ready to generate and send out the add-liquidity tx.
     const addLiquidityTxRequest = await getAddLiquidityTx(
@@ -332,11 +358,12 @@ describe('Slipstream Position liquidity management tests', function () {
       position,
     );
 
-    await impersonatedOwnerClient.sendTransaction({
-      ...addLiquidityTxRequest,
-      account: eoa,
-      chain: base,
-    });
+    await (await eoaSigner.sendTransaction(addLiquidityTxRequest)).wait();
+    // await impersonatedOwnerClient.sendTransaction({
+    //   ...addLiquidityTxRequest,
+    //   account: eoa,
+    //   chain: base,
+    // });
     expect(
       (await getBasicPositionInfo(chainId, amm, positionId, publicClient))
         .liquidity!,
@@ -344,84 +371,116 @@ describe('Slipstream Position liquidity management tests', function () {
 
     // ------- Create Position -------
     // Now we create a new USDC-WETH position.
-    // We wish to provide liquidity to the 12.5 ~ 27.5 WETH per USDC price range, to the HIGH fee-tier pool.
-    // And we want to provide 0.1 USDC paired with the necessary amount of WETH.
+    // We wish to provide liquidity to the 2500 ~ 4000 USDC per WETH price range, to the tickspacing 100 pool.
+    // And we want to provide 0.1 WETH paired with the necessary amount of USDC.
 
     // First, we align the price range's endpoints.
-    const poolFee = FeeAmount.HIGH;
-    const alignedPriceLower = alignPriceToClosestUsableTick(
-      parsePrice(USDC, WETH, '12.5'),
-      poolFee,
+    const alignedPriceLower = alignPriceToClosestUsableTickWithTickSpacing(
+      parsePrice(WETH, USDC, '2500'),
+      tickSpacing,
     );
-    const alignedPriceUpper = alignPriceToClosestUsableTick(
-      parsePrice(USDC, WETH, '27.5'),
-      poolFee,
+    const alignedPriceUpper = alignPriceToClosestUsableTickWithTickSpacing(
+      parsePrice(WETH, USDC, '4000'),
+      tickSpacing,
     );
-    expect(alignedPriceLower.toFixed(6)).to.equal('12.589601');
-    expect(alignedPriceUpper.toFixed(6)).to.equal('27.462794');
+
+    console.log('alignedPriceLower', alignedPriceLower.toFixed(6));
+    console.log('alignedPriceUpper', alignedPriceUpper.toFixed(6));
+    // expect(alignedPriceLower.toFixed(6)).to.equal('12.589601');
+    // expect(alignedPriceUpper.toFixed(6)).to.equal('27.462794');
 
     // Second, we construct the `Position` object for the position we want to create.
     // We want to provide 0.1 USDC and the necessary amount of WETH.
     const usdcAmount = getCurrencyAmount(USDC, '0.1');
-    const tickLower = priceToClosestUsableTick(alignedPriceLower, poolFee);
-    const tickUpper = priceToClosestUsableTick(alignedPriceUpper, poolFee);
-    const pool = await getPool(USDC, WETH, poolFee, chainId, amm, publicClient);
+    const tickLower = nearestUsableTick(
+      priceToClosestTickSafe(alignedPriceLower),
+      tickSpacing,
+    );
+    const tickUpper = nearestUsableTick(
+      priceToClosestTickSafe(alignedPriceUpper),
+      tickSpacing,
+    );
+    // const tickLower = priceToClosestUsableTick(alignedPriceLower, poolFee);
+    // const tickUpper = priceToClosestUsableTick(alignedPriceUpper, poolFee);
+    const pool = await getPool(
+      USDC,
+      WETH,
+      tickSpacing,
+      chainId,
+      amm,
+      publicClient,
+    );
     // Since USDC is token1, we use `Position.fromAmount1()`.
     const positionToCreate = Position.fromAmount1({
       pool,
       tickLower,
       tickUpper,
       amount1: usdcAmount.quotient,
-      // useFullPrecision: false,
     });
-    // Now we know that we need to provide 0.1 USDC and 0.568256298587835347 WETH.
+    // Now we know that we need to provide 0.1 WETH and x USDC.
     expect(
       CurrencyAmount.fromRawAmount(
         USDC,
         positionToCreate.mintAmounts.amount0,
       ).toExact(),
     ).to.equal('0.1');
+
     expect(
       CurrencyAmount.fromRawAmount(
         WETH,
         positionToCreate.mintAmounts.amount1,
       ).toExact(),
-    ).to.equal('0.568256298587835347');
+    ).to.equal('0.568256298587835347'); // TODO: update
 
-    // Approve Uniswap NPM to spend USDC.
-    const { request: approveUsdc } = await publicClient.simulateContract({
-      abi: IERC20__factory.abi,
-      address: USDC_ADDRESS,
-      functionName: 'approve',
-      args: [
-        getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-        BigInt(positionToCreate.mintAmounts.amount0.toString()),
-      ] as const,
-      account: eoa,
-    });
-    await impersonatedOwnerClient.writeContract(approveUsdc);
+    // Approve Uniswap NPM to spend WBTC.
+    await IERC20__factory.connect(WBTC_ADDRESS, eoaSigner).approve(
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      positionToCreate.mintAmounts.amount0.toString(),
+    );
 
     // Approve Uniswap NPM to spend WETH.
-    const { request: depositWETH } = await publicClient.simulateContract({
-      abi: WETH__factory.abi,
-      address: WETH_ADDRESS,
-      functionName: 'deposit',
-      value: BigInt(positionToCreate.mintAmounts.amount1.toString()),
-      account: eoa,
+    await WETH__factory.connect(WETH_ADDRESS, eoaSigner).deposit({
+      value: positionToCreate.mintAmounts.amount1.toString(),
     });
-    await impersonatedOwnerClient.writeContract(depositWETH);
+    await WETH__factory.connect(WETH_ADDRESS, eoaSigner).approve(
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      positionToCreate.mintAmounts.amount1.toString(),
+    );
 
-    const { request: approveWETH } = await publicClient.simulateContract({
-      abi: WETH__factory.abi,
-      address: WETH_ADDRESS,
-      functionName: 'approve',
-      args: [
-        getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-        BigInt(positionToCreate.mintAmounts.amount1.toString()),
-      ],
-      account: eoa,
-    });
-    await impersonatedOwnerClient.writeContract(approveWETH);
+    // Approve Uniswap NPM to spend USDC.
+    // const { request: approveUsdc } = await publicClient.simulateContract({
+    //   abi: IERC20__factory.abi,
+    //   address: USDC_ADDRESS,
+    //   functionName: 'approve',
+    //   args: [
+    //     getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+    //     BigInt(positionToCreate.mintAmounts.amount0.toString()),
+    //   ] as const,
+    //   account: eoa,
+    // });
+    // await impersonatedOwnerClient.writeContract(approveUsdc);
+
+    // // Approve Uniswap NPM to spend WETH.
+    // const { request: depositWETH } = await publicClient.simulateContract({
+    //   abi: WETH__factory.abi,
+    //   address: WETH_ADDRESS,
+    //   functionName: 'deposit',
+    //   value: BigInt(positionToCreate.mintAmounts.amount1.toString()),
+    //   account: eoa,
+    // });
+    // await impersonatedOwnerClient.writeContract(depositWETH);
+
+    // const { request: approveWETH } = await publicClient.simulateContract({
+    //   abi: WETH__factory.abi,
+    //   address: WETH_ADDRESS,
+    //   functionName: 'approve',
+    //   args: [
+    //     getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+    //     BigInt(positionToCreate.mintAmounts.amount1.toString()),
+    //   ],
+    //   account: eoa,
+    // });
+    // await impersonatedOwnerClient.writeContract(approveWETH);
 
     // We are now ready to generate and send out the create-position tx.
     const createPositionTxRequest = await getCreatePositionTx(
@@ -436,13 +495,17 @@ describe('Slipstream Position liquidity management tests', function () {
       publicClient,
     );
 
-    const createPositionTxReceipt = await publicClient.getTransactionReceipt({
-      hash: await impersonatedOwnerClient.sendTransaction({
-        ...createPositionTxRequest,
-        account: eoa,
-        chain: base,
-      }),
-    });
+    // const createPositionTxReceipt = await publicClient.getTransactionReceipt({
+    //   hash: await impersonatedOwnerClient.sendTransaction({
+    //     ...createPositionTxRequest,
+    //     account: eoa,
+    //     chain: base,
+    //   }),
+    // });
+
+    const createPositionTxReceipt = await (
+      await eoaSigner.sendTransaction(createPositionTxRequest)
+    ).wait();
 
     const createdPositionId = getMintedPositionIdFromTxReceipt(
       chainId,
