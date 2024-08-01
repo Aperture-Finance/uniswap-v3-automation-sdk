@@ -371,17 +371,21 @@ export async function viewCollectableTokenAmounts(
     );
   }
 
+  const feeOrTickSpacing =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? basicPositionInfo.tickSpacing
+      : basicPositionInfo.fee;
+
   const pool = getPoolContract(
     basicPositionInfo.token0,
     basicPositionInfo.token1,
-    basicPositionInfo.fee,
+    feeOrTickSpacing,
     chainId,
     amm,
     publicClient,
   );
   const opts = { blockNumber };
 
-  // TODO: replace with viem.getPositionDetails
   const [
     slot0,
     feeGrowthGlobal0X128,

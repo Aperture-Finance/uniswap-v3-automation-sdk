@@ -155,7 +155,7 @@ describe('SlipStreamAutoman transaction tests', function () {
     }
   }
 
-  it.only('Reinvest', async function () {
+  it('Reinvest', async function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;

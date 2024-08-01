@@ -1,6 +1,7 @@
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import hre from 'hardhat';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import hre, { ethers } from 'hardhat';
 import {
   Address,
   GetContractReturnType,
@@ -8,11 +9,13 @@ import {
   TestClient,
   WalletClient,
   getContract,
+  parseEther,
   walletActions,
 } from 'viem';
-import { base } from 'viem/chains';
+import { base, mainnet } from 'viem/chains';
 
 import {
+  ApertureSupportedChainId,
   IERC20__factory,
   WETH__factory,
   alignPriceToClosestUsableTick,
@@ -36,15 +39,21 @@ import {
   getToken,
   viewCollectableTokenAmounts,
 } from '../../../src/viem';
-import { UNIV3_AMM as amm, chainId, expect, resetFork } from '../common';
+import { expect, resetFork } from '../common';
 
-const eoa = '0xFf09eE65939bF6cfcB1aA44D7Fe0C237CB9ccBAb';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
 
-describe('Viem - Aerodrome Slipstream Position liquidity management tests', function () {
+describe('Slipstream Position liquidity management tests', function () {
+  const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
   const positionId = 293613n;
   const blockNumber = 17775451n;
+  const eoa = '0xFf09eE65939bF6cfcB1aA44D7Fe0C237CB9ccBAb';
+
+  const WHALE_ADDRESS = '0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A';
+
+  const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
+
   let USDC: Token, WETH: Token;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -68,15 +77,25 @@ describe('Viem - Aerodrome Slipstream Position liquidity management tests', func
     token1Amount: CurrencyAmount<Token>;
   };
 
-  before(async function () {
+  beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
+    await resetFork(testClient, blockNumber, process.env.BASE_RPC_URL);
+    await testClient.impersonateAccount({
+      address: eoa,
+    });
+    impersonatedOwnerClient = testClient.extend(walletActions);
 
-    // resetFork(
-    //   testClient,
-    //   blockNumber,
-    //   'https://base-mainnet.g.alchemy.com/v2/MpxnCbzEh385Sd2xMzXVipRtSDCukug-',
-    // );
+    const impersonatedWhaleSigner =
+      await ethers.getImpersonatedSigner(WHALE_ADDRESS);
+    await impersonatedWhaleSigner.sendTransaction({
+      to: eoa,
+      value: parseEther('1'),
+    });
+
+    nativeEtherBalanceBefore = await publicClient.getBalance({
+      address: eoa,
+    });
 
     usdtContract = getContract({
       address: USDC_ADDRESS,
@@ -90,17 +109,18 @@ describe('Viem - Aerodrome Slipstream Position liquidity management tests', func
       client: publicClient,
     });
 
-    usdcBalanceBefore = await usdtContract.read.balanceOf([eoa]);
-    wethBalanceBefore = await wethContract.read.balanceOf([eoa]);
-    nativeEtherBalanceBefore = await publicClient.getBalance({
-      address: eoa,
-    });
     position4BasicInfo = await getBasicPositionInfo(
       chainId,
       amm,
       positionId,
       publicClient,
     );
+
+    usdcBalanceBefore = await usdtContract.read.balanceOf([eoa]);
+    wethBalanceBefore = await wethContract.read.balanceOf([eoa]);
+
+    console.log('before usdc', usdcBalanceBefore);
+    console.log('before weth', wethBalanceBefore);
 
     position4ColletableTokenAmounts = await viewCollectableTokenAmounts(
       chainId,
@@ -110,21 +130,19 @@ describe('Viem - Aerodrome Slipstream Position liquidity management tests', func
       position4BasicInfo,
     );
 
+    console.log(
+      'position4ColletableTokenAmounts token0Amount',
+      position4ColletableTokenAmounts.token0Amount.toFixed(),
+    );
+    console.log(
+      'position4ColletableTokenAmounts token1Amount',
+      position4ColletableTokenAmounts.token1Amount.toFixed(),
+    );
+
     USDC = await getToken(USDC_ADDRESS, chainId, publicClient);
     WETH = await getToken(WETH_ADDRESS, chainId, publicClient);
-  });
 
-  beforeEach(async function () {
-    // resetFork(
-    //   testClient,
-    //   blockNumber,
-    //   'https://base-mainnet.g.alchemy.com/v2/MpxnCbzEh385Sd2xMzXVipRtSDCukug-',
-    // );
-
-    await testClient.impersonateAccount({
-      address: eoa,
-    });
-    impersonatedOwnerClient = testClient.extend(walletActions);
+    console.log('publicClient', await publicClient.getChainId());
   });
 
   it('Slipstream Collect fees', async function () {
@@ -142,7 +160,7 @@ describe('Viem - Aerodrome Slipstream Position liquidity management tests', func
       hash: await impersonatedOwnerClient.sendTransaction({
         ...txRequest,
         account: eoa,
-        chain: base,
+        chain: mainnet, // this is weird, but it works
       }),
     });
 
@@ -151,7 +169,31 @@ describe('Viem - Aerodrome Slipstream Position liquidity management tests', func
       position4BasicInfo.token0,
       position4BasicInfo.token1,
     );
+
+    // const eoaSigner = await ethers.getImpersonatedSigner(eoa);
+    // const txReceipt = await (await eoaSigner.sendTransaction(txRequest)).wait();
+
+    // const collectedFees = getCollectedFeesFromReceipt(
+    //   txReceipt,
+    //   position4BasicInfo.token0,
+    //   position4BasicInfo.token1,
+    // );
+
+    console.log(
+      'collectedFees token0Amount',
+      collectedFees.token0Amount.toFixed(),
+    );
+
+    console.log(
+      'collectedFees token1Amount',
+      collectedFees.token1Amount.toFixed(),
+    );
+
+    console.log('after usdc', await usdtContract.read.balanceOf([eoa]));
+    console.log('after weth', await wethContract.read.balanceOf([eoa]));
+
     expect(collectedFees).deep.equal(position4ColletableTokenAmounts);
+
     expect(await usdtContract.read.balanceOf([eoa])).to.equal(
       usdcBalanceBefore +
         BigInt(
