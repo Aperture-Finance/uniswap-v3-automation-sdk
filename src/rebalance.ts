@@ -37,6 +37,7 @@ export function convertRecurringCondition(
   tickLower?: number,
   tickUpper?: number,
 ): PriceCondition {
+  console.log(`tommyzhao in convertRecurringCondition, condition=${JSON.stringify(condition)}`);
   Big.DP = 30;
   if (condition.type === RecurringConditionTypeEnum.enum.RecurringPercentage) {
     if (
@@ -158,6 +159,7 @@ export function convertRecurringCondition(
           new Big(condition.gteToken0ValueProportion),
         )
       : undefined;
+    console.log(`tommyzhao gte=${gteTriggerPrice?.toString()}, lte=${lteTriggerPrice?.toString()}`);
     return {
       type: ConditionTypeEnum.enum.Price,
       durationSec: condition.durationSec,
