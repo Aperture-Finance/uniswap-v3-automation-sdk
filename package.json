@@ -40,9 +40,9 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@0xsequence/multicall": "^1.10.6",
+    "@0xsequence/multicall": "^1.10.8",
     "@aperture_finance/uniswap-v3-sdk": "3.11.0-APTR.1",
-    "aperture-lens": "^2.0.0",
+    "aperture-lens": "^2.0.1",
     "axios": "^1.7.2",
     "big.js": "^6.2.1",
     "bottleneck": "^2.19.5",

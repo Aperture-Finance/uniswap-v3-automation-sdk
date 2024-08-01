@@ -2,55 +2,55 @@
 # yarn lockfile v1
 
 
-"@0xsequence/abi@1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/abi/-/abi-1.10.6.tgz#c272296449aedc4e63e0048e373ba0ff23e0f37a"
-  integrity sha512-o5INBc8/NIlfQHpQF289YDaLmP3pIu9ZsI0ZC9v2ruQTGNZLkd0qu3iGH7y0dp8sbKJUbCgo1ThAvHo1pijEEg==
+"@0xsequence/abi@1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/abi/-/abi-1.10.8.tgz#d0f51163fde8c6dce1dd01acad34c3759d6f8481"
+  integrity sha512-jGZiHoDGzGhZmsVgFWdNfnputx7DoM4MWXgvrD7RTxJc9gPnCMw9yzu3PmzH5fE+LkvdMWvxKgMojR+9rgJkHQ==
 
-"@0xsequence/core@1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/core/-/core-1.10.6.tgz#0334ca28787c2ea0a7f108a5cbaa74793f08a02e"
-  integrity sha512-UtRdX8macH7F0eenXZgCqdkmRwvIbn5zbzLXmmbDxFD7BU70FFWCXAz1NHaBHgc339Z5tmGyALBohMtHtR6F7w==
+"@0xsequence/core@1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/core/-/core-1.10.8.tgz#e111169e1708bbf86afa9582232e28989ad7be41"
+  integrity sha512-Jc6jyFUu85Y5oGz7wUS4zKWNWczoBIjg2UMVC/+Fc6Us6Kdf+A7vrZ4t8IiyTrr+G9Oh4y4EqXGk1AsWNklfSg==
   dependencies:
-    "@0xsequence/abi" "1.10.6"
+    "@0xsequence/abi" "1.10.8"
 
-"@0xsequence/indexer@1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/indexer/-/indexer-1.10.6.tgz#80d4d2ffcffee2fda7f37764f4fb4bf2a23c4632"
-  integrity sha512-HMUS0H07hIuHxOPwis4D7qpF9VQfFnXz5E+VVYIk/1YpIa9SvRBrepqrJO2fwE8XtJYZ2ZMavPWWCTTHWAqNHQ==
+"@0xsequence/indexer@1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/indexer/-/indexer-1.10.8.tgz#ed013f790f2ee451199c944e2a0dbd4cf489f4ac"
+  integrity sha512-RXQP0VEuJJl55i8joJOnG9BEKGl5AHfz/qszg1ENRuMFlc4QaXu+LZUswcm8wmGDeOBCSne198XtnOFmWk0SqQ==
 
-"@0xsequence/multicall@^1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/multicall/-/multicall-1.10.6.tgz#41399d3be50d58787da3c7a38558d2ac37e77c4e"
-  integrity sha512-CPoeC45dh7L8gpw1QMAykyRrzUeCSiS89YqEXJL8wiPhuNMO/NORsOYDRVDRCRvklzIk3wW+fCYGDe32etCvZQ==
+"@0xsequence/multicall@^1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/multicall/-/multicall-1.10.8.tgz#1030cd221d89da662f7ee2dce872cea0b65ed068"
+  integrity sha512-d/WAGk5ieTi4Ol5MjajlRNbFX/FmTOqNRHAY+s4RCXuZSLIir9vs5GmvfjpIFGVLQhcjcrrIvRUeKWhaRW07YQ==
   dependencies:
-    "@0xsequence/abi" "1.10.6"
-    "@0xsequence/network" "1.10.6"
-    "@0xsequence/utils" "1.10.6"
+    "@0xsequence/abi" "1.10.8"
+    "@0xsequence/network" "1.10.8"
+    "@0xsequence/utils" "1.10.8"
 
-"@0xsequence/network@1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/network/-/network-1.10.6.tgz#8acafafa091fd1b48a035c151432f5b4de96ef5a"
-  integrity sha512-xOVxvLiWlRH377ZyODELwo6SNIV6itugm/20BWgO5qu9DMk2Wk77e4n3u02k/KIQTYS8WoROpFIQUKAs5LD4mw==
+"@0xsequence/network@1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/network/-/network-1.10.8.tgz#727579120242bb101d4221bab058482ab526c5cd"
+  integrity sha512-mx+DpJkAPxqq52INF3og+MrtCuoTjONLT5OLU598YuwVGT1MOUTGhNxk2+S87A3LPoe5erdl0AEFBNjQvWQ9sQ==
   dependencies:
-    "@0xsequence/core" "1.10.6"
-    "@0xsequence/indexer" "1.10.6"
-    "@0xsequence/relayer" "1.10.6"
-    "@0xsequence/utils" "1.10.6"
+    "@0xsequence/core" "1.10.8"
+    "@0xsequence/indexer" "1.10.8"
+    "@0xsequence/relayer" "1.10.8"
+    "@0xsequence/utils" "1.10.8"
 
-"@0xsequence/relayer@1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/relayer/-/relayer-1.10.6.tgz#99912735000fef93b41a00aa97875bd18e1f7a64"
-  integrity sha512-L894ogLr9EPrc0cfd/veb5W2Fq/aGJSwU3VPiolJBDeOVczW9G1xkcukzD691LZsrWDf+azV32jaOp+l3IqCVA==
+"@0xsequence/relayer@1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/relayer/-/relayer-1.10.8.tgz#581a90527bea0fc2b8f17e7dfb2ecd838d89b002"
+  integrity sha512-jiz7dIvexElutBpVRJNV0D20w66OY/nr7Ji62jOce1t2SN0jXXtptpsCNLfkOsp+2bjprebn4uGgqD/62vc3jw==
   dependencies:
-    "@0xsequence/abi" "1.10.6"
-    "@0xsequence/core" "1.10.6"
-    "@0xsequence/utils" "1.10.6"
+    "@0xsequence/abi" "1.10.8"
+    "@0xsequence/core" "1.10.8"
+    "@0xsequence/utils" "1.10.8"
 
-"@0xsequence/utils@1.10.6":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@0xsequence/utils/-/utils-1.10.6.tgz#e002da0fe8be1d504901898c13f2a09c618fe4a5"
-  integrity sha512-9+kk4Nf7HOxJQI/qagYLDAS1uXL5Kh9ZvKhwjFhy42GovYsLSryYFOJu0PESydHYdbvZv2RoPoCPjBdKn9zkgA==
+"@0xsequence/utils@1.10.8":
+  version "1.10.8"
+  resolved "https://registry.yarnpkg.com/@0xsequence/utils/-/utils-1.10.8.tgz#82f9b596dcb4d0426ac40db4ad147828d6639f61"
+  integrity sha512-H8K9kt7cQrZp+a6uKfnKeBNRL/LRYPPULs0yA/wn4OVVPM03PftZxw9wrqGFOUKzASfyidNQkpzJ8/VQCyuWcg==
   dependencies:
     js-base64 "^3.7.2"
 
@@ -72,10 +72,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aperture_finance/uni-v3-lib@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@aperture_finance/uni-v3-lib/-/uni-v3-lib-3.0.2.tgz#c0be18fa3035685415230a946acf848807b289c8"
-  integrity sha512-LvROLUy8BqVJ9BBLHGUZIyI2iTjfej7BCOiQ+N836viZfJZ1a36zZdl6E1SS4hMX9VLFJaMHjbt+RaYu7m80jA==
+"@aperture_finance/uni-v3-lib@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@aperture_finance/uni-v3-lib/-/uni-v3-lib-3.0.3.tgz#96cd879c25983ffdceeb6c1f235bcb3ce7f3678a"
+  integrity sha512-vl+ZlE2/Rp52qQZ09n1yDv9z6YLlRJrfHrZc6Bu3tb6EsWrD5dDgYp0dBbOrm0gBzSiSFA0DLEOrafzQARkqCg==
   dependencies:
     "@openzeppelin/contracts" "^5.0.2"
     "@pancakeswap/v3-core" "^1.0.2"
@@ -3831,12 +3831,12 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aperture-lens@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-2.0.0.tgz#b8830dd219bc6130b4104b5c15513479d8464097"
-  integrity sha512-eN8QvpmOL5mdpUJ3/ctugMS04IHKYuEXpuA1jpG07UpF84XQ4r/6NOpnygTQw/XBHIBuocZp8FXU0k7ZW+xW0w==
+aperture-lens@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-2.0.1.tgz#2f974aa067867962aab80d9a33decb6cf3ed774f"
+  integrity sha512-dDqXyqDN7VoHi9azRKhlVRkUZp495wMecFHR8fcgmQiz8q5C0IX63+rwTfGtzeN3M/5l3itirskIcu5VJNDCnA==
   dependencies:
-    "@aperture_finance/uni-v3-lib" "^3.0.2"
+    "@aperture_finance/uni-v3-lib" "^3.0.3"
     "@openzeppelin/contracts" "^5.0.2"
     ethers "5.7.2"
     viem "^2.8.4"

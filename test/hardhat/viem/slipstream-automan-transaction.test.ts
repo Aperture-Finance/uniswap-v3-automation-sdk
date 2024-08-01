@@ -177,13 +177,13 @@ describe('SlipStreamAutoman transaction tests', function () {
     const liquidityAfterReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
+    expect(liquidityBeforeReinvest.toString()).to.equal('13589538797482293814');
+    expect(liquidityAfterReinvest.toString()).to.equal('14018556727424907792');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
         chainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        AutomatedMarketMakerEnum.enum.SLIPSTREAM,
         positionId.toString(),
         /*feeToPrincipalRatioThreshold=*/ 0.1,
         /*slippage=*/ 0.05,
@@ -196,8 +196,8 @@ describe('SlipStreamAutoman transaction tests', function () {
         slippage: 0.05,
         type: ActionTypeEnum.enum.Reinvest,
       },
-      chainId: 1,
-      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+      chainId,
+      amm: AutomatedMarketMakerEnum.enum.SLIPSTREAM,
       condition: {
         feeToPrincipalRatioThreshold: 0.1,
         type: ConditionTypeEnum.enum.AccruedFees,
