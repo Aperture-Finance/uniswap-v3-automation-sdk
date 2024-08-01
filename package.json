@@ -1,7 +1,7 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.6.1",
-  "description": "SDK for Aperture's Uniswap V3 automation platform",
+  "version": "3.7.1",
+  "description": "SDK for Aperture's CLMM automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
   "bugs": {
@@ -83,7 +83,7 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "hardhat": "^2.22.6",
+    "hardhat": "^2.22.7",
     "jest": "^29.7.0",
     "prettier": "^3.3.3",
     "ts-node": "10.9.2",

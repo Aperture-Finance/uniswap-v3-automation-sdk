@@ -1,10 +1,14 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import { MintParams, getAutomanMintOptimalCalldata } from '../automan';
+import {
+  SlipStreamMintParams,
+  UniV3MintParams,
+  getAutomanMintOptimalCalldata,
+} from '../automan';
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
 import { SimulatedAmounts } from './types';
@@ -31,7 +35,7 @@ export async function getOptimalMintTx(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  fee: FeeAmount,
+  feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
   recipient: Address,
@@ -62,7 +66,14 @@ export async function getOptimalMintTx(
   const token0 = (token0Amount.currency as Token).address as Address;
   const token1 = (token1Amount.currency as Token).address as Address;
   const position = new Position({
-    pool: await getPool(token0, token1, fee, chainId, amm, publicClient),
+    pool: await getPool(
+      token0,
+      token1,
+      feeOrTickSpacing,
+      chainId,
+      amm,
+      publicClient,
+    ),
     liquidity: liquidity.toString(),
     tickLower,
     tickUpper,
@@ -70,21 +81,37 @@ export async function getOptimalMintTx(
   const { amount0, amount1 } = position.mintAmountsWithSlippage(
     new Percent(Math.floor(slippage * 1e6), 1e6),
   );
-  const mintParams: MintParams = {
-    token0,
-    token1,
-    fee,
-    tickLower,
-    tickUpper,
-    amount0Desired: BigInt(token0Amount.quotient.toString()),
-    amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: BigInt(amount0.toString()),
-    amount1Min: BigInt(amount1.toString()),
-    recipient,
-    deadline,
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0,
+          token1,
+          tickSpacing: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: BigInt(amount0.toString()),
+          amount1Min: BigInt(amount1.toString()),
+          recipient,
+          deadline,
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0,
+          token1,
+          fee: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: BigInt(amount0.toString()),
+          amount1Min: BigInt(amount1.toString()),
+          recipient,
+          deadline,
+        };
 
-  const data = getAutomanMintOptimalCalldata(mintParams, swapData);
+  const data = getAutomanMintOptimalCalldata(amm, mintParams, swapData);
 
   return {
     tx: {

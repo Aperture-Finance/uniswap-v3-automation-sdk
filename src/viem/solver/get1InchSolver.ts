@@ -1,5 +1,4 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { Address, Hex } from 'viem';
 
 import { getApproveTarget } from '../aggregator';
@@ -11,8 +10,18 @@ import { SwapRoute } from './types';
 export const get1InchSolver = (): ISolver => {
   return {
     optimalMint: async (props) => {
-      const { chainId, amm, mintParams, slippage, poolAmountIn, zeroForOne } =
-        props;
+      const {
+        chainId,
+        amm,
+        token0,
+        token1,
+        feeOrTickSpacing,
+        tickLower,
+        tickUpper,
+        slippage,
+        poolAmountIn,
+        zeroForOne,
+      } = props;
 
       const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
       if (!optimalSwapRouter) {
@@ -22,8 +31,8 @@ export const get1InchSolver = (): ISolver => {
       // get a quote from 1inch
       const { tx, protocols } = await quote(
         chainId,
-        zeroForOne ? mintParams.token0 : mintParams.token1,
-        zeroForOne ? mintParams.token1 : mintParams.token0,
+        zeroForOne ? token0 : token1,
+        zeroForOne ? token1 : token0,
         poolAmountIn.toString(),
         optimalSwapRouter,
         slippage * 100,
@@ -35,11 +44,11 @@ export const get1InchSolver = (): ISolver => {
         swapData: encodeOptimalSwapData(
           chainId,
           amm,
-          mintParams.token0,
-          mintParams.token1,
-          mintParams.fee as FeeAmount,
-          mintParams.tickLower,
-          mintParams.tickUpper,
+          token0,
+          token1,
+          feeOrTickSpacing,
+          tickLower,
+          tickUpper,
           zeroForOne,
           approveTarget,
           tx.to,

@@ -59,11 +59,11 @@ export async function increaseLiquidityOptimalV2(
 
   const token0 = position.pool.token0.address as Address;
   const token1 = position.pool.token1.address as Address;
-  const {
-    tickLower,
-    tickUpper,
-    pool: { fee },
-  } = position;
+  const { tickLower, tickUpper } = position;
+  const feeOrTickSpacing =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? position.pool.tickSpacing
+      : position.pool.fee;
 
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
     chainId,
@@ -71,7 +71,7 @@ export async function increaseLiquidityOptimalV2(
     publicClient,
     token0,
     token1,
-    fee,
+    feeOrTickSpacing,
     tickLower,
     tickUpper,
     increaseParams.amount0Desired,
@@ -87,13 +87,11 @@ export async function increaseLiquidityOptimalV2(
         chainId,
         amm,
         fromAddress,
-        mintParams: {
-          token0,
-          token1,
-          fee,
-          tickLower,
-          tickUpper,
-        },
+        token0,
+        token1,
+        feeOrTickSpacing,
+        tickLower,
+        tickUpper,
         slippage,
         poolAmountIn,
         zeroForOne,
