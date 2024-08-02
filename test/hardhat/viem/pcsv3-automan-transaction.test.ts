@@ -21,11 +21,14 @@ import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
+  ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
+  IOCKEY_LOGGER,
   PCSV3Automan,
   PCSV3Automan__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
+  ioc,
 } from '../../../src';
 import {
   E_Solver,
@@ -62,6 +65,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
+
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
   const nonForkClient = createPublicClient({
     chain: bsc,
     transport: http('https://bsc-rpc.publicnode.com'),
@@ -304,8 +309,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         publicClient,
         [E_Solver.OneInch],
         existingPosition,
-        undefined,
-        false,
+        undefined /**blockNumber */,
+        false /** feesOn */,
       )
     )[0];
     const { tx: txRequest } = await getRebalanceTx(

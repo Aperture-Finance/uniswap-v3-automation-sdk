@@ -2,8 +2,6 @@ import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex } from 'viem';
 
-import { SlipStreamMintParams, UniV3MintParams } from '../automan';
-
 type SelectedProtocol = {
   name: string;
   part: number;
