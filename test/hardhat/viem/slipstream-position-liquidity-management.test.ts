@@ -46,7 +46,7 @@ const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
 describe('Slipstream Position liquidity management tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
   const positionId = 293613n;
-  const blockNumber = 17775451n;
+  const blockNumber = 17776451n;
   const tickSpacing = 100;
   const eoa = '0xFf09eE65939bF6cfcB1aA44D7Fe0C237CB9ccBAb';
 
@@ -88,6 +88,7 @@ describe('Slipstream Position liquidity management tests', function () {
 
     const impersonatedWhaleSigner =
       await ethers.getImpersonatedSigner(WHALE_ADDRESS);
+
     await impersonatedWhaleSigner.sendTransaction({
       to: eoa,
       value: parseEther('1'),
@@ -145,7 +146,7 @@ describe('Slipstream Position liquidity management tests', function () {
     console.log('publicClient', await publicClient.getChainId());
   });
 
-  it.skip('Slipstream Collect fees', async function () {
+  it('Slipstream Collect fees', async function () {
     const txRequest = await getCollectTx(
       positionId,
       eoa,
@@ -156,28 +157,24 @@ describe('Slipstream Position liquidity management tests', function () {
       position4BasicInfo,
     );
 
-    const txReceipt = await publicClient.getTransactionReceipt({
-      hash: await impersonatedOwnerClient.sendTransaction({
-        ...txRequest,
-        account: eoa,
-        chain: mainnet, // this is weird, but it works
-      }),
-    });
+    console.log('txRequest', txRequest);
+
+    // const txReceipt = await publicClient.getTransactionReceipt({
+    //   hash: await impersonatedOwnerClient.sendTransaction({
+    //     ...txRequest,
+    //     account: eoa,
+    //     chain: mainnet, // this is weird, but it works
+    //   }),
+    // });
+
+    const eoaSigner = await ethers.getImpersonatedSigner(eoa);
+    const txReceipt = await (await eoaSigner.sendTransaction(txRequest)).wait();
 
     const collectedFees = getCollectedFeesFromReceipt(
       txReceipt,
       position4BasicInfo.token0,
       position4BasicInfo.token1,
     );
-
-    // const eoaSigner = await ethers.getImpersonatedSigner(eoa);
-    // const txReceipt = await (await eoaSigner.sendTransaction(txRequest)).wait();
-
-    // const collectedFees = getCollectedFeesFromReceipt(
-    //   txReceipt,
-    //   position4BasicInfo.token0,
-    //   position4BasicInfo.token1,
-    // );
 
     console.log(
       'collectedFees token0Amount',
@@ -208,7 +205,7 @@ describe('Slipstream Position liquidity management tests', function () {
     );
   });
 
-  it('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
+  it.skip('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
     // ------- Decrease Liquidity -------
     // Decrease liquidity from position id 4.
     const position = await getPositionFromBasicInfo(

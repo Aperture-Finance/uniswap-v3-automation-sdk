@@ -410,6 +410,7 @@ export async function viewCollectableTokenAmounts(
 
   let feeGrowthInside0X128: bigint, feeGrowthInside1X128: bigint;
   // https://github.com/Uniswap/v4-core/blob/f630c8ca8c669509d958353200953762fd15761a/contracts/libraries/Pool.sol#L566
+
   if (tick < basicPositionInfo.tickLower) {
     feeGrowthInside0X128 =
       feeGrowthOutside0X128Lower - feeGrowthOutside0X128Upper;
@@ -429,6 +430,14 @@ export async function viewCollectableTokenAmounts(
       feeGrowthGlobal1X128 -
       feeGrowthOutside1X128Lower -
       feeGrowthOutside1X128Upper;
+
+    console.log('feeGrowthGlobal1X128', feeGrowthGlobal0X128);
+    console.log('feeGrowthOutside1X128Lower', feeGrowthOutside0X128Lower);
+    console.log('feeGrowthOutside1X128Upper', feeGrowthOutside0X128Upper);
+
+    console.log('feeGrowthGlobal1X128', feeGrowthGlobal1X128);
+    console.log('feeGrowthOutside1X128Lower', feeGrowthOutside1X128Lower);
+    console.log('feeGrowthOutside1X128Upper', feeGrowthOutside1X128Upper);
   }
   const [
     ,
@@ -444,6 +453,9 @@ export async function viewCollectableTokenAmounts(
     tokensOwed0,
     tokensOwed1,
   ] = position;
+
+  console.log('position', position);
+
   const [fees0, fees1] = PositionLibrary.getTokensOwed(
     JSBI.BigInt(feeGrowthInside0LastX128.toString()),
     JSBI.BigInt(feeGrowthInside1LastX128.toString()),
@@ -451,6 +463,16 @@ export async function viewCollectableTokenAmounts(
     JSBI.BigInt(feeGrowthInside0X128.toString()),
     JSBI.BigInt(feeGrowthInside1X128.toString()),
   );
+
+  console.log('feeGrowthInside0LastX128', feeGrowthInside0LastX128.toString());
+  console.log('feeGrowthInside1LastX128', feeGrowthInside1LastX128.toString());
+  console.log('feeGrowthInside0X128', feeGrowthInside0X128.toString());
+  console.log('feeGrowthInside1X128', feeGrowthInside1X128.toString());
+
+  console.log('fees0', fees0.toString());
+  console.log('fees1', fees1.toString());
+  console.log('tokensOwed0', tokensOwed0.toString());
+  console.log('tokensOwed1', tokensOwed1.toString());
   return {
     token0Amount: CurrencyAmount.fromRawAmount(
       basicPositionInfo.token0,
