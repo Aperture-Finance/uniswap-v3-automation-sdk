@@ -44,6 +44,8 @@ import {
 } from '../../../src/viem';
 import { expect, hardhatForkProvider, resetFork } from '../common';
 
+// TODO: Unify test cases for all AMMs (UniV3, PCSV3 and SlipStream).
+
 // Tests for SlipStreamAutoman transactions on a forked Base mainnet.
 describe('SlipStreamAutoman transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
@@ -273,6 +275,76 @@ describe('SlipStreamAutoman transaction tests', function () {
       liquidity: '7008927949436597297',
       tickLower: 78600,
       tickUpper: 79400,
+    });
+  });
+
+  // This test is flaky due to mismatch between the forked state and the most recent live network state which 1inch API operates on.
+  // TODO: Make this test stable and enable it for all AMMs.
+  it.skip('Rebalance with 1inch', async function () {
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    const { swapData, liquidity } = (
+      await getRebalanceSwapInfo(
+        chainId,
+        amm,
+        eoa,
+        positionId,
+        240000,
+        300000,
+        0.01 /*slippageTolerance*/,
+        ['60000', '3000'],
+        publicClient,
+        [E_Solver.OneInch],
+        existingPosition,
+        undefined,
+        false,
+      )
+    )[0];
+    const { tx: txRequest } = await getRebalanceTx(
+      chainId,
+      amm,
+      eoa,
+      positionId,
+      240000,
+      300000,
+      /*slippageTolerance=*/ new Percent(1, 100),
+      /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
+      publicClient,
+      swapData,
+      liquidity,
+      0n /** feeBips */,
+      existingPosition.position,
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    const txReceipt = await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+    const newPositionId = getMintedPositionIdFromTxReceipt(
+      chainId,
+      amm,
+      txReceipt,
+      eoa,
+    )!;
+    expect(
+      await getBasicPositionInfo(chainId, amm, newPositionId, publicClient),
+    ).to.deep.contains({
+      token0: existingPosition.pool.token0,
+      token1: existingPosition.pool.token1,
+      fee: existingPosition.pool.fee,
+      tickSpacing: existingPosition.pool.tickSpacing,
+      tickLower: 240000,
+      tickUpper: 300000,
     });
   });
 

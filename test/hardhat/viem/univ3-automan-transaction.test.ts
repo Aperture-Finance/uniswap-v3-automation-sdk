@@ -316,14 +316,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
       0n /** feeBips */,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -347,6 +345,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
+  // TODO: Make this stable and enable for all AMMs.
   // Unit test with 1inch is known to be unstable, skip it for now.
   it.skip('Optimal mint with 1inch', async function () {
     const pool = await getPool(
@@ -507,14 +506,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -541,6 +538,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
+  // TODO: Make this stable and enable for all AMMs.
   // Unit test with 1inch is known to be unstable, skip it for now.
   it.skip('Increase liquidity optimal with 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
@@ -689,14 +687,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     await publicClient.getTransactionReceipt({

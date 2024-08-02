@@ -3,6 +3,7 @@ import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { parseEther } from 'viem';
 
 import {
   ApertureSupportedChainId,
@@ -542,7 +543,7 @@ describe('Viem - Routing tests', function () {
     console.log(`1 ETH -> ${quote.quoteDecimals} USDC`);
   });
 
-  it('Fetch quote swapping 1 ETH for USDC on Manta Pacific mainet', async function () {
+  it('Fetch quote swapping 0.01 ETH for USDC on Manta Pacific mainet', async function () {
     const quote = await fetchQuoteFromSpecifiedRoutingApiInfo(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       {
@@ -551,7 +552,7 @@ describe('Viem - Routing tests', function () {
       },
       'ETH',
       '0xb73603C5d87fA094B7314C74ACE2e64D165016fb',
-      BigInt(1e18),
+      parseEther('0.01'),
       'exactIn',
     );
     expect(quote.amountDecimals === '1');
