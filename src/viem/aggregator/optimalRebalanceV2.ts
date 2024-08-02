@@ -91,7 +91,9 @@ export async function optimalRebalanceV2(
       publicClient,
       token0,
       token1,
-      position.fee,
+      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+        ? position.tickSpacing
+        : position.fee,
       newTickLower,
       newTickUpper,
       receive0,

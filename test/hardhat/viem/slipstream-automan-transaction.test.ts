@@ -1,19 +1,20 @@
-import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import { nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { BigNumber } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre, { ethers } from 'hardhat';
-import JSBI from 'jsbi';
 import {
   Address,
   PublicClient,
   TestClient,
   WalletClient,
+  createPublicClient,
+  http,
   parseEther,
   walletActions,
 } from 'viem';
-import { mainnet } from 'viem/chains';
+import { base, mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -41,12 +42,7 @@ import {
   getRebalanceTx,
   getReinvestTx,
 } from '../../../src/viem';
-import {
-  expect,
-  getInfuraClient,
-  hardhatForkProvider,
-  resetFork,
-} from '../common';
+import { expect, hardhatForkProvider, resetFork } from '../common';
 
 // Tests for SlipStreamAutoman transactions on a forked Base mainnet.
 describe('SlipStreamAutoman transaction tests', function () {
@@ -63,6 +59,10 @@ describe('SlipStreamAutoman transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
+  const nonForkClient = createPublicClient({
+    chain: base,
+    transport: http('https://base-rpc.publicnode.com'),
+  });
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
@@ -134,10 +134,9 @@ describe('SlipStreamAutoman transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const infuraClient = getInfuraClient();
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, infuraClient),
-      getERC20Overrides(token1, from, to, amount1, infuraClient),
+      getERC20Overrides(token0, from, to, amount0, nonForkClient),
+      getERC20Overrides(token1, from, to, amount1, nonForkClient),
     ]);
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
@@ -155,7 +154,7 @@ describe('SlipStreamAutoman transaction tests', function () {
     }
   }
 
-  it.only('Reinvest', async function () {
+  it('Reinvest', async function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
@@ -221,8 +220,8 @@ describe('SlipStreamAutoman transaction tests', function () {
         amm,
         eoa,
         positionId,
-        240000,
-        300000,
+        78600,
+        79400,
         0.01 /*slippageTolerance*/,
         ['60000', '3000'],
         publicClient,
@@ -237,8 +236,8 @@ describe('SlipStreamAutoman transaction tests', function () {
       amm,
       eoa,
       positionId,
-      240000,
-      300000,
+      78600,
+      79400,
       /*slippageTolerance=*/ new Percent(1, 100),
       /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
@@ -247,14 +246,12 @@ describe('SlipStreamAutoman transaction tests', function () {
       0n /** feeBips */,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -273,184 +270,17 @@ describe('SlipStreamAutoman transaction tests', function () {
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
       tickSpacing: existingPosition.pool.tickSpacing,
-      liquidity: '13291498909567',
-      tickLower: 240000,
-      tickUpper: 300000,
-    });
-  });
-
-  it('Rebalance with 1inch', async function () {
-    const existingPosition = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-    );
-    const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
-        chainId,
-        amm,
-        eoa,
-        positionId,
-        240000,
-        300000,
-        0.01 /*slippageTolerance*/,
-        ['60000', '3000'],
-        publicClient,
-        [E_Solver.OneInch],
-        existingPosition,
-        undefined,
-        false,
-      )
-    )[0];
-    const { tx: txRequest } = await getRebalanceTx(
-      chainId,
-      amm,
-      eoa,
-      positionId,
-      240000,
-      300000,
-      /*slippageTolerance=*/ new Percent(1, 100),
-      /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
-      publicClient,
-      swapData,
-      liquidity,
-      0n /** feeBips */,
-      existingPosition.position,
-    );
-    // Owner of position id 4 sets Automan as operator.
-    await testClient.impersonateAccount({ address: eoa });
-    const walletClient = testClient.extend(walletActions);
-    const txHash = await walletClient.sendTransaction({
-      to: txRequest.to,
-      data: txRequest.data,
-      account: txRequest.from,
-      // from: txRequest.from,
-      chain: walletClient.chain,
-    });
-    const txReceipt = await publicClient.getTransactionReceipt({
-      hash: txHash,
-    });
-    const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
-      txReceipt,
-      eoa,
-    )!;
-    expect(
-      await getBasicPositionInfo(chainId, amm, newPositionId, publicClient),
-    ).to.deep.contains({
-      token0: existingPosition.pool.token0,
-      token1: existingPosition.pool.token1,
-      fee: existingPosition.pool.fee,
-      tickSpacing: existingPosition.pool.tickSpacing,
-      tickLower: 240000,
-      tickUpper: 300000,
-    });
-  });
-
-  // Unit test with 1inch is known to be unstable, skip it for now.
-  it.skip('Optimal mint with 1inch', async function () {
-    const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
-      chainId,
-      amm,
-      publicClient,
-    );
-    const tickLower = nearestUsableTick(
-      pool.tickCurrent - 1000,
-      pool.tickSpacing,
-    );
-    const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 1000,
-      pool.tickSpacing,
-    );
-    const token0Amount = CurrencyAmount.fromRawAmount(
-      pool.token0,
-      '1000000000',
-    );
-    const token1Amount = CurrencyAmount.fromRawAmount(
-      pool.token1,
-      '1000000000000000000',
-    );
-    await dealERC20(
-      pool.token0.address as Address,
-      pool.token1.address as Address,
-      BigInt(token0Amount.quotient.toString()),
-      BigInt(token1Amount.quotient.toString()),
-      eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
-    );
-    const { swapData, liquidity } = (
-      await getOptimalMintSwapInfo(
-        chainId,
-        amm,
-        token0Amount,
-        token1Amount,
-        pool.fee,
-        tickLower,
-        tickUpper,
-        eoa,
-        0.5,
-        publicClient,
-        [E_Solver.OneInch],
-      )
-    )[0];
-    const { tx: txRequest } = await getOptimalMintTx(
-      chainId,
-      amm,
-      token0Amount,
-      token1Amount,
-      pool.fee,
-      tickLower,
-      tickUpper,
-      eoa,
-      /*deadlineEpochSeconds=*/ BigInt(Math.floor(Date.now() / 1000)),
-      0.5,
-      publicClient,
-      swapData,
-      liquidity,
-    );
-    // Owner of position id 4 sets Automan as operator.
-    await testClient.impersonateAccount({ address: eoa });
-    const walletClient = testClient.extend(walletActions);
-    const txHash = await walletClient.sendTransaction({
-      to: txRequest.to,
-      data: txRequest.data,
-      account: txRequest.from,
-      chain: walletClient.chain,
-    });
-    const txReceipt = await publicClient.getTransactionReceipt({
-      hash: txHash,
-    });
-    const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
-      txReceipt,
-      eoa,
-    )!;
-    const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
-      newPositionId,
-      publicClient,
-    );
-    expect(newPosition).to.deep.contains({
-      token0: pool.token0,
-      token1: pool.token1,
-      fee: pool.fee,
-      tickLower,
-      tickUpper,
+      liquidity: '7008927949436597297',
+      tickLower: 78600,
+      tickUpper: 79400,
     });
   });
 
   it('Optimal mint without 1inch', async function () {
     const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
+      '0x4200000000000000000000000000000000000006', // WETH on Base mainnet,
+      '0x940181a94A35A4569E4529A3CDfB74e38FD98631', // AERO on Base mainnet,
+      /*feeOrTickSpacing=*/ 200,
       chainId,
       amm,
       publicClient,
@@ -463,9 +293,10 @@ describe('SlipStreamAutoman transaction tests', function () {
       pool.tickCurrent + 1000,
       pool.tickSpacing,
     );
+    // 1 WETH and 1 AERO.
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
-      '1000000000',
+      '1000000000000000000',
     );
     const token1Amount = CurrencyAmount.fromRawAmount(
       pool.token1,
@@ -485,7 +316,7 @@ describe('SlipStreamAutoman transaction tests', function () {
         amm,
         token0Amount,
         token1Amount,
-        pool.fee,
+        pool.tickSpacing,
         tickLower,
         tickUpper,
         eoa,
@@ -499,7 +330,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       amm,
       token0Amount,
       token1Amount,
-      pool.fee,
+      pool.tickSpacing,
       tickLower,
       tickUpper,
       eoa,
@@ -509,14 +340,12 @@ describe('SlipStreamAutoman transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -538,99 +367,11 @@ describe('SlipStreamAutoman transaction tests', function () {
       token0: pool.token0,
       token1: pool.token1,
       fee: pool.fee,
+      tickSpacing: pool.tickSpacing,
       tickLower,
       tickUpper,
+      liquidity: '645125816475133179687',
     });
-  });
-
-  // Unit test with 1inch is known to be unstable, skip it for now.
-  it.skip('Increase liquidity optimal with 1inch', async function () {
-    const existingPosition = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-    );
-    const pool = existingPosition.pool;
-    const token0Amount = CurrencyAmount.fromRawAmount(
-      pool.token0,
-      '1000000000',
-    );
-    const token1Amount = CurrencyAmount.fromRawAmount(
-      pool.token1,
-      '1000000000000000000',
-    );
-    await dealERC20(
-      pool.token0.address as Address,
-      pool.token1.address as Address,
-      BigInt(token0Amount.quotient.toString()),
-      BigInt(token1Amount.quotient.toString()),
-      eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
-    );
-    const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
-        {
-          tokenId: Number(positionId),
-          slippageTolerance: new Percent(5, 1000),
-          deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-        },
-        chainId,
-        amm,
-        token0Amount,
-        token1Amount,
-        eoa,
-        publicClient,
-        [E_Solver.OneInch],
-        existingPosition.position,
-      )
-    )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
-      {
-        tokenId: Number(positionId),
-        slippageTolerance: new Percent(50, 100),
-        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-      },
-      chainId,
-      amm,
-      token0Amount,
-      token1Amount,
-      eoa,
-      publicClient,
-      swapData,
-      liquidity,
-      existingPosition.position,
-    );
-
-    // Owner of position id 4 sets Automan as operator.
-    await testClient.impersonateAccount({ address: eoa });
-    const walletClient = testClient.extend(walletActions);
-    const txHash = await walletClient.sendTransaction({
-      to: txRequest.to,
-      data: txRequest.data,
-      account: txRequest.from,
-      // from: txRequest.from,
-      chain: walletClient.chain,
-    });
-    await publicClient.getTransactionReceipt({
-      hash: txHash,
-    });
-    const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-    );
-    expect(newPosition).to.deep.contains({
-      token0: pool.token0,
-      token1: pool.token1,
-      fee: pool.fee,
-      tickLower: existingPosition.tickLower,
-      tickUpper: existingPosition.tickUpper,
-    });
-    expect(
-      JSBI.GT(newPosition.liquidity!, existingPosition.liquidity!),
-    ).to.equal(true);
   });
 
   it('Increase liquidity optimal without 1inch', async function () {
@@ -643,7 +384,7 @@ describe('SlipStreamAutoman transaction tests', function () {
     const pool = existingPosition.pool;
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
-      '1000000000',
+      '1000000000000000000',
     );
     const token1Amount = CurrencyAmount.fromRawAmount(
       pool.token1,
@@ -691,14 +432,12 @@ describe('SlipStreamAutoman transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     await publicClient.getTransactionReceipt({
@@ -710,12 +449,15 @@ describe('SlipStreamAutoman transaction tests', function () {
       positionId,
       publicClient,
     );
-    expect(newPosition).to.deep.contains({
+    expect(existingPosition.liquidity).to.equal('13589538797482293814');
+    expect(newPosition).to.deep.equal({
       token0: pool.token0,
       token1: pool.token1,
       fee: pool.fee,
+      tickSpacing: pool.tickSpacing,
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
+      liquidity: '3825661781316041551568',
     });
   });
 });
