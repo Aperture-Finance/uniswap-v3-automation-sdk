@@ -1,8 +1,6 @@
 import { Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { getEip1167Create2Address } from 'eip1167';
-import { ethers } from 'ethers';
-import stringify from 'json-stable-stringify';
 import {
   Address,
   Hex,
@@ -14,54 +12,12 @@ import {
 } from 'viem';
 
 import { getAMMInfo } from './chain';
-import {
-  ApertureSupportedChainId,
-  CreateTriggerPayload,
-  DeleteTriggerPayload,
-  UpdateTriggerPayload,
-} from './interfaces';
+import { ApertureSupportedChainId } from './interfaces';
 
 const PCS_V3_POOL_INIT_CODE_HASH: Hex =
   '0x6ce8eb472fa82df5469c6ab6d485f17c3ad13c8cd7af59b3d4a8026c5ce0f7e2';
 const UNISWAP_V3_POOL_INIT_CODE_HASH: Hex =
   '0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54';
-
-/**
- * Generate the payload message of a trigger to be signed.
- * @param payload The trigger payload.
- * @returns The payload message.
- */
-export function generatePayloadMessage(
-  payload: CreateTriggerPayload | DeleteTriggerPayload | UpdateTriggerPayload,
-): string {
-  return stringify(payload);
-}
-
-/**
- * Sign a payload message with an ethers signer.
- * @param payloadMessage The payload message to sign.
- * @param signer The ethers signer.
- * @returns The signature.
- */
-export function signPayloadMessage(
-  payloadMessage: string,
-  signer: ethers.Signer,
-): Promise<string> {
-  return signer.signMessage(payloadMessage);
-}
-
-/**
- * Sign a trigger payload with an ethers signer.
- * @param payload The trigger payload.
- * @param signer The ethers signer.
- * @returns The signature.
- */
-export function signPayload(
-  payload: CreateTriggerPayload | DeleteTriggerPayload | UpdateTriggerPayload,
-  signer: ethers.Signer,
-): Promise<string> {
-  return signPayloadMessage(generatePayloadMessage(payload), signer);
-}
 
 /**
  * Computes a pool address.
