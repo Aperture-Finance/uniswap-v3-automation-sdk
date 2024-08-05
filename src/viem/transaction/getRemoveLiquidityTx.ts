@@ -1,6 +1,7 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import {
   NonfungiblePositionManager,
+  Position,
   RemoveLiquidityOptions,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { viem } from 'aperture-lens';
@@ -35,31 +36,27 @@ export async function getRemoveLiquidityTx(
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
   receiveNativeEtherIfApplicable?: boolean,
-  positionState?: PositionStateStruct,
+  positionDetail?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<TransactionRequest> {
-  if (positionState === undefined) {
-    positionState = await viem.getPositionDetails(
+  if (positionDetail === undefined) {
+    positionDetail = await PositionDetails.fromPositionId(
+      chainId,
       amm,
-      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       BigInt(removeLiquidityOptions.tokenId.toString()),
       client,
     );
   }
-
-  const { position } = PositionDetails.fromPositionStateStruct(
-    chainId,
-    positionState,
-  );
 
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
     amm,
     BigInt(removeLiquidityOptions.tokenId.toString()),
     client,
-    positionState,
+    positionDetail,
     blockNumber,
   );
+  const { position } = positionDetail;
   const { calldata, value } = NonfungiblePositionManager.removeCallParameters(
     position,
     {

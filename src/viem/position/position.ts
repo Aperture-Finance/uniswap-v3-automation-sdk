@@ -354,35 +354,22 @@ export async function viewCollectableTokenAmounts(
   amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   publicClient?: PublicClient,
-  positionState?: PositionStateStruct,
+  positionDetail?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<CollectableTokenAmounts> {
-  if (positionState === undefined) {
-    positionState = await viem.getPositionDetails(
+  if (positionDetail === undefined) {
+    positionDetail = await PositionDetails.fromPositionId(
+      chainId,
       amm,
-      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionId,
-      publicClient ?? getPublicClient(chainId),
+      publicClient,
       blockNumber,
     );
   }
+  const { tokensOwed0, tokensOwed1 } = positionDetail;
   return {
-    token0Amount: CurrencyAmount.fromRawAmount(
-      new Token(
-        chainId,
-        positionState.position.token0,
-        positionState.decimals0,
-      ),
-      positionState.position.tokensOwed0.toString(),
-    ),
-    token1Amount: CurrencyAmount.fromRawAmount(
-      new Token(
-        chainId,
-        positionState.position.token1,
-        positionState.decimals1,
-      ),
-      positionState.position.tokensOwed1.toString(),
-    ),
+    token0Amount: tokensOwed0,
+    token1Amount: tokensOwed1,
   };
 }
 

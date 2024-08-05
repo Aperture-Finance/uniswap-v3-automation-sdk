@@ -32,12 +32,12 @@ export async function getCollectTx(
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
   receiveNativeEtherIfApplicable?: boolean,
-  positionState?: PositionStateStruct,
+  positionDetail?: PositionDetails,
 ): Promise<TransactionRequest> {
-  if (positionState === undefined) {
-    positionState = await viem.getPositionDetails(
+  if (positionDetail === undefined) {
+    positionDetail = await PositionDetails.fromPositionId(
+      chainId,
       amm,
-      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionId,
       client,
     );
@@ -47,12 +47,7 @@ export async function getCollectTx(
     amm,
     positionId,
     client,
-    positionState,
-  );
-
-  const { token0, token1 } = PositionDetails.fromPositionStateStruct(
-    chainId,
-    positionState,
+    positionDetail,
   );
 
   console.log(
@@ -66,8 +61,8 @@ export async function getCollectTx(
     ...convertCollectableTokenAmountToExpectedCurrencyOwed(
       collectableTokenAmount,
       chainId,
-      token0,
-      token1,
+      positionDetail.token0,
+      positionDetail.token1,
       receiveNativeEtherIfApplicable,
     ),
   });

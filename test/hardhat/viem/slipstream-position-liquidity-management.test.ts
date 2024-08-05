@@ -80,7 +80,7 @@ describe('Slipstream Position liquidity management tests', function () {
   let usdcBalanceBefore: bigint,
     wethBalanceBefore: bigint,
     nativeEtherBalanceBefore: bigint;
-  let positionDetail: PositionStateStruct;
+  let positionDetail: PositionDetails;
   let position4ColletableTokenAmounts: {
     token0Amount: CurrencyAmount<Token>;
     token1Amount: CurrencyAmount<Token>;
@@ -140,9 +140,9 @@ describe('Slipstream Position liquidity management tests', function () {
     console.log('before usdc', usdcBalanceBefore);
     console.log('before weth', wethBalanceBefore);
 
-    positionDetail = await viem.getPositionDetails(
+    positionDetail = await PositionDetails.fromPositionId(
+      chainId,
       amm,
-      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionId,
       publicClient,
     );
@@ -174,14 +174,10 @@ describe('Slipstream Position liquidity management tests', function () {
       }),
     });
 
-    const { token0, token1 } = PositionDetails.fromPositionStateStruct(
-      chainId,
-      positionDetail,
-    );
     const collectedFees = getCollectedFeesFromReceipt(
       txReceipt,
-      token0,
-      token1,
+      positionDetail.token0,
+      positionDetail.token1,
     );
 
     console.log(
@@ -255,14 +251,10 @@ describe('Slipstream Position liquidity management tests', function () {
       await eoaSigner.sendTransaction(removeLiquidityTxRequest)
     ).wait();
 
-    const { token0, token1 } = PositionDetails.fromPositionStateStruct(
-      chainId,
-      positionDetail,
-    );
     const collectedFees = getCollectedFeesFromReceipt(
       removeLiquidityTxReceipt,
-      token0,
-      token1,
+      positionDetail.token0,
+      positionDetail.token1,
     );
 
     console.log('usdcContract', await usdcContract.read.balanceOf([eoa]));
