@@ -91,10 +91,12 @@ describe('Slipstream Position liquidity management tests', function () {
     publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient, blockNumber, process.env.BASE_RPC_URL);
 
+    // if I remove the following code, test will get errors like
+    // Details: No known hardfork for execution on historical block 17786451 (relative to fork block number 17786451) in chain with id 8453. The node was not configured with a hardfork activation history.
+
     const impersonatedWhaleSigner =
       await ethers.getImpersonatedSigner(WHALE_ADDRESS);
 
-    // if I remove the following code, test will fail with
     await new SlipStreamAutoman__factory(impersonatedWhaleSigner).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
@@ -168,7 +170,7 @@ describe('Slipstream Position liquidity management tests', function () {
     );
   });
 
-  it.skip('Slipstream Collect fees', async function () {
+  it('Slipstream Collect fees', async function () {
     const txRequest = await getCollectTx(
       positionId,
       eoa,
