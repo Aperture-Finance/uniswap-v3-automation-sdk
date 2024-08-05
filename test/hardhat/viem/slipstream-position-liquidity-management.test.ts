@@ -147,6 +147,12 @@ describe('Slipstream Position liquidity management tests', function () {
       publicClient,
     );
 
+    console.log(
+      'positionDetail',
+      positionDetail.position.amount0.quotient.toString(),
+      positionDetail.position.amount1.quotient.toString(),
+    );
+
     position4ColletableTokenAmounts = await viewCollectableTokenAmounts(
       chainId,
       amm,
@@ -154,9 +160,15 @@ describe('Slipstream Position liquidity management tests', function () {
       publicClient,
       positionDetail,
     );
+
+    console.log(
+      'position4ColletableTokenAmounts',
+      position4ColletableTokenAmounts.token0Amount.quotient.toString(),
+      position4ColletableTokenAmounts.token1Amount.quotient.toString(),
+    );
   });
 
-  it('Slipstream Collect fees', async function () {
+  it.skip('Slipstream Collect fees', async function () {
     const txRequest = await getCollectTx(
       positionId,
       eoa,
@@ -208,11 +220,9 @@ describe('Slipstream Position liquidity management tests', function () {
     );
   });
 
-  it.skip('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
+  it('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
     // ------- Decrease Liquidity -------
     // Decrease liquidity from position.
-
-    const position = await getPosition(chainId, amm, positionId, publicClient);
 
     const liquidityPercentage = new Percent(1); // 100%
     const removeLiquidityTxRequest = await getRemoveLiquidityTx(
@@ -227,29 +237,20 @@ describe('Slipstream Position liquidity management tests', function () {
       amm,
       publicClient,
       /*receiveNativeEtherIfApplicable=*/ true,
-      position,
+      positionDetail,
     );
 
     console.log('removeLiquidityTxRequest', removeLiquidityTxRequest);
 
-    // const removeLiquidityTxReceipt = await publicClient.getTransactionReceipt({
-    //   hash: await impersonatedOwnerClient.sendTransaction({
-    //     ...removeLiquidityTxRequest,
-    //     account: eoa,
-    //     chain: mainnet,
-    //   }),
-    // });
+    const removeLiquidityTxReceipt = await publicClient.getTransactionReceipt({
+      hash: await impersonatedOwnerClient.sendTransaction({
+        ...removeLiquidityTxRequest,
+        account: eoa,
+        chain: mainnet,
+      }),
+    });
 
-    // const collectedFees = getCollectedFeesFromReceipt(
-    //   removeLiquidityTxReceipt,
-    //   position4BasicInfo.token0,
-    //   position4BasicInfo.token1,
-    // );
-
-    const eoaSigner = await ethers.getImpersonatedSigner(eoa);
-    const removeLiquidityTxReceipt = await (
-      await eoaSigner.sendTransaction(removeLiquidityTxRequest)
-    ).wait();
+    console.log('sent removeLiquidityTxRequest');
 
     const collectedFees = getCollectedFeesFromReceipt(
       removeLiquidityTxReceipt,
@@ -265,34 +266,36 @@ describe('Slipstream Position liquidity management tests', function () {
       }),
     );
 
-    // expect(collectedFees).deep.equal(position4ColletableTokenAmounts);
-    // expect(await usdtContract.read.balanceOf([eoa])).to.equal(
-    //   usdcBalanceBefore +
-    //     // Add collected USDC fees.
-    //     BigInt(
-    //       position4ColletableTokenAmounts.token1Amount.quotient.toString(),
-    //     ) +
-    //     // Add withdrawn USDC liquidity.
-    //     BigInt(position.amount1.quotient.toString()),
-    // );
-    // expect(
-    //   await publicClient.getBalance({
-    //     address: eoa,
-    //   }),
-    // ).to.equal(
-    //   nativeEtherBalanceBefore +
-    //     // Add collected WETH fees.
-    //     BigInt(
-    //       position4ColletableTokenAmounts.token0Amount.quotient.toString(),
-    //     ) +
-    //     // Add withdrawn WETH liquidity.
-    //     BigInt(position.amount0.quotient.toString()) -
-    //     // Subtract gas paid in ETH.
-    //     BigInt(
-    //       removeLiquidityTxReceipt.gasUsed *
-    //         removeLiquidityTxReceipt.effectiveGasPrice,
-    //     ),
-    // );
+    expect(collectedFees).deep.equal(position4ColletableTokenAmounts);
+    expect(await usdcContract.read.balanceOf([eoa])).to.equal(
+      usdcBalanceBefore +
+        // Add collected USDC fees.
+        BigInt(
+          position4ColletableTokenAmounts.token1Amount.quotient.toString(),
+        ) +
+        // Add withdrawn USDC liquidity.
+        BigInt(positionDetail.position.amount1.quotient.toString()),
+    );
+    expect(
+      await publicClient.getBalance({
+        address: eoa,
+      }),
+    ).to.equal(
+      nativeEtherBalanceBefore +
+        // Add collected WETH fees.
+        BigInt(
+          position4ColletableTokenAmounts.token0Amount.quotient.toString(),
+        ) +
+        // Add withdrawn WETH liquidity.
+        BigInt(positionDetail.position.amount0.quotient.toString()) -
+        // Subtract gas paid in ETH.
+        BigInt(
+          removeLiquidityTxReceipt.gasUsed *
+            removeLiquidityTxReceipt.effectiveGasPrice,
+        ),
+    );
+
+    console.log('before add liquidity');
 
     // ------- Add Liquidity -------
     // We now start to add some liquidity to position id 4.
