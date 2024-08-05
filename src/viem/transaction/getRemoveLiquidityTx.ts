@@ -1,13 +1,17 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import {
   NonfungiblePositionManager,
-  Position,
   RemoveLiquidityOptions,
 } from '@aperture_finance/uniswap-v3-sdk';
+import { viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { PublicClient, TransactionRequest } from 'viem';
 
-import { PositionDetails, viewCollectableTokenAmounts } from '../position';
+import {
+  PositionDetails,
+  PositionStateStruct,
+  viewCollectableTokenAmounts,
+} from '../position';
 import {
   convertCollectableTokenAmountToExpectedCurrencyOwed,
   getTxToNonfungiblePositionManager,
@@ -31,31 +35,29 @@ export async function getRemoveLiquidityTx(
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
   receiveNativeEtherIfApplicable?: boolean,
-  position?: Position,
+  positionState?: PositionStateStruct,
   blockNumber?: bigint,
 ): Promise<TransactionRequest> {
-  if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
-      chainId,
+  if (positionState === undefined) {
+    positionState = await viem.getPositionDetails(
       amm,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       BigInt(removeLiquidityOptions.tokenId.toString()),
       client,
-      blockNumber,
-    ));
+    );
   }
+
+  const { position } = PositionDetails.fromPositionStateStruct(
+    chainId,
+    positionState,
+  );
+
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
     amm,
     BigInt(removeLiquidityOptions.tokenId.toString()),
     client,
-    {
-      token0: position.pool.token0,
-      token1: position.pool.token1,
-      tickLower: position.tickLower,
-      tickUpper: position.tickUpper,
-      fee: position.pool.fee,
-      tickSpacing: position.pool.tickSpacing,
-    },
+    positionState,
     blockNumber,
   );
   const { calldata, value } = NonfungiblePositionManager.removeCallParameters(

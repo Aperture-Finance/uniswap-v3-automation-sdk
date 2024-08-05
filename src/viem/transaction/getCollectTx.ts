@@ -1,11 +1,12 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { NonfungiblePositionManager } from '@aperture_finance/uniswap-v3-sdk';
+import { viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { PublicClient, TransactionRequest } from 'viem';
 
 import {
-  BasicPositionInfo,
-  getBasicPositionInfo,
+  PositionDetails,
+  PositionStateStruct,
   viewCollectableTokenAmounts,
 } from '../position';
 import {
@@ -31,12 +32,12 @@ export async function getCollectTx(
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
   receiveNativeEtherIfApplicable?: boolean,
-  basicPositionInfo?: BasicPositionInfo,
+  positionState?: PositionStateStruct,
 ): Promise<TransactionRequest> {
-  if (basicPositionInfo === undefined) {
-    basicPositionInfo = await getBasicPositionInfo(
-      chainId,
+  if (positionState === undefined) {
+    positionState = await viem.getPositionDetails(
       amm,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionId,
       client,
     );
@@ -46,7 +47,12 @@ export async function getCollectTx(
     amm,
     positionId,
     client,
-    basicPositionInfo,
+    positionState,
+  );
+
+  const { token0, token1 } = PositionDetails.fromPositionStateStruct(
+    chainId,
+    positionState,
   );
 
   console.log(
@@ -60,8 +66,8 @@ export async function getCollectTx(
     ...convertCollectableTokenAmountToExpectedCurrencyOwed(
       collectableTokenAmount,
       chainId,
-      basicPositionInfo.token0,
-      basicPositionInfo.token1,
+      token0,
+      token1,
       receiveNativeEtherIfApplicable,
     ),
   });

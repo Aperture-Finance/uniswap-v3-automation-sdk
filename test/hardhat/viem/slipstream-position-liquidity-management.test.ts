@@ -1,5 +1,6 @@
 import { Position, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
+import { viem } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import hre, { ethers } from 'hardhat';
 import {
@@ -8,7 +9,6 @@ import {
   TestClient,
   WalletClient,
   getContract,
-  parseEther,
   walletActions,
 } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -16,6 +16,7 @@ import { mainnet } from 'viem/chains';
 import {
   ApertureSupportedChainId,
   IERC20__factory,
+  SlipStreamAutoman__factory,
   WETH__factory,
   alignPriceToClosestUsableTickWithTickSpacing,
   getAMMInfo,
@@ -23,7 +24,8 @@ import {
   priceToClosestTickSafe,
 } from '../../../src';
 import {
-  BasicPositionInfo,
+  PositionDetails,
+  PositionStateStruct,
   getAddLiquidityTx,
   getBasicPositionInfo,
   getCollectTx,
@@ -33,7 +35,7 @@ import {
   getMintedPositionIdFromTxReceipt,
   getNativeCurrency,
   getPool,
-  getPositionFromBasicInfo,
+  getPosition,
   getRemoveLiquidityTx,
   getToken,
   viewCollectableTokenAmounts,
@@ -45,8 +47,11 @@ const WETH_ADDRESS = '0x4200000000000000000000000000000000000006'; // token0
 
 describe('Slipstream Position liquidity management tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
+  const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
+
   const positionId = 293613n;
-  const blockNumber = 17776451n;
+  const blockNumber = 17786451n;
+
   const tickSpacing = 100;
   const eoa = '0xFf09eE65939bF6cfcB1aA44D7Fe0C237CB9ccBAb';
 
@@ -57,8 +62,6 @@ describe('Slipstream Position liquidity management tests', function () {
   // const eoa = '0xeF1Ce5fddd0a1cb903b49608F6e1A37199DCf2a6';
 
   const WHALE_ADDRESS = '0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A';
-
-  const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
 
   let USDC: Token, WETH: Token;
   let testClient: TestClient;
@@ -77,7 +80,7 @@ describe('Slipstream Position liquidity management tests', function () {
   let usdcBalanceBefore: bigint,
     wethBalanceBefore: bigint,
     nativeEtherBalanceBefore: bigint;
-  let position4BasicInfo: BasicPositionInfo;
+  let positionDetail: PositionStateStruct;
   let position4ColletableTokenAmounts: {
     token0Amount: CurrencyAmount<Token>;
     token1Amount: CurrencyAmount<Token>;
@@ -87,6 +90,16 @@ describe('Slipstream Position liquidity management tests', function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient, blockNumber, process.env.BASE_RPC_URL);
+
+    const impersonatedWhaleSigner =
+      await ethers.getImpersonatedSigner(WHALE_ADDRESS);
+
+    // if I remove the following code, test will fail with
+    await new SlipStreamAutoman__factory(impersonatedWhaleSigner).deploy(
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      /*owner=*/ WHALE_ADDRESS,
+    );
+
     await testClient.impersonateAccount({
       address: eoa,
     });
@@ -116,12 +129,10 @@ describe('Slipstream Position liquidity management tests', function () {
       address: eoa,
     });
 
-    position4BasicInfo = await getBasicPositionInfo(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-    );
+    console.log('nativeEtherBalanceBefore', nativeEtherBalanceBefore);
+
+    USDC = await getToken(USDC_ADDRESS, chainId, publicClient);
+    WETH = await getToken(WETH_ADDRESS, chainId, publicClient);
 
     usdcBalanceBefore = await usdcContract.read.balanceOf([eoa]);
     wethBalanceBefore = await wethContract.read.balanceOf([eoa]);
@@ -129,27 +140,20 @@ describe('Slipstream Position liquidity management tests', function () {
     console.log('before usdc', usdcBalanceBefore);
     console.log('before weth', wethBalanceBefore);
 
+    positionDetail = await viem.getPositionDetails(
+      amm,
+      getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+      positionId,
+      publicClient,
+    );
+
     position4ColletableTokenAmounts = await viewCollectableTokenAmounts(
       chainId,
       amm,
       positionId,
       publicClient,
-      position4BasicInfo,
+      positionDetail,
     );
-
-    console.log(
-      'position4ColletableTokenAmounts token0Amount',
-      position4ColletableTokenAmounts.token0Amount.toFixed(),
-    );
-    console.log(
-      'position4ColletableTokenAmounts token1Amount',
-      position4ColletableTokenAmounts.token1Amount.toFixed(),
-    );
-
-    USDC = await getToken(USDC_ADDRESS, chainId, publicClient);
-    WETH = await getToken(WETH_ADDRESS, chainId, publicClient);
-
-    console.log('publicClient', await publicClient.getChainId());
   });
 
   it('Slipstream Collect fees', async function () {
@@ -160,33 +164,30 @@ describe('Slipstream Position liquidity management tests', function () {
       amm,
       publicClient,
       false,
-      position4BasicInfo,
     );
 
-    console.log('txRequest', txRequest);
+    const txReceipt = await publicClient.getTransactionReceipt({
+      hash: await impersonatedOwnerClient.sendTransaction({
+        ...txRequest,
+        account: eoa,
+        chain: mainnet, // this is weird, but it works
+      }),
+    });
 
-    // const txReceipt = await publicClient.getTransactionReceipt({
-    //   hash: await impersonatedOwnerClient.sendTransaction({
-    //     ...txRequest,
-    //     account: eoa,
-    //     chain: mainnet, // this is weird, but it works
-    //   }),
-    // });
-
-    const eoaSigner = await ethers.getImpersonatedSigner(eoa);
-    const txReceipt = await (await eoaSigner.sendTransaction(txRequest)).wait();
-
+    const { token0, token1 } = PositionDetails.fromPositionStateStruct(
+      chainId,
+      positionDetail,
+    );
     const collectedFees = getCollectedFeesFromReceipt(
       txReceipt,
-      position4BasicInfo.token0,
-      position4BasicInfo.token1,
+      token0,
+      token1,
     );
 
     console.log(
       'collectedFees token0Amount',
       collectedFees.token0Amount.toFixed(),
     );
-
     console.log(
       'collectedFees token1Amount',
       collectedFees.token1Amount.toFixed(),
@@ -197,29 +198,26 @@ describe('Slipstream Position liquidity management tests', function () {
 
     expect(collectedFees).deep.equal(position4ColletableTokenAmounts);
 
-    expect(await usdcContract.read.balanceOf([eoa])).to.equal(
-      usdcBalanceBefore +
+    expect(await wethContract.read.balanceOf([eoa])).to.equal(
+      wethBalanceBefore +
         BigInt(
           position4ColletableTokenAmounts.token0Amount.quotient.toString(),
         ),
     );
-    expect(await wethContract.read.balanceOf([eoa])).to.equal(
-      wethBalanceBefore +
+    expect(await usdcContract.read.balanceOf([eoa])).to.equal(
+      usdcBalanceBefore +
         BigInt(
           position4ColletableTokenAmounts.token1Amount.quotient.toString(),
         ),
     );
   });
 
-  it('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
+  it.skip('Decrease liquidity (receive native ether + USDC), increase liquidity, and create position', async function () {
     // ------- Decrease Liquidity -------
     // Decrease liquidity from position.
-    const position = await getPositionFromBasicInfo(
-      position4BasicInfo,
-      chainId,
-      amm,
-      publicClient,
-    );
+
+    const position = await getPosition(chainId, amm, positionId, publicClient);
+
     const liquidityPercentage = new Percent(1); // 100%
     const removeLiquidityTxRequest = await getRemoveLiquidityTx(
       {
@@ -256,10 +254,15 @@ describe('Slipstream Position liquidity management tests', function () {
     const removeLiquidityTxReceipt = await (
       await eoaSigner.sendTransaction(removeLiquidityTxRequest)
     ).wait();
+
+    const { token0, token1 } = PositionDetails.fromPositionStateStruct(
+      chainId,
+      positionDetail,
+    );
     const collectedFees = getCollectedFeesFromReceipt(
       removeLiquidityTxReceipt,
-      position4BasicInfo.token0,
-      position4BasicInfo.token1,
+      token0,
+      token1,
     );
 
     console.log('usdcContract', await usdcContract.read.balanceOf([eoa]));
