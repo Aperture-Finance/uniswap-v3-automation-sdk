@@ -46,13 +46,6 @@ export async function getCollectTx(
     amm,
     positionId,
     client,
-    basicPositionInfo,
-  );
-
-  console.log(
-    'collectableTokenAmount',
-    collectableTokenAmount.token0Amount.toFixed(),
-    collectableTokenAmount.token1Amount.toFixed(),
   );
   const { calldata, value } = NonfungiblePositionManager.collectCallParameters({
     tokenId: positionId.toString(),

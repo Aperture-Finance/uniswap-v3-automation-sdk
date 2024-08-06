@@ -140,17 +140,21 @@ export async function getCreatePositionTx(
   client: PublicClient,
 ): Promise<TransactionRequest> {
   let createPool = false;
-  try {
-    await getPool(
-      position.pool.token0,
-      position.pool.token1,
-      position.pool.fee,
-      chainId,
-      amm,
-      client,
-    );
-  } catch (e) {
-    createPool = true;
+  // We do not support `createPool` for SlipStream AMM.
+  // SlipStream create position tx must be sent with the pool already created.
+  if (amm !== AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
+    try {
+      await getPool(
+        position.pool.token0,
+        position.pool.token1,
+        position.pool.fee,
+        chainId,
+        amm,
+        client,
+      );
+    } catch (e) {
+      createPool = true;
+    }
   }
   const { calldata, value } = NonfungiblePositionManager.addCallParameters(
     position,

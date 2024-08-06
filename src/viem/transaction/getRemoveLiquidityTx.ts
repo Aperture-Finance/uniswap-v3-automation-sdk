@@ -43,19 +43,13 @@ export async function getRemoveLiquidityTx(
       blockNumber,
     ));
   }
+  // TODO: `viewCollectableTokenAmounts` calls `getPositionDetails` which is already called in `PositionDetails.fromPositionId`.
+  // Consider taking `PositionDetails` or `PositionStateStruct` in place of `position?: Position`.
   const collectableTokenAmount = await viewCollectableTokenAmounts(
     chainId,
     amm,
     BigInt(removeLiquidityOptions.tokenId.toString()),
     client,
-    {
-      token0: position.pool.token0,
-      token1: position.pool.token1,
-      tickLower: position.tickLower,
-      tickUpper: position.tickUpper,
-      fee: position.pool.fee,
-      tickSpacing: position.pool.tickSpacing,
-    },
     blockNumber,
   );
   const { calldata, value } = NonfungiblePositionManager.removeCallParameters(
