@@ -325,17 +325,17 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       ).toExact(),
     ).to.equal('1');
 
-    // Approve Uniswap NPM to spend token1.
-    await IERC20__factory.connect(TOKEN1_ADDRESS, eoaSigner).approve(
+    // Approve Uniswap NPM to spend WETH (token0).
+    await WETH__factory.connect(TOKEN0_ADDRESS, eoaSigner).deposit({
+      value: positionToCreate.mintAmounts.amount0.toString(),
+    });
+    await WETH__factory.connect(TOKEN0_ADDRESS, eoaSigner).approve(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount0.toString(),
     );
 
-    // Approve Uniswap NPM to spend WETH.
-    await WETH__factory.connect(TOKEN0_ADDRESS, eoaSigner).deposit({
-      value: positionToCreate.mintAmounts.amount1.toString(),
-    });
-    await WETH__factory.connect(TOKEN0_ADDRESS, eoaSigner).approve(
+    // Approve Uniswap NPM to spend token1.
+    await IERC20__factory.connect(TOKEN1_ADDRESS, eoaSigner).approve(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount1.toString(),
     );

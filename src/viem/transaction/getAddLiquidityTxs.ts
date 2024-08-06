@@ -162,6 +162,7 @@ export async function getCreatePositionTx(
       ...options,
       createPool,
     },
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM,
   );
 
   return getTxToNonfungiblePositionManager(
