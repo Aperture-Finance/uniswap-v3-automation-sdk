@@ -214,7 +214,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
     // We now start to add some liquidity to position id 4.
     // This involves three steps:
     // (1) Figure out the amount of liquidity that can be minted with the provided amounts of the two tokens.
-    // (2) Approve the two tokens for Uniswap NPM contract to spend, if necessary.
+    // (2) Approve the two tokens for SlipStream NPM contract to spend, if necessary.
     // (3) Send out the tx that adds liquidity.
 
     // Here we want to provide 1 WETH along with the necessary token1 (Lido wstETH) amount.
@@ -239,7 +239,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       useFullPrecision: false,
     }).liquidity;
 
-    // Approve Uniswap NPM to spend token1. Since we are providing native ether in this test case, we don't need to approve WETH.
+    // Approve SlipStream NPM to spend token1. Since we are providing native ether in this test case, we don't need to approve WETH.
     await IERC20__factory.connect(TOKEN1_ADDRESS, eoaSigner).approve(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       token1RawAmount.toString(),
@@ -311,7 +311,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       tickUpper,
       amount1: token1Amount.quotient,
     });
-    // Now we know that we need to provide 0.1 WBTC and 0.568256298587835347 WETH.
+    // Now we know that we need to provide 4.48910673497911912 WETH and 1 wstETH.
     expect(
       CurrencyAmount.fromRawAmount(
         TOKEN0,
@@ -325,7 +325,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       ).toExact(),
     ).to.equal('1');
 
-    // Approve Uniswap NPM to spend WETH (token0).
+    // Approve SlipStream NPM to spend WETH (token0).
     await WETH__factory.connect(TOKEN0_ADDRESS, eoaSigner).deposit({
       value: positionToCreate.mintAmounts.amount0.toString(),
     });
@@ -334,7 +334,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       positionToCreate.mintAmounts.amount0.toString(),
     );
 
-    // Approve Uniswap NPM to spend token1.
+    // Approve SlipStream NPM to spend token1.
     await IERC20__factory.connect(TOKEN1_ADDRESS, eoaSigner).approve(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount1.toString(),
