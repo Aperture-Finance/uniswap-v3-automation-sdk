@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { PancakeV3Callback } from "./PancakeV3Callback";
+export type { SlipStreamCallback } from "./SlipStreamCallback";
 export type { UniswapV3Callback } from "./UniswapV3Callback";

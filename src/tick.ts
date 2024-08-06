@@ -111,6 +111,23 @@ export function alignPriceToClosestUsableTick(
 }
 
 /**
+ * Aligns price to the closest usable tick and returns the aligned price.
+ * @param price The price to align.
+ * @param tickSpacing Liquidity pool tick spacing.
+ * @returns The aligned price.
+ */
+export function alignPriceToClosestUsableTickWithTickSpacing(
+  price: Price<Token, Token>,
+  tickSpacing: number,
+): Price<Token, Token> {
+  return tickToPrice(
+    price.baseCurrency,
+    price.quoteCurrency,
+    nearestUsableTick(priceToClosestTickSafe(price), tickSpacing),
+  );
+}
+
+/**
  * Returns the tick range for a limit order LP given a tick and width multiplier.
  * @param tick The desired average fill price of the limit order, not necessarily aligned to a usable tick.
  * @param poolFee The fee tier of the liquidity pool.

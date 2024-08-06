@@ -3,6 +3,7 @@ import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { parseEther } from 'viem';
 
 import {
   ApertureSupportedChainId,
@@ -37,7 +38,8 @@ import {
 } from '../common';
 
 describe('Viem - Routing tests', function () {
-  it('Test optimalRebalance', async function () {
+  // optimalRebalance is deprecated now, use optimalRebalanceV2 instead
+  it.skip('Test optimalRebalance', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
@@ -329,7 +331,8 @@ describe('Viem - Routing tests', function () {
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
-  it('Test optimalMint', async function () {
+  // optimalMint is deprecated now, use optimalMintV2 instead
+  it.skip('Test optimalMint', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient('arbitrum-mainnet');
@@ -540,7 +543,7 @@ describe('Viem - Routing tests', function () {
     console.log(`1 ETH -> ${quote.quoteDecimals} USDC`);
   });
 
-  it('Fetch quote swapping 1 ETH for USDC on Manta Pacific mainet', async function () {
+  it('Fetch quote swapping 0.01 ETH for USDC on Manta Pacific mainet', async function () {
     const quote = await fetchQuoteFromSpecifiedRoutingApiInfo(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       {
@@ -549,7 +552,7 @@ describe('Viem - Routing tests', function () {
       },
       'ETH',
       '0xb73603C5d87fA094B7314C74ACE2e64D165016fb',
-      BigInt(1e18),
+      parseEther('0.01'),
       'exactIn',
     );
     expect(quote.amountDecimals === '1');

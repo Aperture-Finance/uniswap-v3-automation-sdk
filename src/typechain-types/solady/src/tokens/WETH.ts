@@ -136,15 +136,11 @@ export interface WETHInterface extends utils.Interface {
 
   events: {
     "Approval(address,address,uint256)": EventFragment;
-    "Deposit(address,uint256)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
-    "Withdrawal(address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdrawal"): EventFragment;
 }
 
 export interface ApprovalEventObject {
@@ -159,14 +155,6 @@ export type ApprovalEvent = TypedEvent<
 
 export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 
-export interface DepositEventObject {
-  from: string;
-  amount: BigNumber;
-}
-export type DepositEvent = TypedEvent<[string, BigNumber], DepositEventObject>;
-
-export type DepositEventFilter = TypedEventFilter<DepositEvent>;
-
 export interface TransferEventObject {
   from: string;
   to: string;
@@ -178,17 +166,6 @@ export type TransferEvent = TypedEvent<
 >;
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
-
-export interface WithdrawalEventObject {
-  to: string;
-  amount: BigNumber;
-}
-export type WithdrawalEvent = TypedEvent<
-  [string, BigNumber],
-  WithdrawalEventObject
->;
-
-export type WithdrawalEventFilter = TypedEventFilter<WithdrawalEvent>;
 
 export interface WETH extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -414,12 +391,6 @@ export interface WETH extends BaseContract {
       amount?: null
     ): ApprovalEventFilter;
 
-    "Deposit(address,uint256)"(
-      from?: string | null,
-      amount?: null
-    ): DepositEventFilter;
-    Deposit(from?: string | null, amount?: null): DepositEventFilter;
-
     "Transfer(address,address,uint256)"(
       from?: string | null,
       to?: string | null,
@@ -430,12 +401,6 @@ export interface WETH extends BaseContract {
       to?: string | null,
       amount?: null
     ): TransferEventFilter;
-
-    "Withdrawal(address,uint256)"(
-      to?: string | null,
-      amount?: null
-    ): WithdrawalEventFilter;
-    Withdrawal(to?: string | null, amount?: null): WithdrawalEventFilter;
   };
 
   estimateGas: {

@@ -1,11 +1,11 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient } from 'viem';
 
 import { computePoolAddress } from '../../utils';
 import {
-  MintParams,
+  SlipStreamMintParams,
+  UniV3MintParams,
   encodeOptimalSwapData,
   getAutomanContract,
   simulateRebalance,
@@ -14,7 +14,11 @@ import {
 import { PositionDetails } from '../position';
 import { E_Solver, SwapRoute, quote } from '../solver';
 import { getApproveTarget } from './aggregator';
-import { calcPriceImpact, getSwapPath } from './internal';
+import {
+  calcPriceImpact,
+  getFeeOrTickSpacingFromMintParams,
+  getSwapPath,
+} from './internal';
 import { SolverResult } from './types';
 
 export async function optimalRebalance(
@@ -52,19 +56,35 @@ export async function optimalRebalance(
     blockNumber,
   );
 
-  const mintParams: MintParams = {
-    token0: position.token0.address as Address,
-    token1: position.token1.address as Address,
-    fee: position.fee,
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: receive0,
-    amount1Desired: receive1,
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: fromAddress, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: position.token0.address as Address,
+          token1: position.token1.address as Address,
+          tickSpacing: position.tickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: receive0,
+          amount1Desired: receive1,
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: fromAddress, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: position.token0.address as Address,
+          token1: position.token1.address as Address,
+          fee: position.fee,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: receive0,
+          amount1Desired: receive1,
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: fromAddress, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
 
   const getEstimate = async () => {
     const poolPromise = optimalMintPool(
@@ -134,7 +154,7 @@ async function optimalMintPool(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
-  mintParams: MintParams,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
   positionId: bigint,
   positionOwner: Address,
   feeBips: bigint,
@@ -187,7 +207,7 @@ async function optimalMintRouter(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
-  mintParams: MintParams,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
   positionId: bigint,
   positionOwner: Address,
@@ -228,7 +248,7 @@ async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  mintParams: MintParams,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
   blockNumber?: bigint,
   includeRoute?: boolean,
@@ -248,7 +268,7 @@ async function getOptimalMintSwapData(
           amm,
           mintParams.token0,
           mintParams.token1,
-          mintParams.fee,
+          getFeeOrTickSpacingFromMintParams(amm, mintParams),
         ),
         mintParams.tickLower,
         mintParams.tickUpper,
@@ -276,7 +296,7 @@ async function getOptimalMintSwapData(
         amm,
         mintParams.token0,
         mintParams.token1,
-        mintParams.fee as FeeAmount,
+        getFeeOrTickSpacingFromMintParams(amm, mintParams),
         mintParams.tickLower,
         mintParams.tickUpper,
         zeroForOne,

@@ -30,3 +30,4 @@ jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
         env:
           INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
           BNB_RPC_URL: ${{ secrets.BNB_RPC_URL }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}

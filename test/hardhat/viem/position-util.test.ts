@@ -416,27 +416,11 @@ describe('Position util tests', function () {
     );
     const positionId = 723522n;
     const blockNumber = 20064066n;
-    const position = await getPosition(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      'UNISWAP_V3',
-      positionId,
-      publicClient,
-      blockNumber,
-    );
-    const pool = position.pool;
     const viewAccruedFeeAmounts = await viewCollectableTokenAmounts(
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
       'UNISWAP_V3',
       positionId,
       publicClient,
-      {
-        token0: pool.token0,
-        token1: pool.token1,
-        liquidity: position.liquidity.toString(),
-        tickLower: position.tickLower,
-        tickUpper: position.tickUpper,
-        fee: pool.fee,
-      },
       blockNumber,
     );
     expect(viewAccruedFeeAmounts.token0Amount.toFixed(10)).to.equal(

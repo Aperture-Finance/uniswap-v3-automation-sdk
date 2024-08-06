@@ -4,7 +4,8 @@ import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
 import {
-  MintParams,
+  SlipStreamMintParams,
+  UniV3MintParams,
   estimateRebalanceGas,
   simulateRebalance,
   simulateRemoveLiquidity,
@@ -90,7 +91,9 @@ export async function optimalRebalanceV2(
       publicClient,
       token0,
       token1,
-      position.fee,
+      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+        ? position.tickSpacing
+        : position.fee,
       newTickLower,
       newTickUpper,
       receive0,
@@ -173,26 +176,49 @@ export async function optimalRebalanceV2(
   const { receive0, receive1, poolAmountIn, zeroForOne } =
     await simulateAndGetOptimalSwapAmount(feeBips);
 
-  const mintParams: MintParams = {
-    token0,
-    token1,
-    fee: position.fee,
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: receive0,
-    amount1Desired: receive1,
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: fromAddress, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0,
+          token1,
+          tickSpacing: position.tickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: receive0,
+          amount1Desired: receive1,
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: fromAddress, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0,
+          token1,
+          fee: position.fee,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: receive0,
+          amount1Desired: receive1,
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: fromAddress, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
   const solve = async (solver: E_Solver) => {
     try {
       const { swapData, swapRoute } = await getSolver(solver).optimalMint({
         chainId,
         amm,
         fromAddress,
-        mintParams,
+        token0,
+        token1,
+        feeOrTickSpacing:
+          amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+            ? position.tickSpacing
+            : position.fee,
+        tickLower: newTickLower,
+        tickUpper: newTickUpper,
         slippage,
         poolAmountIn,
         zeroForOne,
