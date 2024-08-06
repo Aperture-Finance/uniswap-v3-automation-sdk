@@ -10,3 +10,4 @@ export type { swapRouterSol };
 export type { Automan } from "./Automan";
 export type { OptimalSwapRouter } from "./OptimalSwapRouter";
 export type { Payments } from "./Payments";
+export type { SlipStreamSwapRouter } from "./SlipStreamSwapRouter";

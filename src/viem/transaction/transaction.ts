@@ -2,13 +2,13 @@ import {
   AmmInfo,
   ApertureSupportedChainId,
   Automan__factory,
-  INonfungiblePositionManager__factory,
   getAMMInfo,
 } from '@/index';
 import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { Percent } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
+import { ICommonNonfungiblePositionManager__factory } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Address,
@@ -63,7 +63,7 @@ export function getMintedPositionIdFromTxReceipt(
     amm,
   )!.nonfungiblePositionManager.toLowerCase();
   const TransferEventAbi = getAbiItem({
-    abi: INonfungiblePositionManager__factory.abi,
+    abi: ICommonNonfungiblePositionManager__factory.abi,
     name: 'Transfer',
   });
   const transferLogs = filterLogsByEvent(txReceipt, TransferEventAbi);
@@ -98,7 +98,7 @@ export function getCollectedFeesFromReceipt(
   token1: Token,
 ): CollectableTokenAmounts {
   const CollectEventAbi = getAbiItem({
-    abi: INonfungiblePositionManager__factory.abi,
+    abi: ICommonNonfungiblePositionManager__factory.abi,
     name: 'Collect',
   });
   const collectLog = filterLogsByEvent(receipt, CollectEventAbi);
@@ -115,7 +115,7 @@ export function getCollectedFeesFromReceipt(
     throw new Error('Failed to decode collect event');
   }
   const DecreaseLiquidityEventAbi = getAbiItem({
-    abi: INonfungiblePositionManager__factory.abi,
+    abi: ICommonNonfungiblePositionManager__factory.abi,
     name: 'DecreaseLiquidity',
   });
   const decreaseLiquidityLog = filterLogsByEvent(
@@ -268,7 +268,7 @@ export function getSetApprovalForAllTx(
     ammInfo,
     encodeFunctionData({
       functionName: 'setApprovalForAll',
-      abi: INonfungiblePositionManager__factory.abi,
+      abi: ICommonNonfungiblePositionManager__factory.abi,
       args: [ammInfo.apertureAutoman, approved],
     }),
   );

@@ -5,7 +5,11 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
-import { getAutomanContract } from '../automan';
+import {
+  SlipStreamMintParams,
+  UniV3MintParams,
+  getAutomanContract,
+} from '../automan';
 import { E_Solver, SwapRoute } from '../solver';
 import { SwapPath } from './types';
 import { SolverResult } from './types';
@@ -69,7 +73,7 @@ export const getOptimalSwapAmount = async (
   publicClient: PublicClient,
   token0: Address,
   token1: Address,
-  feeAmount: number,
+  feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
   amount0Desired: bigint,
@@ -80,7 +84,7 @@ export const getOptimalSwapAmount = async (
   // get swap amounts using the same pool
   const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
     [
-      computePoolAddress(chainId, amm, token0, token1, feeAmount),
+      computePoolAddress(chainId, amm, token0, token1, feeOrTickSpacing),
       tickLower,
       tickUpper,
       amount0Desired,
@@ -135,3 +139,13 @@ export const buildOptimalSolutions = async (
     (result): result is SolverResult => result !== null,
   );
 };
+
+export function getFeeOrTickSpacingFromMintParams(
+  amm: AutomatedMarketMakerEnum,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
+): number {
+  if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
+    return (mintParams as SlipStreamMintParams).tickSpacing;
+  }
+  return (mintParams as UniV3MintParams).fee;
+}

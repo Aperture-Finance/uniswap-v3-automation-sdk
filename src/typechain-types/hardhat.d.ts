@@ -17,13 +17,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FullMath__factory>;
     getContractFactory(
-      name: "INonfungiblePositionManager",
+      name: "ICommonNonfungiblePositionManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.INonfungiblePositionManager__factory>;
+    ): Promise<Contracts.ICommonNonfungiblePositionManager__factory>;
     getContractFactory(
       name: "IPCSV3NonfungiblePositionManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPCSV3NonfungiblePositionManager__factory>;
+    getContractFactory(
+      name: "ISlipStreamNonfungiblePositionManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISlipStreamNonfungiblePositionManager__factory>;
+    getContractFactory(
+      name: "IUniswapV3NonfungiblePositionManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV3NonfungiblePositionManager__factory>;
     getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -157,6 +165,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PancakeV3Callback__factory>;
     getContractFactory(
+      name: "SlipStreamCallback",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SlipStreamCallback__factory>;
+    getContractFactory(
       name: "UniswapV3Callback",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV3Callback__factory>;
@@ -181,6 +193,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Payments__factory>;
     getContractFactory(
+      name: "SlipStreamSwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SlipStreamSwapRouter__factory>;
+    getContractFactory(
       name: "PCSV3SwapRouter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PCSV3SwapRouter__factory>;
@@ -193,13 +209,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniV3SwapRouter__factory>;
     getContractFactory(
-      name: "IAutoman",
+      name: "IAutomanCommon",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAutoman__factory>;
+    ): Promise<Contracts.IAutomanCommon__factory>;
+    getContractFactory(
+      name: "IAutomanSlipStreamMintRebalance",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAutomanSlipStreamMintRebalance__factory>;
+    getContractFactory(
+      name: "IAutomanUniV3MintRebalance",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAutomanUniV3MintRebalance__factory>;
     getContractFactory(
       name: "IPCSV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPCSV3Automan__factory>;
+    getContractFactory(
+      name: "ISlipStreamAutoman",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISlipStreamAutoman__factory>;
     getContractFactory(
       name: "IUniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -221,6 +249,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
     getContractFactory(
+      name: "ISlipStreamCLFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISlipStreamCLFactory__factory>;
+    getContractFactory(
       name: "PCSV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PCSV3Automan__factory>;
@@ -229,9 +261,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PCSV3OptimalSwapRouter__factory>;
     getContractFactory(
-      name: "RouterProxy",
+      name: "SlipStreamAutoman",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.RouterProxy__factory>;
+    ): Promise<Contracts.SlipStreamAutoman__factory>;
+    getContractFactory(
+      name: "SlipStreamOptimalSwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SlipStreamOptimalSwapRouter__factory>;
     getContractFactory(
       name: "UniV3Automan",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -247,15 +283,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.FullMath>;
     getContractAt(
-      name: "INonfungiblePositionManager",
+      name: "ICommonNonfungiblePositionManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.INonfungiblePositionManager>;
+    ): Promise<Contracts.ICommonNonfungiblePositionManager>;
     getContractAt(
       name: "IPCSV3NonfungiblePositionManager",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IPCSV3NonfungiblePositionManager>;
+    getContractAt(
+      name: "ISlipStreamNonfungiblePositionManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ISlipStreamNonfungiblePositionManager>;
+    getContractAt(
+      name: "IUniswapV3NonfungiblePositionManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV3NonfungiblePositionManager>;
     getContractAt(
       name: "Ownable",
       address: string,
@@ -422,6 +468,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.PancakeV3Callback>;
     getContractAt(
+      name: "SlipStreamCallback",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SlipStreamCallback>;
+    getContractAt(
       name: "UniswapV3Callback",
       address: string,
       signer?: ethers.Signer
@@ -452,6 +503,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Payments>;
     getContractAt(
+      name: "SlipStreamSwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SlipStreamSwapRouter>;
+    getContractAt(
       name: "PCSV3SwapRouter",
       address: string,
       signer?: ethers.Signer
@@ -467,15 +523,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.UniV3SwapRouter>;
     getContractAt(
-      name: "IAutoman",
+      name: "IAutomanCommon",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IAutoman>;
+    ): Promise<Contracts.IAutomanCommon>;
+    getContractAt(
+      name: "IAutomanSlipStreamMintRebalance",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAutomanSlipStreamMintRebalance>;
+    getContractAt(
+      name: "IAutomanUniV3MintRebalance",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAutomanUniV3MintRebalance>;
     getContractAt(
       name: "IPCSV3Automan",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IPCSV3Automan>;
+    getContractAt(
+      name: "ISlipStreamAutoman",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ISlipStreamAutoman>;
     getContractAt(
       name: "IUniV3Automan",
       address: string,
@@ -502,6 +573,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OptimalSwap>;
     getContractAt(
+      name: "ISlipStreamCLFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ISlipStreamCLFactory>;
+    getContractAt(
       name: "PCSV3Automan",
       address: string,
       signer?: ethers.Signer
@@ -512,10 +588,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.PCSV3OptimalSwapRouter>;
     getContractAt(
-      name: "RouterProxy",
+      name: "SlipStreamAutoman",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.RouterProxy>;
+    ): Promise<Contracts.SlipStreamAutoman>;
+    getContractAt(
+      name: "SlipStreamOptimalSwapRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SlipStreamOptimalSwapRouter>;
     getContractAt(
       name: "UniV3Automan",
       address: string,

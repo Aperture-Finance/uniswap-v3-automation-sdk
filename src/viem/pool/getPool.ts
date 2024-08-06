@@ -5,6 +5,7 @@ import {
 } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
+import { ISlipStreamCLPool__factory } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   Address,
@@ -32,7 +33,7 @@ import { getPublicClient } from '../public_client';
 export async function getPool(
   tokenA: Token | string,
   tokenB: Token | string,
-  feeOrTickSpacing: number, // TODO: check everywhere if compatible with SLIPSTREAM
+  feeOrTickSpacing: number,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
@@ -103,12 +104,15 @@ export function getPoolContract(
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof IUniswapV3Pool__factory.abi,
+  typeof IUniswapV3Pool__factory.abi | typeof ISlipStreamCLPool__factory.abi,
   PublicClient | WalletClient
 > {
   return getContract({
     address: computePoolAddress(chainId, amm, tokenA, tokenB, feeOrTickSpacing),
-    abi: IUniswapV3Pool__factory.abi,
+    abi:
+      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+        ? ISlipStreamCLPool__factory.abi
+        : IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }

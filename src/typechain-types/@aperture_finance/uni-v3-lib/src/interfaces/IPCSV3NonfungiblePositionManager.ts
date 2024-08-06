@@ -25,9 +25,9 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "../../../../../common";
+} from "../../../../common";
 
-export declare namespace INonfungiblePositionManager {
+export declare namespace ICommonNonfungiblePositionManager {
   export type CollectParamsStruct = {
     tokenId: BigNumberish;
     recipient: string;
@@ -93,7 +93,9 @@ export declare namespace INonfungiblePositionManager {
     amount1Min: BigNumber;
     deadline: BigNumber;
   };
+}
 
+export declare namespace IUniswapV3NonfungiblePositionManager {
   export type MintParamsStruct = {
     token0: string;
     token1: string;
@@ -135,7 +137,8 @@ export declare namespace INonfungiblePositionManager {
   };
 }
 
-export interface INonfungiblePositionManagerInterface extends utils.Interface {
+export interface IPCSV3NonfungiblePositionManagerInterface
+  extends utils.Interface {
   functions: {
     "DOMAIN_SEPARATOR()": FunctionFragment;
     "PERMIT_TYPEHASH()": FunctionFragment;
@@ -146,6 +149,7 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
     "collect((uint256,address,uint128,uint128))": FunctionFragment;
     "createAndInitializePoolIfNecessary(address,address,uint24,uint160)": FunctionFragment;
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256))": FunctionFragment;
+    "deployer()": FunctionFragment;
     "factory()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
@@ -181,6 +185,7 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
       | "collect"
       | "createAndInitializePoolIfNecessary"
       | "decreaseLiquidity"
+      | "deployer"
       | "factory"
       | "getApproved"
       | "increaseLiquidity"
@@ -222,7 +227,7 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
   encodeFunctionData(
     functionFragment: "collect",
-    values: [INonfungiblePositionManager.CollectParamsStruct]
+    values: [ICommonNonfungiblePositionManager.CollectParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "createAndInitializePoolIfNecessary",
@@ -230,8 +235,9 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "decreaseLiquidity",
-    values: [INonfungiblePositionManager.DecreaseLiquidityParamsStruct]
+    values: [ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct]
   ): string;
+  encodeFunctionData(functionFragment: "deployer", values?: undefined): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -239,7 +245,7 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "increaseLiquidity",
-    values: [INonfungiblePositionManager.IncreaseLiquidityParamsStruct]
+    values: [ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -247,7 +253,7 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "mint",
-    values: [INonfungiblePositionManager.MintParamsStruct]
+    values: [IUniswapV3NonfungiblePositionManager.MintParamsStruct]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
@@ -337,6 +343,7 @@ export interface INonfungiblePositionManagerInterface extends utils.Interface {
     functionFragment: "decreaseLiquidity",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "deployer", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
@@ -490,12 +497,12 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface INonfungiblePositionManager extends BaseContract {
+export interface IPCSV3NonfungiblePositionManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: INonfungiblePositionManagerInterface;
+  interface: IPCSV3NonfungiblePositionManagerInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -540,7 +547,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<ContractTransaction>;
 
     collect(
-      params: INonfungiblePositionManager.CollectParamsStruct,
+      params: ICommonNonfungiblePositionManager.CollectParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -553,9 +560,11 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<ContractTransaction>;
 
     decreaseLiquidity(
-      params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
+
+    deployer(overrides?: CallOverrides): Promise<[string]>;
 
     factory(overrides?: CallOverrides): Promise<[string]>;
 
@@ -565,7 +574,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<[string] & { operator: string }>;
 
     increaseLiquidity(
-      params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -576,7 +585,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<[boolean]>;
 
     mint(
-      params: INonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -721,7 +730,7 @@ export interface INonfungiblePositionManager extends BaseContract {
   ): Promise<ContractTransaction>;
 
   collect(
-    params: INonfungiblePositionManager.CollectParamsStruct,
+    params: ICommonNonfungiblePositionManager.CollectParamsStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -734,9 +743,11 @@ export interface INonfungiblePositionManager extends BaseContract {
   ): Promise<ContractTransaction>;
 
   decreaseLiquidity(
-    params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+    params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
+
+  deployer(overrides?: CallOverrides): Promise<string>;
 
   factory(overrides?: CallOverrides): Promise<string>;
 
@@ -746,7 +757,7 @@ export interface INonfungiblePositionManager extends BaseContract {
   ): Promise<string>;
 
   increaseLiquidity(
-    params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+    params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -757,7 +768,7 @@ export interface INonfungiblePositionManager extends BaseContract {
   ): Promise<boolean>;
 
   mint(
-    params: INonfungiblePositionManager.MintParamsStruct,
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -893,7 +904,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     burn(tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     collect(
-      params: INonfungiblePositionManager.CollectParamsStruct,
+      params: ICommonNonfungiblePositionManager.CollectParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -908,11 +919,13 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<string>;
 
     decreaseLiquidity(
-      params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
+
+    deployer(overrides?: CallOverrides): Promise<string>;
 
     factory(overrides?: CallOverrides): Promise<string>;
 
@@ -922,7 +935,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<string>;
 
     increaseLiquidity(
-      params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -939,7 +952,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<boolean>;
 
     mint(
-      params: INonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1158,7 +1171,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<BigNumber>;
 
     collect(
-      params: INonfungiblePositionManager.CollectParamsStruct,
+      params: ICommonNonfungiblePositionManager.CollectParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1171,9 +1184,11 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<BigNumber>;
 
     decreaseLiquidity(
-      params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
+
+    deployer(overrides?: CallOverrides): Promise<BigNumber>;
 
     factory(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1183,7 +1198,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<BigNumber>;
 
     increaseLiquidity(
-      params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1194,7 +1209,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<BigNumber>;
 
     mint(
-      params: INonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1315,7 +1330,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     collect(
-      params: INonfungiblePositionManager.CollectParamsStruct,
+      params: ICommonNonfungiblePositionManager.CollectParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1328,9 +1343,11 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     decreaseLiquidity(
-      params: INonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
+
+    deployer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1340,7 +1357,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     increaseLiquidity(
-      params: INonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1351,7 +1368,7 @@ export interface INonfungiblePositionManager extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     mint(
-      params: INonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

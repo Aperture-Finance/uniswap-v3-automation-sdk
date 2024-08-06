@@ -46,7 +46,6 @@ export async function getCollectTx(
     amm,
     positionId,
     client,
-    basicPositionInfo,
   );
   const { calldata, value } = NonfungiblePositionManager.collectCallParameters({
     tokenId: positionId.toString(),

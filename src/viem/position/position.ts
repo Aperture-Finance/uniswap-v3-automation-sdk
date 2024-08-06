@@ -1,23 +1,21 @@
 import {
   ApertureSupportedChainId,
   Automan__factory,
-  INonfungiblePositionManager__factory,
   fractionToBig,
   getAMMInfo,
   getTokenValueProportionFromPriceRatio,
   priceToSqrtRatioX96,
 } from '@/index';
-import {
-  Pool,
-  Position,
-  PositionLibrary,
-  TickMath,
-} from '@aperture_finance/uniswap-v3-sdk';
+import { Pool, Position, TickMath } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { EphemeralGetPosition__factory, viem } from 'aperture-lens';
+import {
+  EphemeralGetPosition__factory,
+  ISlipStreamNonfungiblePositionManager__factory,
+  IUniswapV3NonfungiblePositionManager__factory,
+  viem,
+} from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import JSBI from 'jsbi';
 import {
   AbiStateMutability,
   Address,
@@ -32,11 +30,7 @@ import {
 
 import { getAutomanReinvestCalldata } from '../automan';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from '../overrides';
-import {
-  getPool,
-  getPoolContract,
-  getPoolFromBasicPositionInfo,
-} from '../pool';
+import { getPool, getPoolFromBasicPositionInfo } from '../pool';
 import { getPublicClient } from '../public_client';
 
 export interface BasicPositionInfo {
@@ -66,12 +60,16 @@ export function getNPM(
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof INonfungiblePositionManager__factory.abi,
+  | typeof ISlipStreamNonfungiblePositionManager__factory.abi
+  | typeof IUniswapV3NonfungiblePositionManager__factory.abi,
   PublicClient | WalletClient
 > {
   return getContract({
     address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
-    abi: INonfungiblePositionManager__factory.abi,
+    abi:
+      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+        ? ISlipStreamNonfungiblePositionManager__factory.abi
+        : IUniswapV3NonfungiblePositionManager__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }
@@ -314,7 +312,6 @@ export class PositionDetails implements BasicPositionInfo {
       amm,
       BigInt(this.tokenId),
       publicClient,
-      this,
       blockNumber,
     );
   }
@@ -345,110 +342,48 @@ export async function getBasicPositionInfo(
   };
 }
 
+export function viewCollectableTokenAmountsFromPositionStateStruct(
+  chainId: ApertureSupportedChainId,
+  positionState: PositionStateStruct,
+): CollectableTokenAmounts {
+  return {
+    token0Amount: CurrencyAmount.fromRawAmount(
+      new Token(
+        chainId,
+        positionState.position.token0,
+        positionState.decimals0,
+      ),
+      positionState.position.tokensOwed0.toString(),
+    ),
+    token1Amount: CurrencyAmount.fromRawAmount(
+      new Token(
+        chainId,
+        positionState.position.token1,
+        positionState.decimals1,
+      ),
+      positionState.position.tokensOwed1.toString(),
+    ),
+  };
+}
+
 export async function viewCollectableTokenAmounts(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   positionId: bigint,
   publicClient?: PublicClient,
-  basicPositionInfo?: BasicPositionInfo,
   blockNumber?: bigint,
 ): Promise<CollectableTokenAmounts> {
-  if (basicPositionInfo === undefined) {
-    basicPositionInfo = await getBasicPositionInfo(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-      blockNumber,
-    );
-  }
-
-  const pool = getPoolContract(
-    basicPositionInfo.token0,
-    basicPositionInfo.token1,
-    basicPositionInfo.fee,
-    chainId,
+  const positionState = await viem.getPositionDetails(
     amm,
-    publicClient,
+    getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
+    positionId,
+    publicClient ?? getPublicClient(chainId),
+    blockNumber,
   );
-  const opts = { blockNumber };
-
-  // TODO: replace with viem.getPositionDetails
-  const [
-    slot0,
-    feeGrowthGlobal0X128,
-    feeGrowthGlobal1X128,
-    lower,
-    upper,
-    position,
-  ] = await Promise.all([
-    pool.read.slot0(opts),
-    pool.read.feeGrowthGlobal0X128(opts),
-    pool.read.feeGrowthGlobal1X128(opts),
-    pool.read.ticks([basicPositionInfo.tickLower], opts),
-    pool.read.ticks([basicPositionInfo.tickUpper], opts),
-    getNPM(chainId, amm, publicClient).read.positions(
-      [BigInt(positionId)],
-      opts,
-    ),
-  ]);
-  const tick = slot0[1];
-  const [, , feeGrowthOutside0X128Lower, feeGrowthOutside1X128Lower] = lower;
-  const [, , feeGrowthOutside0X128Upper, feeGrowthOutside1X128Upper] = upper;
-
-  let feeGrowthInside0X128: bigint, feeGrowthInside1X128: bigint;
-  // https://github.com/Uniswap/v4-core/blob/f630c8ca8c669509d958353200953762fd15761a/contracts/libraries/Pool.sol#L566
-  if (tick < basicPositionInfo.tickLower) {
-    feeGrowthInside0X128 =
-      feeGrowthOutside0X128Lower - feeGrowthOutside0X128Upper;
-    feeGrowthInside1X128 =
-      feeGrowthOutside1X128Lower - feeGrowthOutside1X128Upper;
-  } else if (tick >= basicPositionInfo.tickUpper) {
-    feeGrowthInside0X128 =
-      feeGrowthOutside0X128Upper - feeGrowthOutside0X128Lower;
-    feeGrowthInside1X128 =
-      feeGrowthOutside1X128Upper - feeGrowthOutside1X128Lower;
-  } else {
-    feeGrowthInside0X128 =
-      feeGrowthGlobal0X128 -
-      feeGrowthOutside0X128Lower -
-      feeGrowthOutside0X128Upper;
-    feeGrowthInside1X128 =
-      feeGrowthGlobal1X128 -
-      feeGrowthOutside1X128Lower -
-      feeGrowthOutside1X128Upper;
-  }
-  const [
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    liquidity,
-    feeGrowthInside0LastX128,
-    feeGrowthInside1LastX128,
-    tokensOwed0,
-    tokensOwed1,
-  ] = position;
-  const [fees0, fees1] = PositionLibrary.getTokensOwed(
-    JSBI.BigInt(feeGrowthInside0LastX128.toString()),
-    JSBI.BigInt(feeGrowthInside1LastX128.toString()),
-    JSBI.BigInt(liquidity.toString()),
-    JSBI.BigInt(feeGrowthInside0X128.toString()),
-    JSBI.BigInt(feeGrowthInside1X128.toString()),
+  return viewCollectableTokenAmountsFromPositionStateStruct(
+    chainId,
+    positionState,
   );
-  return {
-    token0Amount: CurrencyAmount.fromRawAmount(
-      basicPositionInfo.token0,
-      (tokensOwed0 + BigInt(fees0.toString())).toString(),
-    ),
-    token1Amount: CurrencyAmount.fromRawAmount(
-      basicPositionInfo.token1,
-      (tokensOwed1 + BigInt(fees1.toString())).toString(),
-    ),
-  };
 }
 
 /**

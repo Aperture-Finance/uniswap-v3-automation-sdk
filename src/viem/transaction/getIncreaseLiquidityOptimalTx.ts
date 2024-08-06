@@ -1,12 +1,11 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
-import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { Currency, CurrencyAmount } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import { getAutomanIncreaseLiquidityOptimalCallData } from '../automan';
 import { getNativeCurrency } from '../currency';
-import { getPool } from '../pool';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
 
@@ -62,19 +61,9 @@ export async function getIncreaseLiquidityOptimalTx(
     value = BigInt(token1Amount.quotient.toString());
   }
 
-  const token0 = (token0Amount.currency as Token).address;
-  const token1 = (token1Amount.currency as Token).address;
-
   // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
   const incrementalPosition = new Position({
-    pool: await getPool(
-      token0,
-      token1,
-      position.pool.fee,
-      chainId,
-      amm,
-      publicClient,
-    ),
+    pool: position.pool,
     liquidity: liquidity.toString(),
     tickLower: position.tickLower,
     tickUpper: position.tickUpper,

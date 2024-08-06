@@ -1,5 +1,4 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import axios from 'axios';
 import { Address, Hex } from 'viem';
 
@@ -18,8 +17,18 @@ const APPROVE_TARGET = '0x14f2b6ca0324cd2B013aD02a7D85541d215e2906';
 export const getPropellerHeadsSolver = (): ISolver => {
   return {
     optimalMint: async (props) => {
-      const { chainId, amm, mintParams, slippage, poolAmountIn, zeroForOne } =
-        props;
+      const {
+        chainId,
+        amm,
+        token0,
+        token1,
+        feeOrTickSpacing,
+        tickLower,
+        tickUpper,
+        slippage,
+        poolAmountIn,
+        zeroForOne,
+      } = props;
 
       if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) {
         throw new Error('Expected: Chain not supported');
@@ -29,8 +38,8 @@ export const getPropellerHeadsSolver = (): ISolver => {
       // get a quote from PH
       const res = await quote(
         blockChainMap[chainId]!,
-        zeroForOne ? mintParams.token0 : mintParams.token1,
-        zeroForOne ? mintParams.token1 : mintParams.token0,
+        zeroForOne ? token0 : token1,
+        zeroForOne ? token1 : token0,
         poolAmountIn.toString(),
         ammInfo.optimalSwapRouter!,
         slippage,
@@ -45,11 +54,11 @@ export const getPropellerHeadsSolver = (): ISolver => {
         swapData: encodeOptimalSwapData(
           chainId,
           amm,
-          mintParams.token0,
-          mintParams.token1,
-          mintParams.fee as FeeAmount,
-          mintParams.tickLower,
-          mintParams.tickUpper,
+          token0,
+          token1,
+          feeOrTickSpacing,
+          tickLower,
+          tickUpper,
           zeroForOne,
           APPROVE_TARGET,
           solutions[0].target_address,

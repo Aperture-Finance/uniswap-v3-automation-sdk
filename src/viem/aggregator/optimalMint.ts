@@ -1,6 +1,5 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { computePoolAddress } from '@/utils';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
@@ -8,14 +7,19 @@ import { Address, Hex, PublicClient } from 'viem';
 
 import { SolverResult, getApproveTarget } from '../aggregator';
 import {
-  MintParams,
+  SlipStreamMintParams,
+  UniV3MintParams,
   encodeOptimalSwapData,
   getAutomanContract,
   simulateMintOptimal,
 } from '../automan';
 import { getPool } from '../pool';
 import { SwapRoute, quote } from '../solver';
-import { calcPriceImpact, getSwapPath } from './internal';
+import {
+  calcPriceImpact,
+  getFeeOrTickSpacingFromMintParams,
+  getSwapPath,
+} from './internal';
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
@@ -36,7 +40,7 @@ export async function optimalMint(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
-  fee: FeeAmount,
+  feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
   fromAddress: Address,
@@ -49,19 +53,35 @@ export async function optimalMint(
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
-  const mintParams = {
-    token0: token0Amount.currency.address as Address,
-    token1: token1Amount.currency.address as Address,
-    fee,
-    tickLower,
-    tickUpper,
-    amount0Desired: BigInt(token0Amount.quotient.toString()),
-    amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: 0n,
-    amount1Min: 0n,
-    recipient: fromAddress,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: token0Amount.currency.address as Address,
+          token1: token1Amount.currency.address as Address,
+          tickSpacing: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: token0Amount.currency.address as Address,
+          token1: token1Amount.currency.address as Address,
+          fee: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
 
   const getEstimate = async () => {
     const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
@@ -103,7 +123,7 @@ export async function optimalMint(
     const pool = await getPool(
       mintParams.token0,
       mintParams.token1,
-      mintParams.fee, // TOOD: check with SLIPSTREAM
+      feeOrTickSpacing,
       chainId,
       amm,
       publicClient,
@@ -140,7 +160,7 @@ async function optimalMintPool(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
-  mintParams: MintParams,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
   const [, liquidity, amount0, amount1] = await simulateMintOptimal(
@@ -187,7 +207,7 @@ async function optimalMintRouter(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
-  mintParams: MintParams,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
 ): Promise<SolverResult> {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
@@ -221,7 +241,7 @@ async function getOptimalMintSwapData(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  mintParams: MintParams,
+  mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
   blockNumber?: bigint,
   includeRoute?: boolean,
@@ -239,7 +259,7 @@ async function getOptimalMintSwapData(
           amm,
           mintParams.token0,
           mintParams.token1,
-          mintParams.fee,
+          getFeeOrTickSpacingFromMintParams(amm, mintParams),
         ),
         mintParams.tickLower,
         mintParams.tickUpper,
@@ -271,7 +291,7 @@ async function getOptimalMintSwapData(
         amm,
         mintParams.token0,
         mintParams.token1,
-        mintParams.fee as FeeAmount,
+        getFeeOrTickSpacingFromMintParams(amm, mintParams),
         mintParams.tickLower,
         mintParams.tickUpper,
         zeroForOne,

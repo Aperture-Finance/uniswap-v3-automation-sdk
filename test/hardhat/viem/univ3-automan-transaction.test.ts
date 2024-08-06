@@ -18,7 +18,7 @@ import {
   ActionTypeEnum,
   ConditionTypeEnum,
   ConsoleLogger,
-  INonfungiblePositionManager__factory,
+  ICommonNonfungiblePositionManager__factory,
   IOCKEY_LOGGER,
   UniV3Automan,
   UniV3Automan__factory,
@@ -106,7 +106,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
 
     // Owner of position id 4 sets Automan as operator.
     const { request } = await publicClient.simulateContract({
-      abi: INonfungiblePositionManager__factory.abi,
+      abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       functionName: 'setApprovalForAll',
       args: [automanContract.address as Address, true] as const,
@@ -212,7 +212,6 @@ describe('Viem - UniV3Automan transaction tests', function () {
       amm,
       positionId,
       publicClient,
-      blockNumber,
     );
     const { swapData, liquidity } = (
       await getRebalanceSwapInfo(
@@ -271,10 +270,10 @@ describe('Viem - UniV3Automan transaction tests', function () {
       token0: existingPosition.pool.token0,
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
+      tickSpacing: existingPosition.pool.tickSpacing,
       liquidity: '13291498909567',
       tickLower: 240000,
       tickUpper: 300000,
-      tickSpacing: 60,
     });
   });
 
@@ -317,14 +316,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
       0n /** feeBips */,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -342,11 +339,13 @@ describe('Viem - UniV3Automan transaction tests', function () {
       token0: existingPosition.pool.token0,
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
+      tickSpacing: existingPosition.pool.tickSpacing,
       tickLower: 240000,
       tickUpper: 300000,
     });
   });
 
+  // TODO: Make this stable and enable for all AMMs.
   // Unit test with 1inch is known to be unstable, skip it for now.
   it.skip('Optimal mint with 1inch', async function () {
     const pool = await getPool(
@@ -418,7 +417,6 @@ describe('Viem - UniV3Automan transaction tests', function () {
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -508,14 +506,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -542,6 +538,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
+  // TODO: Make this stable and enable for all AMMs.
   // Unit test with 1inch is known to be unstable, skip it for now.
   it.skip('Increase liquidity optimal with 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
@@ -690,14 +687,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     await publicClient.getTransactionReceipt({

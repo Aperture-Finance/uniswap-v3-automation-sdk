@@ -35,7 +35,7 @@ const _abi = [
     name: "npm",
     outputs: [
       {
-        internalType: "contract INonfungiblePositionManager",
+        internalType: "contract ICommonNonfungiblePositionManager",
         name: "",
         type: "address",
       },

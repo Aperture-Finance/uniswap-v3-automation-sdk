@@ -4,7 +4,11 @@ import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import { MintParams, getAutomanRebalanceCalldata } from '../automan';
+import {
+  SlipStreamMintParams,
+  UniV3MintParams,
+  getAutomanRebalanceCalldata,
+} from '../automan';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
 
@@ -63,25 +67,42 @@ export async function getRebalanceTx(
   const { amount0: amount0Min, amount1: amount1Min } =
     newPosition.mintAmountsWithSlippage(slippageTolerance);
 
-  const mintParams: MintParams = {
-    token0: position.pool.token0.address as Address,
-    token1: position.pool.token1.address as Address,
-    fee: position.pool.fee,
-    tickLower: newPositionTickLower,
-    tickUpper: newPositionTickUpper,
-    amount0Desired: 0n, // Param value ignored by Automan.
-    amount1Desired: 0n, // Param value ignored by Automan.
-    amount0Min: BigInt(amount0Min.toString()),
-    amount1Min: BigInt(amount1Min.toString()),
-    recipient: ADDRESS_ZERO, // Param value ignored by Automan.
-    deadline: deadlineEpochSeconds,
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: position.pool.token0.address as Address,
+          token1: position.pool.token1.address as Address,
+          tickSpacing: position.pool.tickSpacing,
+          tickLower: newPositionTickLower,
+          tickUpper: newPositionTickUpper,
+          amount0Desired: 0n, // Param value ignored by Automan.
+          amount1Desired: 0n, // Param value ignored by Automan.
+          amount0Min: BigInt(amount0Min.toString()),
+          amount1Min: BigInt(amount1Min.toString()),
+          recipient: ADDRESS_ZERO, // Param value ignored by Automan.
+          deadline: deadlineEpochSeconds,
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: position.pool.token0.address as Address,
+          token1: position.pool.token1.address as Address,
+          fee: position.pool.fee,
+          tickLower: newPositionTickLower,
+          tickUpper: newPositionTickUpper,
+          amount0Desired: 0n, // Param value ignored by Automan.
+          amount1Desired: 0n, // Param value ignored by Automan.
+          amount0Min: BigInt(amount0Min.toString()),
+          amount1Min: BigInt(amount1Min.toString()),
+          recipient: ADDRESS_ZERO, // Param value ignored by Automan.
+          deadline: deadlineEpochSeconds,
+        };
 
   return {
     tx: {
       from: ownerAddress,
       to: getAMMInfo(chainId, amm)!.apertureAutoman,
       data: getAutomanRebalanceCalldata(
+        amm,
         mintParams,
         existingPositionId,
         feeBips,

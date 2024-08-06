@@ -42,7 +42,7 @@ import {
   resetFork,
 } from '../common';
 
-describe('Viem - Position liquidity management tests', function () {
+describe('UniV3 non-Automan liquidity management tests', function () {
   const positionId = 4n;
   let WBTC: Token, WETH: Token;
   let testClient: TestClient;
@@ -100,7 +100,6 @@ describe('Viem - Position liquidity management tests', function () {
       amm,
       positionId,
       publicClient,
-      position4BasicInfo,
     );
 
     WBTC = await getToken(WBTC_ADDRESS, chainId, publicClient);

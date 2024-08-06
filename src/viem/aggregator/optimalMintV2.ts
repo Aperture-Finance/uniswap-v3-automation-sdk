@@ -1,11 +1,11 @@
 import { ApertureSupportedChainId } from '@/index';
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import {
-  MintParams,
+  SlipStreamMintParams,
+  UniV3MintParams,
   estimateMintOptimalGas,
   simulateMintOptimal,
 } from '../automan';
@@ -40,7 +40,7 @@ export async function optimalMintV2(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
-  fee: FeeAmount,
+  feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
   fromAddress: Address,
@@ -57,19 +57,35 @@ export async function optimalMintV2(
   }
   const token0 = token0Amount.currency.address as Address;
   const token1 = token1Amount.currency.address as Address;
-  const mintParams: MintParams = {
-    token0,
-    token1,
-    fee,
-    tickLower,
-    tickUpper,
-    amount0Desired: BigInt(token0Amount.quotient.toString()),
-    amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: 0n,
-    amount1Min: 0n,
-    recipient: fromAddress,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0,
+          token1,
+          tickSpacing: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0,
+          token1,
+          fee: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
 
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
     chainId,
@@ -77,7 +93,7 @@ export async function optimalMintV2(
     publicClient,
     token0,
     token1,
-    fee as FeeAmount,
+    feeOrTickSpacing,
     tickLower,
     tickUpper,
     mintParams.amount0Desired,
@@ -91,7 +107,11 @@ export async function optimalMintV2(
         chainId,
         amm,
         fromAddress,
-        mintParams,
+        token0,
+        token1,
+        feeOrTickSpacing,
+        tickLower,
+        tickUpper,
         slippage,
         poolAmountIn,
         zeroForOne,
@@ -109,7 +129,7 @@ export async function optimalMintV2(
       const pool = await getPool(
         token0,
         token1,
-        mintParams.fee, // TOOD: check with SLIPSTREAM
+        feeOrTickSpacing,
         chainId,
         amm,
         publicClient,
