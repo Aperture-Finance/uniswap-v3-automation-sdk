@@ -228,7 +228,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       tickUpper: position.tickUpper,
       amount0: oneWETH.quotient,
       useFullPrecision: true,
-    }).mintAmounts.amount0;
+    }).mintAmounts.amount1;
     // Now we find the liquidity amount that can be added by providing 1 WETH and `token1RawAmount` of token1.
     const liquidityToAdd = Position.fromAmounts({
       pool: position.pool,
@@ -282,14 +282,14 @@ describe('SlipStream non-Automan liquidity management tests', function () {
 
     // First, we align the price range's endpoints.
     const alignedPriceLower = alignPriceToClosestUsableTickWithTickSpacing(
-      parsePrice(WETH, TOKEN1, '0.95'),
+      parsePrice(WETH, TOKEN1, '0.8'),
       tickSpacing,
     );
     const alignedPriceUpper = alignPriceToClosestUsableTickWithTickSpacing(
       parsePrice(WETH, TOKEN1, '1.1'),
       tickSpacing,
     );
-    expect(alignedPriceLower.toFixed(6)).to.equal('0.949996');
+    expect(alignedPriceLower.toFixed(6)).to.equal('0.799964');
     expect(alignedPriceUpper.toFixed(6)).to.equal('1.099984');
 
     // Second, we construct the `Position` object for the position we want to create.
@@ -305,7 +305,6 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       amm,
       publicClient,
     );
-    console.log(pool);
     const positionToCreate = Position.fromAmount1({
       pool,
       tickLower,
@@ -318,15 +317,15 @@ describe('SlipStream non-Automan liquidity management tests', function () {
         TOKEN0,
         positionToCreate.mintAmounts.amount0,
       ).toExact(),
-    ).to.equal('1');
+    ).to.equal('4.48910673497911912');
     expect(
       CurrencyAmount.fromRawAmount(
         TOKEN1,
         positionToCreate.mintAmounts.amount1,
       ).toExact(),
-    ).to.equal('0.568256298587835347');
+    ).to.equal('1');
 
-    // Approve Uniswap NPM to spend WBTC.
+    // Approve Uniswap NPM to spend token1.
     await IERC20__factory.connect(TOKEN1_ADDRESS, eoaSigner).approve(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       positionToCreate.mintAmounts.amount0.toString(),
