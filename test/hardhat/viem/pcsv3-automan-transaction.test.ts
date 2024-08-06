@@ -1,8 +1,6 @@
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { BigNumber } from 'ethers';
-import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre, { ethers } from 'hardhat';
 import {
   Address,
@@ -10,7 +8,9 @@ import {
   TestClient,
   WalletClient,
   createPublicClient,
+  encodeAbiParameters,
   http,
+  parseAbiParameters,
   parseEther,
   walletActions,
 } from 'viem';
@@ -93,7 +93,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     await automanContract.setFeeConfig({
       feeCollector: WHALE_ADDRESS,
       // Set the max fee deduction to 50%.
-      feeLimitPips: BigNumber.from('500000000000000000'),
+      feeLimitPips: BigInt('500000000000000000'),
     });
     await automanContract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new UniV3OptimalSwapRouter__factory(
@@ -149,14 +149,14 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
         token0,
         slot,
-        defaultAbiCoder.encode(['uint256'], [amount0]),
+        encodeAbiParameters(parseAbiParameters('uint256'), [amount0]),
       ]);
     }
     for (const slot of Object.keys(token1Overrides[token1].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
         token1,
         slot,
-        defaultAbiCoder.encode(['uint256'], [amount1]),
+        encodeAbiParameters(parseAbiParameters('uint256'), [amount1]),
       ]);
     }
   }
