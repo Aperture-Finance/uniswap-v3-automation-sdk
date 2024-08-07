@@ -1,6 +1,6 @@
 // yarn
 // yarn test:jest test/jest/fees.test.ts
-import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { FeeAmount, Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -11,11 +11,12 @@ import { ApertureSupportedChainId, getChainInfo } from '../../src';
 import { getPool, getPublicClient } from '../../src/viem';
 import { getFeeBips } from '../../src/viem/automan/getFees';
 import { CollectableTokenAmounts } from '../../src/viem/position';
+import assert from 'assert';
 
 dotenvConfig();
 
 describe('getFeeBips', () => {
-  it('should return the fee bips', async () => {
+  it('should return the min fee bips between both tokens', async () => {
     const chainId: ApertureSupportedChainId =
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const client = getPublicClient(
@@ -33,7 +34,7 @@ describe('getFeeBips', () => {
         /*address=*/ '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         /*decimals=*/ 6,
       ),
-      /*fee=*/ 500,
+      /*fee=*/ FeeAmount.LOW,
       /*chainId=*/ 42161,
       /*amm=*/ AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
       client,
@@ -45,26 +46,71 @@ describe('getFeeBips', () => {
       tickLower: -887220,
       tickUpper: 52980,
     });
-    const collectableTokenAmounts: CollectableTokenAmounts = {
+    let collectableTokenAmounts: CollectableTokenAmounts = {
       token0Amount: CurrencyAmount.fromRawAmount(
         new Token(
           /*chainId=*/ 42161,
-          /*address=*/ '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-          /*decimals=*/ 6,
+          /*address=*/ '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+          /*decimals=*/ 18,
         ),
         123,
       ),
       token1Amount: CurrencyAmount.fromRawAmount(
         new Token(
           /*chainId=*/ 42161,
-          /*address=*/ '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+          /*address=*/ '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // USDC
           /*decimals=*/ 6,
         ),
         456,
       ),
     };
+    console.log(`pool.sqrtRatioX96=${pool.sqrtRatioX96}, pool.token0Price=${pool.token0Price.toSignificant()}, pool.token1Price=${pool.token1Price.toSignificant()}`); // 3274.22, 0.000305416
+    console.log(pool.token0Price.toSignificant());
+    console.log(pool.liquidity.toString());
+    console.log(pool.tickCurrent);
+    console.log(`postion: ${position.liquidity}, ${position.tickLower}, ${position.tickUpper}`);
+    assert(position.amount0.toSignificant() === '0.000000017476');
+    assert(position.amount1.toSignificant() === '0.000057');
+    assert(collectableTokenAmounts.token0Amount.toSignificant() === '0.000000000000000123');
+    assert(collectableTokenAmounts.token1Amount.toSignificant() === '0.000456');
+    // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
+    // feeBips = min(0.000000000000000123 * getAptrFee(FeeAmount.LOW) / 0.000000017476, 0.000456 * getAptrFee(FeeAmount.LOW) / 0.000057) * 1e18
+    // feeBips = min(0.000000000000000123 * 0.001 / 0.000000017476, 0.000456 * 0.001 / 0.000057) * 1e18
+    // feeBips = min(7.038e-12, 8.0e-3) * 1e18 = 7.038e-12 * 1e18 = 7.038e6
     const feeBips = getFeeBips(position, collectableTokenAmounts);
-    expect(feeBips).toBe(8000000000000000n);
+    expect(feeBips.toSignificant()).toBe('7038190');
+
+    // collectableTokenAmounts = {
+    //   token0Amount: CurrencyAmount.fromRawAmount(
+    //     new Token(
+    //       /*chainId=*/ 42161,
+    //       /*address=*/ '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+    //       /*decimals=*/ 18,
+    //     ),
+    //     '123456789',
+    //   ),
+    //   token1Amount: CurrencyAmount.fromRawAmount(
+    //     new Token(
+    //       /*chainId=*/ 42161,
+    //       /*address=*/ '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // USDC
+    //       /*decimals=*/ 6,
+    //     ),
+    //     123,
+    //   ),
+    // };
+    // console.log(collectableTokenAmounts.token0Amount);
+    // console.log(collectableTokenAmounts.token0Amount.decimalScale.toString());
+    // console.log(`amount0 = ${collectableTokenAmounts.token0Amount.toSignificant()}, ${collectableTokenAmounts.token0Amount}, amount1 = ${collectableTokenAmounts.token1Amount.toSignificant()}`);
+    // const testTokenAmount = CurrencyAmount.fromRawAmount(
+    //   new Token(
+    //     /*chainId=*/ 42161,
+    //     /*address=*/ '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+    //     /*decimals=*/ 18,
+    //   ),
+    //   '987654321',
+    // );
+    // // assert(collectableTokenAmounts.token0Amount.toSignificant() === '0.000000000123456789');
+    // // assert(collectableTokenAmounts.token1Amount.toSignificant() === '0.000123');
   });
 
   it('should have different feeBips for different fee tier', async () => {

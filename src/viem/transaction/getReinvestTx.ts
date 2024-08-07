@@ -47,7 +47,7 @@ export async function getReinvestTx(
     deadlineEpochSeconds,
     0n /*amount0Min*/, // Setting this to zero for tx simulation.
     0n /*amount1Min*/, // Setting this to zero for tx simulation.
-    feeBips,
+    BigInt(feeBips.toSignificant()),
     permitInfo,
   );
   const amounts = await getAmountsWithSlippage(
@@ -70,7 +70,7 @@ export async function getReinvestTx(
         deadlineEpochSeconds,
         BigInt(amounts.amount0Min),
         BigInt(amounts.amount1Min),
-        feeBips,
+        BigInt(feeBips.toSignificant()),
         permitInfo,
       ),
     },
