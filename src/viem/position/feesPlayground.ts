@@ -9,7 +9,7 @@ import { PositionDetails, viewCollectableTokenAmounts } from './position';
 async function main() {
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const amm = AutomatedMarketMakerEnum.Enum.UNISWAP_V3;
-  const positionId = 3303237n;
+  const positionId = 3356299n;
   const client = getPublicClient(chainId);
 
   const { pool, fee, tickLower, tickUpper, position } =
