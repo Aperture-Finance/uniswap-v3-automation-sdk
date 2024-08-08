@@ -85,11 +85,12 @@ export function humanPriceToClosestTick(
  */
 export function priceToClosestUsableTick(
   price: Price<Token, Token>,
-  poolFee: FeeAmount,
+  poolFee?: FeeAmount,
+  tickSpacing?: number,
 ): number {
   return nearestUsableTick(
     priceToClosestTickSafe(price),
-    TICK_SPACINGS[poolFee],
+    tickSpacing ?? TICK_SPACINGS[poolFee!],
   );
 }
 
