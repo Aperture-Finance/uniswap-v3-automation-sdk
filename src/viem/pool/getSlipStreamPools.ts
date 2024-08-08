@@ -2,10 +2,9 @@ import { getAMMInfo } from '@/chain';
 import { ApertureSupportedChainId } from '@/interfaces';
 import { IUniswapV3Pool__factory } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { keyBy } from 'lodash';
 import { Address, PublicClient } from 'viem';
 
-type SlipStreamPool = {
+export type SlipStreamPool = {
   address: Address;
   token0: Address;
   token1: Address;
@@ -95,5 +94,5 @@ export async function getSlipStreamPools(
     });
   }
 
-  return keyBy(pools, 'address');
+  return pools;
 }
