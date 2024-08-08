@@ -10,6 +10,6 @@ const POOL_FEE_TO_APTR_FEE: {
   [FeeAmount.HIGH]: 0.0015,
 };
 
-export function getAptrFee(feeAmount: FeeAmount) {
+export function getAptrFeesOnLpFees(feeAmount: FeeAmount) {
   return POOL_FEE_TO_APTR_FEE[feeAmount];
 }
