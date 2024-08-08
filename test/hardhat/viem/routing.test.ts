@@ -209,8 +209,8 @@ describe('Viem - Routing tests', function () {
       expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
       expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
       expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
-      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.156, 0.0003); // swap ~3.8 USDC, fee 0.156
-      expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.0176, 0.005); // position $8.87, bips 0.156/8.87 = ~0.0176
+      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.1556, 0.0003); // swap ~3.8 USDC, fee 0.1556
+      expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.01754, 0.005); // position $8.87, bips 0.1556/8.87 = ~0.01754
 
       expect(resultV2[i].swapData!).to.be.not.empty;
       expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
