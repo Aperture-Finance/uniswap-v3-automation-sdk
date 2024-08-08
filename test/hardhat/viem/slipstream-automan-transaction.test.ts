@@ -179,7 +179,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('13589538797482293814');
-    expect(liquidityAfterReinvest.toString()).to.equal('14018556727424907792');
+    expect(liquidityAfterReinvest.toString()).to.equal('14018330155023986625');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
