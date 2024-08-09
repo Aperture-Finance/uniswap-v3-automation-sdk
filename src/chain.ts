@@ -295,13 +295,11 @@ const CHAIN_ID_TO_INFO: {
         nonfungiblePositionManager: getAddress(
           '0x827922686190790b37229fd06084350E74485b72',
         ),
-        // Placeholder address to be updated after actual deployment.
         optimalSwapRouter: getAddress(
-          '0xCc06600868DdDab1073DEEC925E9D8c22fA8b889',
+          '0x0000004bb8983d4E004A8fe998155f1e8ed89989',
         ),
-        // Placeholder address to be updated after actual deployment.
         apertureAutoman: getAddress(
-          '0x00000000EDb4489cB49FE07246f39345c9f838cD',
+          '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
       },
     },
