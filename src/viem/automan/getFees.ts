@@ -26,7 +26,7 @@ const FEE_DEFAULT_REINVEST_RATIO = parseFloat(
   process.env.FEE_DEFAULT_REINVEST_RATIO || '0.001',
 );
 
-export function getFeeReinvestRatio(feeAmount: FeeAmount) {
+export function getFeeReinvestRatio(feeAmount: number) {
   return FEE_REINVEST_RATIO[feeAmount] || FEE_DEFAULT_REINVEST_RATIO;
 }
 
