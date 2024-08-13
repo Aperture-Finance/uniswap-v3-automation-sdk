@@ -9,7 +9,10 @@ import JSBI from 'jsbi';
 
 import { ApertureSupportedChainId, getChainInfo } from '../../src';
 import { getPool, getPublicClient } from '../../src/viem';
-import { MAX_FEE_PIPS, getFeeBips } from '../../src/viem/automan/getFees';
+import {
+  MAX_FEE_PIPS,
+  getFeeReinvestBips,
+} from '../../src/viem/automan/getFees';
 import { CollectableTokenAmounts } from '../../src/viem/position';
 
 dotenvConfig();
@@ -63,10 +66,12 @@ describe('getFeeBips', () => {
       '0.000456',
     );
     // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(0.000000000000000123 * getAptrFeesOnLpFees(FeeAmount.LOW) / 0.000000017476, 0.000456 * getAptrFeesOnLpFees(FeeAmount.LOW) / 0.000057) * 1e18
+    // feeBips = min(0.000000000000000123 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000000017476, 0.000456 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000057) * 1e18
     // feeBips = min(0.000000000000000123 * 0.001 / 0.000000017476, 0.000456 * 0.001 / 0.000057) * 1e18
     // feeBips = min(7.038e-12, 8.0e-3) * 1e18 = 7.038e-12 * 1e18 = 7.038e6
-    expect(getFeeBips(position, collectableTokenAmounts)).toBe(7038190n);
+    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
+      7038190n,
+    );
 
     // Test less feesBips on token1.
     collectableTokenAmounts = {
@@ -80,10 +85,10 @@ describe('getFeeBips', () => {
       '0.000456',
     );
     // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(0.123456789123456789 * getAptrFeesOnLpFees(FeeAmount.LOW) / 0.000000017476, 0.000001 * getAptrFeesOnLpFees(FeeAmount.LOW) / 0.000057) * 1e18
+    // feeBips = min(0.123456789123456789 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000000017476, 0.000001 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000057) * 1e18
     // feeBips = min(0.123456789123456789 * 0.001 / 0.000000017476, 0.000456 * 0.001 / 0.000057) * 1e18
     // feeBips = min(7064, 0.008) * 1e18 = 0.008 * 1e18 = 8e15
-    expect(getFeeBips(position, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
       8000000000000000n,
     );
 
@@ -96,7 +101,7 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token0Amount.toSignificant()).toBe(
       '0.000000139808',
     );
-    expect(getFeeBips(position, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
       7999962480377385n,
     );
 
@@ -108,7 +113,7 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token0Amount.toSignificant()).toBe(
       '0.000000139808',
     );
-    expect(getFeeBips(position, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
       8000000000000000n,
     );
   });
@@ -141,7 +146,10 @@ describe('getFeeBips', () => {
     });
     expect(positionLowFee.amount0.toSignificant()).toBe('0.0000000174754');
     expect(positionLowFee.amount1.toSignificant()).toBe('0.000057');
-    const lowFeeBips = getFeeBips(positionLowFee, collectableTokenAmounts);
+    const lowFeeBips = getFeeReinvestBips(
+      positionLowFee,
+      collectableTokenAmounts,
+    );
     // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
     // feeBips = min(0.000000000000000123 * 0.0007 * 1e18 / 0.0000000174754, 0.000456 * 0.0007 * 1e18 / 0.000057)
     // feeBips = min(4926913, 5.6e15) = 4926913
@@ -166,7 +174,7 @@ describe('getFeeBips', () => {
     // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
     // feeBips = min(0.000000000000000123 * 0.0015 * 1e18 / 0.0000000174754, 0.000456 * 0.0015 * 1e18 / 0.000057)
     // feeBips = min(10546013, 5.1.2e16) = 4926913
-    expect(getFeeBips(positionHighFee, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(positionHighFee, collectableTokenAmounts)).toBe(
       10546013n,
     );
   });
@@ -207,7 +215,7 @@ describe('getFeeBips', () => {
     expect(token1Position.amount0.toSignificant()).toBe('0');
     expect(token1Position.amount1.toSignificant()).toBe('54.3777');
     // 0.000456 * 0.001 * 1e18 / 54.3777 = 8385785255
-    expect(getFeeBips(token1Position, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(token1Position, collectableTokenAmounts)).toBe(
       8385785255n,
     );
 
@@ -220,7 +228,7 @@ describe('getFeeBips', () => {
     expect(token0Position.amount0.toSignificant()).toBe('0.00000000000000007');
     expect(token0Position.amount1.toSignificant()).toBe('0');
     // 0.000000000000000123 * 0.001 * 1e18 / 0.00000000000000007 = 1.757e15
-    expect(getFeeBips(token0Position, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(token0Position, collectableTokenAmounts)).toBe(
       1757142857142857n,
     );
   });
@@ -264,7 +272,7 @@ describe('getFeeBips', () => {
     // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
     // feeBips = min(999999 * 0.001 * 1e18 / 0.0000000174754, 1000000 * 0.001 * 1e18 / 0.000057)
     // feeBips = min(5.7e28, 1.754e25) = 1.754e25
-    expect(getFeeBips(position, collectableTokenAmounts)).toBe(
+    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
       BigInt(MAX_FEE_PIPS),
     );
   });
