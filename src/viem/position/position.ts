@@ -478,6 +478,8 @@ export function getPositionAtPrice(
     sqrtPriceX96,
     position.pool.liquidity,
     TickMath.getTickAtSqrtRatio(sqrtPriceX96),
+    undefined,
+    position.pool.tickSpacing,
   );
   return new Position({
     pool: poolAtNewPrice,
