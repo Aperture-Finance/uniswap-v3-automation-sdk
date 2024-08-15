@@ -162,6 +162,17 @@ const PermitTypes: TypedData = {
   ],
 } as const;
 
+const getDomainName = (amm: AutomatedMarketMakerEnum) => {
+  console.log('getDomainName', amm);
+  if (amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3) {
+    return 'Pancake V3 Positions NFT-V1';
+  } else if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
+    return 'Slipstream Position NFT v1';
+  } else {
+    return 'Uniswap V3 Positions NFT-V1';
+  }
+};
+
 /**
  * Generates typed data to be signed that allows Aperture's Automan contract to operate the specified position until the specified deadline.
  * @param chainId Chain id.
@@ -187,10 +198,7 @@ export async function generateTypedDataForPermit(
   )[0];
   return {
     domain: {
-      name:
-        amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3
-          ? 'Pancake V3 Positions NFT-V1'
-          : 'Uniswap V3 Positions NFT-V1',
+      name: getDomainName(amm),
       version: '1',
       chainId,
       verifyingContract: nonfungiblePositionManager,
