@@ -163,7 +163,6 @@ const PermitTypes: TypedData = {
 } as const;
 
 const getDomainName = (amm: AutomatedMarketMakerEnum) => {
-  console.log('getDomainName', amm);
   if (amm === AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3) {
     return 'Pancake V3 Positions NFT-V1';
   } else if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
