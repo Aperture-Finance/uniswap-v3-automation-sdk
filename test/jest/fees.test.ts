@@ -66,13 +66,13 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token1Amount.toSignificant()).toBe(
       '0.000456',
     );
+    // Hardcode an expected value to check to sanity check changing the default reinvest ratio fee.
     // feeBips = min(lpCollectsFeesToken0 * rate * 1e18 / pricipalToken0, lpCollectsFeesToken0 * rate * 1e18 / pricipalToken0)
     // feeBips = min(0.000000000000000123 * getFeeReinvestRatio(FeeAmount.LOW) * 1e18 / 0.000000017476, 0.000456 * getFeeReinvestRatio(FeeAmount.LOW) * 1e18 / 0.000057)
     // feeBips = min(0.000000000000000123 * 0.03 * 1e18 / 0.000000017476, 0.000456 * 0.03 * 1e18 / 0.000057)
     // feeBips = min(211146715, 2.4e17) = 211146715
-    // Hardcode an expected value to check to sanity check changing the default reinvest ratio fee.
     expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
-      211145725n,
+      211145725n, // Last few digits are off due to rounding.
     );
     expect(
       Number(getFeeReinvestBips(position, collectableTokenAmounts)),
@@ -96,10 +96,6 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token0Amount.toSignificant(18)).toBe(
       '0.123456789123456',
     );
-    // feeBips = min(lpCollectsFeesToken0 * rate * 1e18 / pricipalToken0, lpCollectsFeesToken0 * rate * 1e18 / pricipalToken0)
-    // feeBips = min(0.123456789123456 * getFeeReinvestRatio(FeeAmount.LOW) * 1e18 / 0.000000017476, 0.000001 * getFeeReinvestRatio(FeeAmount.LOW) * 1e18 / 0.000057)
-    // feeBips = min(0.123456789123456 * 0.03 * 1e18 / 0.000000017476, 0.000456 * 0.03 * 1e18 / 0.000057)
-    // feeBips = min(2.119e23, 2.4e17) = 2.4e17
     expect(
       Number(getFeeReinvestBips(position, collectableTokenAmounts)),
     ).toBeCloseTo(
