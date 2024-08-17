@@ -18,12 +18,11 @@ export const FEE_SWAP_RATIO = parseFloat(
 );
 const FEE_REINVEST_RATIO = JSON.parse(
   // Fees on the reinvest amount, included in autocompound and rebalance.
-  process.env.FEE_REINVEST_RATIO ||
-    '{"100": 0.0007, "500": 0.001, "2500": 0.0013, "3000": 0.0013, "10000": 0.0015}',
+  process.env.FEE_REINVEST_RATIO || '{}', // Empty map by default so it'll use FEE_DEFAULT_REINVEST_RATIO instead.
 );
 const FEE_DEFAULT_REINVEST_RATIO = parseFloat(
-  // Default fee on the reinvest amount if FeeAmount not found, such as for slipstream.
-  process.env.FEE_DEFAULT_REINVEST_RATIO || '0.001',
+  // Default flat 3% fee on the reinvest amount.
+  process.env.FEE_DEFAULT_REINVEST_RATIO || '0.03',
 );
 
 export function getFeeReinvestRatio(feeAmount: number) {

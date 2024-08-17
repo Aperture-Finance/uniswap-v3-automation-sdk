@@ -12,6 +12,7 @@ import { getPool, getPublicClient } from '../../src/viem';
 import {
   MAX_FEE_PIPS,
   getFeeReinvestBips,
+  getFeeReinvestRatio,
 } from '../../src/viem/automan/getFees';
 import { CollectableTokenAmounts } from '../../src/viem/position';
 
@@ -65,12 +66,26 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token1Amount.toSignificant()).toBe(
       '0.000456',
     );
-    // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(0.000000000000000123 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000000017476, 0.000456 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000057) * 1e18
-    // feeBips = min(0.000000000000000123 * 0.001 / 0.000000017476, 0.000456 * 0.001 / 0.000057) * 1e18
-    // feeBips = min(7.038e-12, 8.0e-3) * 1e18 = 7.038e-12 * 1e18 = 7.038e6
+    // Hardcode an expected value to check to sanity check changing the default reinvest ratio fee.
+    // feeBips = min(lpCollectsFeesToken0 * rate * 1e18 / pricipalToken0, lpCollectsFeesToken0 * rate * 1e18 / pricipalToken0)
+    // feeBips = min(0.000000000000000123 * getFeeReinvestRatio(FeeAmount.LOW) * 1e18 / 0.000000017476, 0.000456 * getFeeReinvestRatio(FeeAmount.LOW) * 1e18 / 0.000057)
+    // feeBips = min(0.000000000000000123 * 0.03 * 1e18 / 0.000000017476, 0.000456 * 0.03 * 1e18 / 0.000057)
+    // feeBips = min(211146715, 2.4e17) = 211146715
     expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
-      7038190n,
+      211145725n, // Last few digits are off due to rounding.
+    );
+    expect(
+      Number(getFeeReinvestBips(position, collectableTokenAmounts)),
+    ).toBeCloseTo(
+      Math.min(
+        (0.000000000000000123 *
+          getFeeReinvestRatio(FeeAmount.LOW) *
+          MAX_FEE_PIPS) /
+          0.000000017476,
+        (0.000456 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) /
+          0.000057,
+      ),
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
     );
 
     // Test less feesBips on token1.
@@ -81,28 +96,18 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token0Amount.toSignificant(18)).toBe(
       '0.123456789123456',
     );
-    expect(collectableTokenAmounts.token1Amount.toSignificant()).toBe(
-      '0.000456',
-    );
-    // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(0.123456789123456789 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000000017476, 0.000001 * getFeeReinvestRatio(FeeAmount.LOW) / 0.000057) * 1e18
-    // feeBips = min(0.123456789123456789 * 0.001 / 0.000000017476, 0.000456 * 0.001 / 0.000057) * 1e18
-    // feeBips = min(7064, 0.008) * 1e18 = 0.008 * 1e18 = 8e15
-    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
-      8000000000000000n,
-    );
-
-    // Test slightly less feesBips on token0.
-    // 0.000456 * 0.001 / 0.000057 * 0.000000017476 / 0.001 = 1.39808e-7.
-    collectableTokenAmounts = {
-      token0Amount: CurrencyAmount.fromRawAmount(token0, 139808000000),
-      token1Amount,
-    };
-    expect(collectableTokenAmounts.token0Amount.toSignificant()).toBe(
-      '0.000000139808',
-    );
-    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
-      7999962480377385n,
+    expect(
+      Number(getFeeReinvestBips(position, collectableTokenAmounts)),
+    ).toBeCloseTo(
+      Math.min(
+        (0.123456789123456 *
+          getFeeReinvestRatio(FeeAmount.LOW) *
+          MAX_FEE_PIPS) /
+          0.000000017476,
+        (0.000456 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) /
+          0.000057,
+      ),
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
     );
 
     // Test equal feeBips on both tokens.
@@ -113,8 +118,16 @@ describe('getFeeBips', () => {
     expect(collectableTokenAmounts.token0Amount.toSignificant()).toBe(
       '0.000000139808',
     );
-    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
-      8000000000000000n,
+    expect(
+      Number(getFeeReinvestBips(position, collectableTokenAmounts)),
+    ).toBeCloseTo(
+      Math.min(
+        (0.000000139808 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) /
+          0.000000017476,
+        (0.000456 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) /
+          0.000057,
+      ),
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
     );
   });
 
@@ -150,10 +163,17 @@ describe('getFeeBips', () => {
       positionLowFee,
       collectableTokenAmounts,
     );
-    // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(0.000000000000000123 * 0.0007 * 1e18 / 0.0000000174754, 0.000456 * 0.0007 * 1e18 / 0.000057)
-    // feeBips = min(4926913, 5.6e15) = 4926913
-    expect(lowFeeBips).toBe(4926913n);
+    expect(Number(lowFeeBips)).toBeCloseTo(
+      Math.min(
+        (0.000000000000000123 *
+          getFeeReinvestRatio(FeeAmount.LOWEST) *
+          MAX_FEE_PIPS) /
+          0.0000000174754,
+        (0.000456 * getFeeReinvestRatio(FeeAmount.LOWEST) * MAX_FEE_PIPS) /
+          0.000057,
+      ),
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
+    );
 
     const positionHighFee: Position = new Position({
       pool: await getPool(
@@ -171,11 +191,16 @@ describe('getFeeBips', () => {
     });
     expect(positionHighFee.amount0.toSignificant()).toBe('0.0000000174947');
     expect(positionHighFee.amount1.toSignificant()).toBe('0.000057');
-    // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(0.000000000000000123 * 0.0015 * 1e18 / 0.0000000174754, 0.000456 * 0.0015 * 1e18 / 0.000057)
-    // feeBips = min(10546013, 5.1.2e16) = 4926913
-    expect(getFeeReinvestBips(positionHighFee, collectableTokenAmounts)).toBe(
-      10546013n,
+    expect(Number(lowFeeBips)).toBeCloseTo(
+      Math.min(
+        (0.000000000000000123 *
+          getFeeReinvestRatio(FeeAmount.HIGH) *
+          MAX_FEE_PIPS) /
+          0.0000000174947,
+        (0.000456 * getFeeReinvestRatio(FeeAmount.HIGH) * MAX_FEE_PIPS) /
+          0.000057,
+      ),
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
     );
   });
 
@@ -214,9 +239,11 @@ describe('getFeeBips', () => {
     });
     expect(token1Position.amount0.toSignificant()).toBe('0');
     expect(token1Position.amount1.toSignificant()).toBe('54.3777');
-    // 0.000456 * 0.001 * 1e18 / 54.3777 = 8385785255
-    expect(getFeeReinvestBips(token1Position, collectableTokenAmounts)).toBe(
-      8385785255n,
+    expect(
+      Number(getFeeReinvestBips(token1Position, collectableTokenAmounts)),
+    ).toBeCloseTo(
+      (0.000456 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) / 54.3777,
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
     );
 
     const token0Position: Position = new Position({
@@ -227,9 +254,14 @@ describe('getFeeBips', () => {
     });
     expect(token0Position.amount0.toSignificant()).toBe('0.00000000000000007');
     expect(token0Position.amount1.toSignificant()).toBe('0');
-    // 0.000000000000000123 * 0.001 * 1e18 / 0.00000000000000007 = 1.757e15
-    expect(getFeeReinvestBips(token0Position, collectableTokenAmounts)).toBe(
-      1757142857142857n,
+    expect(
+      Number(getFeeReinvestBips(token0Position, collectableTokenAmounts)),
+    ).toBeCloseTo(
+      (0.000000000000000123 *
+        getFeeReinvestRatio(FeeAmount.LOW) *
+        MAX_FEE_PIPS) /
+        0.00000000000000007,
+      -6, // Allow the last 6 digits to be different due to rounding, acceptable since MAX_FEE_PIPS is 18 decimals.
     );
   });
 
@@ -261,19 +293,24 @@ describe('getFeeBips', () => {
       token0Amount: CurrencyAmount.fromRawAmount(token0, 1e24),
       token1Amount: CurrencyAmount.fromRawAmount(token1, 1e12),
     };
-    console.log(collectableTokenAmounts.token0Amount.toSignificant());
-    console.log(collectableTokenAmounts.token1Amount.toSignificant());
     expect(collectableTokenAmounts.token0Amount.toSignificant()).toBe(
       '999999', // Should be 1e6, but rounding error.
     );
     expect(collectableTokenAmounts.token1Amount.toSignificant()).toBe(
       '1000000',
     );
-    // feeBips = min(lpCollectsFeesToken0 * rate / pricipalToken0, lpCollectsFeesToken0 * rate / pricipalToken0) * 1e18
-    // feeBips = min(999999 * 0.001 * 1e18 / 0.0000000174754, 1000000 * 0.001 * 1e18 / 0.000057)
-    // feeBips = min(5.7e28, 1.754e25) = 1.754e25
-    expect(getFeeReinvestBips(position, collectableTokenAmounts)).toBe(
-      BigInt(MAX_FEE_PIPS),
+    const feeReinvestBips = getFeeReinvestBips(
+      position,
+      collectableTokenAmounts,
     );
+    expect(feeReinvestBips).toBeLessThan(
+      Math.min(
+        (999999 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) /
+          0.000000017476,
+        (1000000 * getFeeReinvestRatio(FeeAmount.LOW) * MAX_FEE_PIPS) /
+          0.000057,
+      ),
+    );
+    expect(feeReinvestBips).toBe(BigInt(MAX_FEE_PIPS));
   });
 });

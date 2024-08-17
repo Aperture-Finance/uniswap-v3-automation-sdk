@@ -176,7 +176,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('39905002237917');
+    expect(liquidityAfterReinvest.toString()).to.equal('39772839472592');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
