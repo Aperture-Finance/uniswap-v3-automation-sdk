@@ -10,11 +10,6 @@ import {
   simulateRebalance,
   simulateRemoveLiquidity,
 } from '../automan';
-import {
-  FEE_REBALANCE_SWAP_RATIO,
-  FEE_REBALANCE_USD,
-  MAX_FEE_PIPS,
-} from '../automan/getFees';
 import { PositionDetails } from '../position';
 import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
@@ -25,6 +20,9 @@ import {
   getSwapRoute,
 } from './internal';
 import { SolverResult } from './types';
+
+const feeRatio = 0.0015; // 0.15% fee
+const feeCoefficient = 1e18;
 
 /**
  * Get the optimal amount of liquidity to rebalance for a given position.
@@ -121,12 +119,12 @@ export async function optimalRebalanceV2(
       ? position.pool.token0.decimals
       : position.pool.token1.decimals;
 
-    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + FEE_REBALANCE_USD
+    // swap token value * 0.0015 + 0.15
     const feeUSD = new Big(poolAmountIn.toString())
       .div(10 ** decimals)
       .mul(tokenInPrice)
-      .mul(FEE_REBALANCE_SWAP_RATIO)
-      .add(FEE_REBALANCE_USD);
+      .mul(feeRatio)
+      .add(0.15);
 
     const token0USD = new Big(receive0.toString())
       .mul(tokenPrices[0])
@@ -157,7 +155,7 @@ export async function optimalRebalanceV2(
     }
 
     return {
-      feeBips: BigInt(feeUSD.div(positionUSD).mul(MAX_FEE_PIPS).toFixed(0)),
+      feeBips: BigInt(feeUSD.div(positionUSD).mul(feeCoefficient).toFixed(0)),
       feeUSD: feeUSD.toFixed(5),
     };
   };
