@@ -4,7 +4,8 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import { getAutomanReinvestCalldata } from '../automan';
-import { PositionDetails } from '../position';
+import { getFeeReinvestBips } from '../automan/getFees';
+import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
 
@@ -33,19 +34,20 @@ export async function getReinvestTx(
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
 }> {
-  const { pool, tickLower, tickUpper } = await PositionDetails.fromPositionId(
-    chainId,
-    amm,
-    positionId,
-    client,
-  );
+  const { pool, tickLower, tickUpper, position } =
+    await PositionDetails.fromPositionId(chainId, amm, positionId, client);
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+
+  const feeBips = getFeeReinvestBips(
+    position,
+    await viewCollectableTokenAmounts(chainId, amm, positionId, client),
+  );
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,
     0n /*amount0Min*/, // Setting this to zero for tx simulation.
     0n /*amount1Min*/, // Setting this to zero for tx simulation.
-    0n /*feeBips*/,
+    feeBips,
     permitInfo,
   );
   const amounts = await getAmountsWithSlippage(
@@ -68,7 +70,7 @@ export async function getReinvestTx(
         deadlineEpochSeconds,
         BigInt(amounts.amount0Min),
         BigInt(amounts.amount1Min),
-        0n,
+        feeBips,
         permitInfo,
       ),
     },
