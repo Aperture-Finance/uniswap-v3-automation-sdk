@@ -3831,10 +3831,10 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aperture-lens@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-2.0.1.tgz#2f974aa067867962aab80d9a33decb6cf3ed774f"
-  integrity sha512-dDqXyqDN7VoHi9azRKhlVRkUZp495wMecFHR8fcgmQiz8q5C0IX63+rwTfGtzeN3M/5l3itirskIcu5VJNDCnA==
+aperture-lens@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/aperture-lens/-/aperture-lens-2.0.2.tgz#2938c8c5c05f2d57c536277b1d29201b2f7b1451"
+  integrity sha512-KwWffibpVK3dM/eQnPRArimMIFUd0p3MW5EkHv5DgjO6X/S/pegvtY8UTu6NEqqX9wegOOJoR45jQjkOuode3Q==
   dependencies:
     "@aperture_finance/uni-v3-lib" "^3.0.3"
     "@openzeppelin/contracts" "^5.0.2"
