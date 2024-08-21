@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.8.1",
+  "version": "3.8.4",
   "description": "SDK for Aperture's CLMM automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
@@ -42,7 +42,7 @@
   "dependencies": {
     "@0xsequence/multicall": "^1.10.9",
     "@aperture_finance/uniswap-v3-sdk": "3.11.0-APTR.2",
-    "aperture-lens": "^2.0.1",
+    "aperture-lens": "^2.0.2",
     "axios": "^1.7.3",
     "big.js": "^6.2.1",
     "bottleneck": "^2.19.5",
