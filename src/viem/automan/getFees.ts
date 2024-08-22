@@ -1,5 +1,6 @@
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
-import { CurrencyAmount } from '@uniswap/smart-order-router';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
+import Big from 'big.js';
 
 import { CollectableTokenAmounts } from '../position';
 
@@ -30,8 +31,8 @@ export function getFeeReinvestRatio(feeAmount: number) {
 }
 
 function getFeeReinvestBipsFromSpecificToken(
-  principalAmount: CurrencyAmount,
-  collectableTokenAmount: CurrencyAmount,
+  principalAmount: CurrencyAmount<Token>,
+  collectableTokenAmount: CurrencyAmount<Token>,
   feeAmount: FeeAmount,
 ): bigint {
   const feeBipsFromSpecificToken = BigInt(
@@ -52,6 +53,21 @@ function getFeeReinvestBipsFromSpecificToken(
   return feeBipsFromSpecificToken < BigInt(MAX_FEE_PIPS)
     ? feeBipsFromSpecificToken
     : BigInt(MAX_FEE_PIPS);
+}
+
+export function getTokensInUsd(
+  token0Amount: CurrencyAmount<Token>,
+  token1Amount: CurrencyAmount<Token>,
+  tokenPricesUsd: [string, string],
+) {
+  return new Big(token0Amount.quotient.toString())
+    .mul(tokenPricesUsd[0])
+    .div(10 ** token0Amount.currency.decimals)
+    .add(
+      new Big(token1Amount.quotient.toString())
+        .mul(tokenPricesUsd[1])
+        .div(10 ** token1Amount.currency.decimals),
+    );
 }
 
 export function getFeeReinvestBips(
