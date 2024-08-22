@@ -1,8 +1,8 @@
-import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import Big from 'big.js';
 
-import { CollectableTokenAmounts } from '../position';
+import { PositionDetails } from '../position';
 
 export const MAX_FEE_PIPS = 1e18;
 export const FEE_REBALANCE_USD = parseFloat(
@@ -70,38 +70,35 @@ export function getTokensInUsd(
     );
 }
 
-export function getFeeReinvestBips(
-  position: Position,
-  collectableTokenAmounts: CollectableTokenAmounts,
-): bigint {
-  const principalAmount0 = position.amount0;
-  const principalAmount1 = position.amount1;
+export function getFeeReinvestBips(positionDetails: PositionDetails): bigint {
+  const principalAmount0 = positionDetails.position.amount0;
+  const principalAmount1 = positionDetails.position.amount1;
   if (principalAmount0.equalTo(0)) {
     if (principalAmount1.equalTo(0)) {
       return 0n;
     }
     return getFeeReinvestBipsFromSpecificToken(
       principalAmount1,
-      collectableTokenAmounts.token1Amount,
-      position.pool.fee,
+      positionDetails.tokensOwed1,
+      positionDetails.fee,
     );
   }
   if (principalAmount1.equalTo(0)) {
     return getFeeReinvestBipsFromSpecificToken(
       principalAmount0,
-      collectableTokenAmounts.token0Amount,
-      position.pool.fee,
+      positionDetails.tokensOwed0,
+      positionDetails.fee,
     );
   }
   const feeBips0 = getFeeReinvestBipsFromSpecificToken(
     principalAmount0,
-    collectableTokenAmounts.token0Amount,
-    position.pool.fee,
+    positionDetails.tokensOwed0,
+    positionDetails.fee,
   );
   const feeBips1 = getFeeReinvestBipsFromSpecificToken(
     principalAmount1,
-    collectableTokenAmounts.token1Amount,
-    position.pool.fee,
+    positionDetails.tokensOwed1,
+    positionDetails.fee,
   );
   return feeBips0 < feeBips1 ? feeBips0 : feeBips1;
 }

@@ -10,7 +10,7 @@ import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import { getAutomanReinvestCalldata } from '../automan';
 import { getFeeReinvestBips } from '../automan/getFees';
-import { PositionDetails, viewCollectableTokenAmounts } from '../position';
+import { PositionDetails } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
 
@@ -39,19 +39,18 @@ export async function getReinvestTx(
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
 }> {
-  const { pool, tickLower, tickUpper, position } =
-    await PositionDetails.fromPositionId(chainId, amm, positionId, client);
-  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
-
-  const collectableTokenAmounts = await viewCollectableTokenAmounts(
+  const positionDetails = await PositionDetails.fromPositionId(
     chainId,
     amm,
     positionId,
     client,
   );
-  const feeBips = getFeeReinvestBips(position, collectableTokenAmounts);
+  const { pool, tickLower, tickUpper, position } = positionDetails;
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+
+  const feeBips = getFeeReinvestBips(positionDetails);
   getLogger().info(
-    `getReinvestTx ownerAddress=${ownerAddress}, amm=${amm}, chainId=${chainId}, nftId=${positionId}, collectableToken0=${collectableTokenAmounts.token0Amount.toSignificant()}, collectableToken1=${collectableTokenAmounts.token1Amount.toSignificant()}, positionToken0=${position.amount0.toSignificant()}, positionToken1=${position.amount1.toSignificant()}, feeBips=${feeBips}`,
+    `getReinvestTx ownerAddress=${ownerAddress}, amm=${amm}, chainId=${chainId}, nftId=${positionId}, collectableToken0=${positionDetails.tokensOwed0.toSignificant()}, collectableToken1=${positionDetails.tokensOwed1.toSignificant()}, positionToken0=${position.amount0.toSignificant()}, positionToken1=${position.amount1.toSignificant()}, feeBips=${feeBips}`,
   );
   const data = getAutomanReinvestCalldata(
     positionId,
