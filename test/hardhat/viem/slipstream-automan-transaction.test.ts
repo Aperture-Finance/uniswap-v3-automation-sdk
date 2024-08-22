@@ -245,7 +245,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
@@ -316,7 +316,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });

@@ -136,7 +136,7 @@ async function increaseLiquidityOptimalPool(
     fromAddress,
     position,
     increaseParams,
-    /** swapData= */ undefined,
+    /* swapData= */ undefined,
     blockNumber,
   );
   let swapRoute: SwapRoute = [];
@@ -186,7 +186,7 @@ async function increaseLiquidityOptimalRouter(
     position,
     increaseParams,
     slippage,
-    /** includeRoute= */ true,
+    /* includeRoute= */ true,
   );
   const [liquidity, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
     chainId,

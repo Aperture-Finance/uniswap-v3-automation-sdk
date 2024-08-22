@@ -69,7 +69,7 @@ describe('Viem - Routing tests', function () {
       tickLower,
       tickUpper,
       0n,
-      /** usePool= */ true, // don't use 1inch in unit test
+      /* usePool= */ true, // don't use 1inch in unit test
       owner,
       0.1,
       publicClient,
@@ -308,9 +308,9 @@ describe('Viem - Routing tests', function () {
         token0Amount,
         token1Amount,
         eoa,
-        true, //don't use 1inch in unit test
+        /* usePool= */ true, // don't use 1inch in unit test
         blockNumber,
-        true /** includeSwapInfo */,
+        /* includeSwapInfo= */ true,
       );
 
     const _total = Number(
@@ -381,7 +381,7 @@ describe('Viem - Routing tests', function () {
       publicClient,
       true, // don't use 1inch in unit test
       blockNumber,
-      true /** includeSwapInfo */,
+      /* includeSwapInfo= */ true,
     );
     const _total = Number(
       pool.token0Price

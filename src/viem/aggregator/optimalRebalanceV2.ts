@@ -17,7 +17,7 @@ import {
   getFeeReinvestRatio,
   getTokensInUsd,
 } from '../automan/getFees';
-import { PositionDetails, viewCollectableTokenAmounts } from '../position';
+import { PositionDetails } from '../position';
 import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
@@ -114,20 +114,11 @@ export async function optimalRebalanceV2(
   };
 
   const calcFeeBips = async () => {
-    const [optimalSwap, collectableTokenAmounts] = await Promise.all([
-      simulateAndGetOptimalSwapAmount(0n),
-      viewCollectableTokenAmounts(
-        chainId,
-        amm,
-        BigInt(position.tokenId),
-        publicClient,
-        blockNumber,
-      ),
-    ]);
-    const { poolAmountIn, zeroForOne, receive0, receive1 } = optimalSwap;
+    const { poolAmountIn, zeroForOne, receive0, receive1 } =
+      await simulateAndGetOptimalSwapAmount(/* feeBips= */ 0n);
     const collectableTokenInUsd = getTokensInUsd(
-      collectableTokenAmounts.token0Amount,
-      collectableTokenAmounts.token1Amount,
+      position.tokensOwed0,
+      position.tokensOwed1,
       tokenPricesUsd,
     );
     const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
@@ -175,17 +166,16 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-
-    const infoLog = `optimalRebalanceV2 fromAddress=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
-      poolAmountIn.toString(),
-    )
-      .div(10 ** decimals)
-      .mul(tokenInPrice)
-      .mul(
-        FEE_REBALANCE_SWAP_RATIO,
-      )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`;
-    getLogger().info(infoLog);
-    console.log(infoLog);
+    getLogger().info(
+      `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
+        poolAmountIn.toString(),
+      )
+        .div(10 ** decimals)
+        .mul(tokenInPrice)
+        .mul(
+          FEE_REBALANCE_SWAP_RATIO,
+        )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalRebalanceFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`,
+    );
 
     return {
       feeBips,
