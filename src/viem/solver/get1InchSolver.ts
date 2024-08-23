@@ -1,11 +1,44 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import axios from 'axios';
 import { Address, Hex } from 'viem';
 
-import { getApproveTarget } from '../aggregator';
-import { buildRequest } from '../aggregator';
 import { encodeOptimalSwapData } from '../automan';
+import { limiter } from './common';
 import { ISolver } from './types';
 import { SwapRoute } from './types';
+
+const ApiBaseUrl = 'https://1inch-api.aperture.finance';
+const headers = {
+  Accept: 'application/json',
+};
+
+export async function buildRequest(
+  chainId: ApertureSupportedChainId,
+  methodName: string,
+  params: object,
+) {
+  return limiter.schedule(() =>
+    axios.get(apiRequestUrl(chainId, methodName), {
+      headers,
+      params,
+    }),
+  );
+}
+
+function apiRequestUrl(chainId: ApertureSupportedChainId, methodName: string) {
+  return new URL(`/swap/v5.2/${chainId}/${methodName}`, ApiBaseUrl).toString();
+}
+
+export async function get1inchApproveTarget(
+  chainId: ApertureSupportedChainId,
+): Promise<Address> {
+  try {
+    return (await buildRequest(chainId, 'approve/spender', {})).data.address;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
 
 export const get1InchSolver = (): ISolver => {
   return {
@@ -39,7 +72,7 @@ export const get1InchSolver = (): ISolver => {
         true,
       );
 
-      const approveTarget = await getApproveTarget(chainId);
+      const approveTarget = await get1inchApproveTarget(chainId);
       return {
         swapData: encodeOptimalSwapData(
           chainId,

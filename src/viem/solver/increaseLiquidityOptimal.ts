@@ -5,6 +5,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
+import { SwapRoute, quote } from '.';
 import { computePoolAddress } from '../../utils';
 import {
   IncreaseLiquidityParams,
@@ -12,8 +13,7 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
-import { SwapRoute, quote } from '../solver';
-import { getApproveTarget } from './index';
+import { get1inchApproveTarget } from './get1InchSolver';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
@@ -222,7 +222,7 @@ async function getIncreaseLiquidityOptimalSwapData(
   try {
     const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await getApproveTarget(chainId);
+    const approveTarget = await get1inchApproveTarget(chainId);
     // get swap amounts using the same pool
 
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap([

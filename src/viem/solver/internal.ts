@@ -5,12 +5,12 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
+import { E_Solver, SwapRoute } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanContract,
 } from '../automan';
-import { E_Solver, SwapRoute } from '../solver';
 import { SwapPath } from './types';
 import { SolverResult } from './types';
 

@@ -1,5 +1,4 @@
 export * from './activity';
-export * from './aggregator';
 export * from './automan';
 export * from './currency';
 export * from './overrides';

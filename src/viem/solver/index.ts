@@ -5,6 +5,12 @@ import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 export { quote } from './get1InchSolver'; // TODO: remove when complete refactor
 
 export * from './types';
+export * from './optimalRebalanceV2';
+export * from './increaseLiquidityOptimal';
+export * from './increaseLiquidityOptimalV2';
+export * from './optimalMint';
+export * from './optimalMintV2';
+export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {
   swapData: '0x',
