@@ -221,7 +221,7 @@ async function optimalMintRouter(
     mintParams,
     slippage,
     blockNumber,
-    /** includeRoute= */ true,
+    /* includeRoute= */ true,
   );
   const [, liquidity, amount0, amount1] = await simulateRebalance(
     chainId,

@@ -253,7 +253,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     // Owner of position id 4 sets Automan as operator.

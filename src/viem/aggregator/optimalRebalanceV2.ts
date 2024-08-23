@@ -14,6 +14,8 @@ import {
   FEE_REBALANCE_SWAP_RATIO,
   FEE_REBALANCE_USD,
   MAX_FEE_PIPS,
+  getFeeReinvestRatio,
+  getTokensInUsd,
 } from '../automan/getFees';
 import { PositionDetails } from '../position';
 import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
@@ -49,7 +51,7 @@ export async function optimalRebalanceV2(
   newTickUpper: number,
   fromAddress: Address,
   slippage: number,
-  tokenPrices: [string, string],
+  tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
@@ -66,10 +68,10 @@ export async function optimalRebalanceV2(
     newTickUpper,
     fromAddress,
     slippage,
-    tokenPrices,
+    tokenPricesUsd,
   };
 
-  if (tokenPrices[0] === '0' || tokenPrices[1] === '0') {
+  if (tokenPricesUsd[0] === '0' || tokenPricesUsd[1] === '0') {
     throw new Error('Invalid token prices.');
   }
 
@@ -113,40 +115,45 @@ export async function optimalRebalanceV2(
 
   const calcFeeBips = async () => {
     const { poolAmountIn, zeroForOne, receive0, receive1 } =
-      await simulateAndGetOptimalSwapAmount(0n);
-
-    const tokenInPrice = zeroForOne ? tokenPrices[0] : tokenPrices[1];
+      await simulateAndGetOptimalSwapAmount(/* feeBips= */ 0n);
+    const collectableTokenInUsd = getTokensInUsd(
+      position.tokensOwed0,
+      position.tokensOwed1,
+      tokenPricesUsd,
+    );
+    const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
 
     const decimals = zeroForOne
       ? position.pool.token0.decimals
       : position.pool.token1.decimals;
 
-    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + FEE_REBALANCE_USD
+    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + lpCollectedFees * getFeeReinvestRatio(pool.fee) + FEE_REBALANCE_USD
     const feeUSD = new Big(poolAmountIn.toString())
       .div(10 ** decimals)
       .mul(tokenInPrice)
       .mul(FEE_REBALANCE_SWAP_RATIO)
+      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee)))
       .add(FEE_REBALANCE_USD);
 
-    const token0USD = new Big(receive0.toString())
-      .mul(tokenPrices[0])
+    const token0Usd = new Big(receive0.toString())
+      .mul(tokenPricesUsd[0])
       .div(10 ** position.token0.decimals);
 
-    const token1USD = new Big(receive1.toString())
-      .mul(tokenPrices[1])
+    const token1Usd = new Big(receive1.toString())
+      .mul(tokenPricesUsd[1])
       .div(10 ** position.token1.decimals);
 
-    const positionUSD = token0USD.add(token1USD);
+    const positionUsd = token0Usd.add(token1Usd);
 
-    if (positionUSD.eq(0)) {
+    if (positionUsd.eq(0)) {
       getLogger().error('Invalid position USD value', {
         poolAmountIn,
         zeroForOne,
         receive0,
         receive1,
         feeUSD: feeUSD.toFixed(5),
-        token0USD: token0USD.toFixed(5),
-        token1USD: token1USD.toFixed(5),
+        token0Usd: token0Usd.toFixed(5),
+        token1Usd: token1Usd.toFixed(5),
         ...logdata,
       });
 
@@ -156,8 +163,22 @@ export async function optimalRebalanceV2(
       };
     }
 
+    const feeBips = BigInt(
+      feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
+    );
+    getLogger().info(
+      `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
+        poolAmountIn.toString(),
+      )
+        .div(10 ** decimals)
+        .mul(tokenInPrice)
+        .mul(
+          FEE_REBALANCE_SWAP_RATIO,
+        )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalRebalanceFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`,
+    );
+
     return {
-      feeBips: BigInt(feeUSD.div(positionUSD).mul(MAX_FEE_PIPS).toFixed(0)),
+      feeBips,
       feeUSD: feeUSD.toFixed(5),
     };
   };

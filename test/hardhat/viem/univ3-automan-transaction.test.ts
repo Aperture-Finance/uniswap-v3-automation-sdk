@@ -242,7 +242,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     // Owner of position id 4 sets Automan as operator.
@@ -313,7 +313,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
