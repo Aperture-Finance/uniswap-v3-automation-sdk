@@ -94,7 +94,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
@@ -110,7 +110,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/JAGXF8B14mpB8QGKnwhKTs5JxsQZBJQvbDGFcWwL7gbm',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -144,7 +144,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/FQ6JYszEKApsBpAmiHesRsd9Ygc6mzmpNRANeVQFYoVX',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -176,7 +176,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/3hCPRGf4z88VC5rsBKU5AA9FBBq5nF3jbKJG7VZCbhjm',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -207,7 +207,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/Cghf4LfVqPiFw6fp6Y5X5Ubc8UpmUhSfJL82zwiBFLaj',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -238,7 +238,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/G5MUbSBM7Nsrm9tH2tGQUiAF4SZDGf2qeo1xPLYjKr7K',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
@@ -254,7 +254,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/A1fvJWQLBeUAggX2WQTMm3FKjXTekNXo77ZySun4YN2m',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -331,7 +331,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
+          'https://gateway.thegraph.com/api/f9ed9810e15cd166e224bf88fe4d5b61/subgraphs/id/GVH9h9KZ9CqheUEL93qMbq7QwgoBu32QXQDPR6bev4Eo',
       },
     },
     wrappedNativeCurrency: new Token(
