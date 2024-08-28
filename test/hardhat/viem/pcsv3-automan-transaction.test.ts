@@ -186,7 +186,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     const liquidityAfterReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    expect(liquidityAfterReinvest.toString()).to.equal('17369508569204326673');
+    expect(liquidityAfterReinvest.toString()).to.equal('17369281355624526199');
 
     expect(
       generateAutoCompoundRequestPayload(
@@ -253,7 +253,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     // Owner of position id 4 sets Automan as operator.

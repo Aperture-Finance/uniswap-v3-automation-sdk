@@ -169,8 +169,8 @@ async function optimalMintPool(
     publicClient,
     fromAddress,
     mintParams,
-    /** swapData= */ undefined,
-    /** blockNumber= */ blockNumber,
+    /* swapData= */ undefined,
+    /* blockNumber= */ blockNumber,
   );
   let swapRoute: SwapRoute = [];
   if (mintParams.amount0Desired.toString() !== amount0.toString()) {
@@ -216,8 +216,8 @@ async function optimalMintRouter(
     publicClient,
     mintParams,
     slippage,
-    /** blockNumber= */ undefined,
-    /** includeRoute= */ true,
+    /* blockNumber= */ undefined,
+    /* includeRoute= */ true,
   );
   const [, liquidity, amount0, amount1] = await simulateMintOptimal(
     chainId,

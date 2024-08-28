@@ -69,7 +69,7 @@ describe('Viem - Routing tests', function () {
       tickLower,
       tickUpper,
       0n,
-      /** usePool= */ true, // don't use 1inch in unit test
+      /* usePool= */ true, // don't use 1inch in unit test
       owner,
       0.1,
       publicClient,
@@ -209,8 +209,8 @@ describe('Viem - Routing tests', function () {
       expect(Number(resultV2[i].amount0.toString())).to.be.greaterThan(0);
       expect(Number(resultV2[i].amount1.toString())).to.be.greaterThan(0);
       expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
-      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.1527, 0.005); // swap ~3.8 USDC, fee 0.1527
-      expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.017, 0.005); // position $8.87, bips 0.1527/8.87 = ~0.0172
+      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.2048, 0.0003); // swap ~3.8 USDC, reinvest ~$1.6, and FEE_REBALANCE_USD, totalFeeUsd=0.2048
+      expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.02309, 0.005); // position $8.87, bips 0.2048/8.87 = ~0.02309
 
       expect(resultV2[i].swapData!).to.be.not.empty;
       expect(resultV2[i].swapRoute?.length).to.be.greaterThan(0);
@@ -308,9 +308,9 @@ describe('Viem - Routing tests', function () {
         token0Amount,
         token1Amount,
         eoa,
-        true, //don't use 1inch in unit test
+        /* usePool= */ true, // don't use 1inch in unit test
         blockNumber,
-        true /** includeSwapInfo */,
+        /* includeSwapInfo= */ true,
       );
 
     const _total = Number(
@@ -381,7 +381,7 @@ describe('Viem - Routing tests', function () {
       publicClient,
       true, // don't use 1inch in unit test
       blockNumber,
-      true /** includeSwapInfo */,
+      /* includeSwapInfo= */ true,
     );
     const _total = Number(
       pool.token0Price

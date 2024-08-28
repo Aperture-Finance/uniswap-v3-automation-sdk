@@ -179,7 +179,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('13589538797482293814');
-    expect(liquidityAfterReinvest.toString()).to.equal('14018556727424907792');
+    expect(liquidityAfterReinvest.toString()).to.equal('14011759555397272426');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
@@ -245,7 +245,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
@@ -316,7 +316,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      0n /** feeBips */,
+      /* feeBips= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
