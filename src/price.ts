@@ -185,7 +185,9 @@ export async function getTokenHistoricalPricesFromCoingecko(
   apiKey?: string,
 ): Promise<CoingeckoHistoricalPriceDatapoint[]> {
   const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
-  if (coingecko_asset_platform_id === undefined) return [];
+  if (coingecko_asset_platform_id === undefined) {
+    return [];
+  }
   vsCurrency = vsCurrency ?? 'usd';
   let priceResponse: AxiosResponse;
   if (apiKey) {
