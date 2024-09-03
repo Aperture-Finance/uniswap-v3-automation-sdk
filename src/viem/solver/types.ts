@@ -37,6 +37,7 @@ export interface ISolver {
 export enum E_Solver {
   SamePool = 'SamePool',
   PH = 'PropellerHeads',
+  OKX = 'OKX',
   OneInch = '1Inch',
 }
 

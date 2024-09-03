@@ -14,7 +14,7 @@ import {
   simulateMintOptimal,
 } from '../automan';
 import { getPool } from '../pool';
-import { get1inchApproveTarget } from './get1InchSolver';
+import { getOkxApproveTarget } from './getOkxSolver';
 import {
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
@@ -272,7 +272,6 @@ async function getOptimalMintSwapData(
     );
 
     const ammInfo = getAMMInfo(chainId, amm)!;
-    // get a quote from 1inch
     const { tx, protocols } = await quote(
       chainId,
       zeroForOne ? mintParams.token0 : mintParams.token1,
@@ -283,7 +282,7 @@ async function getOptimalMintSwapData(
       includeRoute,
     );
 
-    const approveTarget = await get1inchApproveTarget(chainId);
+    const approveTarget = await getOkxApproveTarget(chainId);
 
     return {
       swapData: encodeOptimalSwapData(

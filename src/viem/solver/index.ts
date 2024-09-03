@@ -1,8 +1,9 @@
 import { get1InchSolver } from './get1InchSolver';
+import { getOkxSolver } from './getOkxSolver';
 import { getPropellerHeadsSolver } from './getPropellerHeadsSolver';
 import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
-export { quote } from './get1InchSolver'; // TODO: remove when complete refactor
+export { getOkxQuote as quote } from './getOkxSolver'; // TODO: remove when complete refactor
 
 export * from './types';
 export * from './optimalRebalanceV2';
@@ -20,6 +21,8 @@ export const getSolver = (solver: E_Solver): ISolver => {
   switch (solver) {
     case E_Solver.OneInch:
       return get1InchSolver();
+    case E_Solver.OKX:
+      return getOkxSolver();
     case E_Solver.PH:
       return getPropellerHeadsSolver();
     case E_Solver.SamePool:

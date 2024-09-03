@@ -13,7 +13,7 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
-import { get1inchApproveTarget } from './get1InchSolver';
+import { getOkxApproveTarget } from './getOkxSolver';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
@@ -222,7 +222,7 @@ async function getIncreaseLiquidityOptimalSwapData(
   try {
     const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await get1inchApproveTarget(chainId);
+    const approveTarget = await getOkxApproveTarget(chainId);
     // get swap amounts using the same pool
 
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap([
@@ -241,7 +241,6 @@ async function getIncreaseLiquidityOptimalSwapData(
       increaseParams.amount1Desired,
     ]);
 
-    // get a quote from 1inch
     const { tx, protocols } = await quote(
       chainId,
       zeroForOne ? position.pool.token0.address : position.pool.token1.address,

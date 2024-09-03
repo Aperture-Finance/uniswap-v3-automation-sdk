@@ -7,7 +7,7 @@ import { limiter } from './common';
 import { ISolver } from './types';
 import { SwapRoute } from './types';
 
-const ApiBaseUrl = 'https://1inch-api.aperture.finance';
+const ApiBaseUrl = 'https://okx-api.aperture.finance';
 const headers = {
   Accept: 'application/json',
 };
@@ -29,7 +29,7 @@ function apiRequestUrl(chainId: ApertureSupportedChainId, methodName: string) {
   return new URL(`/swap/v5.2/${chainId}/${methodName}`, ApiBaseUrl).toString();
 }
 
-export async function get1InchApproveTarget(
+export async function getOkxApproveTarget(
   chainId: ApertureSupportedChainId,
 ): Promise<Address> {
   try {
@@ -40,7 +40,7 @@ export async function get1InchApproveTarget(
   }
 }
 
-export const get1InchSolver = (): ISolver => {
+export const getOkxSolver = (): ISolver => {
   return {
     optimalMint: async (props) => {
       const {
@@ -62,7 +62,7 @@ export const get1InchSolver = (): ISolver => {
       }
 
       // get a quote from 1inch
-      const { tx, protocols } = await get1InchQuote(
+      const { tx, protocols } = await getOkxQuote(
         chainId,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
@@ -72,7 +72,7 @@ export const get1InchSolver = (): ISolver => {
         true,
       );
 
-      const approveTarget = await get1InchApproveTarget(chainId);
+      const approveTarget = await getOkxApproveTarget(chainId);
       return {
         swapData: encodeOptimalSwapData(
           chainId,
@@ -102,7 +102,7 @@ export const get1InchSolver = (): ISolver => {
  * @param from Address of a seller, make sure that this address has approved to spend src in needed amount
  * @param slippage Limit of price slippage you are willing to accept in percentage
  */
-export async function get1InchQuote(
+export async function getOkxQuote(
   chainId: ApertureSupportedChainId,
   src: string,
   dst: string,
