@@ -7,6 +7,7 @@ import JSBI from 'jsbi';
 
 import { getChainInfo } from './chain';
 import { ApertureSupportedChainId } from './interfaces';
+import { getLogger } from './logger';
 
 // Let Big use 30 decimal places of precision since 2^96 < 10^29.
 Big.DP = 30;
@@ -185,7 +186,12 @@ export async function getTokenHistoricalPricesFromCoingecko(
   apiKey?: string,
 ): Promise<CoingeckoHistoricalPriceDatapoint[]> {
   const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
-  if (coingecko_asset_platform_id === undefined) return [];
+  if (coingecko_asset_platform_id === undefined) {
+    getLogger().error("Chain doesn't have a Coingecko asset platform id", {
+      chainId: token.chainId,
+    });
+    return [];
+  }
   vsCurrency = vsCurrency ?? 'usd';
   let priceResponse: AxiosResponse;
   if (apiKey) {
