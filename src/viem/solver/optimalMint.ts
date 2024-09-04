@@ -1,106 +1,103 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import { computePoolAddress } from '@/utils';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { computePoolAddress } from '../../utils';
+import { SolverResult, SwapRoute, quote } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
   encodeOptimalSwapData,
   getAutomanContract,
-  simulateRebalance,
-  simulateRemoveLiquidity,
+  simulateMintOptimal,
 } from '../automan';
-import { PositionDetails } from '../position';
-import { E_Solver, SwapRoute, quote } from '../solver';
-import { getApproveTarget } from './aggregator';
+import { getPool } from '../pool';
+import { get1inchApproveTarget } from './get1InchSolver';
 import {
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
   getSwapPath,
 } from './internal';
-import { SolverResult } from './types';
 
-export async function optimalRebalance(
+/**
+ * Get the optimal amount of liquidity to mint for a given pool and token amounts.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param token0Amount The token0 amount.
+ * @param token1Amount The token1 amount.
+ * @param fee The pool fee tier.
+ * @param tickLower The lower tick of the range.
+ * @param tickUpper The upper tick of the range.
+ * @param fromAddress The address to mint from.
+ * @param slippage The slippage tolerance.
+ * @param publicClient Viem public client.
+ * @param usePool Whether to use the pool or the aggregator for the swap.
+ */
+export async function optimalMint(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  positionId: bigint,
-  newTickLower: number,
-  newTickUpper: number,
-  feeBips: bigint,
-  usePool: boolean,
+  token0Amount: CurrencyAmount<Token>,
+  token1Amount: CurrencyAmount<Token>,
+  feeOrTickSpacing: number,
+  tickLower: number,
+  tickUpper: number,
   fromAddress: Address,
   slippage: number,
   publicClient: PublicClient,
+  usePool = false,
   blockNumber?: bigint,
-  includeSwapInfo: boolean = true,
+  includeSwapInfo?: boolean,
 ): Promise<SolverResult> {
-  const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
-  const position = await PositionDetails.fromPositionId(
-    chainId,
-    amm,
-    positionId,
-    publicClient,
-    blockNumber,
-  );
-  const [receive0, receive1] = await simulateRemoveLiquidity(
-    chainId,
-    amm,
-    publicClient,
-    fromAddress,
-    position.owner,
-    BigInt(position.tokenId),
-    /*amount0Min =*/ undefined,
-    /*amount1Min =*/ undefined,
-    feeBips,
-    blockNumber,
-  );
-
+  if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
+    throw new Error('token0 must be sorted before token1');
+  }
   const mintParams: SlipStreamMintParams | UniV3MintParams =
     amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
       ? {
-          token0: position.token0.address as Address,
-          token1: position.token1.address as Address,
-          tickSpacing: position.tickSpacing,
-          tickLower: newTickLower,
-          tickUpper: newTickUpper,
-          amount0Desired: receive0,
-          amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
-          recipient: fromAddress, // Param value ignored by Automan for rebalance.
+          token0: token0Amount.currency.address as Address,
+          token1: token1Amount.currency.address as Address,
+          tickSpacing: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
           deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
           sqrtPriceX96: 0n,
         }
       : {
-          token0: position.token0.address as Address,
-          token1: position.token1.address as Address,
-          fee: position.fee,
-          tickLower: newTickLower,
-          tickUpper: newTickUpper,
-          amount0Desired: receive0,
-          amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
-          recipient: fromAddress, // Param value ignored by Automan for rebalance.
+          token0: token0Amount.currency.address as Address,
+          token1: token1Amount.currency.address as Address,
+          fee: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
           deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
         };
 
   const getEstimate = async () => {
+    const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
     const poolPromise = optimalMintPool(
       chainId,
       amm,
       publicClient,
       fromAddress,
       mintParams,
-      positionId,
-      position.owner,
-      feeBips,
       blockNumber,
     );
+
     if (usePool || !optimalSwapRouter) {
-      return { ...(await poolPromise), solver: E_Solver.SamePool };
+      return await poolPromise;
     }
+
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
       optimalMintRouter(
@@ -110,36 +107,45 @@ export async function optimalRebalance(
         fromAddress,
         mintParams,
         slippage,
-        positionId,
-        position.owner,
-        feeBips,
-        blockNumber,
       ),
     ]);
     // use the same pool if the quote isn't better
-    if (poolEstimate.liquidity >= routerEstimate.liquidity) {
-      return { ...poolEstimate, solver: E_Solver.SamePool };
+    if (poolEstimate.liquidity > routerEstimate.liquidity) {
+      return poolEstimate;
     } else {
-      return { ...routerEstimate, solver: E_Solver.OneInch };
+      return routerEstimate;
     }
   };
 
   const ret = await getEstimate();
 
   if (includeSwapInfo) {
+    const pool = await getPool(
+      mintParams.token0,
+      mintParams.token1,
+      feeOrTickSpacing,
+      chainId,
+      amm,
+      publicClient,
+      blockNumber,
+    );
+
     ret.priceImpact = calcPriceImpact(
-      position.pool,
+      pool,
       mintParams.amount0Desired,
       mintParams.amount1Desired,
       ret.amount0,
       ret.amount1,
     );
 
+    const token0 = (token0Amount.currency as Token).address as Address;
+    const token1 = (token1Amount.currency as Token).address as Address;
+
     ret.swapPath = getSwapPath(
-      position.pool.token0.address as Address,
-      position.pool.token1.address as Address,
-      receive0,
-      receive1,
+      token0,
+      token1,
+      BigInt(token0Amount.quotient.toString()),
+      BigInt(token1Amount.quotient.toString()),
       ret.amount0,
       ret.amount1,
       slippage,
@@ -155,30 +161,24 @@ async function optimalMintPool(
   publicClient: PublicClient,
   fromAddress: Address,
   mintParams: SlipStreamMintParams | UniV3MintParams,
-  positionId: bigint,
-  positionOwner: Address,
-  feeBips: bigint,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
-  const [, liquidity, amount0, amount1] = await simulateRebalance(
+  const [, liquidity, amount0, amount1] = await simulateMintOptimal(
     chainId,
     amm,
     publicClient,
     fromAddress,
-    positionOwner,
     mintParams,
-    positionId,
-    feeBips,
-    /*swapData =*/ '0x',
-    blockNumber,
+    /* swapData= */ undefined,
+    /* blockNumber= */ blockNumber,
   );
-
   let swapRoute: SwapRoute = [];
-  if (mintParams.amount0Desired !== amount0) {
-    const [fromTokenAddress, toTokenAddress] =
-      mintParams.amount0Desired > amount0
-        ? [mintParams.token0, mintParams.token1]
-        : [mintParams.token1, mintParams.token0];
+  if (mintParams.amount0Desired.toString() !== amount0.toString()) {
+    const [fromTokenAddress, toTokenAddress] = new Big(
+      mintParams.amount0Desired.toString(),
+    ).gt(amount0.toString())
+      ? [mintParams.token0, mintParams.token1]
+      : [mintParams.token1, mintParams.token0];
     swapRoute = [
       [
         [
@@ -209,10 +209,6 @@ async function optimalMintRouter(
   fromAddress: Address,
   mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
-  positionId: bigint,
-  positionOwner: Address,
-  feeBips: bigint,
-  blockNumber?: bigint,
 ): Promise<SolverResult> {
   const { swapData, swapRoute } = await getOptimalMintSwapData(
     chainId,
@@ -220,20 +216,17 @@ async function optimalMintRouter(
     publicClient,
     mintParams,
     slippage,
-    blockNumber,
+    /* blockNumber= */ undefined,
     /* includeRoute= */ true,
   );
-  const [, liquidity, amount0, amount1] = await simulateRebalance(
+  const [, liquidity, amount0, amount1] = await simulateMintOptimal(
     chainId,
     amm,
     publicClient,
     fromAddress,
-    positionOwner,
     mintParams,
-    positionId,
-    feeBips,
     swapData,
-    blockNumber,
+    undefined,
   );
   return {
     amount0,
@@ -257,9 +250,7 @@ async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await getApproveTarget(chainId);
     // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [
@@ -280,6 +271,7 @@ async function getOptimalMintSwapData(
       },
     );
 
+    const ammInfo = getAMMInfo(chainId, amm)!;
     // get a quote from 1inch
     const { tx, protocols } = await quote(
       chainId,
@@ -290,6 +282,9 @@ async function getOptimalMintSwapData(
       slippage * 100,
       includeRoute,
     );
+
+    const approveTarget = await get1inchApproveTarget(chainId);
+
     return {
       swapData: encodeOptimalSwapData(
         chainId,

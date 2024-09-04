@@ -41,3 +41,25 @@ export enum E_Solver {
 }
 
 export const ALL_SOLVERS = [E_Solver.SamePool, E_Solver.OneInch, E_Solver.PH]; // order matters
+
+export type SwapPath = {
+  tokenIn: Address;
+  tokenOut: Address;
+  amountIn: string;
+  amountOut: string;
+  minAmountOut: string;
+};
+
+export type SolverResult = {
+  solver?: E_Solver; // TODO: make it required
+  amount0: bigint;
+  amount1: bigint;
+  liquidity: bigint;
+  swapData: Address;
+  swapRoute?: SwapRoute;
+  swapPath?: SwapPath;
+  priceImpact?: Big;
+  feeBips?: bigint;
+  feeUSD?: string;
+  gasFeeEstimation?: bigint;
+};

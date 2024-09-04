@@ -3,6 +3,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
+import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
@@ -18,7 +19,6 @@ import {
   getTokensInUsd,
 } from '../automan/getFees';
 import { PositionDetails } from '../position';
-import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
   calcPriceImpact,

@@ -3,6 +3,7 @@ import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
+import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
@@ -10,7 +11,6 @@ import {
   simulateMintOptimal,
 } from '../automan';
 import { getPool } from '../pool';
-import { ALL_SOLVERS, E_Solver, getSolver } from '../solver';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
