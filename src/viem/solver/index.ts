@@ -5,6 +5,11 @@ import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
 export { getOkxQuote as quote } from './getOkxSolver'; // TODO: remove when complete refactor
 
+export * from './increaseLiquidityOptimal';
+export * from './increaseLiquidityOptimalV2';
+export * from './optimalMint';
+export * from './optimalMintV2';
+export * from './optimalRebalanceV2';
 export * from './types';
 export * from './optimalRebalanceV2';
 export * from './increaseLiquidityOptimal';
