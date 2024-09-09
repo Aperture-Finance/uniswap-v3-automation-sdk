@@ -37,10 +37,16 @@ export interface ISolver {
 export enum E_Solver {
   SamePool = 'SamePool',
   PH = 'PropellerHeads',
+  OKX = 'OKX',
   OneInch = '1Inch',
 }
 
-export const ALL_SOLVERS = [E_Solver.SamePool, E_Solver.OneInch, E_Solver.PH]; // order matters
+export const ALL_SOLVERS = [
+  E_Solver.SamePool,
+  E_Solver.PH,
+  E_Solver.OKX,
+  E_Solver.OneInch,
+]; // order matters
 
 export type SwapPath = {
   tokenIn: Address;

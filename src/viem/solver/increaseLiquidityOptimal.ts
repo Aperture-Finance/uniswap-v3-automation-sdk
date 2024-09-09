@@ -5,7 +5,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { SwapRoute, quote } from '.';
+import { SwapRoute, get1InchQuote, getIsOkx, getOkxQuote } from '.';
 import { computePoolAddress } from '../../utils';
 import {
   IncreaseLiquidityParams,
@@ -13,7 +13,8 @@ import {
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
-import { get1inchApproveTarget } from './get1InchSolver';
+import { get1InchApproveTarget } from './get1InchSolver';
+import { getOkxApproveTarget } from './getOkxSolver';
 import { calcPriceImpact, getSwapPath } from './internal';
 import { SolverResult } from './types';
 
@@ -222,7 +223,10 @@ async function getIncreaseLiquidityOptimalSwapData(
   try {
     const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
-    const approveTarget = await get1inchApproveTarget(chainId);
+    const isOkx = getIsOkx();
+    const approveTarget = await (isOkx
+      ? getOkxApproveTarget()
+      : get1InchApproveTarget(chainId));
     // get swap amounts using the same pool
 
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap([
@@ -241,16 +245,32 @@ async function getIncreaseLiquidityOptimalSwapData(
       increaseParams.amount1Desired,
     ]);
 
-    // get a quote from 1inch
-    const { tx, protocols } = await quote(
-      chainId,
-      zeroForOne ? position.pool.token0.address : position.pool.token1.address,
-      zeroForOne ? position.pool.token1.address : position.pool.token0.address,
-      poolAmountIn.toString(),
-      ammInfo.optimalSwapRouter!,
-      slippage * 100,
-      includeRoute,
-    );
+    const { tx, protocols } = await (isOkx
+      ? getOkxQuote(
+          chainId,
+          zeroForOne
+            ? position.pool.token0.address
+            : position.pool.token1.address,
+          zeroForOne
+            ? position.pool.token1.address
+            : position.pool.token0.address,
+          poolAmountIn.toString(),
+          ammInfo.optimalSwapRouter!,
+          slippage * 100,
+        )
+      : get1InchQuote(
+          chainId,
+          zeroForOne
+            ? position.pool.token0.address
+            : position.pool.token1.address,
+          zeroForOne
+            ? position.pool.token1.address
+            : position.pool.token0.address,
+          poolAmountIn.toString(),
+          ammInfo.optimalSwapRouter!,
+          slippage * 100,
+          includeRoute,
+        ));
     return {
       swapData: encodeOptimalSwapData(
         chainId,

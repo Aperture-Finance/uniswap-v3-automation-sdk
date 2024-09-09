@@ -1,8 +1,10 @@
 import { get1InchSolver } from './get1InchSolver';
+import { getOkxSolver } from './getOkxSolver';
 import { getPropellerHeadsSolver } from './getPropellerHeadsSolver';
 import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
-export { quote } from './get1InchSolver'; // TODO: remove when complete refactor
+export { getOkxQuote } from './getOkxSolver'; // TODO: remove when complete refactor
+export { get1InchQuote } from './get1InchSolver';
 
 export * from './increaseLiquidityOptimal';
 export * from './increaseLiquidityOptimalV2';
@@ -19,6 +21,8 @@ export const getSolver = (solver: E_Solver): ISolver => {
   switch (solver) {
     case E_Solver.OneInch:
       return get1InchSolver();
+    case E_Solver.OKX:
+      return getOkxSolver();
     case E_Solver.PH:
       return getPropellerHeadsSolver();
     case E_Solver.SamePool:
@@ -29,3 +33,7 @@ export const getSolver = (solver: E_Solver): ISolver => {
       throw new Error('Invalid solver');
   }
 };
+
+export function getIsOkx() {
+  return Number(process.env.OKX_RAMPUP_PERCENT || '1') / 100 > Math.random();
+}
