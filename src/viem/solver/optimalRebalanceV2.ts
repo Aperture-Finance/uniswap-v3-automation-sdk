@@ -57,6 +57,7 @@ export async function optimalRebalanceV2(
   includeSolvers: E_Solver[] = ALL_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
+  console.log('tommyzhao optimalRebalanceV2');
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
 
@@ -166,16 +167,20 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info(
-      `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
-        poolAmountIn.toString(),
-      )
-        .div(10 ** decimals)
-        .mul(tokenInPrice)
-        .mul(
-          FEE_REBALANCE_SWAP_RATIO,
-        )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalRebalanceFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`,
-    );
+    try {
+      getLogger().info(
+        `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
+          poolAmountIn.toString(),
+        )
+          .div(10 ** decimals)
+          .mul(tokenInPrice)
+          .mul(
+            FEE_REBALANCE_SWAP_RATIO,
+          )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalRebalanceFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`,
+      );
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       feeBips,
@@ -190,10 +195,14 @@ export async function optimalRebalanceV2(
       ({ feeBips, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
-    getLogger().error('Error calculating fee', {
-      error: JSON.stringify(e),
-      ...logdata,
-    });
+    try {
+      getLogger().error('Error calculating fee', {
+        error: JSON.stringify(e),
+        ...logdata,
+      });
+    } catch (e2) {
+      console.error(e2);
+    }
   }
 
   const { receive0, receive1, poolAmountIn, zeroForOne } =
@@ -279,12 +288,16 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('Error estimating gas', {
-          error: JSON.stringify(e),
-          swapData,
-          mintParams,
-          ...logdata,
-        });
+        try {
+          getLogger().error('Error estimating gas', {
+            error: JSON.stringify(e),
+            swapData,
+            mintParams,
+            ...logdata,
+          });
+        } catch (e2) {
+          console.error(e2);
+        }
       }
 
       return {
@@ -316,10 +329,14 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('Solver failed', {
-          solver,
-          error: JSON.stringify(e),
-        });
+        try {
+          getLogger().error('Solver failed', {
+            solver,
+            error: JSON.stringify(e),
+          });
+        } catch (e2) {
+          console.error(e2);
+        }
       } else {
         console.warn('Solver failed', solver);
       }
