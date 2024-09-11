@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getLogger } from '@/index';
+import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
@@ -146,7 +146,7 @@ export async function optimalRebalanceV2(
     const positionUsd = token0Usd.add(token1Usd);
 
     if (positionUsd.eq(0)) {
-      getLogger().error('Invalid position USD value', {
+      console.error('Invalid position USD value', {
         poolAmountIn,
         zeroForOne,
         receive0,
@@ -166,7 +166,7 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info(
+    console.info(
       `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
         poolAmountIn.toString(),
       )
@@ -190,7 +190,7 @@ export async function optimalRebalanceV2(
       ({ feeBips, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
-    getLogger().error('Error calculating fee', {
+    console.error('Error calculating fee', {
       error: JSON.stringify(e),
       ...logdata,
     });
@@ -279,7 +279,7 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('Error estimating gas', {
+        console.error('Error estimating gas', {
           error: JSON.stringify(e),
           swapData,
           mintParams,
@@ -316,7 +316,7 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('Solver failed', {
+        console.error('Solver failed', {
           solver,
           error: JSON.stringify(e),
         });
