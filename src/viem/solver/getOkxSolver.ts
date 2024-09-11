@@ -30,9 +30,19 @@ function apiRequestUrl(methodName: string) {
   return rv;
 }
 
-export async function getOkxApproveTarget(): Promise<Address> {
+export async function getOkxApproveTarget(
+  chainId: ApertureSupportedChainId,
+  tokenContractAddress: string,
+  approveAmount: string,
+): Promise<Address> {
   try {
-    return (await buildRequest('approve/spender', {})).data.address;
+    return (
+      await buildRequest('approve-transaction', {
+        chainId,
+        tokenContractAddress,
+        approveAmount,
+      })
+    ).data.data[0].dexContractAddress;
   } catch (e) {
     console.error(e);
     throw e;
@@ -70,7 +80,11 @@ export const getOkxSolver = (): ISolver => {
         slippage * 100,
       );
 
-      const approveTarget = await getOkxApproveTarget();
+      const approveTarget = await getOkxApproveTarget(
+        chainId,
+        zeroForOne ? token0 : token1,
+        poolAmountIn.toString(),
+      );
       return {
         swapData: encodeOptimalSwapData(
           chainId,

@@ -297,7 +297,11 @@ async function getOptimalMintSwapData(
           includeRoute,
         ));
 
-    const approveTarget = await getOkxApproveTarget();
+    const approveTarget = await getOkxApproveTarget(
+      chainId,
+      zeroForOne ? mintParams.token0 : mintParams.token1,
+      poolAmountIn.toString(),
+    );
 
     return {
       swapData: encodeOptimalSwapData(

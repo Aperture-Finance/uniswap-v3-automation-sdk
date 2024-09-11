@@ -18,7 +18,7 @@ async function test1InchSolver() {
   );
 
   console.log(
-    `toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
+    `1inch toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
   );
 }
 
@@ -52,7 +52,7 @@ async function testOkxSolver() {
       'swap',
       new URLSearchParams(swapParams),
     );
-    console.log(response.data.data);
+    console.log('response.data.data ', response.data.data);
     const { toAmount, tx, protocols } = await getOkxQuote(
       chainId,
       token0,
@@ -62,11 +62,23 @@ async function testOkxSolver() {
       slippage,
     );
     console.log(
-      `toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
+      `okx toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
     );
   } catch (e) {
     console.error(e);
   }
+
+  const approveTransaction = await buildRequest('approve-transaction', {
+    chainId,
+    tokenContractAddress: token0,
+    approveAmount: amount,
+  });
+  console.log('approveTransaction', approveTransaction);
+  console.log('approveTransaction.data', approveTransaction.data);
+  console.log(
+    'approveTransaction.data.data[0]',
+    approveTransaction.data.data[0],
+  );
 }
 
 testOkxSolver();

@@ -224,11 +224,8 @@ async function getIncreaseLiquidityOptimalSwapData(
     const ammInfo = getAMMInfo(chainId, amm)!;
     const automan = getAutomanContract(chainId, amm, publicClient);
     const isOkx = getIsOkx();
-    const approveTarget = await (isOkx
-      ? getOkxApproveTarget()
-      : get1InchApproveTarget(chainId));
-    // get swap amounts using the same pool
 
+    // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap([
       computePoolAddress(
         chainId,
@@ -245,6 +242,15 @@ async function getIncreaseLiquidityOptimalSwapData(
       increaseParams.amount1Desired,
     ]);
 
+    const approveTarget = await (isOkx
+      ? getOkxApproveTarget(
+          chainId,
+          zeroForOne
+            ? position.pool.token0.address
+            : position.pool.token1.address,
+          poolAmountIn.toString(),
+        )
+      : get1InchApproveTarget(chainId));
     const { tx, protocols } = await (isOkx
       ? getOkxQuote(
           chainId,
