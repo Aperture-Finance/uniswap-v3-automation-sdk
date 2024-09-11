@@ -89,6 +89,7 @@ import {
   getRebalanceSwapInfo,
   getRebalanceTx,
   getSlipStreamPools,
+  getSlipStreamStakePositions,
   getTickToLiquidityMapForPool,
   getToken,
   simulateIncreaseLiquidityOptimal,
@@ -855,6 +856,21 @@ describe('Pool tests', function () {
     const blockNumber = 17514450n;
     const pools = await getSlipStreamPools(client, blockNumber);
     expect(Object.keys(pools).length).to.be.equal(107);
+  });
+});
+
+describe('Stake position tests', function () {
+  it('getSlipStreamStakePositions', async () => {
+    const client = getPublicClient(
+      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    );
+    const blockNumber = 17514450n;
+    const stakedPositions = await getSlipStreamStakePositions(
+      WHALE_ADDRESS,
+      client,
+      blockNumber,
+    );
+    expect(stakedPositions.length).to.be.equal(107);
   });
 });
 
