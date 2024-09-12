@@ -54,10 +54,10 @@ export async function getReinvestTx(
     amm,
     chainId,
     positionId,
-    collectableToken0: positionDetails.tokensOwed0.toSignificant(),
-    collectableToken1: positionDetails.tokensOwed1.toSignificant(),
-    positionToken0: position.amount0.toSignificant(),
-    positionToken1: position.amount1.toSignificant(),
+    collectableToken0: positionDetails.tokensOwed0.toString(),
+    collectableToken1: positionDetails.tokensOwed1.toString(),
+    positionToken0: position.amount0.toString(),
+    positionToken1: position.amount1.toString(),
     feeBips,
   });
   const data = getAutomanReinvestCalldata(
