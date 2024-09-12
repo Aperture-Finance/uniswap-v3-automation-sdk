@@ -22,7 +22,9 @@ class IoCContainer {
   resolve<T>(key: string): T {
     const dependency = this.dependencies[key];
     if (!dependency) {
-      throw new Error(`Dependency with key ${key} not found`);
+      throw new Error(
+        `IoC dependency with key ${key} not found, call \`ioc.register\` to register service ${key} first.`,
+      );
     }
 
     const { constructor, args, singleton } = dependency;
