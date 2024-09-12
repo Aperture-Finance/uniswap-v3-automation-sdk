@@ -1,11 +1,8 @@
 import {
   ApertureSupportedChainId,
-  ConsoleLogger,
-  IOCKEY_LOGGER,
   PermitInfo,
   getAMMInfo,
   getLogger,
-  ioc,
 } from '@/index';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -52,7 +49,6 @@ export async function getReinvestTx(
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
 
   const feeBips = getFeeReinvestBips(positionDetails);
-  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
   getLogger().info('getReinvestTx fees', {
     ownerAddress,
     amm,

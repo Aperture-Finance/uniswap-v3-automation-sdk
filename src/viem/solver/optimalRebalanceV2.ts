@@ -1,10 +1,4 @@
-import {
-  ApertureSupportedChainId,
-  ConsoleLogger,
-  IOCKEY_LOGGER,
-  getLogger,
-  ioc,
-} from '@/index';
+import { ApertureSupportedChainId, getLogger } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
@@ -66,7 +60,6 @@ export async function optimalRebalanceV2(
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
 
-  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
   const logdata = {
     chainId,
     amm,
