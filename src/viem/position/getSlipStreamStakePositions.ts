@@ -55,5 +55,8 @@ export async function getSlipStreamStakePositions(
     })
   ).map(({ result }) => result! ?? []);
 
-  return stakedPositions;
+  return stakedPositions.reduce(
+    (accumulator, value) => accumulator.concat(value),
+    [],
+  );
 }
