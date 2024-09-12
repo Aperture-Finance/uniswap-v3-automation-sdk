@@ -22,7 +22,7 @@ export class ConsoleLogger implements ILogger {
   }
 }
 
-export const IOCKEY_LOGGER = 'logger';
+export const IOCKEY_LOGGER = 'ioc_logger';
 
 export const getLogger = () => {
   return ioc.resolve<ILogger>(IOCKEY_LOGGER);
