@@ -49,9 +49,17 @@ export async function getReinvestTx(
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
 
   const feeBips = getFeeReinvestBips(positionDetails);
-  getLogger().info(
-    `getReinvestTx ownerAddress=${ownerAddress}, amm=${amm}, chainId=${chainId}, nftId=${positionId}, collectableToken0=${positionDetails.tokensOwed0.toSignificant()}, collectableToken1=${positionDetails.tokensOwed1.toSignificant()}, positionToken0=${position.amount0.toSignificant()}, positionToken1=${position.amount1.toSignificant()}, feeBips=${feeBips}`,
-  );
+  getLogger().info('getReinvestTx fees', {
+    ownerAddress,
+    amm,
+    chainId,
+    positionId,
+    collectableToken0: positionDetails.tokensOwed0.toSignificant(),
+    collectableToken1: positionDetails.tokensOwed1.toSignificant(),
+    positionToken0: position.amount0.toSignificant(),
+    positionToken1: position.amount1.toSignificant(),
+    feeBips,
+  });
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,

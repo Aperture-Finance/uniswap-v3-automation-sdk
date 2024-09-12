@@ -166,16 +166,27 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info(
-      `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
-        poolAmountIn.toString(),
-      )
+    getLogger().info('optimalRebalanceV2 fees', {
+      feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
         .div(10 ** decimals)
         .mul(tokenInPrice)
-        .mul(
-          FEE_REBALANCE_SWAP_RATIO,
-        )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalRebalanceFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`,
-    );
+        .mul(FEE_REBALANCE_SWAP_RATIO),
+      feeOnRebalanceReinvestUsd: collectableTokenInUsd.mul(
+        getFeeReinvestRatio(position.fee),
+      ),
+      feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
+      totalRebalanceFeeUsd: feeUSD,
+      feeBips,
+      poolAmountIn,
+      tokenInPrice,
+      collectableTokenInUsd,
+      token0Price: tokenPricesUsd[0],
+      token1Price: tokenPricesUsd[1],
+      token0Usd,
+      token1Usd,
+      positionUsd,
+      ...logdata,
+    });
 
     return {
       feeBips,
