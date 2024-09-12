@@ -5,7 +5,13 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { SolverResult, SwapRoute, quote } from '.';
+import {
+  SolverResult,
+  SwapRoute,
+  get1InchQuote,
+  getIsOkx,
+  getOkxQuote,
+} from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
@@ -14,7 +20,7 @@ import {
   simulateMintOptimal,
 } from '../automan';
 import { getPool } from '../pool';
-import { get1inchApproveTarget } from './get1InchSolver';
+import { getOkxApproveTarget } from './getOkxSolver';
 import {
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
@@ -272,18 +278,30 @@ async function getOptimalMintSwapData(
     );
 
     const ammInfo = getAMMInfo(chainId, amm)!;
-    // get a quote from 1inch
-    const { tx, protocols } = await quote(
+    const { tx, protocols } = await (getIsOkx()
+      ? getOkxQuote(
+          chainId,
+          zeroForOne ? mintParams.token0 : mintParams.token1,
+          zeroForOne ? mintParams.token1 : mintParams.token0,
+          poolAmountIn.toString(),
+          ammInfo.optimalSwapRouter!,
+          slippage * 100,
+        )
+      : get1InchQuote(
+          chainId,
+          zeroForOne ? mintParams.token0 : mintParams.token1,
+          zeroForOne ? mintParams.token1 : mintParams.token0,
+          poolAmountIn.toString(),
+          ammInfo.optimalSwapRouter!,
+          slippage * 100,
+          includeRoute,
+        ));
+
+    const approveTarget = await getOkxApproveTarget(
       chainId,
       zeroForOne ? mintParams.token0 : mintParams.token1,
-      zeroForOne ? mintParams.token1 : mintParams.token0,
       poolAmountIn.toString(),
-      ammInfo.optimalSwapRouter!,
-      slippage * 100,
-      includeRoute,
     );
-
-    const approveTarget = await get1inchApproveTarget(chainId);
 
     return {
       swapData: encodeOptimalSwapData(

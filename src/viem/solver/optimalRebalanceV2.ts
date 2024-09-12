@@ -151,9 +151,9 @@ export async function optimalRebalanceV2(
         zeroForOne,
         receive0,
         receive1,
-        feeUSD: feeUSD.toFixed(5),
-        token0Usd: token0Usd.toFixed(5),
-        token1Usd: token1Usd.toFixed(5),
+        feeUSD: feeUSD.toString(),
+        token0Usd: token0Usd.toString(),
+        token1Usd: token1Usd.toString(),
         ...logdata,
       });
 
@@ -170,21 +170,22 @@ export async function optimalRebalanceV2(
       feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
         .div(10 ** decimals)
         .mul(tokenInPrice)
-        .mul(FEE_REBALANCE_SWAP_RATIO),
-      feeOnRebalanceReinvestUsd: collectableTokenInUsd.mul(
-        getFeeReinvestRatio(position.fee),
-      ),
+        .mul(FEE_REBALANCE_SWAP_RATIO)
+        .toString(),
+      feeOnRebalanceReinvestUsd: collectableTokenInUsd
+        .mul(getFeeReinvestRatio(position.fee))
+        .toString(),
       feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
-      totalRebalanceFeeUsd: feeUSD,
+      totalRebalanceFeeUsd: feeUSD.toString(),
       feeBips,
       poolAmountIn,
       tokenInPrice,
-      collectableTokenInUsd,
+      collectableTokenInUsd: collectableTokenInUsd.toString(),
       token0Price: tokenPricesUsd[0],
       token1Price: tokenPricesUsd[1],
-      token0Usd,
-      token1Usd,
-      positionUsd,
+      token0Usd: token0Usd.toString(),
+      token1Usd: token0Usd.toString(),
+      positionUsd: positionUsd.toString(),
       ...logdata,
     });
 

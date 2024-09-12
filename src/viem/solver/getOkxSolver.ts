@@ -7,40 +7,49 @@ import { limiter } from './common';
 import { ISolver } from './types';
 import { SwapRoute } from './types';
 
-const ApiBaseUrl = 'https://1inch-api.aperture.finance';
+const ApiBaseUrl = 'https://okx-api.aperture.finance';
 const headers = {
   Accept: 'application/json',
 };
 
-export async function buildRequest(
-  chainId: ApertureSupportedChainId,
-  methodName: string,
-  params: object,
-) {
+export async function buildRequest(methodName: string, params: object) {
   return limiter.schedule(() =>
-    axios.get(apiRequestUrl(chainId, methodName), {
+    axios.get(apiRequestUrl(methodName), {
       headers,
       params,
     }),
   );
 }
 
-function apiRequestUrl(chainId: ApertureSupportedChainId, methodName: string) {
-  return new URL(`/swap/v5.2/${chainId}/${methodName}`, ApiBaseUrl).toString();
+function apiRequestUrl(methodName: string) {
+  const rv = new URL(
+    `api/v5/dex/aggregator/${methodName}`,
+    ApiBaseUrl,
+  ).toString();
+  console.log('apiRequestUrl', rv);
+  return rv;
 }
 
-export async function get1InchApproveTarget(
+export async function getOkxApproveTarget(
   chainId: ApertureSupportedChainId,
+  tokenContractAddress: string,
+  approveAmount: string,
 ): Promise<Address> {
   try {
-    return (await buildRequest(chainId, 'approve/spender', {})).data.address;
+    return (
+      await buildRequest('approve-transaction', {
+        chainId,
+        tokenContractAddress,
+        approveAmount,
+      })
+    ).data.data[0].dexContractAddress;
   } catch (e) {
     console.error(e);
     throw e;
   }
 }
 
-export const get1InchSolver = (): ISolver => {
+export const getOkxSolver = (): ISolver => {
   return {
     optimalMint: async (props) => {
       const {
@@ -61,17 +70,20 @@ export const get1InchSolver = (): ISolver => {
         throw new Error('Expected: Chain or AMM not support');
       }
 
-      const { tx, protocols } = await get1InchQuote(
+      const { tx, protocols } = await getOkxQuote(
         chainId,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
         poolAmountIn.toString(),
         optimalSwapRouter,
         slippage * 100,
-        true,
       );
 
-      const approveTarget = await get1InchApproveTarget(chainId);
+      const approveTarget = await getOkxApproveTarget(
+        chainId,
+        zeroForOne ? token0 : token1,
+        poolAmountIn.toString(),
+      );
       return {
         swapData: encodeOptimalSwapData(
           chainId,
@@ -101,14 +113,13 @@ export const get1InchSolver = (): ISolver => {
  * @param from Address of a seller, make sure that this address has approved to spend src in needed amount
  * @param slippage Limit of price slippage you are willing to accept in percentage
  */
-export async function get1InchQuote(
+export async function getOkxQuote(
   chainId: ApertureSupportedChainId,
   src: string,
   dst: string,
   amount: string,
   from: string,
   slippage: number,
-  includeProtocols?: boolean,
 ): Promise<{
   toAmount: string;
   tx: {
@@ -125,19 +136,26 @@ export async function get1InchQuote(
     throw new Error('amount should greater than 0');
   }
   const swapParams = {
-    src,
-    dst,
+    chainId: chainId.toString(),
+    fromTokenAddress: src,
+    toTokenAddress: dst,
     amount,
-    from,
     slippage: slippage.toString(),
-    disableEstimate: 'true',
-    allowPartialFill: 'false',
-    includeProtocols: (!!includeProtocols).toString(),
+    userWalletAddress: from,
   };
   try {
-    return (
-      await buildRequest(chainId, 'swap', new URLSearchParams(swapParams))
-    ).data;
+    const swapData = (
+      await buildRequest('swap', new URLSearchParams(swapParams))
+    ).data.data;
+    if (swapData.length < 1) {
+      throw new Error(
+        `Error: No swap route found with swapParams=${JSON.stringify(swapParams)}`,
+      );
+    }
+    return {
+      toAmount: swapData[0].routerResult.toTokenAmount,
+      tx: swapData[0].tx,
+    };
   } catch (e) {
     console.error(e);
     throw e;
