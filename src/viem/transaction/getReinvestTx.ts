@@ -1,4 +1,12 @@
-import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  ConsoleLogger,
+  IOCKEY_LOGGER,
+  PermitInfo,
+  getAMMInfo,
+  getLogger,
+  ioc,
+} from '@/index';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, TransactionRequest } from 'viem';
@@ -44,9 +52,18 @@ export async function getReinvestTx(
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
 
   const feeBips = getFeeReinvestBips(positionDetails);
-  console.info(
-    `getReinvestTx ownerAddress=${ownerAddress}, amm=${amm}, chainId=${chainId}, nftId=${positionId}, collectableToken0=${positionDetails.tokensOwed0.toSignificant()}, collectableToken1=${positionDetails.tokensOwed1.toSignificant()}, positionToken0=${position.amount0.toSignificant()}, positionToken1=${position.amount1.toSignificant()}, feeBips=${feeBips}`,
-  );
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
+  getLogger().info('getReinvestTx fees', {
+    ownerAddress,
+    amm,
+    chainId,
+    positionId,
+    collectableToken0: positionDetails.tokensOwed0.toSignificant(),
+    collectableToken1: positionDetails.tokensOwed1.toSignificant(),
+    positionToken0: position.amount0.toSignificant(),
+    positionToken1: position.amount1.toSignificant(),
+    feeBips,
+  });
   const data = getAutomanReinvestCalldata(
     positionId,
     deadlineEpochSeconds,

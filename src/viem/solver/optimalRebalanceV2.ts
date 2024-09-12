@@ -1,4 +1,10 @@
-import { ApertureSupportedChainId } from '@/index';
+import {
+  ApertureSupportedChainId,
+  ConsoleLogger,
+  IOCKEY_LOGGER,
+  getLogger,
+  ioc,
+} from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
@@ -60,6 +66,7 @@ export async function optimalRebalanceV2(
   const token0 = position.token0.address as Address;
   const token1 = position.token1.address as Address;
 
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
   const logdata = {
     chainId,
     amm,
@@ -146,7 +153,7 @@ export async function optimalRebalanceV2(
     const positionUsd = token0Usd.add(token1Usd);
 
     if (positionUsd.eq(0)) {
-      console.error('Invalid position USD value', {
+      getLogger().error('Invalid position USD value', {
         poolAmountIn,
         zeroForOne,
         receive0,
@@ -166,16 +173,27 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    console.info(
-      `optimalRebalanceV2 address=${fromAddress}, amm=${amm}, chainId=${chainId}, nftId=${position.tokenId}, feeOnRebalanceSwapUsd=${new Big(
-        poolAmountIn.toString(),
-      )
+    getLogger().info('optimalRebalanceV2 fees', {
+      feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
         .div(10 ** decimals)
         .mul(tokenInPrice)
-        .mul(
-          FEE_REBALANCE_SWAP_RATIO,
-        )}, feeOnRebalanceReinvestUsd=${collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee))}, feeOnRebalanceFlatUsd=${FEE_REBALANCE_USD}, totalRebalanceFeeUsd=${feeUSD}, feeBips=${feeBips}, poolAmountIn=${poolAmountIn}, tokenInPrice=${tokenInPrice}, collectableTokenInUsd=${collectableTokenInUsd}, token0Price=${tokenPricesUsd[0]}, token1Price=${tokenPricesUsd[1]}, token0Usd=${token0Usd}, token1Usd=${token1Usd}, positionUsd=${positionUsd}`,
-    );
+        .mul(FEE_REBALANCE_SWAP_RATIO),
+      feeOnRebalanceReinvestUsd: collectableTokenInUsd.mul(
+        getFeeReinvestRatio(position.fee),
+      ),
+      feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
+      totalRebalanceFeeUsd: feeUSD,
+      feeBips,
+      poolAmountIn,
+      tokenInPrice,
+      collectableTokenInUsd,
+      token0Price: tokenPricesUsd[0],
+      token1Price: tokenPricesUsd[1],
+      token0Usd,
+      token1Usd,
+      positionUsd,
+      ...logdata,
+    });
 
     return {
       feeBips,
@@ -190,7 +208,7 @@ export async function optimalRebalanceV2(
       ({ feeBips, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
-    console.error('Error calculating fee', {
+    getLogger().error('Error calculating fee', {
       error: JSON.stringify(e),
       ...logdata,
     });
@@ -279,7 +297,7 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        console.error('Error estimating gas', {
+        getLogger().error('Error estimating gas', {
           error: JSON.stringify(e),
           swapData,
           mintParams,
@@ -316,7 +334,7 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        console.error('Solver failed', {
+        getLogger().error('Solver failed', {
           solver,
           error: JSON.stringify(e),
         });
