@@ -864,13 +864,13 @@ describe('Stake position tests', function () {
     const client = getPublicClient(
       ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
     );
-    const blockNumber = 17514450n;
+    const blockNumber = 19669550n;
     const stakedPositions = await getSlipStreamStakePositions(
-      WHALE_ADDRESS,
+      '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
       client,
       blockNumber,
     );
-    expect(stakedPositions.length).to.be.equal(0);
+    expect(stakedPositions.length).to.be.equal(1);
   });
 });
 
