@@ -61,7 +61,6 @@ export const get1InchSolver = (): ISolver => {
         throw new Error('Expected: Chain or AMM not support');
       }
 
-      // get a quote from 1inch
       const { tx, protocols } = await get1InchQuote(
         chainId,
         zeroForOne ? token0 : token1,

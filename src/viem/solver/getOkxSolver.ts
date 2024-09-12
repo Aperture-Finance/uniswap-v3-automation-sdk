@@ -70,7 +70,6 @@ export const getOkxSolver = (): ISolver => {
         throw new Error('Expected: Chain or AMM not support');
       }
 
-      // get a quote from 1inch
       const { tx, protocols } = await getOkxQuote(
         chainId,
         zeroForOne ? token0 : token1,
