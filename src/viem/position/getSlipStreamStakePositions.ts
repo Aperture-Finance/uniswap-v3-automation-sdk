@@ -2,34 +2,21 @@ import { Address, PublicClient } from 'viem';
 
 import { getSlipStreamPools } from '../pool';
 
+export type SlipStreamPosition = {
+  address: Address;
+  gaugeAddress: Address;
+};
+
 export async function getSlipStreamStakePositions(
   owner: Address,
   publicClient: PublicClient,
   blockNumber?: bigint,
 ) {
   const pools = await getSlipStreamPools(publicClient, blockNumber);
+  const gaugeAddresses = pools.map((pool) => pool.gaugeAddress);
   const opt = {
     blockNumber,
   };
-
-  const gaugeAddresses = (
-    await publicClient.multicall({
-      contracts: pools.map((pool) => ({
-        address: pool.address,
-        abi: [
-          {
-            inputs: [],
-            name: 'gauge',
-            outputs: [{ internalType: 'address', name: '', type: 'address' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-        ] as const,
-        functionName: 'gauge',
-        ...opt,
-      })),
-    })
-  ).map(({ result }) => result!);
 
   const stakedPositions = (
     await publicClient.multicall({
@@ -55,11 +42,8 @@ export async function getSlipStreamStakePositions(
     })
   ).map(({ result }) => result! ?? []);
 
-  const result: Map<bigint, string> = new Map();
-  stakedPositions.map((positionList, index) =>
-    positionList.forEach((position) =>
-      result.set(position, gaugeAddresses[index]),
-    ),
+  return stakedPositions.reduce(
+    (accumulator, value) => accumulator.concat(value),
+    [],
   );
-  return result;
 }

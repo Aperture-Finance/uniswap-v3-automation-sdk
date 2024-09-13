@@ -10,6 +10,7 @@ export type SlipStreamPool = {
   token1: Address;
   fee: number;
   tickSpacing: number;
+  gaugeAddress: Address;
 };
 
 export async function getSlipStreamPools(
@@ -59,6 +60,25 @@ export async function getSlipStreamPools(
     })
   ).map(({ result }) => result!);
 
+  const gaugeAddresses = (
+    await publicClient.multicall({
+      contracts: poolAddresses.map((address) => ({
+        address,
+        abi: [
+          {
+            inputs: [],
+            name: 'gauge',
+            outputs: [{ internalType: 'address', name: '', type: 'address' }],
+            stateMutability: 'view',
+            type: 'function',
+          },
+        ] as const,
+        functionName: 'gauge',
+        ...opt,
+      })),
+    })
+  ).map(({ result }) => result!);
+
   const getPoolKeys = (address: Address) => {
     const poolOpt = {
       address,
@@ -91,6 +111,7 @@ export async function getSlipStreamPools(
       token1,
       fee,
       tickSpacing,
+      gaugeAddress: gaugeAddresses[i],
     });
   }
 
