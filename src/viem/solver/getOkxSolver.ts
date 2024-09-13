@@ -147,7 +147,6 @@ export async function getOkxQuote(
         `Error: No swap route found with swapParams=${JSON.stringify(swapParams)}`,
       );
     }
-    console.log('OKX toAmount', swapData[0].routerResult.toTokenAmount);
     return {
       toAmount: swapData[0].routerResult.toTokenAmount,
       tx: swapData[0].tx,
