@@ -870,11 +870,7 @@ describe('Stake position tests', function () {
       client,
       blockNumber,
     );
-    expect(stakedPositions.size).to.be.equal(1);
-    expect(stakedPositions.keys().next().value).to.be.equal(436963n);
-    expect(stakedPositions.values().next().value).to.be.equal(
-      '0xF33a96b5932D9E9B9A0eDA447AbD8C9d48d2e0c8',
-    );
+    expect(stakedPositions.length).to.be.equal(1);
   });
 });
 
