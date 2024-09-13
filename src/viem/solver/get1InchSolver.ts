@@ -135,11 +135,9 @@ export async function get1InchQuote(
     includeProtocols: (!!includeProtocols).toString(),
   };
   try {
-    const data = (
+    return (
       await buildRequest(chainId, 'swap', new URLSearchParams(swapParams))
     ).data;
-    console.log('1Inch toAmount', data.toAmount);
-    return data;
   } catch (e) {
     console.error(e);
     throw e;
