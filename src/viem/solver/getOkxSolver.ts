@@ -22,12 +22,7 @@ export async function buildRequest(methodName: string, params: object) {
 }
 
 function apiRequestUrl(methodName: string) {
-  const rv = new URL(
-    `api/v5/dex/aggregator/${methodName}`,
-    ApiBaseUrl,
-  ).toString();
-  console.log('apiRequestUrl', rv);
-  return rv;
+  return new URL(`api/v5/dex/aggregator/${methodName}`, ApiBaseUrl).toString();
 }
 
 export async function getOkxApproveTarget(
@@ -152,6 +147,7 @@ export async function getOkxQuote(
         `Error: No swap route found with swapParams=${JSON.stringify(swapParams)}`,
       );
     }
+    console.log('OKX toAmount', swapData[0].routerResult.toTokenAmount);
     return {
       toAmount: swapData[0].routerResult.toTokenAmount,
       tx: swapData[0].tx,
