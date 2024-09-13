@@ -55,8 +55,11 @@ export async function getSlipStreamStakePositions(
     })
   ).map(({ result }) => result! ?? []);
 
-  return stakedPositions.reduce(
-    (accumulator, value) => accumulator.concat(value),
-    [],
+  const result: Map<bigint, string> = new Map();
+  stakedPositions.map((positionList, index) =>
+    positionList.forEach((position) =>
+      result.set(position, gaugeAddresses[index]),
+    ),
   );
+  return result;
 }
