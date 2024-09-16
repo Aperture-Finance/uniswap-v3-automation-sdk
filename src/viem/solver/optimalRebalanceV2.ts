@@ -184,7 +184,7 @@ export async function optimalRebalanceV2(
       token0Price: tokenPricesUsd[0],
       token1Price: tokenPricesUsd[1],
       token0Usd: token0Usd.toString(),
-      token1Usd: token0Usd.toString(),
+      token1Usd: token1Usd.toString(),
       positionUsd: positionUsd.toString(),
       ...logdata,
     });
