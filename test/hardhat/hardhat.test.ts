@@ -868,6 +868,7 @@ describe('Stake position tests', function () {
     const stakedPositions = await getSlipStreamStakePositions(
       '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
       client,
+      undefined,
       blockNumber,
     );
     expect(stakedPositions.length).to.be.equal(1);
