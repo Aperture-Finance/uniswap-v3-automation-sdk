@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  Automan__factory,
+  Automan__factoryV1,
   getAMMInfo,
 } from '@/index';
 import {
@@ -53,12 +53,12 @@ export function getAutomanContract(
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof Automan__factory.abi,
+  typeof Automan__factoryV1.abi,
   PublicClient | WalletClient
 > {
   return getContract({
     address: getAMMInfo(chainId, amm)!.apertureAutoman,
-    abi: Automan__factory.abi,
+    abi: Automan__factoryV1.abi,
     client: walletClient ?? publicClient!,
   });
 }
@@ -139,7 +139,7 @@ export async function simulateMintOptimal(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: Automan__factory.abi,
+    abi: Automan__factoryV1.abi,
     data: returnData,
     functionName: 'mintOptimal',
   });
@@ -247,7 +247,7 @@ export async function simulateIncreaseLiquidityOptimal(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: Automan__factory.abi,
+    abi: Automan__factoryV1.abi,
     data: returnData,
     functionName: 'increaseLiquidityOptimal',
   });
@@ -366,7 +366,7 @@ export async function simulateRemoveLiquidity(
   const destContract =
     customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutoman;
   return decodeFunctionResult({
-    abi: Automan__factory.abi,
+    abi: Automan__factoryV1.abi,
     data: await tryRequestWithOverrides(
       'eth_call',
       {
@@ -461,7 +461,7 @@ export async function simulateRebalance(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: Automan__factory.abi,
+    abi: Automan__factoryV1.abi,
     data,
     functionName: 'rebalance',
   });

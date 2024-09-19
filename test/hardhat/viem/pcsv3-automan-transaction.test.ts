@@ -23,8 +23,8 @@ import {
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
   IOCKEY_LOGGER,
-  PCSV3Automan,
-  PCSV3Automan__factory,
+  PCSV3AutomanV1,
+  PCSV3Automan__factoryV1,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
   ioc,
@@ -47,8 +47,8 @@ import {
 } from '../../../src/viem';
 import { expect, hardhatForkProvider, resetFork } from '../common';
 
-// Tests for PCSV3Automan transactions on a forked BNB mainnet.
-describe('Viem - PCSV3Automan transaction tests', function () {
+// Tests for PCSV3AutomanV1 transactions on a forked BNB mainnet.
+describe('Viem - PCSV3AutomanV1 transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336n;
@@ -59,7 +59,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
   const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
   const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
 
-  let automanContract: PCSV3Automan;
+  let automanContract: PCSV3AutomanV1;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -82,7 +82,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     impersonatedOwnerClient = testClient.extend(walletActions);
 
     // Deploy Automan.
-    automanContract = await new PCSV3Automan__factory(
+    automanContract = await new PCSV3Automan__factoryV1(
       // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(

@@ -21,8 +21,8 @@ import {
   ApertureSupportedChainId,
   ConditionTypeEnum,
   ICommonNonfungiblePositionManager__factory,
-  SlipStreamAutoman,
-  SlipStreamAutoman__factory,
+  SlipStreamAutomanV1,
+  SlipStreamAutoman__factoryV1,
   SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
@@ -46,8 +46,8 @@ import { expect, hardhatForkProvider, resetFork } from '../common';
 
 // TODO: Unify test cases for all AMMs (UniV3, PCSV3 and SlipStream).
 
-// Tests for SlipStreamAutoman transactions on a forked Base mainnet.
-describe('SlipStreamAutoman transaction tests', function () {
+// Tests for SlipStreamAutomanV1 transactions on a forked Base mainnet.
+describe('SlipStreamAutomanV1 transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
   const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
   const blockNumber = 17839113n;
@@ -56,7 +56,7 @@ describe('SlipStreamAutoman transaction tests', function () {
   const eoa = '0xeF1Ce5fddd0a1cb903b49608F6e1A37199DCf2a6';
   // A Binance hot wallet address that holds a large amount of ETH and USDC on Base mainnet.
   const WHALE_ADDRESS = '0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A';
-  let automanContract: SlipStreamAutoman;
+  let automanContract: SlipStreamAutomanV1;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -78,7 +78,7 @@ describe('SlipStreamAutoman transaction tests', function () {
     // Deploy Automan.
     const impersonatedWhaleSigner =
       await ethers.getImpersonatedSigner(WHALE_ADDRESS);
-    automanContract = await new SlipStreamAutoman__factory(
+    automanContract = await new SlipStreamAutoman__factoryV1(
       impersonatedWhaleSigner,
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,

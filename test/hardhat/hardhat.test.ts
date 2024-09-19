@@ -49,8 +49,8 @@ import {
   RecurringPriceCondition,
   RecurringRatioAction,
   RecurringRatioCondition,
-  UniV3Automan,
-  UniV3Automan__factory,
+  UniV3AutomanV1,
+  UniV3Automan__factoryV1,
   UniV3OptimalSwapRouter__factory,
   alignPriceToClosestUsableTick,
   convertRecurringCondition,
@@ -238,14 +238,14 @@ describe('State overrides tests', function () {
     const walletClient = testClient.extend(walletActions);
     // Deploy Automan.
     await walletClient.deployContract({
-      abi: UniV3Automan__factory.abi,
+      abi: UniV3Automan__factoryV1.abi,
       account: WHALE_ADDRESS,
       chain: mainnet,
       args: [
         getAMMInfo(chainId, UNIV3_AMM)!.nonfungiblePositionManager,
         /*owner=*/ WHALE_ADDRESS,
       ],
-      bytecode: UniV3Automan__factory.bytecode,
+      bytecode: UniV3Automan__factoryV1.bytecode,
     });
     const automanAddress = getContractAddress({
       from: WHALE_ADDRESS,
@@ -999,7 +999,7 @@ describe('Recurring rebalance tests', function () {
 describe('Viem - Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
-  let automanContract: UniV3Automan;
+  let automanContract: UniV3AutomanV1;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
 
   beforeEach(async function () {
@@ -1012,7 +1012,7 @@ describe('Viem - Automan transaction tests', function () {
     // await hardhatForkProvider.getBalance(WHALE_ADDRESS);
 
     // Deploy Automan.
-    automanContract = await new UniV3Automan__factory(
+    automanContract = await new UniV3Automan__factoryV1(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
