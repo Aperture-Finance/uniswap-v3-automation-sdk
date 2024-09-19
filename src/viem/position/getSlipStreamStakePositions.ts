@@ -10,10 +10,13 @@ export type SlipStreamPosition = {
 export async function getSlipStreamStakePositions(
   owner: Address,
   publicClient: PublicClient,
+  gaugeAddresses?: Address[],
   blockNumber?: bigint,
 ) {
-  const pools = await getSlipStreamPools(publicClient, blockNumber);
-  const gaugeAddresses = pools.map((pool) => pool.gaugeAddress);
+  if (!gaugeAddresses) {
+    const pools = await getSlipStreamPools(publicClient, blockNumber);
+    gaugeAddresses = pools.map((pool) => pool.gaugeAddress);
+  }
   const opt = {
     blockNumber,
   };
