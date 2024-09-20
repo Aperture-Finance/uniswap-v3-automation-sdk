@@ -127,14 +127,6 @@ export async function optimalRebalanceV2(
       ? position.pool.token0.decimals
       : position.pool.token1.decimals;
 
-    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + lpCollectedFees * getFeeReinvestRatio(pool.fee) + FEE_REBALANCE_USD
-    const feeUSD = new Big(poolAmountIn.toString())
-      .div(10 ** decimals)
-      .mul(tokenInPrice)
-      .mul(FEE_REBALANCE_SWAP_RATIO)
-      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee)))
-      .add(FEE_REBALANCE_USD);
-
     const token0Usd = new Big(receive0.toString())
       .mul(tokenPricesUsd[0])
       .div(10 ** position.token0.decimals);
@@ -144,14 +136,12 @@ export async function optimalRebalanceV2(
       .div(10 ** position.token1.decimals);
 
     const positionUsd = token0Usd.add(token1Usd);
-
     if (positionUsd.eq(0)) {
       getLogger().error('Invalid position USD value', {
         poolAmountIn,
         zeroForOne,
         receive0,
         receive1,
-        feeUSD: feeUSD.toString(),
         token0Usd: token0Usd.toString(),
         token1Usd: token1Usd.toString(),
         ...logdata,
@@ -163,20 +153,69 @@ export async function optimalRebalanceV2(
       };
     }
 
+    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + lpCollectedFees * getFeeReinvestRatio(pool.fee) + FEE_REBALANCE_USD
+    const tokenInSwapFeeAmount = new Big(poolAmountIn.toString()).mul(
+      FEE_REBALANCE_SWAP_RATIO,
+    );
+    const token0SwapFeeAmount = zeroForOne
+      ? tokenInSwapFeeAmount
+      : new Big('0');
+    const token1SwapFeeAmount = zeroForOne
+      ? new Big('0')
+      : tokenInSwapFeeAmount;
+    const token0ReinvestFeeAmount = new Big(
+      position.tokensOwed0.quotient.toString(),
+    ).mul(getFeeReinvestRatio(position.fee));
+    const token1ReinvestFeeAmount = new Big(
+      position.tokensOwed1.quotient.toString(),
+    ).mul(getFeeReinvestRatio(position.fee));
+    const rebalanceFlatFeePips = new Big(FEE_REBALANCE_USD)
+      .div(positionUsd)
+      .mul(MAX_FEE_PIPS)
+      .toFixed(0);
+    const token0RebalanceFlatFeeAmount = new Big(receive0.toString())
+      .mul(rebalanceFlatFeePips)
+      .div(MAX_FEE_PIPS);
+    const token1RebalanceFlatFeeAmount = new Big(receive1.toString())
+      .mul(rebalanceFlatFeePips)
+      .div(MAX_FEE_PIPS);
+    const token0FeeAmount = token0SwapFeeAmount
+      .add(token0ReinvestFeeAmount)
+      .add(token0RebalanceFlatFeeAmount);
+    const token1FeeAmount = token1SwapFeeAmount
+      .add(token1ReinvestFeeAmount)
+      .add(token1RebalanceFlatFeeAmount);
+
+    const feeUSD = new Big(poolAmountIn.toString())
+      .div(10 ** decimals)
+      .mul(tokenInPrice)
+      .mul(FEE_REBALANCE_SWAP_RATIO)
+      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee)))
+      .add(FEE_REBALANCE_USD);
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
     getLogger().info('optimalRebalanceV2 fees', {
+      totalRebalanceFeeUsd: feeUSD.toString(),
+      token0FeeAmount: token0FeeAmount.toString(),
+      token1FeeAmount: token1FeeAmount.toString(),
       feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
         .div(10 ** decimals)
         .mul(tokenInPrice)
         .mul(FEE_REBALANCE_SWAP_RATIO)
         .toString(),
+      tokenInSwapFeeAmount: tokenInSwapFeeAmount.toString(),
+      token0SwapFeeAmount: token0SwapFeeAmount.toString(),
+      token1SwapFeeAmount: token1SwapFeeAmount.toString(),
       feeOnRebalanceReinvestUsd: collectableTokenInUsd
         .mul(getFeeReinvestRatio(position.fee))
         .toString(),
+      token0ReinvestFeeAmount: token0ReinvestFeeAmount.toString(),
+      token1ReinvestFeeAmount: token1ReinvestFeeAmount.toString(),
+      rebalanceFlatFeePips,
       feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
-      totalRebalanceFeeUsd: feeUSD.toString(),
+      token0RebalanceFlatFeeAmount: token0RebalanceFlatFeeAmount.toString(),
+      token1RebalanceFlatFeeAmount: token1RebalanceFlatFeeAmount.toString(),
       feeBips,
       poolAmountIn,
       tokenInPrice,
@@ -190,16 +229,17 @@ export async function optimalRebalanceV2(
     });
 
     return {
-      feeBips,
-      feeUSD: feeUSD.toFixed(5),
+      token0FeeAmount,
+      token1FeeAmount,
+      feeUSD: feeUSD.toFixed(),
     };
   };
 
-  let feeBips = 0n,
+  let token0FeeAmount = 0n,token1FeeAmount=0n,
     feeUSD = '0';
   try {
     if (feesOn) {
-      ({ feeBips, feeUSD } = await calcFeeBips());
+      ({ token0FeeAmount, token1FeeAmount, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
     getLogger().error('Error calculating fee', {

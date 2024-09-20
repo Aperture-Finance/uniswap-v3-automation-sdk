@@ -1,4 +1,8 @@
-import { ApertureSupportedChainId, getAMMInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  Automan__factoryV1,
+  getAMMInfo,
+} from '@/index';
 import { computePoolAddress } from '@/utils';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -256,7 +260,11 @@ async function getOptimalMintSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const automan = getAutomanContract(chainId, amm, publicClient);
+    const automan = getAutomanContract(
+      chainId,
+      amm,
+      publicClient,
+    );
     // get swap amounts using the same pool
     const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
       [

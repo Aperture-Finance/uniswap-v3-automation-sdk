@@ -20,8 +20,8 @@ import {
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
   IOCKEY_LOGGER,
-  UniV3Automan,
-  UniV3Automan__factory,
+  UniV3AutomanV1,
+  UniV3Automan__factoryV1,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
   ioc,
@@ -55,11 +55,11 @@ import {
   resetFork,
 } from '../common';
 
-// Tests for UniV3Automan transactions on a forked Ethereum mainnet.
-describe('Viem - UniV3Automan transaction tests', function () {
+// Tests for UniV3AutomanV1 transactions on a forked Ethereum mainnet.
+describe('Viem - UniV3AutomanV1 transaction tests', function () {
   const positionId = 4n;
   const blockNumber = 17188000n;
-  let automanContract: UniV3Automan;
+  let automanContract: UniV3AutomanV1;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -78,7 +78,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     impersonatedOwnerClient = testClient.extend(walletActions);
 
     // Deploy Automan.
-    automanContract = await new UniV3Automan__factory(
+    automanContract = await new UniV3Automan__factoryV1(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,

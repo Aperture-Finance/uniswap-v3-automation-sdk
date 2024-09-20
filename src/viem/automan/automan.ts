@@ -1,5 +1,6 @@
 import {
   ApertureSupportedChainId,
+  Automan__factory,
   Automan__factoryV1,
   getAMMInfo,
 } from '@/index';
@@ -35,6 +36,8 @@ import {
   getAutomanRebalanceCalldata,
   getAutomanReinvestCalldata,
   getAutomanRemoveLiquidityCalldata,
+  getAutomanV1RebalanceCalldata,
+  getAutomanV1ReinvestCalldata,
 } from './getAutomanCallData';
 import { getFromAddress } from './internal';
 import {
@@ -53,12 +56,12 @@ export function getAutomanContract(
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof Automan__factoryV1.abi,
+  typeof Automan__factory.abi,
   PublicClient | WalletClient
 > {
   return getContract({
     address: getAMMInfo(chainId, amm)!.apertureAutoman,
-    abi: Automan__factoryV1.abi,
+    abi: Automan__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }
@@ -139,7 +142,7 @@ export async function simulateMintOptimal(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: Automan__factoryV1.abi,
+    abi: Automan__factory.abi,
     data: returnData,
     functionName: 'mintOptimal',
   });
@@ -343,7 +346,7 @@ export async function requestIncreaseLiquidityOptimal<
  * @param feeBips The percentage of position value to pay as a fee, multiplied by 1e18.
  * @param blockNumber Optional block number to query.
  */
-export async function simulateRemoveLiquidity(
+export async function simulateRemoveLiquidityV1(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -382,7 +385,59 @@ export async function simulateRemoveLiquidity(
   });
 }
 
-export async function requestRebalance<M extends keyof RpcReturnType>(
+/**
+ * Simulate a `removeLiquidity` call.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param owner The owner of the position to burn.
+ * @param tokenId The token ID of the position to burn.
+ * @param amount0Min The minimum amount of token0 to receive.
+ * @param amount1Min The minimum amount of token1 to receive.
+ * @param feeBips The percentage of position value to pay as a fee, multiplied by 1e18.
+ * @param blockNumber Optional block number to query.
+ */
+export async function simulateRemoveLiquidity(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  owner: Address,
+  tokenId: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  blockNumber?: bigint,
+  customDestContract?: Address,
+): Promise<RemoveLiquidityReturnType> {
+  const data = getAutomanRemoveLiquidityCalldata(
+    tokenId,
+    BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    amount0Min,
+    amount1Min,
+    feeBips,
+  );
+  const destContract =
+    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutoman;
+  return decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data: await tryRequestWithOverrides(
+      'eth_call',
+      {
+        from,
+        to: destContract,
+        data,
+      },
+      publicClient,
+      getNPMApprovalOverrides(chainId, amm, owner),
+      blockNumber,
+    ),
+    functionName: 'removeLiquidity',
+  });
+}
+
+export async function requestRebalanceV1<M extends keyof RpcReturnType>(
   method: M,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -396,11 +451,53 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   checkTicks(amm, mintParams);
-  const data = getAutomanRebalanceCalldata(
+  const data = getAutomanV1RebalanceCalldata(
     amm,
     mintParams,
     tokenId,
     feeBips,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
+
+export async function requestRebalance<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  checkTicks(amm, mintParams);
+  const data = getAutomanRebalanceCalldata(
+    amm,
+    mintParams,
+    tokenId,
+    token0FeeAmount,
+    token1FeeAmount,
     undefined,
     swapData,
   );
@@ -435,7 +532,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
  * @param swapData The swap data if using a router.
  * @param blockNumber Optional block number to query.
  */
-export async function simulateRebalance(
+export async function simulateRebalanceV1(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -447,7 +544,7 @@ export async function simulateRebalance(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RebalanceReturnType> {
-  const data = await requestRebalance(
+  const data = await requestRebalanceV1(
     'eth_call',
     chainId,
     amm,
@@ -467,7 +564,55 @@ export async function simulateRebalance(
   });
 }
 
-export async function estimateRebalanceGas(
+/**
+ * Simulate a `rebalance` call.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param owner The owner of the position to rebalance.
+ * @param mintParams The mint parameters.
+ * @param tokenId The token ID of the position to rebalance.
+ * @param token0FeeAmount The amount of token0 to send to feeCollector.
+ * @param token1FeeAmount The amount of token1 to send to feeCollector.
+ * @param swapData The swap data if using a router.
+ * @param blockNumber Optional block number to query.
+ */
+export async function simulateRebalance(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RebalanceReturnType> {
+  const data = await requestRebalance(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    owner,
+    mintParams,
+    tokenId,
+    token0FeeAmount,
+    token1FeeAmount,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: Automan__factoryV1.abi,
+    data,
+    functionName: 'rebalance',
+  });
+}
+
+export async function estimateRebalanceV1Gas(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -480,7 +625,7 @@ export async function estimateRebalanceGas(
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
-    await requestRebalance(
+    await requestRebalanceV1(
       'eth_estimateGas',
       chainId,
       amm,
@@ -496,7 +641,38 @@ export async function estimateRebalanceGas(
   );
 }
 
-export async function requestReinvest<M extends keyof RpcReturnType>(
+export async function estimateRebalanceGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestRebalance(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      owner,
+      mintParams,
+      tokenId,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function requestReinvestV1<M extends keyof RpcReturnType>(
   method: M,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -511,7 +687,7 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  const data = getAutomanReinvestCalldata(
+  const data = getAutomanV1ReinvestCalldata(
     tokenId,
     deadline,
     amount0Min,
@@ -538,7 +714,51 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
   );
 }
 
-export async function estimateReinvestGas(
+export async function requestReinvest<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanReinvestCalldata(
+    tokenId,
+    deadline,
+    amount0Min,
+    amount1Min,
+    token0FeeAmount,
+    token1FeeAmount,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
+
+export async function estimateReinvestV1Gas(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -549,6 +769,40 @@ export async function estimateReinvestGas(
   amount0Min = BigInt(0),
   amount1Min = BigInt(0),
   feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestReinvestV1(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      owner,
+      tokenId,
+      deadline,
+      amount0Min,
+      amount1Min,
+      feeBips,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function estimateReinvestGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<bigint> {
@@ -564,7 +818,8 @@ export async function estimateReinvestGas(
       deadline,
       amount0Min,
       amount1Min,
-      feeBips,
+      token0FeeAmount,
+      token1FeeAmount,
       swapData,
       blockNumber,
     ),
