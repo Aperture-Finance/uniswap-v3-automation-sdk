@@ -262,7 +262,7 @@ async function getIncreaseLiquidityOptimalSwapData(
             : position.pool.token0.address,
           poolAmountIn.toString(),
           ammInfo.optimalSwapRouter!,
-          slippage * 100,
+          slippage,
         )
       : get1InchQuote(
           chainId,
