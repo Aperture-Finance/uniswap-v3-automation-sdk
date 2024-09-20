@@ -71,7 +71,7 @@ export const getOkxSolver = (): ISolver => {
         zeroForOne ? token1 : token0,
         poolAmountIn.toString(),
         optimalSwapRouter,
-        slippage * 100,
+        slippage,
       );
 
       const approveTarget = await getOkxApproveTarget(
