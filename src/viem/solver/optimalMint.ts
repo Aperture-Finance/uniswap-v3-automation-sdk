@@ -293,7 +293,7 @@ async function getOptimalMintSwapData(
           zeroForOne ? mintParams.token1 : mintParams.token0,
           poolAmountIn.toString(),
           ammInfo.optimalSwapRouter!,
-          slippage * 100,
+          slippage,
         )
       : get1InchQuote(
           chainId,

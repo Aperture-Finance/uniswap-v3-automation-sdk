@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId } from '@/index';
+import { ApertureSupportedChainId, getLogger } from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -152,7 +152,11 @@ export async function optimalMintV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        console.warn('Error estimating gas', e);
+        getLogger().error('SDK.optimalMintV2.EstimateGas.Error', {
+          error: JSON.stringify((e as Error).message),
+          swapData,
+          mintParams,
+        });
       }
 
       return {
@@ -186,8 +190,13 @@ export async function optimalMintV2(
         ),
       } as SolverResult;
     } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Solver ${solver} failed: ${e}`);
+      if (!(e as Error)?.message.startsWith('Expected')) {
+        getLogger().error('SDK.Solver.optimalMintV2.Error', {
+          solver,
+          error: JSON.stringify((e as Error).message),
+        });
+      } else {
+        console.warn('SDK.Solver.optimalMintV2.Warning', solver);
       }
       return null;
     }
