@@ -202,8 +202,8 @@ export async function optimalRebalanceV2(
       ({ feeBips, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
-    getLogger().error('Error calculating fee', {
-      error: JSON.stringify(e),
+    getLogger().error('SDK.OptimalRebalanceV2.CalcFee.Error', {
+      error: JSON.stringify((e as Error).message),
       ...logdata,
     });
   }
@@ -291,7 +291,7 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('Error estimating gas', {
+        getLogger().error('SDK.optimalRebalanceV2.EstimateGas.Error', {
           error: JSON.stringify(e),
           swapData,
           mintParams,
@@ -328,12 +328,12 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('Solver failed', {
+        getLogger().error('SDK.Solver.optimalRebalanceV2.Error', {
           solver,
-          error: JSON.stringify(e),
+          error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('Solver failed', solver);
+        console.warn('SDK.Solver.optimalRebalanceV2.Warning', solver);
       }
       return null;
     }
