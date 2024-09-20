@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId } from '@/index';
+import { ApertureSupportedChainId, getLogger } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -125,7 +125,11 @@ export async function increaseLiquidityOptimalV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        console.warn(`Failed to estimate gas: ${e}`);
+        getLogger().error('SDK.increaseLiquidityOptimalV2.EstimateGas.Error', {
+          error: JSON.stringify((e as Error).message),
+          swapData,
+          increaseParams,
+        });
       }
 
       return {
@@ -159,8 +163,13 @@ export async function increaseLiquidityOptimalV2(
         ),
       } as SolverResult;
     } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Solver ${solver} failed: ${e}`);
+      if (!(e as Error)?.message.startsWith('Expected')) {
+        getLogger().error('SDK.Solver.increaseLiquidityOptimalV2.Error', {
+          solver,
+          error: JSON.stringify((e as Error).message),
+        });
+      } else {
+        console.warn('SDK.Solver.increaseLiquidityOptimalV2.Warning', solver);
       }
       return null;
     }
