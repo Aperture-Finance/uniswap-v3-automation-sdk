@@ -102,3 +102,8 @@ export function getFeeReinvestBips(positionDetails: PositionDetails): bigint {
   );
   return feeBips0 < feeBips1 ? feeBips0 : feeBips1;
 }
+
+const FEE_ZAP_RATIO = parseFloat(
+  // Default 0.25% fee on the amount zapped.
+  process.env.FEE_ZAP_RATIO || '0.0025',
+);

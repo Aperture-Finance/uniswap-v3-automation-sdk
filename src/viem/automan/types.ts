@@ -1,6 +1,6 @@
 import {
   Automan__factory,
-  Automan__factoryV1,
+  Automan__factoryV2,
   ICommonNonfungiblePositionManager__factory,
   ISlipStreamNonfungiblePositionManager__factory,
   IUniswapV3NonfungiblePositionManager__factory,
@@ -24,6 +24,8 @@ export type AutomanActionName =
 
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof Automan__factory.abi, T>;
+export type GetAutomanV2Params<T extends AutomanActionName> =
+  GetAbiFunctionParamsTypes<typeof Automan__factoryV2.abi, T>;
 
 export type GetAutomanReturnTypes<
   functionName extends AutomanActionName,
@@ -42,20 +44,19 @@ export type GetAutomanReturnTypes<
   functionName,
   args // to dedup function name
 >;
-
-export type GetAutomanReturnTypesV1<
+export type GetAutomanReturnTypesV2<
   functionName extends AutomanActionName,
   args extends ContractFunctionArgs<
-    typeof Automan__factoryV1.abi,
+    typeof Automan__factoryV2.abi,
     AbiStateMutability,
     functionName
   > = ContractFunctionArgs<
-    typeof Automan__factoryV1.abi,
+    typeof Automan__factoryV2.abi,
     AbiStateMutability,
     functionName
   >,
 > = ContractFunctionReturnType<
-  typeof Automan__factoryV1.abi,
+  typeof Automan__factoryV2.abi,
   AbiStateMutability,
   functionName,
   args // to dedup function name
@@ -76,22 +77,20 @@ export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
   'increaseLiquidity'
 >[0];
 
-export type RebalanceReturnTypeV1 = GetAutomanReturnTypesV1<
+export type RebalanceReturnType = GetAutomanReturnTypes<
   'rebalance',
   [UniV3MintParams, bigint, bigint, Hex]
 >;
-
-export type RebalanceReturnType = GetAutomanReturnTypes<
+export type RebalanceReturnTypeV2 = GetAutomanReturnTypesV2<
   'rebalance',
   [UniV3MintParams, bigint, bigint, bigint, Hex]
 >;
 
-export type ReinvestReturnTypeV1 = GetAutomanReturnTypesV1<
+export type ReinvestReturnType = GetAutomanReturnTypes<
   'reinvest',
   [IncreaseLiquidityParams, bigint, Hex]
 >;
-
-export type ReinvestReturnType = GetAutomanReturnTypes<
+export type ReinvestReturnTypeV2 = GetAutomanReturnTypesV2<
   'reinvest',
   [IncreaseLiquidityParams, bigint, bigint, Hex]
 >;
@@ -101,12 +100,11 @@ export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
 export type IncreaseLiquidityReturnType =
   GetAutomanReturnTypes<'increaseLiquidityOptimal'>;
 
-export type RemoveLiquidityReturnTypeV1 = GetAutomanReturnTypesV1<
+export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
   'removeLiquidity',
   [DecreaseLiquidityParams, bigint]
 >;
-
-export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
+export type RemoveLiquidityReturnTypeV2 = GetAutomanReturnTypesV2<
   'removeLiquidity',
   [DecreaseLiquidityParams, bigint, bigint]
 >;

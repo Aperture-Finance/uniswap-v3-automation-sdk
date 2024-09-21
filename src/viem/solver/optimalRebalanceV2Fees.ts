@@ -7,9 +7,9 @@ import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
-  estimateRebalanceGas,
-  simulateRebalance,
-  simulateRemoveLiquidity,
+  estimateRebalanceV2Gas,
+  simulateRebalanceV2,
+  simulateRemoveLiquidityV2,
 } from '../automan';
 import {
   FEE_REBALANCE_SWAP_RATIO,
@@ -43,7 +43,7 @@ import { SolverResult } from './types';
  * @param includeSolvers Optional. The solvers to include.
  * @returns The optimal rebalance solutions.
  */
-export async function optimalRebalanceV2(
+export async function optimalRebalanceV2Fees(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   position: PositionDetails,
@@ -75,8 +75,8 @@ export async function optimalRebalanceV2(
     throw new Error('Invalid token prices.');
   }
 
-  const simulateAndGetOptimalSwapAmount = async (feeBips: bigint) => {
-    const [receive0, receive1] = await simulateRemoveLiquidity(
+  const simulateAndGetOptimalSwapAmount = async (token0FeeAmount: bigint, token1FeeAmount: bigint) => {
+    const [receive0, receive1] = await simulateRemoveLiquidityV2(
       chainId,
       amm,
       publicClient,
@@ -85,7 +85,8 @@ export async function optimalRebalanceV2(
       BigInt(position.tokenId),
       /*amount0Min =*/ undefined,
       /*amount1Min =*/ undefined,
-      feeBips,
+      token0FeeAmount,
+      token1FeeAmount,
       blockNumber,
     );
 
@@ -113,9 +114,9 @@ export async function optimalRebalanceV2(
     };
   };
 
-  const calcFeeBips = async () => {
+  const calcFeeAmount = async () => {
     const { poolAmountIn, zeroForOne, receive0, receive1 } =
-      await simulateAndGetOptimalSwapAmount(/* feeBips= */ 0n);
+      await simulateAndGetOptimalSwapAmount(/* token0FeeAmount= */ 0n, /* token1FeeAmount= */ 0n);
     const collectableTokenInUsd = getTokensInUsd(
       position.tokensOwed0,
       position.tokensOwed1,
@@ -148,7 +149,8 @@ export async function optimalRebalanceV2(
       });
 
       return {
-        feeBips: 0n,
+        token0FeeAmount: 0n,
+        token1FeeAmount: 0n,
         feeUSD: '0',
       };
     }
@@ -195,7 +197,7 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info('optimalRebalanceV2 fees', {
+    getLogger().info('optimalRebalanceV2Fees fees', {
       totalRebalanceFeeUsd: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
@@ -229,16 +231,16 @@ export async function optimalRebalanceV2(
     });
 
     return {
-      feeBips,
+      token0FeeAmount: BigInt(token0FeeAmount.toString()),
+      token1FeeAmount: BigInt(token1FeeAmount.toString()),
       feeUSD: feeUSD.toFixed(),
     };
   };
 
-  let feeBips=0n,
-    feeUSD = '0';
+  let token0FeeAmount = 0n,token1FeeAmount=0n, feeUSD = '0';
   try {
     if (feesOn) {
-      ({ feeBips, feeUSD } = await calcFeeBips());
+      ({ token0FeeAmount, token1FeeAmount, feeUSD } = await calcFeeAmount());
     }
   } catch (e) {
     getLogger().error('SDK.OptimalRebalanceV2.CalcFee.Error', {
@@ -248,7 +250,7 @@ export async function optimalRebalanceV2(
   }
 
   const { receive0, receive1, poolAmountIn, zeroForOne } =
-    await simulateAndGetOptimalSwapAmount(feeBips);
+    await simulateAndGetOptimalSwapAmount(token0FeeAmount, token1FeeAmount);
 
   const mintParams: SlipStreamMintParams | UniV3MintParams =
     amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
@@ -298,7 +300,7 @@ export async function optimalRebalanceV2(
         zeroForOne,
       });
 
-      const [, liquidity, amount0, amount1] = await simulateRebalance(
+      const [, liquidity, amount0, amount1] = await simulateRebalanceV2(
         chainId,
         amm,
         publicClient,
@@ -306,7 +308,8 @@ export async function optimalRebalanceV2(
         position.owner,
         mintParams,
         BigInt(position.tokenId),
-        feeBips,
+        token0FeeAmount,
+        token1FeeAmount,
         swapData,
         blockNumber,
       );
@@ -315,7 +318,7 @@ export async function optimalRebalanceV2(
       try {
         const [gasPrice, gasAmount] = await Promise.all([
           publicClient.getGasPrice(),
-          estimateRebalanceGas(
+          estimateRebalanceV2Gas(
             chainId,
             amm,
             publicClient,
@@ -323,7 +326,8 @@ export async function optimalRebalanceV2(
             position.owner,
             mintParams,
             BigInt(position.tokenId),
-            feeBips,
+            token0FeeAmount,
+            token1FeeAmount,
             swapData,
             blockNumber,
           ),
@@ -344,7 +348,8 @@ export async function optimalRebalanceV2(
         amount1,
         liquidity,
         swapData,
-        feeBips,
+        token0FeeAmount,
+        token1FeeAmount,
         feeUSD,
         gasFeeEstimation,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),

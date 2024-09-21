@@ -220,74 +220,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-    ],
-    name: "decreaseLiquidity",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "amount0",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount1",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint128",
-            name: "liquidity",
-            type: "uint128",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "deadline",
-            type: "uint256",
-          },
-        ],
-        internalType:
-          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
-        name: "params",
-        type: "tuple",
-      },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -363,24 +296,96 @@ const _abi = [
         type: "tuple",
       },
       {
+        internalType: "uint256",
+        name: "feePips",
+        type: "uint256",
+      },
+    ],
+    name: "decreaseLiquidity",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amount0",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint128",
+            name: "liquidity",
+            type: "uint128",
+          },
+          {
+            internalType: "uint256",
+            name: "amount0Min",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amount1Min",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+        ],
+        internalType:
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
+        name: "params",
+        type: "tuple",
+      },
+      {
         internalType: "bool",
         name: "zeroForOne",
         type: "bool",
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "permitDeadline",
+        type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "v",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes32",
+        name: "r",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "s",
+        type: "bytes32",
       },
     ],
     name: "decreaseLiquiditySingle",
@@ -436,38 +441,13 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
       },
     ],
     name: "decreaseLiquiditySingle",
@@ -655,16 +635,6 @@ const _abi = [
         name: "swapData",
         type: "bytes",
       },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
     ],
     name: "increaseLiquidityOptimal",
     outputs: [
@@ -770,11 +740,6 @@ const _abi = [
         name: "params",
         type: "tuple",
       },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceX96",
-        type: "uint160",
-      },
     ],
     name: "mint",
     outputs: [
@@ -870,21 +835,6 @@ const _abi = [
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceX96",
-        type: "uint160",
       },
     ],
     name: "mintOptimal",
@@ -1020,12 +970,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -1131,12 +1076,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -1233,12 +1173,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -1310,12 +1245,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -1402,12 +1332,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
     ],
@@ -1464,12 +1389,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -1551,12 +1471,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {
@@ -1638,12 +1553,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "feePips",
         type: "uint256",
       },
       {

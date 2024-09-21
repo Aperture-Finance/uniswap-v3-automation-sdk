@@ -23,11 +23,11 @@ import type {
   OnEvent,
 } from "../../../common";
 
-export declare namespace ISlipStreamNonfungiblePositionManager {
+export declare namespace IUniswapV3NonfungiblePositionManager {
   export type MintParamsStruct = {
     token0: string;
     token1: string;
-    tickSpacing: BigNumberish;
+    fee: BigNumberish;
     tickLower: BigNumberish;
     tickUpper: BigNumberish;
     amount0Desired: BigNumberish;
@@ -36,7 +36,6 @@ export declare namespace ISlipStreamNonfungiblePositionManager {
     amount1Min: BigNumberish;
     recipient: string;
     deadline: BigNumberish;
-    sqrtPriceX96: BigNumberish;
   };
 
   export type MintParamsStructOutput = [
@@ -50,12 +49,11 @@ export declare namespace ISlipStreamNonfungiblePositionManager {
     BigNumber,
     BigNumber,
     string,
-    BigNumber,
     BigNumber
   ] & {
     token0: string;
     token1: string;
-    tickSpacing: number;
+    fee: number;
     tickLower: number;
     tickUpper: number;
     amount0Desired: BigNumber;
@@ -64,48 +62,57 @@ export declare namespace ISlipStreamNonfungiblePositionManager {
     amount1Min: BigNumber;
     recipient: string;
     deadline: BigNumber;
-    sqrtPriceX96: BigNumber;
   };
 }
 
-export interface IAutomanSlipStreamMintRebalanceInterface
-  extends utils.Interface {
+export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
   functions: {
-    "mint((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160))": FunctionFragment;
-    "mintOptimal((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),bytes)": FunctionFragment;
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)": FunctionFragment;
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint160)": FunctionFragment;
+    "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256,uint160)": FunctionFragment;
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)": FunctionFragment;
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "mint"
       | "mintOptimal"
-      | "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)"
-      | "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
+      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"
+      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "mint",
-    values: [ISlipStreamNonfungiblePositionManager.MintParamsStruct]
+    values: [
+      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      BigNumberish
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "mintOptimal",
-    values: [ISlipStreamNonfungiblePositionManager.MintParamsStruct, BytesLike]
+    values: [
+      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
+    ]
   ): string;
   encodeFunctionData(
-    functionFragment: "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)",
     values: [
-      ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      BigNumberish,
       BigNumberish,
       BigNumberish,
       BytesLike
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
     values: [
-      ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      BigNumberish,
       BigNumberish,
       BigNumberish,
       BytesLike,
@@ -122,23 +129,23 @@ export interface IAutomanSlipStreamMintRebalanceInterface
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
     data: BytesLike
   ): Result;
 
   events: {};
 }
 
-export interface IAutomanSlipStreamMintRebalance extends BaseContract {
+export interface IAutomanUniV3MintRebalance extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IAutomanSlipStreamMintRebalanceInterface;
+  interface: IAutomanUniV3MintRebalanceInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -161,28 +168,34 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
 
   functions: {
     mint(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
+      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -193,28 +206,34 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
   };
 
   mint(
-    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+    sqrtPriceX96: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   mintOptimal(
-    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     swapData: BytesLike,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
+    sqrtPriceX96: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)"(
-    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenId: BigNumberish,
-    feePips: BigNumberish,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
     swapData: BytesLike,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
-    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenId: BigNumberish,
-    feePips: BigNumberish,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
     swapData: BytesLike,
     permitDeadline: BigNumberish,
     v: BigNumberish,
@@ -225,7 +244,8 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
 
   callStatic: {
     mint(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      sqrtPriceX96: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -237,8 +257,11 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
     >;
 
     mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
+      sqrtPriceX96: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -249,10 +272,11 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
       }
     >;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       overrides?: CallOverrides
     ): Promise<
@@ -264,10 +288,11 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
       }
     >;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -288,28 +313,34 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
 
   estimateGas: {
     mint(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
+      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -321,28 +352,34 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
 
   populateTransaction: {
     mint(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
+      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
-      feePips: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData: BytesLike,
       permitDeadline: BigNumberish,
       v: BigNumberish,

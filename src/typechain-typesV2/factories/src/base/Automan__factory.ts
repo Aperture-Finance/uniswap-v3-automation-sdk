@@ -4,10 +4,7 @@
 
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import type {
-  IUniV3Automan,
-  IUniV3AutomanInterface,
-} from "../../../../src/interfaces/IAutoman.sol/IUniV3Automan";
+import type { Automan, AutomanInterface } from "../../../src/base/Automan";
 
 const _abi = [
   {
@@ -27,12 +24,49 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "Invalid_Tick_Range",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MismatchETH",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "NotApproved",
     type: "error",
   },
   {
     inputs: [],
+    name: "NotWETH9",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "NotWhitelistedRouter",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "OwnableInvalidOwner",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "OwnableUnauthorizedAccount",
     type: "error",
   },
   {
@@ -110,6 +144,25 @@ const _abi = [
       },
     ],
     name: "Mint",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
     type: "event",
   },
   {
@@ -220,28 +273,13 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "permitDeadline",
+        name: "token1FeeAmount",
         type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
       },
     ],
     name: "decreaseLiquidity",
@@ -297,8 +335,33 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
         type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "permitDeadline",
+        type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "v",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes32",
+        name: "r",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "s",
+        type: "bytes32",
       },
     ],
     name: "decreaseLiquidity",
@@ -359,33 +422,18 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
       },
     ],
     name: "decreaseLiquiditySingle",
@@ -441,13 +489,38 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "permitDeadline",
+        type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "v",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes32",
+        name: "r",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "s",
+        type: "bytes32",
       },
     ],
     name: "decreaseLiquiditySingle",
@@ -463,12 +536,17 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "factory",
+    name: "feeConfig",
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "feeCollector",
         type: "address",
+      },
+      {
+        internalType: "uint96",
+        name: "feeLimitPips",
+        type: "uint96",
       },
     ],
     stateMutability: "view",
@@ -635,6 +713,16 @@ const _abi = [
         name: "swapData",
         type: "bytes",
       },
+      {
+        internalType: "uint256",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
+        type: "uint256",
+      },
     ],
     name: "increaseLiquidityOptimal",
     outputs: [
@@ -661,11 +749,30 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "addressToCheck",
+        name: "",
         type: "address",
       },
     ],
     name: "isController",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "isWhiteListedSwapRouter",
     outputs: [
       {
         internalType: "bool",
@@ -739,6 +846,11 @@ const _abi = [
         internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
+      },
+      {
+        internalType: "uint160",
+        name: "sqrtPriceX96",
+        type: "uint160",
       },
     ],
     name: "mint",
@@ -836,6 +948,21 @@ const _abi = [
         name: "swapData",
         type: "bytes",
       },
+      {
+        internalType: "uint256",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint160",
+        name: "sqrtPriceX96",
+        type: "uint160",
+      },
     ],
     name: "mintOptimal",
     outputs: [
@@ -869,6 +996,19 @@ const _abi = [
     outputs: [
       {
         internalType: "contract ICommonNonfungiblePositionManager",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
         name: "",
         type: "address",
       },
@@ -947,7 +1087,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1053,7 +1198,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1150,7 +1300,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1222,7 +1377,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1309,7 +1469,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
     ],
@@ -1366,7 +1531,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1448,7 +1618,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1530,7 +1705,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1547,6 +1727,13 @@ const _abi = [
         type: "uint256",
       },
     ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -1614,37 +1801,31 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "int256",
-        name: "amount0Delta",
-        type: "int256",
-      },
-      {
-        internalType: "int256",
-        name: "amount1Delta",
-        type: "int256",
-      },
-      {
-        internalType: "bytes",
-        name: "data",
-        type: "bytes",
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
       },
     ],
-    name: "uniswapV3SwapCallback",
+    name: "transferOwnership",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    stateMutability: "payable",
+    type: "receive",
+  },
 ] as const;
 
-export class IUniV3Automan__factory {
+export class Automan__factory {
   static readonly abi = _abi;
-  static createInterface(): IUniV3AutomanInterface {
-    return new utils.Interface(_abi) as IUniV3AutomanInterface;
+  static createInterface(): AutomanInterface {
+    return new utils.Interface(_abi) as AutomanInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IUniV3Automan {
-    return new Contract(address, _abi, signerOrProvider) as IUniV3Automan;
+  ): Automan {
+    return new Contract(address, _abi, signerOrProvider) as Automan;
   }
 }

@@ -5,9 +5,9 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  ISlipStreamAutoman,
-  ISlipStreamAutomanInterface,
-} from "../../../../src/interfaces/IAutoman.sol/ISlipStreamAutoman";
+  IUniV3Automan,
+  IUniV3AutomanInterface,
+} from "../../../../src/interfaces/IAutoman.sol/IUniV3Automan";
 
 const _abi = [
   {
@@ -220,28 +220,13 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "permitDeadline",
+        name: "token1FeeAmount",
         type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
       },
     ],
     name: "decreaseLiquidity",
@@ -297,8 +282,33 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
         type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "permitDeadline",
+        type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "v",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes32",
+        name: "r",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "s",
+        type: "bytes32",
       },
     ],
     name: "decreaseLiquidity",
@@ -359,33 +369,18 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
       },
     ],
     name: "decreaseLiquiditySingle",
@@ -441,13 +436,38 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "permitDeadline",
+        type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "v",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes32",
+        name: "r",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "s",
+        type: "bytes32",
       },
     ],
     name: "decreaseLiquiditySingle",
@@ -635,6 +655,16 @@ const _abi = [
         name: "swapData",
         type: "bytes",
       },
+      {
+        internalType: "uint256",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
+        type: "uint256",
+      },
     ],
     name: "increaseLiquidityOptimal",
     outputs: [
@@ -691,9 +721,9 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "int24",
-            name: "tickSpacing",
-            type: "int24",
+            internalType: "uint24",
+            name: "fee",
+            type: "uint24",
           },
           {
             internalType: "int24",
@@ -735,15 +765,15 @@ const _abi = [
             name: "deadline",
             type: "uint256",
           },
-          {
-            internalType: "uint160",
-            name: "sqrtPriceX96",
-            type: "uint160",
-          },
         ],
-        internalType: "struct ISlipStreamNonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
+      },
+      {
+        internalType: "uint160",
+        name: "sqrtPriceX96",
+        type: "uint160",
       },
     ],
     name: "mint",
@@ -787,9 +817,9 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "int24",
-            name: "tickSpacing",
-            type: "int24",
+            internalType: "uint24",
+            name: "fee",
+            type: "uint24",
           },
           {
             internalType: "int24",
@@ -831,13 +861,8 @@ const _abi = [
             name: "deadline",
             type: "uint256",
           },
-          {
-            internalType: "uint160",
-            name: "sqrtPriceX96",
-            type: "uint160",
-          },
         ],
-        internalType: "struct ISlipStreamNonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -845,6 +870,21 @@ const _abi = [
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint160",
+        name: "sqrtPriceX96",
+        type: "uint160",
       },
     ],
     name: "mintOptimal",
@@ -901,9 +941,9 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "int24",
-            name: "tickSpacing",
-            type: "int24",
+            internalType: "uint24",
+            name: "fee",
+            type: "uint24",
           },
           {
             internalType: "int24",
@@ -945,13 +985,8 @@ const _abi = [
             name: "deadline",
             type: "uint256",
           },
-          {
-            internalType: "uint160",
-            name: "sqrtPriceX96",
-            type: "uint160",
-          },
         ],
-        internalType: "struct ISlipStreamNonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -962,7 +997,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1012,9 +1052,9 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "int24",
-            name: "tickSpacing",
-            type: "int24",
+            internalType: "uint24",
+            name: "fee",
+            type: "uint24",
           },
           {
             internalType: "int24",
@@ -1056,13 +1096,8 @@ const _abi = [
             name: "deadline",
             type: "uint256",
           },
-          {
-            internalType: "uint160",
-            name: "sqrtPriceX96",
-            type: "uint160",
-          },
         ],
-        internalType: "struct ISlipStreamNonfungiblePositionManager.MintParams",
+        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
         name: "params",
         type: "tuple",
       },
@@ -1073,7 +1108,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1170,7 +1210,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1242,7 +1287,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1329,7 +1379,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
     ],
@@ -1386,7 +1441,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1468,7 +1528,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1550,7 +1615,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "feePips",
+        name: "token0FeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1FeeAmount",
         type: "uint256",
       },
       {
@@ -1656,15 +1726,15 @@ const _abi = [
   },
 ] as const;
 
-export class ISlipStreamAutoman__factory {
+export class IUniV3Automan__factory {
   static readonly abi = _abi;
-  static createInterface(): ISlipStreamAutomanInterface {
-    return new utils.Interface(_abi) as ISlipStreamAutomanInterface;
+  static createInterface(): IUniV3AutomanInterface {
+    return new utils.Interface(_abi) as IUniV3AutomanInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): ISlipStreamAutoman {
-    return new Contract(address, _abi, signerOrProvider) as ISlipStreamAutoman;
+  ): IUniV3Automan {
+    return new Contract(address, _abi, signerOrProvider) as IUniV3Automan;
   }
 }
