@@ -55,8 +55,8 @@ import {
   resetFork,
 } from '../common';
 
-// Tests for UniV3AutomanV1 transactions on a forked Ethereum mainnet.
-describe('Viem - UniV3AutomanV1 transaction tests', function () {
+// Tests for UniV3AutomanV2 transactions on a forked Ethereum mainnet.
+describe('Viem - UniV3AutomanV2 transaction tests', function () {
   const positionId = 4n;
   const blockNumber = 17188000n;
   let automanContract: UniV3AutomanV2;
