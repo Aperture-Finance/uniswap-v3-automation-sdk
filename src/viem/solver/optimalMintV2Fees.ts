@@ -1,10 +1,12 @@
 import { ApertureSupportedChainId, getLogger } from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
 import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
+  FEE_ZAP_RATIO,
   SlipStreamMintParams,
   UniV3MintParams,
   estimateMintOptimalGas,
@@ -159,6 +161,24 @@ export async function optimalMintV2Fees(
         });
       }
 
+      const token0FeeAmount = zeroForOne
+        ? new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO)
+        : 0n;
+      const token1FeeAmount = zeroForOne
+        ? 0n
+        : new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO);
+
+      getLogger().info('optimalMintV2Fees ', {
+        amm: amm,
+        chainId: chainId,
+        token0FeeAmount: token0FeeAmount.toString(),
+        token1FeeAmount: token1FeeAmount.toString(),
+        amount0Desired: mintParams.amount0Desired.toString(),
+        amount1Desired: mintParams.amount1Desired.toString(),
+        zeroForOne,
+        poolAmountIn: poolAmountIn.toString(),
+      });
+
       return {
         solver,
         amount0,
@@ -188,6 +208,8 @@ export async function optimalMintV2Fees(
           amount1,
           slippage,
         ),
+        token0FeeAmount,
+        token1FeeAmount,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
