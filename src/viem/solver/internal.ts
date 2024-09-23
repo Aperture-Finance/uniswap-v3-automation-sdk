@@ -1,4 +1,4 @@
-import { Automan__factoryV1, fractionToBig } from '@/index';
+import { fractionToBig } from '@/index';
 import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -80,11 +80,7 @@ export const getOptimalSwapAmount = async (
   amount1Desired: bigint,
   blockNumber?: bigint,
 ) => {
-  const automan = getAutomanContract(
-    chainId,
-    amm,
-    publicClient,
-  );
+  const automan = getAutomanContract(chainId, amm, publicClient);
   // get swap amounts using the same pool
   const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
     [

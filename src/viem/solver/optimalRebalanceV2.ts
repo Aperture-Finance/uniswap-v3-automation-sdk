@@ -234,7 +234,7 @@ export async function optimalRebalanceV2(
     };
   };
 
-  let feeBips=0n,
+  let feeBips = 0n,
     feeUSD = '0';
   try {
     if (feesOn) {

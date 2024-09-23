@@ -1,343 +1,939 @@
-import { ApertureSupportedChainId, getLogger } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import Big from 'big.js';
-import { Address, PublicClient } from 'viem';
-
-import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
+  ApertureSupportedChainId,
+  AutomanV2__factory,
+  Automan__factory,
+  getAMMInfo,
+} from '@/index';
+import {
+  FeeAmount,
+  Position,
+  TICK_SPACINGS,
+  nearestUsableTick,
+} from '@aperture_finance/uniswap-v3-sdk';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import {
+  Address,
+  GetContractReturnType,
+  Hex,
+  PublicClient,
+  WalletClient,
+  decodeFunctionResult,
+  encodePacked,
+  getContract,
+  hexToBigInt,
+} from 'viem';
+
+import {
+  RpcReturnType,
+  getControllerOverrides,
+  getERC20Overrides,
+  getNPMApprovalOverrides,
+  tryRequestWithOverrides,
+} from '../overrides';
+import {
+  getAutomanIncreaseLiquidityOptimalCallData,
+  getAutomanMintOptimalCalldata,
+  getAutomanRebalanceCalldata,
+  getAutomanReinvestCalldata,
+  getAutomanRemoveLiquidityCalldata,
+  getAutomanV2IncreaseLiquidityOptimalCallData,
+  getAutomanV2RebalanceCalldata,
+  getAutomanV2ReinvestCalldata,
+  getAutomanV2RemoveLiquidityCalldata,
+} from './getAutomanCallData';
+import { getFromAddress } from './internal';
+import {
+  IncreaseLiquidityParams,
+  IncreaseLiquidityReturnType,
+  MintReturnType,
+  RebalanceReturnType,
+  RemoveLiquidityReturnType,
   SlipStreamMintParams,
   UniV3MintParams,
-  estimateRebalanceGas,
-  simulateRebalance,
-  simulateRemoveLiquidity,
-} from '../automan';
-import {
-  FEE_REBALANCE_SWAP_RATIO,
-  FEE_REBALANCE_USD,
-  MAX_FEE_PIPS,
-  getFeeReinvestRatio,
-  getTokensInUsd,
-} from '../automan/getFees';
-import { PositionDetails } from '../position';
-import {
-  buildOptimalSolutions,
-  calcPriceImpact,
-  getOptimalSwapAmount,
-  getSwapPath,
-  getSwapRoute,
-} from './internal';
-import { SolverResult } from './types';
+} from './types';
 
-/**
- * Get the optimal amount of liquidity to rebalance for a given position.
- * @param chainId The chain ID.
- * @param amm The Automated Market Maker.
- * @param position Position details
- * @param newTickLower The new lower tick.
- * @param newTickUpper The new upper tick.
- * @param feeBips The fee Aperture charge for the transaction.
- * @param fromAddress The address to rebalance from.
- * @param slippage The slippage tolerance.
- * @param publicClient Viem public client.
- * @param blockNumber Optional. The block number to use for the simulation.
- * @param includeSolvers Optional. The solvers to include.
- * @returns The optimal rebalance solutions.
- */
-export async function optimalRebalanceV2(
+export function getAutomanContract(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  position: PositionDetails,
-  newTickLower: number,
-  newTickUpper: number,
-  fromAddress: Address,
-  slippage: number,
-  tokenPricesUsd: [string, string],
-  publicClient: PublicClient,
-  blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
-  feesOn = true,
-): Promise<SolverResult[]> {
-  const token0 = position.token0.address as Address;
-  const token1 = position.token1.address as Address;
+  publicClient?: PublicClient,
+  walletClient?: WalletClient,
+): GetContractReturnType<
+  typeof Automan__factory.abi,
+  PublicClient | WalletClient
+> {
+  return getContract({
+    address: getAMMInfo(chainId, amm)!.apertureAutoman,
+    abi: Automan__factory.abi,
+    client: walletClient ?? publicClient!,
+  });
+}
 
-  const logdata = {
+export function encodeOptimalSwapData(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  token0: Address,
+  token1: Address,
+  feeOrTickSpacing: number,
+  tickLower: number,
+  tickUpper: number,
+  zeroForOne: boolean,
+  approveTarget: Address,
+  router: Address,
+  data: Hex,
+): Hex {
+  return encodePacked(
+    ['address', 'bytes'],
+    [
+      getAMMInfo(chainId, amm)!.optimalSwapRouter!,
+      encodePacked(
+        // prettier-ignore
+        ["address", "address", "uint24", "int24", "int24", "bool", "address", "address", "bytes"],
+        // prettier-ignore
+        [token0, token1, feeOrTickSpacing, tickLower, tickUpper, zeroForOne, approveTarget, router, data],
+      ),
+    ],
+  );
+}
+
+function checkTicks(
+  amm: AutomatedMarketMakerEnum,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+) {
+  const { tickLower, tickUpper } = mintParams;
+  const tickSpacing =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? (mintParams as SlipStreamMintParams).tickSpacing
+      : TICK_SPACINGS[(mintParams as UniV3MintParams).fee as FeeAmount];
+  if (
+    tickLower !== nearestUsableTick(tickLower, tickSpacing) ||
+    tickUpper !== nearestUsableTick(tickUpper, tickSpacing)
+  ) {
+    throw new Error('tickLower or tickUpper not valid');
+  }
+}
+
+/**
+ * Simulate a `mintOptimal` call by overriding the balances and allowances of the tokens involved.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param mintParams The mint parameters.
+ * @param swapData The swap data if using a router.
+ * @param blockNumber Optional block number to query.
+ * @returns {tokenId, liquidity, amount0, amount1}
+ */
+export async function simulateMintOptimal(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<MintReturnType> {
+  checkTicks(amm, mintParams);
+  const returnData = await requestMintOptimal(
+    'eth_call',
     chainId,
     amm,
-    position: position.tokenId,
-    newTickLower,
-    newTickUpper,
-    fromAddress,
-    slippage,
-    tokenPricesUsd,
-  };
+    publicClient,
+    from,
+    mintParams,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data: returnData,
+    functionName: 'mintOptimal',
+  });
+}
 
-  if (tokenPricesUsd[0] === '0' || tokenPricesUsd[1] === '0') {
-    throw new Error('Invalid token prices.');
-  }
+export async function simulateMintOptimalV2(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<MintReturnType> {
+  checkTicks(amm, mintParams);
+  const returnData = await requestMintOptimal(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    mintParams,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: AutomanV2__factory.abi,
+    data: returnData,
+    functionName: 'mintOptimal',
+  });
+}
 
-  const simulateAndGetOptimalSwapAmount = async (feeBips: bigint) => {
-    const [receive0, receive1] = await simulateRemoveLiquidity(
+export async function estimateMintOptimalGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestMintOptimal(
+      'eth_estimateGas',
       chainId,
       amm,
       publicClient,
-      fromAddress,
-      position.owner,
-      BigInt(position.tokenId),
-      /*amount0Min =*/ undefined,
-      /*amount1Min =*/ undefined,
-      feeBips,
+      from,
+      mintParams,
+      swapData,
       blockNumber,
-    );
+    ),
+  );
+}
 
-    const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
+export async function requestMintOptimal<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  checkTicks(amm, mintParams);
+  const data = getAutomanMintOptimalCalldata(amm, mintParams, swapData);
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const [token0Overrides, token1Overrides] = await Promise.all([
+    getERC20Overrides(
+      mintParams.token0,
+      from,
+      apertureAutoman,
+      mintParams.amount0Desired,
+      publicClient,
+    ),
+    getERC20Overrides(
+      mintParams.token1,
+      from,
+      apertureAutoman,
+      mintParams.amount1Desired,
+      publicClient,
+    ),
+  ]);
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutoman,
+      data,
+    },
+    publicClient,
+    {
+      ...token0Overrides,
+      ...token1Overrides,
+    },
+    blockNumber,
+  );
+}
+
+/**
+ * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param position The current position to simulate the call from.
+ * @param increaseParams The increase liquidity parameters.
+ * @param swapData The swap data if using a router.
+ * @param blockNumber Optional block number to query.
+ * @returns {tokenId, liquidity, amount0, amount1}
+ */
+export async function simulateIncreaseLiquidityOptimal(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<IncreaseLiquidityReturnType> {
+  const returnData = await requestIncreaseLiquidityOptimal(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    position,
+    increaseParams,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data: returnData,
+    functionName: 'increaseLiquidityOptimal',
+  });
+}
+
+export async function simulateIncreaseLiquidityV2Optimal(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<IncreaseLiquidityReturnType> {
+  const returnData = await requestIncreaseLiquidityOptimal(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    position,
+    increaseParams,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: AutomanV2__factory.abi,
+    data: returnData,
+    functionName: 'increaseLiquidityOptimal',
+  });
+}
+
+export async function estimateIncreaseLiquidityOptimalGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestIncreaseLiquidityOptimal(
+      'eth_estimateGas',
       chainId,
       amm,
       publicClient,
-      token0,
-      token1,
-      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-        ? position.tickSpacing
-        : position.fee,
-      newTickLower,
-      newTickUpper,
-      receive0,
-      receive1,
+      from,
+      position,
+      increaseParams,
+      swapData,
       blockNumber,
-    );
+    ),
+  );
+}
 
-    return {
-      receive0,
-      receive1,
-      poolAmountIn,
-      zeroForOne,
-    };
+export async function requestIncreaseLiquidityOptimal<
+  M extends keyof RpcReturnType,
+>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanIncreaseLiquidityOptimalCallData(
+    increaseParams,
+    swapData,
+  );
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+
+  const [token0Overrides, token1Overrides] = await Promise.all([
+    getERC20Overrides(
+      position.pool.token0.address as Address,
+      from,
+      apertureAutoman,
+      increaseParams.amount0Desired,
+      publicClient,
+    ),
+    getERC20Overrides(
+      position.pool.token1.address as Address,
+      from,
+      apertureAutoman,
+      increaseParams.amount1Desired,
+      publicClient,
+    ),
+  ]);
+
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutoman,
+      data,
+    },
+    publicClient,
+    {
+      ...token0Overrides,
+      ...token1Overrides,
+    },
+    blockNumber,
+  );
+}
+
+export async function requestIncreaseLiquidityOptimalV2<
+  M extends keyof RpcReturnType,
+>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanV2IncreaseLiquidityOptimalCallData(
+    increaseParams,
+    swapData,
+  );
+  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+
+  const [token0Overrides, token1Overrides] = await Promise.all([
+    getERC20Overrides(
+      position.pool.token0.address as Address,
+      from,
+      apertureAutoman,
+      increaseParams.amount0Desired,
+      publicClient,
+    ),
+    getERC20Overrides(
+      position.pool.token1.address as Address,
+      from,
+      apertureAutoman,
+      increaseParams.amount1Desired,
+      publicClient,
+    ),
+  ]);
+
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutoman,
+      data,
+    },
+    publicClient,
+    {
+      ...token0Overrides,
+      ...token1Overrides,
+    },
+    blockNumber,
+  );
+}
+
+/**
+ * Simulate a `removeLiquidity` call.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param owner The owner of the position to burn.
+ * @param tokenId The token ID of the position to burn.
+ * @param amount0Min The minimum amount of token0 to receive.
+ * @param amount1Min The minimum amount of token1 to receive.
+ * @param feeBips The percentage of position value to pay as a fee, multiplied by 1e18.
+ * @param blockNumber Optional block number to query.
+ */
+export async function simulateRemoveLiquidity(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  owner: Address,
+  tokenId: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  blockNumber?: bigint,
+  customDestContract?: Address,
+): Promise<RemoveLiquidityReturnType> {
+  const data = getAutomanRemoveLiquidityCalldata(
+    tokenId,
+    BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    amount0Min,
+    amount1Min,
+    feeBips,
+  );
+  const destContract =
+    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutoman;
+  return decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data: await tryRequestWithOverrides(
+      'eth_call',
+      {
+        from,
+        to: destContract,
+        data,
+      },
+      publicClient,
+      getNPMApprovalOverrides(chainId, amm, owner),
+      blockNumber,
+    ),
+    functionName: 'removeLiquidity',
+  });
+}
+
+/**
+ * Simulate a `removeLiquidity` call.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param owner The owner of the position to burn.
+ * @param tokenId The token ID of the position to burn.
+ * @param amount0Min The minimum amount of token0 to receive.
+ * @param amount1Min The minimum amount of token1 to receive.
+ * @param token0FeeAmount The amount of token0 to send to feeCollector.
+ * @param token1FeeAmount The amount of token1 to send to feeCollector.
+ * @param blockNumber Optional block number to query.
+ */
+export async function simulateRemoveLiquidityV2(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  owner: Address,
+  tokenId: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  blockNumber?: bigint,
+  customDestContract?: Address,
+): Promise<RemoveLiquidityReturnType> {
+  const data = getAutomanV2RemoveLiquidityCalldata(
+    tokenId,
+    BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    amount0Min,
+    amount1Min,
+    token0FeeAmount,
+    token1FeeAmount,
+  );
+  const destContract =
+    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutoman;
+  return decodeFunctionResult({
+    abi: AutomanV2__factory.abi,
+    data: await tryRequestWithOverrides(
+      'eth_call',
+      {
+        from,
+        to: destContract,
+        data,
+      },
+      publicClient,
+      getNPMApprovalOverrides(chainId, amm, owner),
+      blockNumber,
+    ),
+    functionName: 'removeLiquidity',
+  });
+}
+
+export async function requestRebalance<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  checkTicks(amm, mintParams);
+  const data = getAutomanRebalanceCalldata(
+    amm,
+    mintParams,
+    tokenId,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
   };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
 
-  const calcFeeBips = async () => {
-    const { poolAmountIn, zeroForOne, receive0, receive1 } =
-      await simulateAndGetOptimalSwapAmount(/* feeBips= */ 0n);
-    const collectableTokenInUsd = getTokensInUsd(
-      position.tokensOwed0,
-      position.tokensOwed1,
-      tokenPricesUsd,
-    );
-    const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+export async function requestRebalanceV2<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  checkTicks(amm, mintParams);
+  const data = getAutomanV2RebalanceCalldata(
+    amm,
+    mintParams,
+    tokenId,
+    token0FeeAmount,
+    token1FeeAmount,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
 
-    const decimals = zeroForOne
-      ? position.pool.token0.decimals
-      : position.pool.token1.decimals;
+/**
+ * Simulate a `rebalance` call.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param owner The owner of the position to rebalance.
+ * @param mintParams The mint parameters.
+ * @param tokenId The token ID of the position to rebalance.
+ * @param feeBips The percentage of position value to pay as a fee, multiplied by 1e18.
+ * @param swapData The swap data if using a router.
+ * @param blockNumber Optional block number to query.
+ */
+export async function simulateRebalance(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RebalanceReturnType> {
+  const data = await requestRebalance(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    owner,
+    mintParams,
+    tokenId,
+    feeBips,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data,
+    functionName: 'rebalance',
+  });
+}
 
-    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + lpCollectedFees * getFeeReinvestRatio(pool.fee) + FEE_REBALANCE_USD
-    const feeUSD = new Big(poolAmountIn.toString())
-      .div(10 ** decimals)
-      .mul(tokenInPrice)
-      .mul(FEE_REBALANCE_SWAP_RATIO)
-      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee)))
-      .add(FEE_REBALANCE_USD);
+/**
+ * Simulate a `rebalance` call.
+ * @param chainId The chain ID.
+ * @param amm The Automated Market Maker.
+ * @param publicClient Viem public client.
+ * @param from The address to simulate the call from.
+ * @param owner The owner of the position to rebalance.
+ * @param mintParams The mint parameters.
+ * @param tokenId The token ID of the position to rebalance.
+ * @param token0FeeAmount The amount of token0 to send to feeCollector.
+ * @param token1FeeAmount The amount of token1 to send to feeCollector.
+ * @param swapData The swap data if using a router.
+ * @param blockNumber Optional block number to query.
+ */
+export async function simulateRebalanceV2(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RebalanceReturnType> {
+  const data = await requestRebalanceV2(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    owner,
+    mintParams,
+    tokenId,
+    token0FeeAmount,
+    token1FeeAmount,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: AutomanV2__factory.abi,
+    data,
+    functionName: 'rebalance',
+  });
+}
 
-    const token0Usd = new Big(receive0.toString())
-      .mul(tokenPricesUsd[0])
-      .div(10 ** position.token0.decimals);
-
-    const token1Usd = new Big(receive1.toString())
-      .mul(tokenPricesUsd[1])
-      .div(10 ** position.token1.decimals);
-
-    const positionUsd = token0Usd.add(token1Usd);
-
-    if (positionUsd.eq(0)) {
-      getLogger().error('Invalid position USD value', {
-        poolAmountIn,
-        zeroForOne,
-        receive0,
-        receive1,
-        feeUSD: feeUSD.toString(),
-        token0Usd: token0Usd.toString(),
-        token1Usd: token1Usd.toString(),
-        ...logdata,
-      });
-
-      return {
-        feeBips: 0n,
-        feeUSD: '0',
-      };
-    }
-
-    const feeBips = BigInt(
-      feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
-    );
-    getLogger().info('optimalRebalanceV2 fees', {
-      feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
-        .div(10 ** decimals)
-        .mul(tokenInPrice)
-        .mul(FEE_REBALANCE_SWAP_RATIO)
-        .toString(),
-      feeOnRebalanceReinvestUsd: collectableTokenInUsd
-        .mul(getFeeReinvestRatio(position.fee))
-        .toString(),
-      feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
-      totalRebalanceFeeUsd: feeUSD.toString(),
+export async function estimateRebalanceGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestRebalance(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      owner,
+      mintParams,
+      tokenId,
       feeBips,
-      poolAmountIn,
-      tokenInPrice,
-      collectableTokenInUsd: collectableTokenInUsd.toString(),
-      token0Price: tokenPricesUsd[0],
-      token1Price: tokenPricesUsd[1],
-      token0Usd: token0Usd.toString(),
-      token1Usd: token1Usd.toString(),
-      positionUsd: positionUsd.toString(),
-      ...logdata,
-    });
+      swapData,
+      blockNumber,
+    ),
+  );
+}
 
-    return {
+export async function estimateRebalanceV2Gas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenId: bigint,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestRebalanceV2(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      owner,
+      mintParams,
+      tokenId,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function requestReinvest<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanReinvestCalldata(
+    tokenId,
+    deadline,
+    amount0Min,
+    amount1Min,
+    feeBips,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
+
+export async function requestReinvestV2<M extends keyof RpcReturnType>(
+  method: M,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanV2ReinvestCalldata(
+    tokenId,
+    deadline,
+    amount0Min,
+    amount1Min,
+    token0FeeAmount,
+    token1FeeAmount,
+    undefined,
+    swapData,
+  );
+  from = getFromAddress(from);
+  const overrides = {
+    ...getNPMApprovalOverrides(chainId, amm, owner),
+    ...getControllerOverrides(chainId, amm, from),
+  };
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      data,
+    },
+    publicClient,
+    overrides,
+    blockNumber,
+  );
+}
+
+export async function estimateReinvestGas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestReinvest(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      owner,
+      tokenId,
+      deadline,
+      amount0Min,
+      amount1Min,
       feeBips,
-      feeUSD: feeUSD.toFixed(5),
-    };
-  };
+      swapData,
+      blockNumber,
+    ),
+  );
+}
 
-  let feeBips = 0n,
-    feeUSD = '0';
-  try {
-    if (feesOn) {
-      ({ feeBips, feeUSD } = await calcFeeBips());
-    }
-  } catch (e) {
-    getLogger().error('SDK.OptimalRebalanceV2.CalcFee.Error', {
-      error: JSON.stringify((e as Error).message),
-      ...logdata,
-    });
-  }
-
-  const { receive0, receive1, poolAmountIn, zeroForOne } =
-    await simulateAndGetOptimalSwapAmount(feeBips);
-
-  const mintParams: SlipStreamMintParams | UniV3MintParams =
-    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-      ? {
-          token0,
-          token1,
-          tickSpacing: position.tickSpacing,
-          tickLower: newTickLower,
-          tickUpper: newTickUpper,
-          amount0Desired: receive0,
-          amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
-          recipient: fromAddress, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-          sqrtPriceX96: 0n,
-        }
-      : {
-          token0,
-          token1,
-          fee: position.fee,
-          tickLower: newTickLower,
-          tickUpper: newTickUpper,
-          amount0Desired: receive0,
-          amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
-          recipient: fromAddress, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-        };
-  const solve = async (solver: E_Solver) => {
-    try {
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
-        chainId,
-        amm,
-        fromAddress,
-        token0,
-        token1,
-        feeOrTickSpacing:
-          amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-            ? position.tickSpacing
-            : position.fee,
-        tickLower: newTickLower,
-        tickUpper: newTickUpper,
-        slippage,
-        poolAmountIn,
-        zeroForOne,
-      });
-
-      const [, liquidity, amount0, amount1] = await simulateRebalance(
-        chainId,
-        amm,
-        publicClient,
-        fromAddress,
-        position.owner,
-        mintParams,
-        BigInt(position.tokenId),
-        feeBips,
-        swapData,
-        blockNumber,
-      );
-
-      let gasFeeEstimation = 0n;
-      try {
-        const [gasPrice, gasAmount] = await Promise.all([
-          publicClient.getGasPrice(),
-          estimateRebalanceGas(
-            chainId,
-            amm,
-            publicClient,
-            fromAddress,
-            position.owner,
-            mintParams,
-            BigInt(position.tokenId),
-            feeBips,
-            swapData,
-            blockNumber,
-          ),
-        ]);
-        gasFeeEstimation = gasPrice * gasAmount;
-      } catch (e) {
-        getLogger().error('SDK.optimalRebalanceV2.EstimateGas.Error', {
-          error: JSON.stringify(e),
-          swapData,
-          mintParams,
-          ...logdata,
-        });
-      }
-
-      return {
-        solver,
-        amount0,
-        amount1,
-        liquidity,
-        swapData,
-        feeBips,
-        feeUSD,
-        gasFeeEstimation,
-        swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
-        priceImpact: calcPriceImpact(
-          position.pool,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-        ),
-        swapPath: getSwapPath(
-          token0,
-          token1,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-          slippage,
-        ),
-      } as SolverResult;
-    } catch (e) {
-      if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.optimalRebalanceV2.Error', {
-          solver,
-          error: JSON.stringify((e as Error).message),
-        });
-      } else {
-        console.warn('SDK.Solver.optimalRebalanceV2.Warning', solver);
-      }
-      return null;
-    }
-  };
-
-  return buildOptimalSolutions(solve, includeSolvers);
+export async function estimateReinvestV2Gas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestReinvestV2(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      owner,
+      tokenId,
+      deadline,
+      amount0Min,
+      amount1Min,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData,
+      blockNumber,
+    ),
+  );
 }

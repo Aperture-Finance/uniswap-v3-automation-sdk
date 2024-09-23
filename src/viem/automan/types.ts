@@ -1,6 +1,6 @@
 import {
+  AutomanV2__factory,
   Automan__factory,
-  Automan__factoryV2,
   ICommonNonfungiblePositionManager__factory,
   ISlipStreamNonfungiblePositionManager__factory,
   IUniswapV3NonfungiblePositionManager__factory,
@@ -25,7 +25,7 @@ export type AutomanActionName =
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof Automan__factory.abi, T>;
 export type GetAutomanV2Params<T extends AutomanActionName> =
-  GetAbiFunctionParamsTypes<typeof Automan__factoryV2.abi, T>;
+  GetAbiFunctionParamsTypes<typeof AutomanV2__factory.abi, T>;
 
 export type GetAutomanReturnTypes<
   functionName extends AutomanActionName,
@@ -47,16 +47,16 @@ export type GetAutomanReturnTypes<
 export type GetAutomanReturnTypesV2<
   functionName extends AutomanActionName,
   args extends ContractFunctionArgs<
-    typeof Automan__factoryV2.abi,
+    typeof AutomanV2__factory.abi,
     AbiStateMutability,
     functionName
   > = ContractFunctionArgs<
-    typeof Automan__factoryV2.abi,
+    typeof AutomanV2__factory.abi,
     AbiStateMutability,
     functionName
   >,
 > = ContractFunctionReturnType<
-  typeof Automan__factoryV2.abi,
+  typeof AutomanV2__factory.abi,
   AbiStateMutability,
   functionName,
   args // to dedup function name

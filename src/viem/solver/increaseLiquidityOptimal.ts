@@ -1,7 +1,4 @@
-import {
-  ApertureSupportedChainId,
-  getAMMInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -225,11 +222,7 @@ async function getIncreaseLiquidityOptimalSwapData(
 }> {
   try {
     const ammInfo = getAMMInfo(chainId, amm)!;
-    const automan = getAutomanContract(
-      chainId,
-      amm,
-      publicClient,
-    );
+    const automan = getAutomanContract(chainId, amm, publicClient);
     const isOkx = getIsOkx();
 
     // get swap amounts using the same pool

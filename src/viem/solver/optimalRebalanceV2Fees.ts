@@ -75,7 +75,10 @@ export async function optimalRebalanceV2Fees(
     throw new Error('Invalid token prices.');
   }
 
-  const simulateAndGetOptimalSwapAmount = async (token0FeeAmount: bigint, token1FeeAmount: bigint) => {
+  const simulateAndGetOptimalSwapAmount = async (
+    token0FeeAmount: bigint,
+    token1FeeAmount: bigint,
+  ) => {
     const [receive0, receive1] = await simulateRemoveLiquidityV2(
       chainId,
       amm,
@@ -116,7 +119,10 @@ export async function optimalRebalanceV2Fees(
 
   const calcFeeAmount = async () => {
     const { poolAmountIn, zeroForOne, receive0, receive1 } =
-      await simulateAndGetOptimalSwapAmount(/* token0FeeAmount= */ 0n, /* token1FeeAmount= */ 0n);
+      await simulateAndGetOptimalSwapAmount(
+        /* token0FeeAmount= */ 0n,
+        /* token1FeeAmount= */ 0n,
+      );
     const collectableTokenInUsd = getTokensInUsd(
       position.tokensOwed0,
       position.tokensOwed1,
@@ -237,7 +243,9 @@ export async function optimalRebalanceV2Fees(
     };
   };
 
-  let token0FeeAmount = 0n,token1FeeAmount=0n, feeUSD = '0';
+  let token0FeeAmount = 0n,
+    token1FeeAmount = 0n,
+    feeUSD = '0';
   try {
     if (feesOn) {
       ({ token0FeeAmount, token1FeeAmount, feeUSD } = await calcFeeAmount());

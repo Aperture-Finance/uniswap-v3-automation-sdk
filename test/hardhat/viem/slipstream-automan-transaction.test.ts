@@ -22,7 +22,7 @@ import {
   ConditionTypeEnum,
   ICommonNonfungiblePositionManager__factory,
   SlipStreamAutomanV1,
-  SlipStreamAutoman__factoryV1,
+  SlipStreamAutoman__factory,
   SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
 } from '../../../src';
@@ -78,7 +78,7 @@ describe('SlipStreamAutomanV1 transaction tests', function () {
     // Deploy Automan.
     const impersonatedWhaleSigner =
       await ethers.getImpersonatedSigner(WHALE_ADDRESS);
-    automanContract = await new SlipStreamAutoman__factoryV1(
+    automanContract = await new SlipStreamAutoman__factory(
       impersonatedWhaleSigner,
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
