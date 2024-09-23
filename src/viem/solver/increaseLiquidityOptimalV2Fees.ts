@@ -135,11 +135,11 @@ export async function increaseLiquidityOptimalV2Fees(
       }
 
       const token0FeeAmount = zeroForOne
-        ? new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO)
+        ? Big(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toString())
         : 0n;
       const token1FeeAmount = zeroForOne
         ? 0n
-        : new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO);
+        : Big(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toString());
 
       getLogger().info('increaseLiquidityOptimalV2Fees ', {
         amm: amm,

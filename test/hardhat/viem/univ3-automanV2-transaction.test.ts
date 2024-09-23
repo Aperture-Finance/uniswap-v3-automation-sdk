@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/univ3-automanV2-transaction.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -33,14 +34,14 @@ import {
   getBasicPositionInfo,
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfo,
-  getIncreaseLiquidityOptimalTx,
+  getIncreaseLiquidityOptimalV2Tx,
   getMintedPositionIdFromTxReceipt,
-  getOptimalMintSwapInfo,
+  getOptimalMintSwapInfoV2Fees,
   getOptimalMintTx,
   getPool,
-  getRebalanceSwapInfo,
-  getRebalanceTx,
-  getReinvestTx,
+  getRebalanceSwapInfoV2Fees,
+  getRebalanceV2Tx,
+  getReinvestV2Tx,
 } from '../../../src/viem';
 import {
   WBTC_ADDRESS,
@@ -157,7 +158,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    const { tx: txRequest } = await getReinvestTx(
+    const { tx: txRequest } = await getReinvestV2Tx(
       chainId,
       amm,
       eoa,
@@ -214,7 +215,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV2Fees(
         chainId,
         amm,
         eoa,
@@ -230,7 +231,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
         false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV2Tx(
       chainId,
       amm,
       eoa,
@@ -286,7 +287,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV2Fees(
         chainId,
         amm,
         eoa,
@@ -302,7 +303,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
         false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV2Tx(
       chainId,
       amm,
       eoa,
@@ -382,7 +383,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getOptimalMintSwapInfo(
+      await getOptimalMintSwapInfoV2Fees(
         chainId,
         amm,
         token0Amount,
@@ -396,7 +397,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
         [E_Solver.OneInch],
       )
     )[0];
-    const { tx: txRequest } = await getOptimalMintTx(
+    const { tx: txRequest } = await getOptimalMintV2Tx(
       chainId,
       amm,
       token0Amount,
@@ -478,7 +479,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getOptimalMintSwapInfo(
+      await getOptimalMintSwapInfoV2Fees(
         chainId,
         amm,
         token0Amount,
@@ -671,7 +672,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV2Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
