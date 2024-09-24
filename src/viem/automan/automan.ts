@@ -37,6 +37,7 @@ import {
   getAutomanReinvestCalldata,
   getAutomanRemoveLiquidityCalldata,
   getAutomanV3IncreaseLiquidityOptimalCallData,
+  getAutomanV3MintOptimalCalldata,
   getAutomanV3RebalanceCalldata,
   getAutomanV3ReinvestCalldata,
   getAutomanV3RemoveLiquidityCalldata,
@@ -295,7 +296,7 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   checkTicks(amm, mintParams);
-  const data = getAutomanMintOptimalCalldata(amm, mintParams, swapData);
+  const data = getAutomanV3MintOptimalCalldata(amm, mintParams, swapData);
   const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(
@@ -379,7 +380,7 @@ export async function simulateIncreaseLiquidityOptimalV3(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<IncreaseLiquidityReturnType> {
-  const returnData = await requestIncreaseLiquidityOptimal(
+  const returnData = await requestIncreaseLiquidityOptimalV3(
     'eth_call',
     chainId,
     amm,
@@ -491,20 +492,20 @@ export async function requestIncreaseLiquidityOptimalV3<
     increaseParams,
     swapData,
   );
-  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
 
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(
       position.pool.token0.address as Address,
       from,
-      apertureAutoman,
+      apertureAutomanV3,
       increaseParams.amount0Desired,
       publicClient,
     ),
     getERC20Overrides(
       position.pool.token1.address as Address,
       from,
-      apertureAutoman,
+      apertureAutomanV3,
       increaseParams.amount1Desired,
       publicClient,
     ),
@@ -514,7 +515,7 @@ export async function requestIncreaseLiquidityOptimalV3<
     method,
     {
       from,
-      to: apertureAutoman,
+      to: apertureAutomanV3,
       data,
     },
     publicClient,
@@ -615,7 +616,7 @@ export async function simulateRemoveLiquidityV3(
     token1FeeAmount,
   );
   const destContract =
-    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutoman;
+    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutomanV3;
   return decodeFunctionResult({
     abi: AutomanV3__factory.abi,
     data: await tryRequestWithOverrides(
@@ -706,7 +707,7 @@ export async function requestRebalanceV3<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
       data,
     },
     publicClient,
@@ -945,7 +946,7 @@ export async function requestReinvestV3<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
       data,
     },
     publicClient,

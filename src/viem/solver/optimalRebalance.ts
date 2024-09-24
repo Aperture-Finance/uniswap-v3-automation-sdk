@@ -26,6 +26,7 @@ import {
   buildOptimalSolutions,
   calcPriceImpact,
   getOptimalSwapAmount,
+  getOptimalSwapAmountV3,
   getSwapPath,
   getSwapRoute,
 } from './internal';
@@ -435,7 +436,7 @@ export async function optimalRebalanceV3(
       blockNumber,
     );
 
-    const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
+    const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
       chainId,
       amm,
       publicClient,

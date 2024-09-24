@@ -99,12 +99,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
     await router.deployed();
     await automanV3Contract.setSwapRouters([router.address], [true]);
 
-    console.log(
-      `tommyzhao automanV3Contract.address=${automanV3Contract.address}`,
-    );
     // Set Automan address in CHAIN_ID_TO_INFO.
-    // getAMMInfo(chainId, amm)!.apertureAutoman =
-    // automanV3Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.apertureAutomanV3 =
       automanV3Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
