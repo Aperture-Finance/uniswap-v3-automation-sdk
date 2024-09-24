@@ -18,6 +18,7 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   encodeOptimalSwapData,
+  estimateMintOptimalV3Gas,
   getAutomanContract,
   simulateMintOptimal,
 } from '../automan';
@@ -31,6 +32,7 @@ import { getOkxApproveTarget } from './getOkxSolver';
 import {
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
+  getOptimalSwapAmountV3,
   getSwapPath,
 } from './internal';
 import {
@@ -577,7 +579,7 @@ export async function optimalMintV3(
           deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
         };
 
-  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
+  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
     chainId,
     amm,
     publicClient,
@@ -630,7 +632,7 @@ export async function optimalMintV3(
       try {
         const [gasPrice, gasAmount] = await Promise.all([
           publicClient.getGasPrice(),
-          estimateMintOptimalGas(
+          estimateMintOptimalV3Gas(
             chainId,
             amm,
             publicClient,
@@ -642,7 +644,7 @@ export async function optimalMintV3(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('SDK.optimalMintV2.EstimateGas.Error', {
+        getLogger().error('SDK.optimalMintV3.EstimateGas.Error', {
           error: JSON.stringify((e as Error).message),
           swapData,
           mintParams,

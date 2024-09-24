@@ -68,6 +68,22 @@ export function getAutomanContract(
   });
 }
 
+export function getAutomanV3Contract(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient?: PublicClient,
+  walletClient?: WalletClient,
+): GetContractReturnType<
+  typeof AutomanV3__factory.abi,
+  PublicClient | WalletClient
+> {
+  return getContract({
+    address: getAMMInfo(chainId, amm)!.apertureAutomanV3,
+    abi: AutomanV3__factory.abi,
+    client: walletClient ?? publicClient!,
+  });
+}
+
 export function encodeOptimalSwapData(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -188,6 +204,29 @@ export async function estimateMintOptimalGas(
 ): Promise<bigint> {
   return hexToBigInt(
     await requestMintOptimal(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      mintParams,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function estimateMintOptimalV3Gas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestMintOptimalV3(
       'eth_estimateGas',
       chainId,
       amm,

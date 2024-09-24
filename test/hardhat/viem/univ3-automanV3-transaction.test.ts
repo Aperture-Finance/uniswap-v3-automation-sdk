@@ -33,7 +33,6 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfo,
   getIncreaseLiquidityOptimalSwapInfoV3,
   getIncreaseLiquidityOptimalV3Tx,
   getMintedPositionIdFromTxReceipt,
@@ -61,7 +60,7 @@ import {
 describe('Viem - UniV3AutomanV3 transaction tests', function () {
   const positionId = 4n;
   const blockNumber = 17188000n;
-  let automanContract: UniV3AutomanV3;
+  let automanV3Contract: UniV3AutomanV3;
   const automanV3Address = getAMMInfo(chainId, amm)!.apertureAutomanV3;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -80,29 +79,34 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
     impersonatedOwnerClient = testClient.extend(walletActions);
 
     // Deploy Automan.
-    automanContract = await new UniV3AutomanV3__factory(
+    automanV3Contract = await new UniV3AutomanV3__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
-    await automanContract.deployed();
-    await automanContract.setFeeConfig({
+    await automanV3Contract.deployed();
+    await automanV3Contract.setFeeConfig({
       feeCollector: WHALE_ADDRESS,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
-    await automanContract.setControllers([WHALE_ADDRESS], [true]);
+    await automanV3Contract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new UniV3OptimalSwapRouter__factory(
       // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();
-    await automanContract.setSwapRouters([router.address], [true]);
+    await automanV3Contract.setSwapRouters([router.address], [true]);
 
+    console.log(
+      `tommyzhao automanV3Contract.address=${automanV3Contract.address}`,
+    );
     // Set Automan address in CHAIN_ID_TO_INFO.
+    // getAMMInfo(chainId, amm)!.apertureAutoman =
+    // automanV3Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.apertureAutomanV3 =
-      automanContract.address as `0x${string}`;
+      automanV3Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
       router.address as `0x${string}`;
 
@@ -111,7 +115,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       functionName: 'setApprovalForAll',
-      args: [automanContract.address as Address, true] as const,
+      args: [automanV3Contract.address as Address, true] as const,
       account: eoa,
     });
 
@@ -317,7 +321,8 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
@@ -569,7 +574,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV3,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV3(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -585,7 +590,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV3Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),

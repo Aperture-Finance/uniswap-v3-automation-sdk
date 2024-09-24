@@ -1,15 +1,21 @@
-import { fractionToBig } from '@/index';
+import { AutomanV3__factory, Automan__factory, fractionToBig } from '@/index';
 import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import { Address, PublicClient } from 'viem';
+import {
+  Address,
+  GetContractReturnType,
+  PublicClient,
+  WalletClient,
+} from 'viem';
 
 import { E_Solver, SwapRoute } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanContract,
+  getAutomanV3Contract,
 } from '../automan';
 import { SwapPath } from './types';
 import { SolverResult } from './types';
@@ -67,7 +73,20 @@ export const getSwapPath = (
   };
 };
 
-export const getOptimalSwapAmount = async (
+export const _getOptimalSwapAmount = async (
+  getAutomanContractFn: (
+    chainId: ApertureSupportedChainId,
+    amm: AutomatedMarketMakerEnum,
+    publicClient: PublicClient,
+  ) =>
+    | GetContractReturnType<
+        typeof Automan__factory.abi,
+        PublicClient | WalletClient
+      >
+    | GetContractReturnType<
+        typeof AutomanV3__factory.abi,
+        PublicClient | WalletClient
+      >,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -80,7 +99,7 @@ export const getOptimalSwapAmount = async (
   amount1Desired: bigint,
   blockNumber?: bigint,
 ) => {
-  const automan = getAutomanContract(chainId, amm, publicClient);
+  const automan = getAutomanContractFn(chainId, amm, publicClient);
   // get swap amounts using the same pool
   const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
     [
@@ -99,6 +118,64 @@ export const getOptimalSwapAmount = async (
     poolAmountIn,
     zeroForOne,
   };
+};
+
+export const getOptimalSwapAmount = async (
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  token0: Address,
+  token1: Address,
+  feeOrTickSpacing: number,
+  tickLower: number,
+  tickUpper: number,
+  amount0Desired: bigint,
+  amount1Desired: bigint,
+  blockNumber?: bigint,
+) => {
+  return _getOptimalSwapAmount(
+    getAutomanContract,
+    chainId,
+    amm,
+    publicClient,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    tickLower,
+    tickUpper,
+    amount0Desired,
+    amount1Desired,
+    blockNumber,
+  );
+};
+
+export const getOptimalSwapAmountV3 = async (
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  token0: Address,
+  token1: Address,
+  feeOrTickSpacing: number,
+  tickLower: number,
+  tickUpper: number,
+  amount0Desired: bigint,
+  amount1Desired: bigint,
+  blockNumber?: bigint,
+) => {
+  return _getOptimalSwapAmount(
+    getAutomanV3Contract,
+    chainId,
+    amm,
+    publicClient,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    tickLower,
+    tickUpper,
+    amount0Desired,
+    amount1Desired,
+    blockNumber,
+  );
 };
 
 export const getSwapRoute = (

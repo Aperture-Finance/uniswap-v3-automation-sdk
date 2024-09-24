@@ -21,6 +21,7 @@ import {
   buildOptimalSolutions,
   calcPriceImpact,
   getOptimalSwapAmount,
+  getOptimalSwapAmountV3,
   getSwapPath,
   getSwapRoute,
 } from './internal';
@@ -502,7 +503,7 @@ export async function increaseLiquidityOptimalV3(
       ? position.pool.tickSpacing
       : position.pool.fee;
 
-  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
+  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
     chainId,
     amm,
     publicClient,
@@ -562,7 +563,7 @@ export async function increaseLiquidityOptimalV3(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('SDK.increaseLiquidityOptimalV2.EstimateGas.Error', {
+        getLogger().error('SDK.increaseLiquidityOptimalV3.EstimateGas.Error', {
           error: JSON.stringify((e as Error).message),
           swapData,
           increaseParams,
