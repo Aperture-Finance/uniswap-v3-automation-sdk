@@ -5,7 +5,10 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
-import { increaseLiquidityOptimalV2 } from '../solver';
+import {
+  increaseLiquidityOptimalV2,
+  increaseLiquidityOptimalV2Fees,
+} from '../solver';
 import { E_Solver } from '../solver';
 
 /**
@@ -42,6 +45,41 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   }
 
   return await increaseLiquidityOptimalV2(
+    chainId,
+    amm,
+    publicClient,
+    position,
+    increaseOptions,
+    token0Amount as CurrencyAmount<Token>,
+    token1Amount as CurrencyAmount<Token>,
+    recipient,
+    blockNumber,
+    includeSolvers,
+  );
+}
+
+export async function getIncreaseLiquidityOptimalSwapInfoV2Fees(
+  increaseOptions: IncreaseOptions,
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  token0Amount: CurrencyAmount<Currency>,
+  token1Amount: CurrencyAmount<Currency>,
+  recipient: Address,
+  publicClient: PublicClient,
+  includeSolvers?: E_Solver[],
+  position?: Position,
+  blockNumber?: bigint,
+) {
+  if (position === undefined) {
+    ({ position } = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      BigInt(increaseOptions.tokenId.toString()),
+      publicClient,
+    ));
+  }
+
+  return await increaseLiquidityOptimalV2Fees(
     chainId,
     amm,
     publicClient,

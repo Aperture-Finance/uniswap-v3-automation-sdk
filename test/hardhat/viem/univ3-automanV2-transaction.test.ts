@@ -34,6 +34,7 @@ import {
   getBasicPositionInfo,
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfo,
+  getIncreaseLiquidityOptimalSwapInfoV2Fees,
   getIncreaseLiquidityOptimalV2Tx,
   getMintedPositionIdFromTxReceipt,
   getOptimalMintSwapInfoV2Fees,
@@ -177,7 +178,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('39772839472592');
+    expect(liquidityAfterReinvest.toString()).to.equal('38878988486731');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
@@ -243,7 +244,8 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
     // Owner of position id 4 sets Automan as operator.
@@ -656,7 +658,7 @@ describe('Viem - UniV3AutomanV2 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV2Fees(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),

@@ -111,12 +111,12 @@ export function getFeeReinvestFeeAmount(positionDetails: PositionDetails): {
     token0FeeAmount: BigInt(
       new Big(positionDetails.position.amount0.quotient.toString())
         .mul(getFeeReinvestRatio(positionDetails.fee))
-        .toString(),
+        .toFixed(0),
     ),
     token1FeeAmount: BigInt(
       new Big(positionDetails.position.amount1.quotient.toString())
         .mul(getFeeReinvestRatio(positionDetails.fee))
-        .toString(),
+        .toFixed(0),
     ),
   };
 }
