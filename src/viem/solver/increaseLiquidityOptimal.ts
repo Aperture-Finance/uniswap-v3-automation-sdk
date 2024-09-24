@@ -8,7 +8,11 @@ import { Address, Hex, PublicClient } from 'viem';
 import { SwapRoute, get1InchQuote, getIsOkx, getOkxQuote } from '.';
 import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import { computePoolAddress } from '../../utils';
-import { encodeOptimalSwapData, getAutomanContract, simulateIncreaseLiquidityOptimalV3 } from '../automan';
+import {
+  encodeOptimalSwapData,
+  getAutomanContract,
+  simulateIncreaseLiquidityOptimalV3,
+} from '../automan';
 import {
   FEE_ZAP_RATIO,
   IncreaseLiquidityParams,
