@@ -203,9 +203,9 @@ export async function generateTypedDataForPermit(
     primaryType: 'Permit',
     message: {
       spender: apertureAutoman,
-      tokenId: positionId,
-      nonce,
-      deadline: deadlineEpochSeconds,
+      tokenId: Number(positionId),
+      nonce: Number(nonce),
+      deadline: Number(deadlineEpochSeconds),
     },
   } as const;
 }
