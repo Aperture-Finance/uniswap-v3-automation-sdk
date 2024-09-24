@@ -1,15 +1,15 @@
 import {
-  Automan__factory as AutomanV2__factory,
-  IPCSV3Automan__factory as IPCSV3AutomanV2__factory,
-  ISlipStreamAutoman__factory as ISlipStreamAutomanV2__factory,
-  IUniV3Automan__factory as IUniV3AutomanV2__factoryV2,
-  PCSV3Automan as PCSV3AutomanV2,
-  PCSV3Automan__factory as PCSV3AutomanV2__factory,
-  SlipStreamAutoman as SlipStreamAutomanV2,
-  SlipStreamAutoman__factory as SlipStreamAutomanV2__factory,
-  UniV3Automan as UniV3AutomanV2,
-  UniV3Automan__factory as UniV3AutomanV2__factory,
-} from './typechain-typesV2';
+  Automan__factory as AutomanV3__factory,
+  IPCSV3Automan__factory as IPCSV3AutomanV3__factory,
+  ISlipStreamAutoman__factory as ISlipStreamAutomanV3__factory,
+  IUniV3Automan__factory as IUniV3AutomanV3__factory,
+  PCSV3Automan as PCSV3AutomanV3,
+  PCSV3Automan__factory as PCSV3AutomanV3__factory,
+  SlipStreamAutoman as SlipStreamAutomanV3,
+  SlipStreamAutoman__factory as SlipStreamAutomanV3__factory,
+  UniV3Automan as UniV3AutomanV3,
+  UniV3Automan__factory as UniV3AutomanV3__factory,
+} from './typechain-typesV3';
 
 export * from './automan_client';
 export * from './constants';
@@ -27,14 +27,14 @@ export * from './ioc';
 export * from './logger';
 export * from './data';
 export {
-  AutomanV2__factory,
-  UniV3AutomanV2,
-  PCSV3AutomanV2,
-  SlipStreamAutomanV2,
-  IPCSV3AutomanV2__factory,
-  ISlipStreamAutomanV2__factory,
-  IUniV3AutomanV2__factoryV2,
-  PCSV3AutomanV2__factory,
-  SlipStreamAutomanV2__factory,
-  UniV3AutomanV2__factory,
+  AutomanV3__factory,
+  UniV3AutomanV3,
+  PCSV3AutomanV3,
+  SlipStreamAutomanV3,
+  IPCSV3AutomanV3__factory,
+  ISlipStreamAutomanV3__factory,
+  IUniV3AutomanV3__factory,
+  PCSV3AutomanV3__factory,
+  SlipStreamAutomanV3__factory,
+  UniV3AutomanV3__factory,
 };

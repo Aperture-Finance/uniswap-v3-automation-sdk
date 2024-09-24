@@ -7,7 +7,7 @@ import { Address, PublicClient } from 'viem';
 import { PositionDetails } from '../position';
 import {
   increaseLiquidityOptimalV2,
-  increaseLiquidityOptimalV2Fees,
+  increaseLiquidityOptimalV3,
 } from '../solver';
 import { E_Solver } from '../solver';
 
@@ -58,7 +58,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   );
 }
 
-export async function getIncreaseLiquidityOptimalSwapInfoV2Fees(
+export async function getIncreaseLiquidityOptimalSwapInfoV3(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -79,7 +79,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV2Fees(
     ));
   }
 
-  return await increaseLiquidityOptimalV2Fees(
+  return await increaseLiquidityOptimalV3(
     chainId,
     amm,
     publicClient,

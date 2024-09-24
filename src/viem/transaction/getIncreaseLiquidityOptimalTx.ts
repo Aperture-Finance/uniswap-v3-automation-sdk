@@ -6,7 +6,7 @@ import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
   getAutomanIncreaseLiquidityOptimalCallData,
-  getAutomanV2IncreaseLiquidityOptimalCallData,
+  getAutomanV3IncreaseLiquidityOptimalCallData,
 } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { PositionDetails } from '../position';
@@ -102,7 +102,7 @@ export async function getIncreaseLiquidityOptimalTx(
   };
 }
 
-export async function getIncreaseLiquidityOptimalV2Tx(
+export async function getIncreaseLiquidityOptimalV3Tx(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -162,7 +162,7 @@ export async function getIncreaseLiquidityOptimalV2Tx(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
 
-  const data = getAutomanV2IncreaseLiquidityOptimalCallData(
+  const data = getAutomanV3IncreaseLiquidityOptimalCallData(
     increaseParams,
     swapData,
     token0FeeAmount,
@@ -171,7 +171,7 @@ export async function getIncreaseLiquidityOptimalV2Tx(
 
   return {
     tx: {
-      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
       data,
       value,
       from,

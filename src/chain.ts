@@ -52,6 +52,7 @@ export interface AmmInfo {
   optimalSwapRouter?: Address;
   // Aperture's Automan contract address.
   apertureAutoman: Address;
+  apertureAutomanV3: Address;
   // The subgraph URL for the AMM.
   // For Uniswap, refer to https://docs.uniswap.org/api/subgraph/overview.
   // For PancakeSwap, refer to https://github.com/pancakeswap/pancake-subgraph.
@@ -93,6 +94,9 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
+        apertureAutomanV3: getAddress(
+          '0x00000000Ede6d8D217c60f93191C060747324bca',
+        ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
       },
@@ -107,6 +111,9 @@ const CHAIN_ID_TO_INFO: {
           '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
         ),
         apertureAutoman: getAddress(
+          '0x000000EEd287174A06550eabE6A00074255CaB34',
+        ),
+        apertureAutomanV3: getAddress(
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         subgraph_url:
@@ -143,6 +150,9 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
+        apertureAutomanV3: getAddress(
+          '0x00000000Ede6d8D217c60f93191C060747324bca',
+        ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
       },
@@ -173,6 +183,9 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
         ),
         apertureAutoman: getAddress(
+          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+        ),
+        apertureAutomanV3: getAddress(
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
         subgraph_url:
@@ -206,6 +219,9 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
+        apertureAutomanV3: getAddress(
+          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+        ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
       },
@@ -237,6 +253,9 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
+        apertureAutomanV3: getAddress(
+          '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
+        ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
       },
@@ -251,6 +270,9 @@ const CHAIN_ID_TO_INFO: {
           '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
         ),
         apertureAutoman: getAddress(
+          '0x000000EEd287174A06550eabE6A00074255CaB34',
+        ),
+        apertureAutomanV3: getAddress(
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         subgraph_url:
@@ -284,6 +306,9 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000EDb4489cB49FE07246f39345c9f838cD',
         ),
+        apertureAutomanV3: getAddress(
+          '0x00000000EDb4489cB49FE07246f39345c9f838cD',
+        ),
         subgraph_url:
           'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
       },
@@ -299,6 +324,9 @@ const CHAIN_ID_TO_INFO: {
           '0x0000004bb8983d4E004A8fe998155f1e8ed89989',
         ),
         apertureAutoman: getAddress(
+          '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
+        ),
+        apertureAutomanV3: getAddress(
           '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
       },
@@ -328,6 +356,9 @@ const CHAIN_ID_TO_INFO: {
           '0x039eC83141218fC68bd85E0067d696769E0576bf',
         ),
         apertureAutoman: getAddress(
+          '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
+        ),
+        apertureAutomanV3: getAddress(
           '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
         ),
         subgraph_url:
@@ -360,6 +391,9 @@ const CHAIN_ID_TO_INFO: {
           '0x000000000d44011EACAB39AB7965687d0bc2B16A',
         ),
         apertureAutoman: getAddress(
+          '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
+        ),
+        apertureAutomanV3: getAddress(
           '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
         ),
         subgraph_url:
@@ -396,6 +430,9 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
         ),
+        apertureAutomanV3: getAddress(
+          '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
+        ),
         subgraph_url:
           'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
       },
@@ -427,6 +464,9 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ff5c300B992ae04D59a799AA4fbA1dC8',
         ),
         apertureAutoman: getAddress(
+          '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
+        ),
+        apertureAutomanV3: getAddress(
           '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
         ),
         subgraph_url:

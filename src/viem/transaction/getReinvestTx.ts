@@ -10,7 +10,7 @@ import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import {
   getAutomanReinvestCalldata,
-  getAutomanV2ReinvestCalldata,
+  getAutomanV3ReinvestCalldata,
 } from '../automan';
 import {
   getFeeReinvestBips,
@@ -102,7 +102,7 @@ export async function getReinvestTx(
   };
 }
 
-export async function getReinvestV2Tx(
+export async function getReinvestV3Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
@@ -122,7 +122,7 @@ export async function getReinvestV2Tx(
     client,
   );
   const { pool, tickLower, tickUpper, position } = positionDetails;
-  const { apertureAutoman } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
 
   const { token0FeeAmount, token1FeeAmount } =
     getFeeReinvestFeeAmount(positionDetails);
@@ -138,7 +138,7 @@ export async function getReinvestV2Tx(
     token0FeeAmount,
     token1FeeAmount,
   });
-  const data = getAutomanV2ReinvestCalldata(
+  const data = getAutomanV3ReinvestCalldata(
     positionId,
     deadlineEpochSeconds,
     0n /*amount0Min*/, // Setting this to zero for tx simulation.
@@ -151,7 +151,7 @@ export async function getReinvestV2Tx(
     pool,
     tickLower,
     tickUpper,
-    apertureAutoman,
+    apertureAutomanV3,
     ownerAddress,
     'reinvest',
     data,
@@ -161,8 +161,8 @@ export async function getReinvestV2Tx(
   return {
     tx: {
       from: ownerAddress,
-      to: apertureAutoman,
-      data: getAutomanV2ReinvestCalldata(
+      to: apertureAutomanV3,
+      data: getAutomanV3ReinvestCalldata(
         positionId,
         deadlineEpochSeconds,
         BigInt(amounts.amount0Min),

@@ -7,10 +7,8 @@ export { getOkxQuote } from './getOkxSolver'; // TODO: remove when complete refa
 export { get1InchQuote } from './get1InchSolver';
 
 export * from './increaseLiquidityOptimal';
-export * from './increaseLiquidityOptimalV2';
 export * from './optimalMint';
-export * from './optimalMintV2';
-export * from './optimalRebalanceV2';
+export * from './optimalRebalance';
 export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {

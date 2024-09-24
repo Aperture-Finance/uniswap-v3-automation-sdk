@@ -8,7 +8,7 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanMintOptimalCalldata,
-  getAutomanV2MintOptimalCalldata,
+  getAutomanV3MintOptimalCalldata,
 } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
@@ -128,7 +128,7 @@ export async function getOptimalMintTx(
   };
 }
 
-export async function getOptimalMintV2Tx(
+export async function getOptimalMintV3Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
@@ -212,7 +212,7 @@ export async function getOptimalMintV2Tx(
           deadline,
         };
 
-  const data = getAutomanV2MintOptimalCalldata(
+  const data = getAutomanV3MintOptimalCalldata(
     amm,
     mintParams,
     swapData,
@@ -223,7 +223,7 @@ export async function getOptimalMintV2Tx(
 
   return {
     tx: {
-      to: getAMMInfo(chainId, amm)!.apertureAutoman,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
       data,
       value,
       from: recipient,

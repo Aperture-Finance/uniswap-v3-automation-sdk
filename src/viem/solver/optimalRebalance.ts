@@ -8,11 +8,11 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   estimateRebalanceGas,
-  estimateRebalanceV2Gas,
+  estimateRebalanceV3Gas,
   simulateRebalance,
-  simulateRebalanceV2,
+  simulateRebalanceV3,
   simulateRemoveLiquidity,
-  simulateRemoveLiquidityV2,
+  simulateRemoveLiquidityV3,
 } from '../automan';
 import {
   FEE_REBALANCE_SWAP_RATIO,
@@ -385,7 +385,7 @@ export async function optimalRebalanceV2(
 }
 
 // Same as optimalRebalanceV2, but with feeAmounts instead of feeBips.
-export async function optimalRebalanceV2Fees(
+export async function optimalRebalanceV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   position: PositionDetails,
@@ -421,7 +421,7 @@ export async function optimalRebalanceV2Fees(
     token0FeeAmount: bigint,
     token1FeeAmount: bigint,
   ) => {
-    const [receive0, receive1] = await simulateRemoveLiquidityV2(
+    const [receive0, receive1] = await simulateRemoveLiquidityV3(
       chainId,
       amm,
       publicClient,
@@ -545,7 +545,7 @@ export async function optimalRebalanceV2Fees(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info('optimalRebalanceV2Fees fees', {
+    getLogger().info('optimalRebalanceV3 fees', {
       totalRebalanceFeeUsd: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
@@ -650,7 +650,7 @@ export async function optimalRebalanceV2Fees(
         zeroForOne,
       });
 
-      const [, liquidity, amount0, amount1] = await simulateRebalanceV2(
+      const [, liquidity, amount0, amount1] = await simulateRebalanceV3(
         chainId,
         amm,
         publicClient,
@@ -668,7 +668,7 @@ export async function optimalRebalanceV2Fees(
       try {
         const [gasPrice, gasAmount] = await Promise.all([
           publicClient.getGasPrice(),
-          estimateRebalanceV2Gas(
+          estimateRebalanceV3Gas(
             chainId,
             amm,
             publicClient,
@@ -702,7 +702,12 @@ export async function optimalRebalanceV2Fees(
         token1FeeAmount,
         feeUSD,
         gasFeeEstimation,
-        swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
+        swapRoute: getSwapRoute(
+          token0,
+          token1,
+          BigInt(amount0 - receive0),
+          swapRoute,
+        ),
         priceImpact: calcPriceImpact(
           position.pool,
           receive0,
