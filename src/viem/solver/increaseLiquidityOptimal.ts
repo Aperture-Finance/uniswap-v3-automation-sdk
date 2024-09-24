@@ -473,7 +473,7 @@ export async function increaseLiquidityOptimalV2(
   return buildOptimalSolutions(solve, includeSolvers);
 }
 
-// Same as increaseLiquidityOptimalV2, except uses feeAmounts instead of feeBips.
+// Same as increaseLiquidityOptimalV2, but with feeAmounts instead of feeBips.
 export async function increaseLiquidityOptimalV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

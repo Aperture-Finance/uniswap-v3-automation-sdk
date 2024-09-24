@@ -526,7 +526,7 @@ export async function optimalMintV2(
   return buildOptimalSolutions(solve, includeSolvers);
 }
 
-// Same as optimalMintV2, except uses feeAmounts instead of feeBips.
+// Same as optimalMintV2, but with feeAmounts instead of feeBips.
 export async function optimalMintV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

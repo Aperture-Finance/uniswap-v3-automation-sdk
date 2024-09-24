@@ -102,6 +102,7 @@ export async function getIncreaseLiquidityOptimalTx(
   };
 }
 
+// Same as getIncreaseLiquidityOptimalTx, but enables collecting feeAmount.
 export async function getIncreaseLiquidityOptimalV3Tx(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,

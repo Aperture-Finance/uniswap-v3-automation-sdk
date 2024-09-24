@@ -102,6 +102,7 @@ export async function getReinvestTx(
   };
 }
 
+// Same as getReinvestTx, but with feeAmounts instead of feeBips.
 export async function getReinvestV3Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

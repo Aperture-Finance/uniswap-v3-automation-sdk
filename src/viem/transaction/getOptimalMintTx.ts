@@ -128,6 +128,7 @@ export async function getOptimalMintTx(
   };
 }
 
+// Same as getIncreaseLiquidityOptimalTx, but with feeAmount and enables initilizing pool with sqrtPriceX96.
 export async function getOptimalMintV3Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
