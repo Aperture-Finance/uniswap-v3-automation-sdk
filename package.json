@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.10.8-permit0",
+  "version": "3.10.8-permit1",
   "description": "SDK for Aperture's CLMM automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Aperture-Finance/uniswap-v3-automation-sdk.git"
+    "url": "git+https://github.com/Aperture-Finance/uniswap-v3-automation-sdk.git"
   },
   "keywords": [
     "ethereum",
