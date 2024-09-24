@@ -109,6 +109,7 @@ export async function get1InchQuote(
   from: string,
   slippage: number,
   includeProtocols?: boolean,
+  methodName: string = 'swap',
 ): Promise<{
   toAmount: string;
   tx: {
@@ -136,7 +137,7 @@ export async function get1InchQuote(
   };
   try {
     return (
-      await buildRequest(chainId, 'swap', new URLSearchParams(swapParams))
+      await buildRequest(chainId, methodName, new URLSearchParams(swapParams))
     ).data;
   } catch (e) {
     console.error(e);
