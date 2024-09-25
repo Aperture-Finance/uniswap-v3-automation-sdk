@@ -22,7 +22,7 @@ The Uniswap V3 Automation SDK is a comprehensive software development kit design
 
 ## Documentation
 
-For detailed information on how to use the Uniswap V3 Automation SDK, please refer to the official documentation: [Documentation Link](https://your-documentation-link).
+For detailed information on how to use the Uniswap V3 Automation SDK, please refer to the official documentation: [Documentation Link](https://github.com/Aperture-Finance/uniswap-v3-automation-sdk).
 
 ## Getting Started
 
@@ -87,13 +87,18 @@ yarn unlink v1.22.22
 success Removed linked package "@aperture_finance/uniswap-v3-automation-sdk".
 ```
 
+## Version Naming Conventions
+
+- **V2**: Custom Solver
+- **V3**: Migrate from feeBips to feeAmount
+
 ## Contributing
 
-We welcome contributions from the community! If you would like to contribute to the Uniswap V3 Automation SDK, please follow the guidelines outlined in CONTRIBUTING.md: [Contributing Guidelines Link](https://your-contributing-guidelines-link).
+We welcome contributions from the community!
 
 ## Licensing
 
-The license for Aperture Automation SDK is the Business Source License 1.1 (BUSL-1.1), see [LICENSE](./License).
+The license for Aperture Automation SDK is the Business Source License 1.1 (BUSL-1.1), see [LICENSE](./LICENSE).
 
 ## Contact
 

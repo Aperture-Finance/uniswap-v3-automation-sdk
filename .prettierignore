@@ -1,5 +1,6 @@
 # Hardhat typechain generated code
 typechain-types/
+typechain-typesV3/
 
 # Jest coverage report
 coverage/
