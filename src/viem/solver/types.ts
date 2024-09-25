@@ -65,6 +65,8 @@ export type SolverResult = {
   swapRoute?: SwapRoute;
   swapPath?: SwapPath;
   priceImpact?: Big;
+  token0FeeAmount?: bigint;
+  token1FeeAmount?: bigint;
   feeBips?: bigint;
   feeUSD?: string;
   gasFeeEstimation?: bigint;

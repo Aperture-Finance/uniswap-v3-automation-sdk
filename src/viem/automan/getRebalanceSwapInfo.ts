@@ -4,6 +4,7 @@ import {
   PositionDetails,
   SolverResult,
   optimalRebalanceV2,
+  optimalRebalanceV3,
 } from '@/viem';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -49,6 +50,48 @@ export async function getRebalanceSwapInfo(
   }
 
   return optimalRebalanceV2(
+    chainId,
+    amm,
+    position,
+    newPositionTickLower,
+    newPositionTickUpper,
+    ownerAddress,
+    slippageTolerance,
+    tokenPrices,
+    publicClient,
+    blockNumber,
+    includeSolvers,
+    feesOn,
+  );
+}
+
+// Same as getRebalanceSwapInfo, except return the fees as token0FeeAmount and token1FeeAmount instead of feeBips
+export async function getRebalanceSwapInfoV3(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  ownerAddress: Address,
+  existingPositionId: bigint,
+  newPositionTickLower: number,
+  newPositionTickUpper: number,
+  slippageTolerance: number,
+  tokenPrices: [string, string],
+  publicClient: PublicClient,
+  includeSolvers?: E_Solver[],
+  position?: PositionDetails,
+  blockNumber?: bigint,
+  feesOn?: boolean,
+): Promise<SolverResult[]> {
+  if (position === undefined) {
+    position = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      existingPositionId,
+      publicClient,
+      blockNumber,
+    );
+  }
+
+  return optimalRebalanceV3(
     chainId,
     amm,
     position,
