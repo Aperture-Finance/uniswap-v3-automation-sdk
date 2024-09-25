@@ -2,7 +2,11 @@
 import { ApertureSupportedChainId } from '../../src';
 import { get1InchQuote } from '../../src/viem/solver/get1InchSolver';
 import { buildRequest as build1InchRequest } from '../../src/viem/solver/get1InchSolver';
-import { buildRequest, getOkxQuote } from '../../src/viem/solver/getOkxSolver';
+import {
+  buildRequest,
+  getOkxQuote,
+  getOkxSwap,
+} from '../../src/viem/solver/getOkxSolver';
 
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
 const userAddress = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
@@ -47,9 +51,30 @@ async function test1InchSolver() {
   );
 }
 
-test1InchSolver();
+async function testOkxApprove() {
+  const approveTransaction = await buildRequest('approve-transaction', {
+    chainId,
+    tokenContractAddress: token0,
+    approveAmount: amount,
+  });
+  console.log('approveTransaction', approveTransaction);
+  console.log('approveTransaction.data', approveTransaction.data);
+  console.log(
+    'approveTransaction.data.data[0]',
+    approveTransaction.data.data[0],
+  );
+}
 
-async function testOkxSolver() {
+async function testOkxQuote() {
+  try {
+    const { toAmount } = await getOkxQuote(chainId, token0, token1, amount);
+    console.log(`OKX quote toAmount=${toAmount}`);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function testOkxSwap() {
   const date = new Date();
   console.log(`date=${date.toISOString()}`);
   const dateIsoString = '2024-09-05T21:04:39.977Z';
@@ -76,7 +101,7 @@ async function testOkxSolver() {
       'OKX response.data.data[0].routerResult.dexRouterList ',
       JSON.stringify(response.data.data[0].routerResult.dexRouterList),
     );
-    const { toAmount, tx, protocols } = await getOkxQuote(
+    const { toAmount, tx, protocols } = await getOkxSwap(
       chainId,
       token0,
       token1,
@@ -85,23 +110,18 @@ async function testOkxSolver() {
       slippage,
     );
     console.log(
-      `OKX toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
+      `OKX swap toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
     );
   } catch (e) {
     console.error(e);
   }
-
-  const approveTransaction = await buildRequest('approve-transaction', {
-    chainId,
-    tokenContractAddress: token0,
-    approveAmount: amount,
-  });
-  console.log('approveTransaction', approveTransaction);
-  console.log('approveTransaction.data', approveTransaction.data);
-  console.log(
-    'approveTransaction.data.data[0]',
-    approveTransaction.data.data[0],
-  );
 }
 
-testOkxSolver();
+async function main() {
+  await test1InchSolver();
+  await testOkxApprove();
+  await testOkxQuote();
+  await testOkxSwap();
+}
+
+main();

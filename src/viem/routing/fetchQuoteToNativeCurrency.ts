@@ -5,6 +5,7 @@ import {
 } from '@/index';
 import axios from 'axios';
 
+import { getOkxQuote } from '../solver';
 import {
   RoutingApiQuoteResponse,
   UnifiedRoutingApiClassicQuoteRequestBody,
@@ -96,37 +97,18 @@ export async function fetchQuoteToNativeCurrency(
     ).quote;
   } catch (e) {
     console.debug(
-      'fail to fetchQuoteToNativeCurrency from routing api, trying to get from 1inch',
+      'fail to fetchQuoteToNativeCurrency from routing api, trying to get from okx',
       tokenAddress,
       wrappedNativeCurrency.address,
     );
 
-    const swapParams = {
-      src: wrappedNativeCurrency.address,
-      dst: tokenAddress,
-      amount: nativeCurrencyExactOutRawAmount.toString(),
-    };
-
-    const { toAmount } =
-      (
-        await buildRequest(chainId, new URLSearchParams(swapParams)).catch(
-          (e) => {
-            console.error('fail to fetchQuoteToNativeCurrency from 1inch', e);
-          },
-        )
-      )?.data ?? {};
-
-    return toAmount;
+    return (
+      await getOkxQuote(
+        chainId,
+        tokenAddress,
+        wrappedNativeCurrency.address,
+        nativeCurrencyExactOutRawAmount.toString(),
+      )
+    ).toAmount;
   }
-}
-
-const ApiBaseUrl = 'https://1inch-api.aperture.finance';
-
-function buildRequest(
-  chainId: ApertureSupportedChainId,
-  params: URLSearchParams,
-) {
-  return axios.get(`${ApiBaseUrl}/swap/v5.2/${chainId}/quote`, {
-    params,
-  });
 }

@@ -10,7 +10,7 @@ import {
   SwapRoute,
   get1InchQuote,
   getIsOkx,
-  getOkxQuote,
+  getOkxSwap,
 } from '.';
 import {
   SlipStreamMintParams,
@@ -279,7 +279,7 @@ async function getOptimalMintSwapData(
 
     const ammInfo = getAMMInfo(chainId, amm)!;
     const { tx, protocols } = await (getIsOkx()
-      ? getOkxQuote(
+      ? getOkxSwap(
           chainId,
           zeroForOne ? mintParams.token0 : mintParams.token1,
           zeroForOne ? mintParams.token1 : mintParams.token0,

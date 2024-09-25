@@ -5,7 +5,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { SwapRoute, get1InchQuote, getIsOkx, getOkxQuote } from '.';
+import { SwapRoute, get1InchQuote, getIsOkx, getOkxSwap } from '.';
 import { computePoolAddress } from '../../utils';
 import {
   IncreaseLiquidityParams,
@@ -252,7 +252,7 @@ async function getIncreaseLiquidityOptimalSwapData(
         )
       : get1InchApproveTarget(chainId));
     const { tx, protocols } = await (isOkx
-      ? getOkxQuote(
+      ? getOkxSwap(
           chainId,
           zeroForOne
             ? position.pool.token0.address
