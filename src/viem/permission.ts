@@ -157,6 +157,7 @@ const PermitTypes: TypedData = {
   Permit: [
     { name: 'spender', type: 'address' },
     { name: 'tokenId', type: 'uint256' },
+    { name: 'value', type: 'uint256' },
     { name: 'nonce', type: 'uint256' },
     { name: 'deadline', type: 'uint256' },
   ],
@@ -175,6 +176,7 @@ export async function generateTypedDataForPermit(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   positionId: bigint,
+  value: bigint,
   deadlineEpochSeconds: bigint,
   publicClient?: PublicClient,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
@@ -204,6 +206,7 @@ export async function generateTypedDataForPermit(
     message: {
       spender: apertureAutoman,
       tokenId: positionId,
+      value,
       nonce,
       deadline: deadlineEpochSeconds,
     },

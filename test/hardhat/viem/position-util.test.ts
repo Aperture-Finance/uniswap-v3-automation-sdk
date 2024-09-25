@@ -163,6 +163,7 @@ describe('Position util tests', function () {
       chainId,
       UNIV3_AMM,
       positionId,
+      1n,
       BigInt(deadline),
       publicClient,
     );
@@ -192,6 +193,7 @@ describe('Position util tests', function () {
       chainId,
       UNIV3_AMM,
       positionId + 1n,
+      1n,
       BigInt(deadline),
       publicClient,
     );
