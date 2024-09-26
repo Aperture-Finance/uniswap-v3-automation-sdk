@@ -11,7 +11,7 @@ import {
   SwapRoute,
   get1InchQuote,
   getIsOkx,
-  getOkxQuote,
+  getOkxSwap,
   getSolver,
 } from '.';
 import { computePoolAddress } from '../../utils';
@@ -270,7 +270,7 @@ async function getIncreaseLiquidityOptimalSwapData(
         )
       : get1InchApproveTarget(chainId));
     const { tx, protocols } = await (isOkx
-      ? getOkxQuote(
+      ? getOkxSwap(
           chainId,
           zeroForOne
             ? position.pool.token0.address
