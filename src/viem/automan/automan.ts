@@ -423,6 +423,31 @@ export async function estimateIncreaseLiquidityOptimalGas(
   );
 }
 
+export async function estimateIncreaseLiquidityOptimalV3Gas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestIncreaseLiquidityOptimalV3(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      position,
+      increaseParams,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
 export async function requestIncreaseLiquidityOptimal<
   M extends keyof RpcReturnType,
 >(
