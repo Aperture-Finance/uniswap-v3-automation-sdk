@@ -65,7 +65,7 @@ export const getOkxSolver = (): ISolver => {
         throw new Error('Expected: Chain or AMM not support');
       }
 
-      const { tx, protocols } = await getOkxQuote(
+      const { tx, protocols } = await getOkxSwap(
         chainId,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
@@ -100,7 +100,8 @@ export const getOkxSolver = (): ISolver => {
 };
 
 /**
- * Get a quote for a swap.
+ * Get a quote and swap data.
+ * Api documentation: https://www.okx.com/web3/build/docs/waas/dex-swap
  * @param chainId The chain ID.
  * @param src Contract address of a token to sell
  * @param dst Contract address of a token to buy
@@ -108,7 +109,7 @@ export const getOkxSolver = (): ISolver => {
  * @param from Address of a seller, make sure that this address has approved to spend src in needed amount
  * @param slippage Limit of price slippage you are willing to accept in percentage
  */
-export async function getOkxQuote(
+export async function getOkxSwap(
   chainId: ApertureSupportedChainId,
   src: string,
   dst: string,
@@ -150,6 +151,48 @@ export async function getOkxQuote(
     return {
       toAmount: swapData[0].routerResult.toTokenAmount,
       tx: swapData[0].tx,
+    };
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
+
+/* Get a quote without swap data. Useful because userWalletAddress and slippage not required.
+ * Api documentation: https://www.okx.com/web3/build/docs/waas/dex-get-quote
+ * @param chainId The chain ID.
+ * @param src Contract address of a token to sell
+ * @param dst Contract address of a token to buy
+ * @param amount Amount of a token to sell, set in minimal divisible units
+ */
+export async function getOkxQuote(
+  chainId: ApertureSupportedChainId,
+  src: string,
+  dst: string,
+  amount: string,
+): Promise<{
+  toAmount: string;
+}> {
+  if (amount === '0') {
+    throw new Error('amount should greater than 0');
+  }
+  const quoteParams = {
+    chainId: chainId.toString(),
+    fromTokenAddress: src,
+    toTokenAddress: dst,
+    amount,
+  };
+  try {
+    const quoteData = (
+      await buildRequest('quote', new URLSearchParams(quoteParams))
+    ).data.data;
+    if (quoteData.length < 1) {
+      throw new Error(
+        `Error: No quote found with quoteParams=${JSON.stringify(quoteParams)}`,
+      );
+    }
+    return {
+      toAmount: quoteData[0].toTokenAmount,
     };
   } catch (e) {
     console.error(e);

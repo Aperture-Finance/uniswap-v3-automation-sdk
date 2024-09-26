@@ -3,7 +3,7 @@ import { getOkxSolver } from './getOkxSolver';
 import { getPropellerHeadsSolver } from './getPropellerHeadsSolver';
 import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
-export { getOkxQuote } from './getOkxSolver'; // TODO: remove when complete refactor
+export { getOkxQuote, getOkxSwap } from './getOkxSolver'; // TODO: remove when complete refactor
 export { get1InchQuote } from './get1InchSolver';
 
 export * from './increaseLiquidityOptimal';
