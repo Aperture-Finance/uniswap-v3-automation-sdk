@@ -33,5 +33,5 @@ export const getSolver = (solver: E_Solver): ISolver => {
 };
 
 export function getIsOkx() {
-  return Number(process.env.OKX_RAMPUP_PERCENT || '1') / 100 > Math.random();
+  return Number(process.env.OKX_RAMPUP_PERCENT || '100') / 100 > Math.random();
 }
