@@ -234,7 +234,7 @@ export async function optimalRebalanceV2(
 
     return {
       feeBips,
-      feeUSD: feeUSD.toFixed(),
+      feeUSD: feeUSD.toFixed(5),
     };
   };
 

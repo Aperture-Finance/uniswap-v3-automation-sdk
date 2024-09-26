@@ -19,6 +19,7 @@ import {
   estimateIncreaseLiquidityOptimalGas,
   simulateIncreaseLiquidityOptimal,
 } from '../automan';
+import { estimateIncreaseLiquidityOptimalGas } from '../automan';
 import { get1InchApproveTarget } from './get1InchSolver';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {
