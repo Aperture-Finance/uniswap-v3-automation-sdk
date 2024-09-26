@@ -5,21 +5,25 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { SwapRoute, get1InchQuote, getIsOkx, getOkxQuote } from '.';
-import { ALL_SOLVERS, E_Solver, getSolver } from '.';
-import { computePoolAddress } from '../../utils';
 import {
-  encodeOptimalSwapData,
-  getAutomanContract,
-  simulateIncreaseLiquidityOptimalV3,
-} from '../automan';
+  ALL_SOLVERS,
+  E_Solver,
+  SwapRoute,
+  get1InchQuote,
+  getIsOkx,
+  getOkxQuote,
+  getSolver,
+} from '.';
+import { computePoolAddress } from '../../utils';
 import {
   FEE_ZAP_RATIO,
   IncreaseLiquidityParams,
+  encodeOptimalSwapData,
   estimateIncreaseLiquidityOptimalGas,
+  getAutomanContract,
   simulateIncreaseLiquidityOptimal,
+  simulateIncreaseLiquidityOptimalV3,
 } from '../automan';
-import { estimateIncreaseLiquidityOptimalGas } from '../automan';
 import { get1InchApproveTarget } from './get1InchSolver';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {

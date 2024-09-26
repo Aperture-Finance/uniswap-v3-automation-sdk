@@ -1,5 +1,4 @@
-import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { getLogger } from '@/index';
+import { ApertureSupportedChainId, getAMMInfo, getLogger } from '@/index';
 import { computePoolAddress } from '@/utils';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -7,37 +6,35 @@ import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
+  ALL_SOLVERS,
+  E_Solver,
   SolverResult,
   SwapRoute,
   get1InchQuote,
   getIsOkx,
   getOkxQuote,
+  getSolver,
 } from '.';
-import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
+  FEE_ZAP_RATIO,
   SlipStreamMintParams,
   UniV3MintParams,
   encodeOptimalSwapData,
+  estimateMintOptimalGas,
   estimateMintOptimalV3Gas,
   getAutomanContract,
   simulateMintOptimal,
-} from '../automan';
-import {
-  FEE_ZAP_RATIO,
-  estimateMintOptimalGas,
   simulateMintOptimalV3,
 } from '../automan';
 import { getPool } from '../pool';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {
+  buildOptimalSolutions,
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
+  getOptimalSwapAmount,
   getOptimalSwapAmountV3,
   getSwapPath,
-} from './internal';
-import {
-  buildOptimalSolutions,
-  getOptimalSwapAmount,
   getSwapRoute,
 } from './internal';
 
