@@ -60,11 +60,13 @@ export const getOkxSolver = (): ISolver => {
         zeroForOne,
       } = props;
 
+      console.log('tommyzhao optimalMint 63');
       const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
       if (!optimalSwapRouter) {
         throw new Error('Expected: Chain or AMM not support');
       }
 
+      console.log(`'tommyzhao optimalMint 69, poolAmountIn=${poolAmountIn.toString()}, zeroForOne=${zeroForOne}`);
       const { tx, protocols } = await getOkxSwap(
         chainId,
         zeroForOne ? token0 : token1,
@@ -74,6 +76,7 @@ export const getOkxSolver = (): ISolver => {
         slippage,
       );
 
+      console.log('tommyzhao optimalMint 79');
       const approveTarget = await getOkxApproveTarget(
         chainId,
         zeroForOne ? token0 : token1,

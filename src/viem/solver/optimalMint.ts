@@ -538,6 +538,7 @@ export async function optimalMintV3(
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
+  console.log('tommyzhao optimalMintV3 541b');
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
@@ -576,6 +577,7 @@ export async function optimalMintV3(
           deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
         };
 
+  console.log(`tommyzhao optimalMintV3 580, mintParams.amount0Desired=${mintParams.amount0Desired}, mintParams.amount1Desired=${mintParams.amount1Desired}, feeOrTickSpacing=${feeOrTickSpacing}, tickLower=${tickLower}, tickUpper=${tickUpper}, fromAddress=${fromAddress}, slippage=${slippage}, publicClient=${publicClient}, blockNumber=${blockNumber}, includeSolvers=${includeSolvers}`);
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
     chainId,
     amm,
@@ -589,9 +591,11 @@ export async function optimalMintV3(
     mintParams.amount1Desired,
     blockNumber,
   );
+  console.log(`tommyzhao optimalMintV3 594, poolAmountIn=${poolAmountIn.toString()}, zeroForOne=${zeroForOne}`);
 
   const solve = async (solver: E_Solver) => {
     try {
+      console.log(`tommyzhao optimalMintV3 598, solver=${solver}, poolAmountIn=${poolAmountIn.toString()}, zeroForOne=${zeroForOne}, tickLower=${tickLower}, tickUpper=${tickUpper}, slippage=${slippage}, mintParams.amount0Desired=${mintParams.amount0Desired}, mintParams.amount1Desired=${mintParams.amount1Desired}`);
       const { swapData, swapRoute } = await getSolver(solver).optimalMint({
         chainId,
         amm,
@@ -605,6 +609,7 @@ export async function optimalMintV3(
         poolAmountIn,
         zeroForOne,
       });
+      console.log(`tommyzhao optimalMintV3 612, solver=${solver}, swapData=${swapData}, swapRoute=${swapRoute}`);
       const [, liquidity, amount0, amount1] = await simulateMintOptimalV3(
         chainId,
         amm,
@@ -615,6 +620,7 @@ export async function optimalMintV3(
         blockNumber,
       );
 
+      console.log(`tommyzhao optimalMintV3 623, liquidity=${liquidity}, amount0=${amount0}, amount1=${amount1}`);
       const pool = await getPool(
         token0,
         token1,
@@ -625,6 +631,7 @@ export async function optimalMintV3(
         blockNumber,
       );
 
+      console.log('tommyzhao optimalMintV3 634, pool=', pool);
       let gasFeeEstimation = 0n;
       try {
         const [gasPrice, gasAmount] = await Promise.all([
@@ -648,6 +655,7 @@ export async function optimalMintV3(
         });
       }
 
+      console.log('tommyzhao optimalMintV3 658, solver=', solver);
       const token0FeeAmount = zeroForOne
         ? new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO)
         : 0n;
@@ -666,6 +674,7 @@ export async function optimalMintV3(
         poolAmountIn: poolAmountIn.toString(),
       });
 
+      console.log('tommyzhao optimalMintV3 677, solver=', solver);
       return {
         solver,
         amount0,

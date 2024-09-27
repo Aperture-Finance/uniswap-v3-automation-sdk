@@ -20,6 +20,7 @@ import {
   IncreaseLiquidityParams,
   encodeOptimalSwapData,
   estimateIncreaseLiquidityOptimalGas,
+  estimateIncreaseLiquidityOptimalV3Gas,
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
   simulateIncreaseLiquidityOptimalV3,
@@ -559,7 +560,7 @@ export async function increaseLiquidityOptimalV3(
       try {
         const [gasPrice, gasAmount] = await Promise.all([
           publicClient.getGasPrice(),
-          estimateIncreaseLiquidityOptimalGas(
+          estimateIncreaseLiquidityOptimalV3Gas(
             chainId,
             amm,
             publicClient,

@@ -176,7 +176,9 @@ export async function simulateMintOptimalV3(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
+  console.log('tommyzhao simulateMintOptimalV3 179');
   checkTicks(amm, mintParams);
+  console.log('tommyzhao simulateMintOptimalV3 181');
   const returnData = await requestMintOptimalV3(
     'eth_call',
     chainId,
@@ -187,6 +189,7 @@ export async function simulateMintOptimalV3(
     swapData,
     blockNumber,
   );
+  console.log(`tommyzhao simulateMintOptimalV3 192, returnData=${returnData}`);
   return decodeFunctionResult({
     abi: AutomanV3__factory.abi,
     data: returnData,
@@ -295,9 +298,12 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
+  console.log('tommyzhao requestMintOptimalV3 301');
   checkTicks(amm, mintParams);
+  console.log('tommyzhao requestMintOptimalV3 303');
   const data = getAutomanV3MintOptimalCalldata(amm, mintParams, swapData);
   const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+  console.log('tommyzhao requestMintOptimalV3 306');
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(
       mintParams.token0,
@@ -314,6 +320,7 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
       publicClient,
     ),
   ]);
+  console.log('tommyzhao requestMintOptimalV3 323');
   return tryRequestWithOverrides(
     method,
     {
@@ -410,6 +417,31 @@ export async function estimateIncreaseLiquidityOptimalGas(
 ): Promise<bigint> {
   return hexToBigInt(
     await requestIncreaseLiquidityOptimal(
+      'eth_estimateGas',
+      chainId,
+      amm,
+      publicClient,
+      from,
+      position,
+      increaseParams,
+      swapData,
+      blockNumber,
+    ),
+  );
+}
+
+export async function estimateIncreaseLiquidityOptimalV3Gas(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address,
+  position: Position,
+  increaseParams: IncreaseLiquidityParams,
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestIncreaseLiquidityOptimalV3(
       'eth_estimateGas',
       chainId,
       amm,
