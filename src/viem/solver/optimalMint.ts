@@ -650,11 +650,13 @@ export async function optimalMintV3(
       }
 
       const token0FeeAmount = zeroForOne
-        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed())
+        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
         : 0n;
       const token1FeeAmount = zeroForOne
         ? 0n
-        : BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed());
+        : BigInt(
+            new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+          );
 
       getLogger().info('optimalMintV3 ', {
         amm: amm,

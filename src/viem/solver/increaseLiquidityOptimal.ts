@@ -581,11 +581,13 @@ export async function increaseLiquidityOptimalV3(
       }
 
       const token0FeeAmount = zeroForOne
-        ? Big(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toString())
+        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
         : 0n;
       const token1FeeAmount = zeroForOne
         ? 0n
-        : Big(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toString());
+        : BigInt(
+            new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+          );
 
       getLogger().info('increaseLiquidityOptimalV3 ', {
         amm: amm,
