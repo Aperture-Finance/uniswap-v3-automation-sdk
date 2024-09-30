@@ -386,6 +386,7 @@ export async function optimalRebalanceV2(
 }
 
 // Same as optimalRebalanceV2, but with feeAmounts instead of feeBips.
+// Do not use, but implemented to make it easier to migrate to future versions.
 export async function optimalRebalanceV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

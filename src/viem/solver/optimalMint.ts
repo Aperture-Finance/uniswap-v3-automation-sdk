@@ -534,6 +534,7 @@ export async function optimalMintV3(
   tickUpper: number,
   fromAddress: Address,
   slippage: number,
+  tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
@@ -657,10 +658,17 @@ export async function optimalMintV3(
         : BigInt(
             new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
           );
+      const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+      const decimals = zeroForOne ? pool.token0.decimals : pool.token1.decimals;
+      const feeUSD = new Big(poolAmountIn.toString())
+        .div(10 ** decimals)
+        .mul(tokenInPrice)
+        .mul(FEE_ZAP_RATIO);
 
       getLogger().info('optimalMintV3 ', {
         amm: amm,
         chainId: chainId,
+        totalOptimalMintFeeUsd: feeUSD.toString(),
         token0FeeAmount: token0FeeAmount.toString(),
         token1FeeAmount: token1FeeAmount.toString(),
         amount0Desired: mintParams.amount0Desired.toString(),
@@ -698,6 +706,7 @@ export async function optimalMintV3(
           amount1,
           slippage,
         ),
+        feeUSD: feeUSD.toFixed(),
         token0FeeAmount,
         token1FeeAmount,
       } as SolverResult;

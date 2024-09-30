@@ -489,6 +489,7 @@ export async function increaseLiquidityOptimalV3(
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
   fromAddress: Address,
+  tokenPricesUsd: [string, string],
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
@@ -588,11 +589,20 @@ export async function increaseLiquidityOptimalV3(
         : BigInt(
             new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
           );
+      const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+      const decimals = zeroForOne
+        ? token0Amount.currency.decimals
+        : token0Amount.currency.decimals;
+      const feeUSD = new Big(poolAmountIn.toString())
+        .div(10 ** decimals)
+        .mul(tokenInPrice)
+        .mul(FEE_ZAP_RATIO);
 
       getLogger().info('increaseLiquidityOptimalV3 ', {
         amm: amm,
         chainId: chainId,
         position: increaseOptions.tokenId,
+        totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
         token0FeeAmount: token0FeeAmount.toString(),
         token1FeeAmount: token1FeeAmount.toString(),
         amount0Desired: increaseParams.amount0Desired.toString(),
@@ -623,6 +633,7 @@ export async function increaseLiquidityOptimalV3(
           amount1,
           slippage,
         ),
+        feeUSD: feeUSD.toFixed(),
         priceImpact: calcPriceImpact(
           position.pool,
           increaseParams.amount0Desired,

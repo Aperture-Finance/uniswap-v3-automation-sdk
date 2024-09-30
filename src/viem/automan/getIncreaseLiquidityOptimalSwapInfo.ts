@@ -65,6 +65,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV3(
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
   recipient: Address,
+  tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
   position?: Position,
@@ -88,6 +89,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV3(
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
     recipient,
+    tokenPricesUsd,
     blockNumber,
     includeSolvers,
   );

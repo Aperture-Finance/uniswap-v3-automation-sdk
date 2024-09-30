@@ -32,7 +32,7 @@ export async function getRebalanceSwapInfo(
   newPositionTickLower: number,
   newPositionTickUpper: number,
   slippageTolerance: number,
-  tokenPrices: [string, string],
+  tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
   position?: PositionDetails,
@@ -57,7 +57,7 @@ export async function getRebalanceSwapInfo(
     newPositionTickUpper,
     ownerAddress,
     slippageTolerance,
-    tokenPrices,
+    tokenPricesUsd,
     publicClient,
     blockNumber,
     includeSolvers,
@@ -66,6 +66,7 @@ export async function getRebalanceSwapInfo(
 }
 
 // Same as getRebalanceSwapInfo, except return the fees as token0FeeAmount and token1FeeAmount instead of feeBips
+// Do not use, but implemented to make it easier to migrate to future versions.
 export async function getRebalanceSwapInfoV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -74,7 +75,7 @@ export async function getRebalanceSwapInfoV3(
   newPositionTickLower: number,
   newPositionTickUpper: number,
   slippageTolerance: number,
-  tokenPrices: [string, string],
+  tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
   position?: PositionDetails,
@@ -99,7 +100,7 @@ export async function getRebalanceSwapInfoV3(
     newPositionTickUpper,
     ownerAddress,
     slippageTolerance,
-    tokenPrices,
+    tokenPricesUsd,
     publicClient,
     blockNumber,
     includeSolvers,
