@@ -20,7 +20,7 @@ export async function getSlipStreamStakePositions(
   const opt = {
     blockNumber,
   };
-
+  console.log(123, opt);
   const stakedPositions = (
     await publicClient.multicall({
       contracts: gaugeAddresses.map((address) => ({
@@ -40,8 +40,8 @@ export async function getSlipStreamStakePositions(
         ] as const,
         functionName: 'stakedValues',
         args: [owner],
-        ...opt,
       })),
+      ...opt,
     })
   ).map(({ result }) => result! ?? []);
 

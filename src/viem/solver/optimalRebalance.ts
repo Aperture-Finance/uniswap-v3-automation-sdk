@@ -580,8 +580,8 @@ export async function optimalRebalanceV3(
     });
 
     return {
-      token0FeeAmount: BigInt(token0FeeAmount.toString()),
-      token1FeeAmount: BigInt(token1FeeAmount.toString()),
+      token0FeeAmount: BigInt(token0FeeAmount.toFixed(0)),
+      token1FeeAmount: BigInt(token1FeeAmount.toFixed(0)),
       feeUSD: feeUSD.toFixed(),
     };
   };
