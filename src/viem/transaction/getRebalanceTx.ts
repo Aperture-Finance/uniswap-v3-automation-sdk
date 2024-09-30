@@ -119,6 +119,7 @@ export async function getRebalanceTx(
 }
 
 // Same as getRebalanceTx, but with feeAmounts instead of feeBips.
+// Do not use, but implemented to make it easier to migrate to future versions.
 export async function getRebalanceV3Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
