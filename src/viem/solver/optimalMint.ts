@@ -544,6 +544,7 @@ export async function optimalMintV3(
   if (!blockNumber) {
     blockNumber = await publicClient.getBlockNumber();
   }
+
   const token0 = token0Amount.currency.address as Address;
   const token1 = token1Amount.currency.address as Address;
   const mintParams: SlipStreamMintParams | UniV3MintParams =
@@ -649,11 +650,11 @@ export async function optimalMintV3(
       }
 
       const token0FeeAmount = zeroForOne
-        ? new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO)
+        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed())
         : 0n;
       const token1FeeAmount = zeroForOne
         ? 0n
-        : new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO);
+        : BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed());
 
       getLogger().info('optimalMintV3 ', {
         amm: amm,
