@@ -55,8 +55,8 @@ export async function getSlipStreamPools(
         ] as const,
         functionName: 'allPools',
         args: [BigInt(index)],
-        ...opt,
       })),
+      ...opt,
     })
   ).map(({ result }) => result!);
 
@@ -74,8 +74,8 @@ export async function getSlipStreamPools(
           },
         ] as const,
         functionName: 'gauge',
-        ...opt,
       })),
+      ...opt,
     })
   ).map(({ result }) => result!);
 
@@ -96,6 +96,7 @@ export async function getSlipStreamPools(
   const poolData = (
     await publicClient.multicall({
       contracts: poolAddresses.map((addr) => getPoolKeys(addr)).flat(),
+      ...opt,
     })
   ).map(({ result }) => result!);
 
