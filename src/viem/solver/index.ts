@@ -3,14 +3,12 @@ import { getOkxSolver } from './getOkxSolver';
 import { getPropellerHeadsSolver } from './getPropellerHeadsSolver';
 import { E_Solver, ISolver, SolvedSwapInfo } from './types';
 
-export { getOkxQuote } from './getOkxSolver'; // TODO: remove when complete refactor
+export { getOkxQuote, getOkxSwap } from './getOkxSolver'; // TODO: remove when complete refactor
 export { get1InchQuote } from './get1InchSolver';
 
 export * from './increaseLiquidityOptimal';
-export * from './increaseLiquidityOptimalV2';
 export * from './optimalMint';
-export * from './optimalMintV2';
-export * from './optimalRebalanceV2';
+export * from './optimalRebalance';
 export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {
@@ -35,5 +33,5 @@ export const getSolver = (solver: E_Solver): ISolver => {
 };
 
 export function getIsOkx() {
-  return Number(process.env.OKX_RAMPUP_PERCENT || '1') / 100 > Math.random();
+  return Number(process.env.OKX_RAMPUP_PERCENT || '100') / 100 > Math.random();
 }
