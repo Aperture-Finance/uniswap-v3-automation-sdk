@@ -174,6 +174,9 @@ export async function simulateMintOptimalV3(
   from: Address,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  sqrtPriceX96 = BigInt(0),
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
   checkTicks(amm, mintParams);
@@ -185,6 +188,9 @@ export async function simulateMintOptimalV3(
     from,
     mintParams,
     swapData,
+    token0FeeAmount,
+    token1FeeAmount,
+    sqrtPriceX96,
     blockNumber,
   );
   return decodeFunctionResult({
@@ -224,6 +230,9 @@ export async function estimateMintOptimalV3Gas(
   from: Address,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  sqrtPriceX96 = BigInt(0),
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
@@ -235,6 +244,9 @@ export async function estimateMintOptimalV3Gas(
       from,
       mintParams,
       swapData,
+      token0FeeAmount,
+      token1FeeAmount,
+      sqrtPriceX96,
       blockNumber,
     ),
   );
@@ -293,10 +305,20 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
   from: Address,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  sqrtPriceX96 = BigInt(0),
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   checkTicks(amm, mintParams);
-  const data = getAutomanV3MintOptimalCalldata(amm, mintParams, swapData);
+  const data = getAutomanV3MintOptimalCalldata(
+    amm,
+    mintParams,
+    swapData,
+    token0FeeAmount,
+    token1FeeAmount,
+    sqrtPriceX96,
+  );
   const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(

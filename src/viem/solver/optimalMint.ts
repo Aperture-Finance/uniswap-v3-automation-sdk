@@ -536,6 +536,7 @@ export async function optimalMintV3(
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
+  sqrtPriceX96 = BigInt(0),
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
@@ -592,6 +593,33 @@ export async function optimalMintV3(
     blockNumber,
   );
 
+  const token0FeeAmount = zeroForOne
+    ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
+    : 0n;
+  const token1FeeAmount = zeroForOne
+    ? 0n
+    : BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0));
+  const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+  const decimals = zeroForOne
+    ? token0Amount.currency.decimals
+    : token1Amount.currency.decimals;
+  const feeUSD = new Big(poolAmountIn.toString())
+    .div(10 ** decimals)
+    .mul(tokenInPrice)
+    .mul(FEE_ZAP_RATIO);
+
+  getLogger().info('optimalMintV3 ', {
+    amm: amm,
+    chainId: chainId,
+    totalOptimalMintFeeUsd: feeUSD.toString(),
+    token0FeeAmount: token0FeeAmount.toString(),
+    token1FeeAmount: token1FeeAmount.toString(),
+    amount0Desired: mintParams.amount0Desired.toString(),
+    amount1Desired: mintParams.amount1Desired.toString(),
+    zeroForOne,
+    poolAmountIn: poolAmountIn.toString(),
+  });
+
   const solve = async (solver: E_Solver) => {
     try {
       const { swapData, swapRoute } = await getSolver(solver).optimalMint({
@@ -614,6 +642,9 @@ export async function optimalMintV3(
         fromAddress,
         mintParams,
         swapData,
+        token0FeeAmount,
+        token1FeeAmount,
+        sqrtPriceX96,
         blockNumber,
       );
 
@@ -638,6 +669,9 @@ export async function optimalMintV3(
             fromAddress,
             mintParams,
             swapData,
+            token0FeeAmount,
+            token1FeeAmount,
+            sqrtPriceX96,
             blockNumber,
           ),
         ]);
@@ -649,33 +683,6 @@ export async function optimalMintV3(
           mintParams,
         });
       }
-
-      const token0FeeAmount = zeroForOne
-        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
-        : 0n;
-      const token1FeeAmount = zeroForOne
-        ? 0n
-        : BigInt(
-            new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
-          );
-      const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-      const decimals = zeroForOne ? pool.token0.decimals : pool.token1.decimals;
-      const feeUSD = new Big(poolAmountIn.toString())
-        .div(10 ** decimals)
-        .mul(tokenInPrice)
-        .mul(FEE_ZAP_RATIO);
-
-      getLogger().info('optimalMintV3 ', {
-        amm: amm,
-        chainId: chainId,
-        totalOptimalMintFeeUsd: feeUSD.toString(),
-        token0FeeAmount: token0FeeAmount.toString(),
-        token1FeeAmount: token1FeeAmount.toString(),
-        amount0Desired: mintParams.amount0Desired.toString(),
-        amount1Desired: mintParams.amount1Desired.toString(),
-        zeroForOne,
-        poolAmountIn: poolAmountIn.toString(),
-      });
 
       return {
         solver,
