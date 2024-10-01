@@ -45,7 +45,7 @@ export const ALL_SOLVERS = [
   E_Solver.SamePool,
   E_Solver.PH,
   E_Solver.OKX,
-  E_Solver.OneInch,
+  // E_Solver.OneInch, // no longer paying for enterprise plan
 ]; // order matters
 
 export type SwapPath = {
