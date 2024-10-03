@@ -770,11 +770,6 @@ const _abi = [
         name: "params",
         type: "tuple",
       },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceX96",
-        type: "uint160",
-      },
     ],
     name: "mint",
     outputs: [
@@ -880,11 +875,6 @@ const _abi = [
         internalType: "uint256",
         name: "token1FeeAmount",
         type: "uint256",
-      },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceX96",
-        type: "uint160",
       },
     ],
     name: "mintOptimal",

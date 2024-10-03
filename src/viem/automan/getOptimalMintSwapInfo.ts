@@ -60,7 +60,6 @@ export async function getOptimalMintSwapInfoV3(
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
-  sqrtPriceX96 = BigInt(0),
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
 ) {
@@ -76,7 +75,6 @@ export async function getOptimalMintSwapInfoV3(
     slippage,
     tokenPricesUsd,
     publicClient,
-    sqrtPriceX96,
     blockNumber,
     includeSolvers,
   );

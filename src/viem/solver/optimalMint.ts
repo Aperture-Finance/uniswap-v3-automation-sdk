@@ -536,7 +536,6 @@ export async function optimalMintV3(
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
-  sqrtPriceX96 = BigInt(0),
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = ALL_SOLVERS,
 ): Promise<SolverResult[]> {
@@ -644,7 +643,6 @@ export async function optimalMintV3(
         swapData,
         token0FeeAmount,
         token1FeeAmount,
-        sqrtPriceX96,
         blockNumber,
       );
 
@@ -671,7 +669,6 @@ export async function optimalMintV3(
             swapData,
             token0FeeAmount,
             token1FeeAmount,
-            sqrtPriceX96,
             blockNumber,
           ),
         ]);

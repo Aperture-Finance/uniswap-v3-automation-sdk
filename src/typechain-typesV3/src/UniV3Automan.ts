@@ -144,8 +144,8 @@ export interface UniV3AutomanInterface extends utils.Interface {
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes,uint256,uint256)": FunctionFragment;
     "isController(address)": FunctionFragment;
     "isWhiteListedSwapRouter(address)": FunctionFragment;
-    "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint160)": FunctionFragment;
-    "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256,uint160)": FunctionFragment;
+    "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))": FunctionFragment;
+    "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256)": FunctionFragment;
     "npm()": FunctionFragment;
     "owner()": FunctionFragment;
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)": FunctionFragment;
@@ -272,17 +272,13 @@ export interface UniV3AutomanInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "mint",
-    values: [
-      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      BigNumberish
-    ]
+    values: [IUniswapV3NonfungiblePositionManager.MintParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "mintOptimal",
     values: [
       IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       BytesLike,
-      BigNumberish,
       BigNumberish,
       BigNumberish
     ]
@@ -745,7 +741,6 @@ export interface UniV3Automan extends BaseContract {
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -754,7 +749,6 @@ export interface UniV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
-      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -966,7 +960,6 @@ export interface UniV3Automan extends BaseContract {
 
   mint(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-    sqrtPriceX96: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -975,7 +968,6 @@ export interface UniV3Automan extends BaseContract {
     swapData: BytesLike,
     token0FeeAmount: BigNumberish,
     token1FeeAmount: BigNumberish,
-    sqrtPriceX96: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1203,7 +1195,6 @@ export interface UniV3Automan extends BaseContract {
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      sqrtPriceX96: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1219,7 +1210,6 @@ export interface UniV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
-      sqrtPriceX96: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1519,7 +1509,6 @@ export interface UniV3Automan extends BaseContract {
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1528,7 +1517,6 @@ export interface UniV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
-      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1733,7 +1721,6 @@ export interface UniV3Automan extends BaseContract {
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1742,7 +1729,6 @@ export interface UniV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
-      sqrtPriceX96: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

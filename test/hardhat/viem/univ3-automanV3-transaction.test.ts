@@ -397,7 +397,6 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         /* slippage= */ 0.5,
         /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
-        /* sqrtPriceX96= */ BigInt(0),
         [E_Solver.OneInch],
       )
     )[0];
@@ -495,7 +494,6 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         /* slippage= */ 0.5,
         /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
-        /* sqrtPriceX96= */ BigInt(0),
         [E_Solver.SamePool],
       )
     )[0];

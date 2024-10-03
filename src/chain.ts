@@ -151,7 +151,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         apertureAutomanV3: getAddress(
-          '0x18DBd37AC2EDF21Dd0944D2B5F19C6f711523080',
+          '0x34d066b12df60abe5ce7F4E0641299b611FdD10B',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
