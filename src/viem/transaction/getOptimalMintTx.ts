@@ -144,7 +144,7 @@ export async function getOptimalMintV3Tx(
   swapData: Hex,
   liquidity: bigint,
   token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0)
+  token1FeeAmount = BigInt(0),
 ): Promise<{
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
@@ -217,7 +217,7 @@ export async function getOptimalMintV3Tx(
     mintParams,
     swapData,
     token0FeeAmount,
-    token1FeeAmount
+    token1FeeAmount,
   );
 
   return {

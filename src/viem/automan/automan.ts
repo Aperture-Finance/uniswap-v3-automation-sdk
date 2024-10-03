@@ -311,7 +311,7 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
     mintParams,
     swapData,
     token0FeeAmount,
-    token1FeeAmount
+    token1FeeAmount,
   );
   const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
   const [token0Overrides, token1Overrides] = await Promise.all([

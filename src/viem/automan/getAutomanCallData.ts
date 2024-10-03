@@ -39,7 +39,7 @@ export function getAutomanV3MintOptimalCalldata(
   mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0)
+  token1FeeAmount = BigInt(0),
 ): Hex {
   if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
     return encodeFunctionData({
@@ -59,7 +59,7 @@ export function getAutomanV3MintOptimalCalldata(
       mintParams as UniV3MintParams,
       swapData,
       token0FeeAmount,
-      token1FeeAmount
+      token1FeeAmount,
     ] as const,
     functionName: 'mintOptimal',
   });
