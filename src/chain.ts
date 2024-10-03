@@ -307,7 +307,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000EDb4489cB49FE07246f39345c9f838cD',
         ),
         apertureAutomanV3: getAddress(
-          '0x9d5A27C526D3d433b881dA988D25013a36845C97',
+          '0x321400FE92503eC9023e344c5C81ce89746aD117',
         ),
         subgraph_url:
           'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
@@ -327,7 +327,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
         apertureAutomanV3: getAddress(
-          '0x6AE606727376118aD0Ea65aC763a619ac234A580',
+          '0x96597dBF73Af387d4a513AeaA9395Aa3619A8038',
         ),
       },
     },
