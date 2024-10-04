@@ -598,11 +598,13 @@ export async function increaseLiquidityOptimalV3(
         .mul(tokenInPrice)
         .mul(FEE_ZAP_RATIO);
 
-      getLogger().info('increaseLiquidityOptimalV3 ', {
+      getLogger().info('increaseLiquidityOptimalV3 fees ', {
         amm: amm,
         chainId: chainId,
         position: increaseOptions.tokenId,
         totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
+        token0PricesUsd: tokenPricesUsd[0],
+        token1PricesUsd: tokenPricesUsd[1],
         token0FeeAmount: token0FeeAmount.toString(),
         token1FeeAmount: token1FeeAmount.toString(),
         amount0Desired: increaseParams.amount0Desired.toString(),

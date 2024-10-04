@@ -607,10 +607,12 @@ export async function optimalMintV3(
     .mul(tokenInPrice)
     .mul(FEE_ZAP_RATIO);
 
-  getLogger().info('optimalMintV3 ', {
+  getLogger().info('optimalMintV3 fees ', {
     amm: amm,
     chainId: chainId,
     totalOptimalMintFeeUsd: feeUSD.toString(),
+    token0PricesUsd: tokenPricesUsd[0],
+    token1PricesUsd: tokenPricesUsd[1],
     token0FeeAmount: token0FeeAmount.toString(),
     token1FeeAmount: token1FeeAmount.toString(),
     amount0Desired: mintParams.amount0Desired.toString(),
