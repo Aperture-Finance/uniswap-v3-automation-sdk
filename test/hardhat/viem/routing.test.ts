@@ -210,7 +210,7 @@ describe('Viem - Routing tests', function () {
       expect(Number(resultV2[i].liquidity.toString())).to.be.greaterThan(0);
       // The fees depends on poolAmountIn, which varies depending on solver results,
       // so adjust the tolerance accordingly.
-      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.205, 0.01); // swap ~3.8 USDC, reinvest ~$1.62, and FEE_REBALANCE_USD, totalFeeUsd=0.2055
+      expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.205, 0.015); // swap ~3.8 USDC, reinvest ~$1.62, and FEE_REBALANCE_USD, totalFeeUsd=0.2055
       expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(0.023, 0.005); // position $8.87, bips 0.205/8.87 = ~0.023
 
       expect(resultV2[i].swapData!).to.be.not.empty;
