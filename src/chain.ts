@@ -95,7 +95,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000000Ede6d8D217c60f93191C060747324bca',
+          '0x00000070ee937917c1d9bd91729ce1dd9a77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
@@ -114,7 +114,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000EEd287174A06550eabE6A00074255CaB34',
+          '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
@@ -151,7 +151,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         apertureAutomanV3: getAddress(
-          '0x34d066b12df60abe5ce7F4E0641299b611FdD10B',
+          '0x00000070ee937917c1d9bd91729ce1dd9a77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
@@ -186,7 +186,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
         apertureAutomanV3: getAddress(
-          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
@@ -220,7 +220,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
         apertureAutomanV3: getAddress(
-          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+          '0x00000070ee937917c1d9bd91729ce1dd9a77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
@@ -254,7 +254,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
+          '0x000000e2f3dd82130669b730bdf170d12df35233',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
@@ -273,7 +273,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000EEd287174A06550eabE6A00074255CaB34',
+          '0x00000076a5feff94a54834fe1b2803a6da672e03',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
@@ -307,7 +307,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000EDb4489cB49FE07246f39345c9f838cD',
         ),
         apertureAutomanV3: getAddress(
-          '0x321400FE92503eC9023e344c5C81ce89746aD117',
+          '0x000000c51119e2bde2419c5e6fd273a81b79a8e3',
         ),
         subgraph_url:
           'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
@@ -327,7 +327,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
         apertureAutomanV3: getAddress(
-          '0x96597dBF73Af387d4a513AeaA9395Aa3619A8038',
+          '0x000000ca99cf8E1E53B4b7999180Db3e1D032333',
         ),
       },
     },
@@ -359,7 +359,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
+          '0x00000075Cd3dAd5805699d0E1C5734e27B3264e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
@@ -394,7 +394,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
         ),
         apertureAutomanV3: getAddress(
-          '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
+          '0x000000bf0e089a0991bab3cd0e111213c71a5ad3',
         ),
         subgraph_url:
           'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-manta-pacific/uniswap-v3/gn',
@@ -431,7 +431,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
+          '0x0000000000000000000000000000000000000000',
         ),
         subgraph_url:
           'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
@@ -467,7 +467,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
+          '0x00000027bc53f021f3564180f347425edaa20883',
         ),
         subgraph_url:
           'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
