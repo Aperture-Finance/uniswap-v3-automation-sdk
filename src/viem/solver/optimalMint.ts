@@ -6,31 +6,35 @@ import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
+  ALL_SOLVERS,
+  E_Solver,
   SolverResult,
   SwapRoute,
   get1InchQuote,
   getIsOkx,
   getOkxSwap,
+  getSolver,
 } from '.';
-import { ALL_SOLVERS, E_Solver, getSolver } from '.';
 import {
+  FEE_ZAP_RATIO,
   SlipStreamMintParams,
   UniV3MintParams,
   encodeOptimalSwapData,
+  estimateMintOptimalGas,
+  estimateMintOptimalV3Gas,
   getAutomanContract,
   simulateMintOptimal,
+  simulateMintOptimalV3,
 } from '../automan';
-import { estimateMintOptimalGas } from '../automan';
 import { getPool } from '../pool';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {
+  buildOptimalSolutions,
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
-  getSwapPath,
-} from './internal';
-import {
-  buildOptimalSolutions,
   getOptimalSwapAmount,
+  getOptimalSwapAmountV3,
+  getSwapPath,
   getSwapRoute,
 } from './internal';
 
@@ -511,6 +515,215 @@ export async function optimalMintV2(
         });
       } else {
         console.warn('SDK.Solver.optimalMintV2.Warning', solver);
+      }
+      return null;
+    }
+  };
+
+  return buildOptimalSolutions(solve, includeSolvers);
+}
+
+// Same as optimalMintV2, but with feeAmounts instead of feeBips.
+export async function optimalMintV3(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  token0Amount: CurrencyAmount<Token>,
+  token1Amount: CurrencyAmount<Token>,
+  feeOrTickSpacing: number,
+  tickLower: number,
+  tickUpper: number,
+  fromAddress: Address,
+  slippage: number,
+  tokenPricesUsd: [string, string],
+  publicClient: PublicClient,
+  blockNumber?: bigint,
+  includeSolvers: E_Solver[] = ALL_SOLVERS,
+): Promise<SolverResult[]> {
+  if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
+    throw new Error('token0 must be sorted before token1');
+  }
+  if (!blockNumber) {
+    blockNumber = await publicClient.getBlockNumber();
+  }
+
+  const token0 = token0Amount.currency.address as Address;
+  const token1 = token1Amount.currency.address as Address;
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0,
+          token1,
+          tickSpacing: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0,
+          token1,
+          fee: feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: BigInt(token0Amount.quotient.toString()),
+          amount1Desired: BigInt(token1Amount.quotient.toString()),
+          amount0Min: 0n,
+          amount1Min: 0n,
+          recipient: fromAddress,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
+
+  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
+    chainId,
+    amm,
+    publicClient,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    tickLower,
+    tickUpper,
+    mintParams.amount0Desired,
+    mintParams.amount1Desired,
+    blockNumber,
+  );
+
+  const token0FeeAmount = zeroForOne
+    ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
+    : 0n;
+  const token1FeeAmount = zeroForOne
+    ? 0n
+    : BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0));
+  const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+  const decimals = zeroForOne
+    ? token0Amount.currency.decimals
+    : token1Amount.currency.decimals;
+  const feeUSD = new Big(poolAmountIn.toString())
+    .div(10 ** decimals)
+    .mul(tokenInPrice)
+    .mul(FEE_ZAP_RATIO);
+
+  getLogger().info('optimalMintV3 fees ', {
+    amm: amm,
+    chainId: chainId,
+    totalOptimalMintFeeUsd: feeUSD.toString(),
+    token0PricesUsd: tokenPricesUsd[0],
+    token1PricesUsd: tokenPricesUsd[1],
+    token0FeeAmount: token0FeeAmount.toString(),
+    token1FeeAmount: token1FeeAmount.toString(),
+    amount0Desired: mintParams.amount0Desired.toString(),
+    amount1Desired: mintParams.amount1Desired.toString(),
+    zeroForOne,
+    poolAmountIn: poolAmountIn.toString(),
+  });
+
+  const solve = async (solver: E_Solver) => {
+    try {
+      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+        chainId,
+        amm,
+        fromAddress,
+        token0,
+        token1,
+        feeOrTickSpacing,
+        tickLower,
+        tickUpper,
+        slippage,
+        poolAmountIn,
+        zeroForOne,
+      });
+      const [, liquidity, amount0, amount1] = await simulateMintOptimalV3(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        mintParams,
+        swapData,
+        token0FeeAmount,
+        token1FeeAmount,
+        blockNumber,
+      );
+
+      const pool = await getPool(
+        token0,
+        token1,
+        feeOrTickSpacing,
+        chainId,
+        amm,
+        publicClient,
+        blockNumber,
+      );
+
+      let gasFeeEstimation = 0n;
+      try {
+        const [gasPrice, gasAmount] = await Promise.all([
+          publicClient.getGasPrice(),
+          estimateMintOptimalV3Gas(
+            chainId,
+            amm,
+            publicClient,
+            fromAddress,
+            mintParams,
+            swapData,
+            token0FeeAmount,
+            token1FeeAmount,
+            blockNumber,
+          ),
+        ]);
+        gasFeeEstimation = gasPrice * gasAmount;
+      } catch (e) {
+        getLogger().error('SDK.optimalMintV3.EstimateGas.Error', {
+          error: JSON.stringify((e as Error).message),
+          swapData,
+          mintParams,
+        });
+      }
+
+      return {
+        solver,
+        amount0,
+        amount1,
+        liquidity,
+        swapData,
+        gasFeeEstimation,
+        swapRoute: getSwapRoute(
+          token0,
+          token1,
+          amount0 - mintParams.amount0Desired,
+          swapRoute,
+        ),
+        priceImpact: calcPriceImpact(
+          pool,
+          mintParams.amount0Desired,
+          mintParams.amount1Desired,
+          amount0,
+          amount1,
+        ),
+        swapPath: getSwapPath(
+          mintParams.token0,
+          mintParams.token1,
+          mintParams.amount0Desired,
+          mintParams.amount1Desired,
+          amount0,
+          amount1,
+          slippage,
+        ),
+        feeUSD: feeUSD.toFixed(),
+        token0FeeAmount,
+        token1FeeAmount,
+      } as SolverResult;
+    } catch (e) {
+      if (!(e as Error)?.message.startsWith('Expected')) {
+        getLogger().error('SDK.Solver.optimalMintV3.Error', {
+          solver,
+          error: JSON.stringify((e as Error).message),
+        });
+      } else {
+        console.warn('SDK.Solver.optimalMintV3.Warning', solver);
       }
       return null;
     }

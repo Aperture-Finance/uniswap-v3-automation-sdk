@@ -102,3 +102,26 @@ export function getFeeReinvestBips(positionDetails: PositionDetails): bigint {
   );
   return feeBips0 < feeBips1 ? feeBips0 : feeBips1;
 }
+
+export function getFeeReinvestFeeAmount(positionDetails: PositionDetails): {
+  token0FeeAmount: bigint;
+  token1FeeAmount: bigint;
+} {
+  return {
+    token0FeeAmount: BigInt(
+      new Big(positionDetails.position.amount0.quotient.toString())
+        .mul(getFeeReinvestRatio(positionDetails.fee))
+        .toFixed(0),
+    ),
+    token1FeeAmount: BigInt(
+      new Big(positionDetails.position.amount1.quotient.toString())
+        .mul(getFeeReinvestRatio(positionDetails.fee))
+        .toFixed(0),
+    ),
+  };
+}
+
+export const FEE_ZAP_RATIO = parseFloat(
+  // Default 0.25% fee on the amount zapped.
+  process.env.FEE_ZAP_RATIO || '0.0025',
+);

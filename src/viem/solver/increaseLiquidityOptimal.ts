@@ -16,18 +16,23 @@ import {
 } from '.';
 import { computePoolAddress } from '../../utils';
 import {
+  FEE_ZAP_RATIO,
   IncreaseLiquidityParams,
   encodeOptimalSwapData,
+  estimateIncreaseLiquidityOptimalGas,
+  estimateIncreaseLiquidityOptimalV3Gas,
   getAutomanContract,
   simulateIncreaseLiquidityOptimal,
+  simulateIncreaseLiquidityOptimalV3,
 } from '../automan';
-import { estimateIncreaseLiquidityOptimalGas } from '../automan';
 import { get1InchApproveTarget } from './get1InchSolver';
 import { getOkxApproveTarget } from './getOkxSolver';
-import { calcPriceImpact, getSwapPath } from './internal';
 import {
   buildOptimalSolutions,
+  calcPriceImpact,
   getOptimalSwapAmount,
+  getOptimalSwapAmountV3,
+  getSwapPath,
   getSwapRoute,
 } from './internal';
 import { SolverResult } from './types';
@@ -466,6 +471,189 @@ export async function increaseLiquidityOptimalV2(
         });
       } else {
         console.warn('SDK.Solver.increaseLiquidityOptimalV2.Warning', solver);
+      }
+      return null;
+    }
+  };
+
+  return buildOptimalSolutions(solve, includeSolvers);
+}
+
+// Same as increaseLiquidityOptimalV2, but with feeAmounts instead of feeBips.
+export async function increaseLiquidityOptimalV3(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  position: Position,
+  increaseOptions: IncreaseOptions,
+  token0Amount: CurrencyAmount<Token>,
+  token1Amount: CurrencyAmount<Token>,
+  fromAddress: Address,
+  tokenPricesUsd: [string, string],
+  blockNumber?: bigint,
+  includeSolvers: E_Solver[] = ALL_SOLVERS,
+): Promise<SolverResult[]> {
+  if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
+    throw new Error('token0 must be sorted before token1');
+  }
+
+  const increaseParams: IncreaseLiquidityParams = {
+    tokenId: BigInt(increaseOptions.tokenId.toString()),
+    amount0Desired: BigInt(token0Amount.quotient.toString()),
+    amount1Desired: BigInt(token1Amount.quotient.toString()),
+    amount0Min: 0n,
+    amount1Min: 0n,
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+  };
+
+  const token0 = position.pool.token0.address as Address;
+  const token1 = position.pool.token1.address as Address;
+  const { tickLower, tickUpper } = position;
+  const feeOrTickSpacing =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? position.pool.tickSpacing
+      : position.pool.fee;
+
+  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
+    chainId,
+    amm,
+    publicClient,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    tickLower,
+    tickUpper,
+    increaseParams.amount0Desired,
+    increaseParams.amount1Desired,
+    blockNumber,
+  );
+
+  const solve = async (solver: E_Solver) => {
+    try {
+      const slippage =
+        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+        chainId,
+        amm,
+        fromAddress,
+        token0,
+        token1,
+        feeOrTickSpacing,
+        tickLower,
+        tickUpper,
+        slippage,
+        poolAmountIn,
+        zeroForOne,
+      });
+      const [liquidity, amount0, amount1] =
+        await simulateIncreaseLiquidityOptimalV3(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          position,
+          increaseParams,
+          swapData,
+          blockNumber,
+        );
+
+      let gasFeeEstimation = 0n;
+      try {
+        const [gasPrice, gasAmount] = await Promise.all([
+          publicClient.getGasPrice(),
+          estimateIncreaseLiquidityOptimalV3Gas(
+            chainId,
+            amm,
+            publicClient,
+            fromAddress,
+            position,
+            increaseParams,
+            swapData,
+            blockNumber,
+          ),
+        ]);
+        gasFeeEstimation = gasPrice * gasAmount;
+      } catch (e) {
+        getLogger().error('SDK.increaseLiquidityOptimalV3.EstimateGas.Error', {
+          error: JSON.stringify((e as Error).message),
+          swapData,
+          increaseParams,
+        });
+      }
+
+      const token0FeeAmount = zeroForOne
+        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
+        : 0n;
+      const token1FeeAmount = zeroForOne
+        ? 0n
+        : BigInt(
+            new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+          );
+      const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+      const decimals = zeroForOne
+        ? token0Amount.currency.decimals
+        : token0Amount.currency.decimals;
+      const feeUSD = new Big(poolAmountIn.toString())
+        .div(10 ** decimals)
+        .mul(tokenInPrice)
+        .mul(FEE_ZAP_RATIO);
+
+      getLogger().info('increaseLiquidityOptimalV3 fees ', {
+        amm: amm,
+        chainId: chainId,
+        position: increaseOptions.tokenId,
+        totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
+        token0PricesUsd: tokenPricesUsd[0],
+        token1PricesUsd: tokenPricesUsd[1],
+        token0FeeAmount: token0FeeAmount.toString(),
+        token1FeeAmount: token1FeeAmount.toString(),
+        amount0Desired: increaseParams.amount0Desired.toString(),
+        amount1Desired: increaseParams.amount1Desired.toString(),
+        zeroForOne,
+        poolAmountIn: poolAmountIn.toString(),
+      });
+
+      return {
+        solver,
+        amount0,
+        amount1,
+        liquidity,
+        swapData,
+        gasFeeEstimation,
+        swapRoute: getSwapRoute(
+          token0,
+          token1,
+          amount0 - increaseParams.amount0Desired,
+          swapRoute,
+        ),
+        swapPath: getSwapPath(
+          token0,
+          token1,
+          increaseParams.amount0Desired,
+          increaseParams.amount1Desired,
+          amount0,
+          amount1,
+          slippage,
+        ),
+        feeUSD: feeUSD.toFixed(),
+        priceImpact: calcPriceImpact(
+          position.pool,
+          increaseParams.amount0Desired,
+          increaseParams.amount1Desired,
+          amount0,
+          amount1,
+        ),
+        token0FeeAmount,
+        token1FeeAmount,
+      } as SolverResult;
+    } catch (e) {
+      if (!(e as Error)?.message.startsWith('Expected')) {
+        getLogger().error('SDK.Solver.increaseLiquidityOptimalV3.Error', {
+          solver,
+          error: JSON.stringify((e as Error).message),
+        });
+      } else {
+        console.warn('SDK.Solver.increaseLiquidityOptimalV3.Warning', solver);
       }
       return null;
     }

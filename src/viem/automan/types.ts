@@ -1,4 +1,5 @@
 import {
+  AutomanV3__factory,
   Automan__factory,
   ICommonNonfungiblePositionManager__factory,
   ISlipStreamNonfungiblePositionManager__factory,
@@ -23,6 +24,8 @@ export type AutomanActionName =
 
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof Automan__factory.abi, T>;
+export type GetAutomanV3Params<T extends AutomanActionName> =
+  GetAbiFunctionParamsTypes<typeof AutomanV3__factory.abi, T>;
 
 export type GetAutomanReturnTypes<
   functionName extends AutomanActionName,
