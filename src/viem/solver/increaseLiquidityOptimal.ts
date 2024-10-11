@@ -384,7 +384,7 @@ export async function increaseLiquidityOptimalV2(
     try {
       const slippage =
         Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
         chainId,
         amm,
         fromAddress,
@@ -532,7 +532,7 @@ export async function increaseLiquidityOptimalV3(
     try {
       const slippage =
         Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
         chainId,
         amm,
         fromAddress,

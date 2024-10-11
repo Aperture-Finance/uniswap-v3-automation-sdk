@@ -46,7 +46,7 @@ export async function getOkxApproveTarget(
 
 export const getOkxSolver = (): ISolver => {
   return {
-    optimalMint: async (props) => {
+    mintOptimal: async (props) => {
       const {
         chainId,
         amm,

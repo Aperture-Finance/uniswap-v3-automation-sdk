@@ -31,7 +31,7 @@ import { SimulatedAmounts } from './types';
  * @param swapData Swap data for the position, returned by getRebalanceSwapInfo.
  * @param liquidity The amount of liquidity to mint.
  */
-export async function getOptimalMintTx(
+export async function getMintOptimalTx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
@@ -129,7 +129,7 @@ export async function getOptimalMintTx(
 }
 
 // Same as getIncreaseLiquidityOptimalTx, but with feeAmount and enables initilizing pool with sqrtPriceX96.
-export async function getOptimalMintV3Tx(
+export async function getMintOptimalV3Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,

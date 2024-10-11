@@ -16,7 +16,7 @@ export interface SolvedSwapInfo {
   swapRoute?: SwapRoute;
 }
 
-export interface SolveOptimalMintProps {
+export interface SolveMintOptimalProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
   fromAddress: Address;
@@ -31,7 +31,7 @@ export interface SolveOptimalMintProps {
 }
 
 export interface ISolver {
-  optimalMint(props: SolveOptimalMintProps): Promise<SolvedSwapInfo>;
+  mintOptimal(props: SolveMintOptimalProps): Promise<SolvedSwapInfo>;
 }
 
 export enum E_Solver {
