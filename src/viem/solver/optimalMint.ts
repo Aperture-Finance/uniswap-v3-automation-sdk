@@ -6,7 +6,7 @@ import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
-  ALL_SOLVERS,
+  DEFAULT_SOLVERS,
   E_Solver,
   SolverResult,
   SwapRoute,
@@ -365,7 +365,7 @@ export async function optimalMintV2(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -537,7 +537,7 @@ export async function optimalMintV3(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
