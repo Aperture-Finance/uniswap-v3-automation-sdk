@@ -80,9 +80,9 @@ import {
   getFeeTierDistribution,
   getIncreaseLiquidityOptimalSwapInfo,
   getLiquidityArrayForPool,
+  getMintOptimalSwapInfo,
   getMintedPositionIdFromTxReceipt,
   getNPM,
-  getOptimalMintSwapInfo,
   getPool,
   getPosition,
   getPublicClient,
@@ -1206,7 +1206,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapRoute } = (
-      await getOptimalMintSwapInfo(
+      await getMintOptimalSwapInfo(
         chainId,
         UNIV3_AMM,
         hypotheticalPosition.amount0,
@@ -1261,7 +1261,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapPath, swapRoute } = (
-      await getOptimalMintSwapInfo(
+      await getMintOptimalSwapInfo(
         chainId,
         UNIV3_AMM,
         token0Amount,

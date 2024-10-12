@@ -35,9 +35,9 @@ import {
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfoV3,
   getIncreaseLiquidityOptimalV3Tx,
+  getMintOptimalSwapInfoV3,
+  getMintOptimalV3Tx,
   getMintedPositionIdFromTxReceipt,
-  getOptimalMintSwapInfoV3,
-  getOptimalMintV3Tx,
   getPool,
   getRebalanceSwapInfoV3,
   getRebalanceV3Tx,
@@ -385,7 +385,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV3,
     );
     const { swapData, liquidity } = (
-      await getOptimalMintSwapInfoV3(
+      await getMintOptimalSwapInfoV3(
         chainId,
         amm,
         token0Amount,
@@ -400,7 +400,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         [E_Solver.OneInch],
       )
     )[0];
-    const { tx: txRequest } = await getOptimalMintV3Tx(
+    const { tx: txRequest } = await getMintOptimalV3Tx(
       chainId,
       amm,
       token0Amount,
@@ -482,7 +482,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV3,
     );
     const { swapData, liquidity } = (
-      await getOptimalMintSwapInfoV3(
+      await getMintOptimalSwapInfoV3(
         chainId,
         amm,
         token0Amount,
@@ -497,7 +497,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getOptimalMintV3Tx(
+    const { tx: txRequest } = await getMintOptimalV3Tx(
       chainId,
       amm,
       token0Amount,

@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
-import { E_Solver, optimalMintV2, optimalMintV3 } from '@/viem';
+import { E_Solver, mintOptimalV2, mintOptimalV3 } from '@/viem';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -18,7 +18,7 @@ import { Address, PublicClient } from 'viem';
  * @param publicClient Viem public client.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getOptimalMintSwapInfo(
+export async function getMintOptimalSwapInfo(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
@@ -32,7 +32,7 @@ export async function getOptimalMintSwapInfo(
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
 ) {
-  return optimalMintV2(
+  return mintOptimalV2(
     chainId,
     amm,
     token0Amount as CurrencyAmount<Token>,
@@ -48,7 +48,7 @@ export async function getOptimalMintSwapInfo(
   );
 }
 
-export async function getOptimalMintSwapInfoV3(
+export async function getMintOptimalSwapInfoV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
@@ -63,7 +63,7 @@ export async function getOptimalMintSwapInfoV3(
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
 ) {
-  return optimalMintV3(
+  return mintOptimalV3(
     chainId,
     amm,
     token0Amount as CurrencyAmount<Token>,

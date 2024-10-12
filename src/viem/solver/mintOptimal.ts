@@ -52,7 +52,7 @@ import {
  * @param publicClient Viem public client.
  * @param usePool Whether to use the pool or the aggregator for the swap.
  */
-export async function optimalMint(
+export async function mintOptimal(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
@@ -102,7 +102,7 @@ export async function optimalMint(
 
   const getEstimate = async () => {
     const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
-    const poolPromise = optimalMintPool(
+    const poolPromise = mintOptimalPool(
       chainId,
       amm,
       publicClient,
@@ -117,7 +117,7 @@ export async function optimalMint(
 
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
-      optimalMintRouter(
+      mintOptimalRouter(
         chainId,
         amm,
         publicClient,
@@ -172,7 +172,7 @@ export async function optimalMint(
   return ret;
 }
 
-async function optimalMintPool(
+async function mintOptimalPool(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -219,7 +219,7 @@ async function optimalMintPool(
   };
 }
 
-async function optimalMintRouter(
+async function mintOptimalRouter(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -227,7 +227,7 @@ async function optimalMintRouter(
   mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
 ): Promise<SolverResult> {
-  const { swapData, swapRoute } = await getOptimalMintSwapData(
+  const { swapData, swapRoute } = await getMintOptimalSwapData(
     chainId,
     amm,
     publicClient,
@@ -254,7 +254,7 @@ async function optimalMintRouter(
   };
 }
 
-async function getOptimalMintSwapData(
+async function getMintOptimalSwapData(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -347,7 +347,7 @@ async function getOptimalMintSwapData(
  * @param blockNumber Optional. The block number to use for the simulation.
  * @param includeSolvers Optional. The solvers to include.
  */
-export async function optimalMintV2(
+export async function mintOptimalV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
@@ -415,7 +415,7 @@ export async function optimalMintV2(
 
   const solve = async (solver: E_Solver) => {
     try {
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
         chainId,
         amm,
         fromAddress,
@@ -464,7 +464,7 @@ export async function optimalMintV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('SDK.optimalMintV2.EstimateGas.Error', {
+        getLogger().error('SDK.mintOptimalV2.EstimateGas.Error', {
           error: JSON.stringify((e as Error).message),
           swapData,
           mintParams,
@@ -503,12 +503,12 @@ export async function optimalMintV2(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.optimalMintV2.Error', {
+        getLogger().error('SDK.Solver.mintOptimal2.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.optimalMintV2.Warning', solver);
+        console.warn('SDK.Solver.mintOptimalV2.Warning', solver);
       }
       return null;
     }
@@ -517,8 +517,8 @@ export async function optimalMintV2(
   return buildOptimalSolutions(solve, includeSolvers);
 }
 
-// Same as optimalMintV2, but with feeAmounts instead of feeBips.
-export async function optimalMintV3(
+// Same as mintOptimalV2, but with feeAmounts instead of feeBips.
+export async function mintOptimalV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Token>,
@@ -601,10 +601,10 @@ export async function optimalMintV3(
     .mul(tokenInPrice)
     .mul(FEE_ZAP_RATIO);
 
-  getLogger().info('optimalMintV3 fees ', {
+  getLogger().info('mintOptimalV3 fees ', {
     amm: amm,
     chainId: chainId,
-    totalOptimalMintFeeUsd: feeUSD.toString(),
+    totalMintOptimalFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     token0FeeAmount: token0FeeAmount.toString(),
@@ -617,7 +617,7 @@ export async function optimalMintV3(
 
   const solve = async (solver: E_Solver) => {
     try {
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
         chainId,
         amm,
         fromAddress,
@@ -670,7 +670,7 @@ export async function optimalMintV3(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('SDK.optimalMintV3.EstimateGas.Error', {
+        getLogger().error('SDK.mintOptimalV3.EstimateGas.Error', {
           error: JSON.stringify((e as Error).message),
           swapData,
           mintParams,
@@ -712,12 +712,12 @@ export async function optimalMintV3(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.optimalMintV3.Error', {
+        getLogger().error('SDK.Solver.mintOptimalV3.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.optimalMintV3.Warning', solver);
+        console.warn('SDK.Solver.mintOptimalV3.Warning', solver);
       }
       return null;
     }

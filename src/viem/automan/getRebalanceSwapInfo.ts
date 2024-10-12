@@ -3,8 +3,8 @@ import {
   E_Solver,
   PositionDetails,
   SolverResult,
-  optimalRebalanceV2,
-  optimalRebalanceV3,
+  rebalanceOptimalV2,
+  rebalanceOptimalV3,
 } from '@/viem';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -49,7 +49,7 @@ export async function getRebalanceSwapInfo(
     );
   }
 
-  return optimalRebalanceV2(
+  return rebalanceOptimalV2(
     chainId,
     amm,
     position,
@@ -92,7 +92,7 @@ export async function getRebalanceSwapInfoV3(
     );
   }
 
-  return optimalRebalanceV3(
+  return rebalanceOptimalV3(
     chainId,
     amm,
     position,

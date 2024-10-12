@@ -47,7 +47,7 @@ import { SolverResult } from './types';
  * @param includeSolvers Optional. The solvers to include.
  * @returns The optimal rebalance solutions.
  */
-export async function optimalRebalanceV2(
+export async function rebalanceOptimalV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   position: PositionDetails,
@@ -199,7 +199,7 @@ export async function optimalRebalanceV2(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info('optimalRebalanceV2 fees', {
+    getLogger().info('rebalanceOptimalV2 fees', {
       totalRebalanceFeeUsd: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
@@ -245,7 +245,7 @@ export async function optimalRebalanceV2(
       ({ feeBips, feeUSD } = await calcFeeBips());
     }
   } catch (e) {
-    getLogger().error('SDK.OptimalRebalanceV2.CalcFee.Error', {
+    getLogger().error('SDK.rebalanceOptimalV2.calcFeeBips.Error', {
       error: JSON.stringify((e as Error).message),
       ...logdata,
     });
@@ -285,7 +285,7 @@ export async function optimalRebalanceV2(
         };
   const solve = async (solver: E_Solver) => {
     try {
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
         chainId,
         amm,
         fromAddress,
@@ -334,7 +334,7 @@ export async function optimalRebalanceV2(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('SDK.optimalRebalanceV2.EstimateGas.Error', {
+        getLogger().error('SDK.rebalanceOptimalV2.EstimateGas.Error', {
           error: JSON.stringify(e),
           swapData,
           mintParams,
@@ -371,12 +371,12 @@ export async function optimalRebalanceV2(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.optimalRebalanceV2.Error', {
+        getLogger().error('SDK.Solver.rebalanceOptimalV2.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.optimalRebalanceV2.Warning', solver);
+        console.warn('SDK.Solver.rebalanceOptimalV2.Warning', solver);
       }
       return null;
     }
@@ -385,9 +385,9 @@ export async function optimalRebalanceV2(
   return buildOptimalSolutions(solve, includeSolvers);
 }
 
-// Same as optimalRebalanceV2, but with feeAmounts instead of feeBips.
+// Same as rebalanceOptimalV2, but with feeAmounts instead of feeBips.
 // Do not use, but implemented to make it easier to migrate to future versions.
-export async function optimalRebalanceV3(
+export async function rebalanceOptimalV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   position: PositionDetails,
@@ -547,7 +547,7 @@ export async function optimalRebalanceV3(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info('optimalRebalanceV3 fees', {
+    getLogger().info('rebalanceOptimalV3 fees', {
       totalRebalanceFeeUsd: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
@@ -595,7 +595,7 @@ export async function optimalRebalanceV3(
       ({ token0FeeAmount, token1FeeAmount, feeUSD } = await calcFeeAmount());
     }
   } catch (e) {
-    getLogger().error('SDK.OptimalRebalanceV3.CalcFee.Error', {
+    getLogger().error('SDK.rebalanceOptimalV3.calcFeeAmount.Error', {
       error: JSON.stringify((e as Error).message),
       ...logdata,
     });
@@ -635,7 +635,7 @@ export async function optimalRebalanceV3(
         };
   const solve = async (solver: E_Solver) => {
     try {
-      const { swapData, swapRoute } = await getSolver(solver).optimalMint({
+      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
         chainId,
         amm,
         fromAddress,
@@ -686,7 +686,7 @@ export async function optimalRebalanceV3(
         ]);
         gasFeeEstimation = gasPrice * gasAmount;
       } catch (e) {
-        getLogger().error('SDK.optimalRebalanceV3.EstimateGas.Error', {
+        getLogger().error('SDK.rebalanceOptimalV3.EstimateGas.Error', {
           error: JSON.stringify(e),
           swapData,
           mintParams,
@@ -729,12 +729,12 @@ export async function optimalRebalanceV3(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.optimalRebalanceV3.Error', {
+        getLogger().error('SDK.Solver.rebalanceOptimalV3.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.optimalRebalanceV3.Warning', solver);
+        console.warn('SDK.Solver.rebalanceOptimalV3.Warning', solver);
       }
       return null;
     }

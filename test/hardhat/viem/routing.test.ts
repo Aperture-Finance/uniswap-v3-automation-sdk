@@ -23,9 +23,9 @@ import {
   getRebalancedPosition,
   getToken,
   increaseLiquidityOptimal,
-  optimalMint,
-  optimalMintV2,
-  optimalRebalanceV2,
+  mintOptimal,
+  mintOptimalV2,
+  rebalanceOptimalV2,
 } from '../../../src/viem';
 import {
   UNIV3_AMM,
@@ -37,8 +37,8 @@ import {
 } from '../common';
 
 describe('Viem - Routing tests', function () {
-  // optimalRebalance is deprecated now, use optimalRebalanceV2 instead
-  it.skip('Test optimalRebalance', async function () {
+  // rebalanceOptimal is deprecated now, use rebalanceOptimalV2 instead
+  it.skip('Test rebalanceOptimal', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
@@ -61,7 +61,7 @@ describe('Viem - Routing tests', function () {
     const owner = await getNPM(chainId, UNIV3_AMM, publicClient).read.ownerOf([
       tokenId,
     ]);
-    const resultV1 = await optimalRebalance(
+    const resultV1 = await rebalanceOptimal(
       chainId,
       UNIV3_AMM,
       tokenId,
@@ -94,7 +94,7 @@ describe('Viem - Routing tests', function () {
   });
 
   // can pass when run alone, but fail when run with other tests, skip it currently
-  it.skip('Test optimalRebalanceV2 in mainnet', async function () {
+  it.skip('Test rebalanceOptimalV2 in mainnet', async function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
@@ -127,7 +127,7 @@ describe('Viem - Routing tests', function () {
       blockNumber,
     );
 
-    const resultV2 = await optimalRebalanceV2(
+    const resultV2 = await rebalanceOptimalV2(
       chainId,
       amm,
       position,
@@ -154,7 +154,7 @@ describe('Viem - Routing tests', function () {
     expect(resultV2.map((r) => r.solver)).to.be.include(E_Solver.PH); // should include PH
   });
 
-  it('Test optimalRebalanceV2 in arbitrum', async function () {
+  it('Test rebalanceOptimalV2 in arbitrum', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
@@ -179,7 +179,7 @@ describe('Viem - Routing tests', function () {
       tokenId,
     ]);
 
-    const resultV2 = await optimalRebalanceV2(
+    const resultV2 = await rebalanceOptimalV2(
       chainId,
       UNIV3_AMM,
       position,
@@ -228,7 +228,7 @@ describe('Viem - Routing tests', function () {
     }
   });
 
-  it('Test optimalRebalanceV2 with invalid prices', async function () {
+  it('Test rebalanceOptimalV2 with invalid prices', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const publicClient = getInfuraClient('arbitrum-mainnet');
     const tokenId = 726230n;
@@ -254,7 +254,7 @@ describe('Viem - Routing tests', function () {
     ]);
 
     try {
-      await optimalRebalanceV2(
+      await rebalanceOptimalV2(
         chainId,
         UNIV3_AMM,
         position,
@@ -332,8 +332,8 @@ describe('Viem - Routing tests', function () {
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
-  // optimalMint is deprecated now, use optimalMintV2 instead
-  it.skip('Test optimalMint', async function () {
+  // mintOptimal is deprecated now, use mintOptimalV2 instead
+  it.skip('Test mintOptimal', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient('arbitrum-mainnet');
@@ -369,7 +369,7 @@ describe('Viem - Routing tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
-    const { amount0, amount1, priceImpact, swapPath } = await optimalMint(
+    const { amount0, amount1, priceImpact, swapPath } = await mintOptimal(
       chainId,
       amm,
       token0Amount,
@@ -403,7 +403,7 @@ describe('Viem - Routing tests', function () {
   });
 
   // can pass when run alone, but fail when run with other tests, skip it currently
-  it.skip('Test optimalMintV2 in mainnet', async function () {
+  it.skip('Test mintOptimalV2 in mainnet', async function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
@@ -435,7 +435,7 @@ describe('Viem - Routing tests', function () {
     );
     const fee = FeeAmount.MEDIUM;
 
-    const resultV2 = await optimalMintV2(
+    const resultV2 = await mintOptimalV2(
       chainId,
       amm,
       token0Amount,
@@ -477,7 +477,7 @@ describe('Viem - Routing tests', function () {
     }
   });
 
-  it('Test optimalMintV2 in arbitrum', async function () {
+  it('Test mintOptimalV2 in arbitrum', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getInfuraClient('arbitrum-mainnet');
@@ -514,7 +514,7 @@ describe('Viem - Routing tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
-    const resultV2 = await optimalMintV2(
+    const resultV2 = await mintOptimalV2(
       chainId,
       amm,
       token0Amount,

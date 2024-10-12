@@ -7,8 +7,8 @@ export { getOkxQuote, getOkxSwap } from './getOkxSolver'; // TODO: remove when c
 export { get1InchQuote } from './get1InchSolver';
 
 export * from './increaseLiquidityOptimal';
-export * from './optimalMint';
-export * from './optimalRebalance';
+export * from './mintOptimal';
+export * from './rebalanceOptimal';
 export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {
@@ -25,7 +25,7 @@ export const getSolver = (solver: E_Solver): ISolver => {
       return getPropellerHeadsSolver();
     case E_Solver.SamePool:
       return {
-        optimalMint: async () => defaultSwapInfo,
+        mintOptimal: async () => defaultSwapInfo,
       };
     default:
       throw new Error('Invalid solver');
