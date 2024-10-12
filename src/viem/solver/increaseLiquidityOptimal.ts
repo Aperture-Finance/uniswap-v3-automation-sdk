@@ -14,7 +14,6 @@ import {
   getOkxSwap,
   getSolver,
 } from '.';
-import { computePoolAddress } from '../../utils';
 import {
   FEE_ZAP_RATIO,
   IncreaseLiquidityParams,
@@ -28,6 +27,7 @@ import {
 import { get1InchApproveTarget } from './get1InchSolver';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {
+  _getOptimalSwapAmount,
   buildOptimalSolutions,
   calcPriceImpact,
   getOptimalSwapAmount,
@@ -241,25 +241,24 @@ async function getIncreaseLiquidityOptimalSwapData(
 }> {
   try {
     const ammInfo = getAMMInfo(chainId, amm)!;
-    const automan = getAutomanContract(chainId, amm, publicClient);
     const isOkx = getIsOkx();
 
     // get swap amounts using the same pool
-    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap([
-      computePoolAddress(
-        chainId,
-        amm,
-        position.pool.token0.address,
-        position.pool.token1.address,
-        amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-          ? position.pool.tickSpacing
-          : position.pool.fee,
-      ),
+    const { poolAmountIn, zeroForOne } = await _getOptimalSwapAmount(
+      getAutomanContract,
+      chainId,
+      amm,
+      publicClient,
+      position.pool.token0.address as Address,
+      position.pool.token1.address as Address,
+      amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+        ? position.pool.tickSpacing
+        : position.pool.fee,
       position.tickLower,
       position.tickUpper,
       increaseParams.amount0Desired,
       increaseParams.amount1Desired,
-    ]);
+    );
 
     const approveTarget = await (isOkx
       ? getOkxApproveTarget(
