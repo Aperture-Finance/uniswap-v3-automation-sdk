@@ -1,12 +1,11 @@
 import { ApertureSupportedChainId, getAMMInfo, getLogger } from '@/index';
-import { computePoolAddress } from '@/utils';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
-  ALL_SOLVERS,
+  DEFAULT_SOLVERS,
   E_Solver,
   SolverResult,
   SwapRoute,
@@ -29,6 +28,7 @@ import {
 import { getPool } from '../pool';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {
+  _getOptimalSwapAmount,
   buildOptimalSolutions,
   calcPriceImpact,
   getFeeOrTickSpacingFromMintParams,
@@ -267,25 +267,19 @@ async function getMintOptimalSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
-    const automan = getAutomanContract(chainId, amm, publicClient);
-    // get swap amounts using the same pool
-    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
-      [
-        computePoolAddress(
-          chainId,
-          amm,
-          mintParams.token0,
-          mintParams.token1,
-          getFeeOrTickSpacingFromMintParams(amm, mintParams),
-        ),
-        mintParams.tickLower,
-        mintParams.tickUpper,
-        mintParams.amount0Desired,
-        mintParams.amount1Desired,
-      ],
-      {
-        blockNumber,
-      },
+    const { poolAmountIn, zeroForOne } = await _getOptimalSwapAmount(
+      getAutomanContract,
+      chainId,
+      amm,
+      publicClient,
+      mintParams.token0,
+      mintParams.token1,
+      getFeeOrTickSpacingFromMintParams(amm, mintParams),
+      mintParams.tickLower,
+      mintParams.tickUpper,
+      mintParams.amount0Desired,
+      mintParams.amount1Desired,
+      blockNumber,
     );
 
     const ammInfo = getAMMInfo(chainId, amm)!;
@@ -365,7 +359,7 @@ export async function mintOptimalV2(
   slippage: number,
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -537,7 +531,7 @@ export async function mintOptimalV3(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');

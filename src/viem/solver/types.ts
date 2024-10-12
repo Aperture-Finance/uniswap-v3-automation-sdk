@@ -41,12 +41,12 @@ export enum E_Solver {
   OneInch = '1Inch',
 }
 
-export const ALL_SOLVERS = [
+export const DEFAULT_SOLVERS = [
   E_Solver.SamePool,
-  E_Solver.PH,
+  // E_Solver.PH, // PH is deprecating their API.
   E_Solver.OKX,
-  // E_Solver.OneInch, // no longer paying for enterprise plan
-]; // order matters
+  // E_Solver.OneInch, // No longer paying for enterprise plan.
+]; // order matters because first one will be select if the liquidities are the same.
 
 export type SwapPath = {
   tokenIn: Address;
