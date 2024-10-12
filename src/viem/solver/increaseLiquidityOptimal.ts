@@ -6,7 +6,7 @@ import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
 import {
-  ALL_SOLVERS,
+  DEFAULT_SOLVERS,
   E_Solver,
   SwapRoute,
   get1InchQuote,
@@ -343,7 +343,7 @@ export async function increaseLiquidityOptimalV2(
   token1Amount: CurrencyAmount<Token>,
   fromAddress: Address,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -491,7 +491,7 @@ export async function increaseLiquidityOptimalV3(
   fromAddress: Address,
   tokenPricesUsd: [string, string],
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
