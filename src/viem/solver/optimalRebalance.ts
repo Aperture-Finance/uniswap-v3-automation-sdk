@@ -3,7 +3,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, PublicClient } from 'viem';
 
-import { ALL_SOLVERS, E_Solver, getSolver } from '.';
+import { DEFAULT_SOLVERS, E_Solver, getSolver } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
@@ -58,7 +58,7 @@ export async function optimalRebalanceV2(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
   const token0 = position.token0.address as Address;
@@ -398,7 +398,7 @@ export async function optimalRebalanceV3(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   blockNumber?: bigint,
-  includeSolvers: E_Solver[] = ALL_SOLVERS,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
   const token0 = position.token0.address as Address;
