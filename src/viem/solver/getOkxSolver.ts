@@ -187,7 +187,7 @@ export async function getOkxQuote(
       await buildRequest('quote', new URLSearchParams(quoteParams))
     ).data.data;
     if (quoteData.length < 1) {
-      getLogger().error('SDK.getOkxQuote.NoQuoteFound', quoteParams);
+      getLogger().error('SDK.getOkxQuote.NoQuoteFound', { quoteParams });
       throw new Error(
         `Error: No quote found with quoteParams=${JSON.stringify(quoteParams)}`,
       );
@@ -196,9 +196,12 @@ export async function getOkxQuote(
       toAmount: quoteData[0].toTokenAmount,
     };
   } catch (e) {
-    getLogger().error('SDK.getOkxQuote.Error', {
-      message: (e as Error).message,
-    });
+    const msg = (e as Error).message;
+    if (!msg.startsWith('Error: No quote found with quoteParams')) {
+      getLogger().error('SDK.getOkxQuote.Error', {
+        detail: (e as Error).message,
+      });
+    }
     throw e;
   }
 }
