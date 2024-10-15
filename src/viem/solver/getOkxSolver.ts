@@ -197,7 +197,7 @@ export async function getOkxQuote(
     };
   } catch (e) {
     getLogger().error('SDK.getOkxQuote.Error', {
-      message: (e as Error).message,
+      detail: (e as Error).message,
     });
     throw e;
   }
