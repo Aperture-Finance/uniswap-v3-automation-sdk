@@ -225,6 +225,24 @@ const CHAIN_ID_TO_INFO: {
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
       },
+      [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
+        factory: getAddress('0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A'),
+        poolImplementation: getAddress(
+          '0xeC8E5342B19977B4eF8892e02D8DAEcfa1315831',
+        ),
+        nonfungiblePositionManager: getAddress(
+          '0x827922686190790b37229fd06084350E74485b72',
+        ),
+        optimalSwapRouter: getAddress(
+          '0x0000004bb8983d4E004A8fe998155f1e8ed89989',
+        ),
+        apertureAutoman: getAddress(
+          '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x000000ca99cf8E1E53B4b7999180Db3e1D032333',
+        ),
+      },
     },
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
