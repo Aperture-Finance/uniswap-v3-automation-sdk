@@ -6523,6 +6523,11 @@ js-base64@^3.7.2:
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.7.5.tgz#21e24cf6b886f76d6f5f165bfcd69cc55b9e3fca"
   integrity sha512-3MEt5DTINKqfScXKfJFrRbxkrnk2AxPWGBL/ycjz4dK8iqiSJ06UxD8jh8xuh6p10TX4t2+7FsBYVxxQbMg+qA==
 
+js-big-decimal@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/js-big-decimal/-/js-big-decimal-1.4.1.tgz#e79423a1d06e55a390547d75233ff289c3dd8820"
+  integrity sha512-lEE6kXojqv1/ky/H0nTTg5gi+1g+V6O94T2GPpZTGayXGeYIC6f6PszckNsEa7S2+qgas9ZOEkONMryxXVKWwQ==
+
 js-sha3@0.8.0, js-sha3@^0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
