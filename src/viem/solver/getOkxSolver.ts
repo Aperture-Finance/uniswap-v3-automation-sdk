@@ -187,7 +187,7 @@ export async function getOkxQuote(
       await buildRequest('quote', new URLSearchParams(quoteParams))
     ).data.data;
     if (quoteData.length < 1) {
-      getLogger().error('SDK.getOkxQuote.NoQuoteFound', { quoteParams });
+      getLogger().warn('SDK.getOkxQuote.NoQuoteFound', { quoteParams });
       throw new Error(
         `Error: No quote found with quoteParams=${JSON.stringify(quoteParams)}`,
       );
