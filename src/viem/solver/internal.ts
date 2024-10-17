@@ -118,12 +118,13 @@ export function getOtherTokenAmount(
 }
 
 function getPercentDifference(a: Big, b: Big) {
-  // Check to avoid dividing by 0.
-  if (a.add(b).eq(0)) {
+  // Check denominator to avoid dividing by 0.
+  const denominator = a.add(b).div(2);
+  if (denominator.eq(0)) {
     return 0;
   }
   // Return (|a - b| * 100) / (a + b) / 2
-  return Number(a.sub(b).abs().mul(100).div(a.add(b).div(2)));
+  return Number(a.sub(b).abs().mul(100).div(denominator));
 }
 
 export const _getOptimalSwapAmount = async (
