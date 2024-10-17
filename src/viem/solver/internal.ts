@@ -1,8 +1,10 @@
 import { AutomanV3__factory, Automan__factory, fractionToBig } from '@/index';
 import { ApertureSupportedChainId, computePoolAddress } from '@/index';
-import { Pool } from '@aperture_finance/uniswap-v3-sdk';
+import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
+import bigDecimal from 'js-big-decimal';
 import {
   Address,
   GetContractReturnType,
@@ -11,6 +13,7 @@ import {
 } from 'viem';
 
 import { E_Solver, SwapRoute } from '.';
+import { getCurrencyAmount, getPool } from '..';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
@@ -73,6 +76,56 @@ export const getSwapPath = (
   };
 };
 
+export function getOtherTokenAmount(
+  address: string,
+  amount: string,
+  tickLower: number,
+  tickUpper: number,
+  pool: Pool,
+): CurrencyAmount<Token> {
+  if (address === pool.token0.address) {
+    return Position.fromAmount0({
+      pool,
+      tickLower,
+      tickUpper,
+      amount0: getCurrencyAmount(
+        pool.token0,
+        bigDecimal.round(
+          amount,
+          pool.token0.decimals,
+          bigDecimal.RoundingModes.DOWN,
+        ),
+      ).quotient,
+      useFullPrecision: false,
+    }).amount1;
+  } else if (address === pool.token1.address) {
+    return Position.fromAmount1({
+      pool,
+      tickLower,
+      tickUpper,
+      amount1: getCurrencyAmount(
+        pool.token1,
+        bigDecimal.round(
+          amount,
+          pool.token1.decimals,
+          bigDecimal.RoundingModes.DOWN,
+        ),
+      ).quotient,
+    }).amount0;
+  } else {
+    throw new Error('Token address not in pool');
+  }
+}
+
+function getPercentDifference(a: Big, b: Big) {
+  // Check to avoid dividing by 0.
+  if (a.add(b).eq(0)) {
+    return 0;
+  }
+  // Return (|a - b| * 100) / (a + b) / 2
+  return Number(a.sub(b).abs().mul(100).div(a.add(b).div(2)));
+}
+
 export const _getOptimalSwapAmount = async (
   getAutomanContractFn: (
     chainId: ApertureSupportedChainId,
@@ -101,23 +154,68 @@ export const _getOptimalSwapAmount = async (
 ) => {
   const automan = getAutomanContractFn(chainId, amm, publicClient);
   // get swap amounts using the same pool
-  const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
-    [
-      computePoolAddress(chainId, amm, token0, token1, feeOrTickSpacing),
-      tickLower,
-      tickUpper,
-      amount0Desired,
-      amount1Desired,
-    ],
-    {
+  // Try catch because automan.read.getOptimalSwap() may result in out of gas error.
+  try {
+    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
+      [
+        computePoolAddress(chainId, amm, token0, token1, feeOrTickSpacing),
+        tickLower,
+        tickUpper,
+        amount0Desired,
+        amount1Desired,
+      ],
+      {
+        blockNumber,
+      },
+    );
+    return {
+      poolAmountIn,
+      zeroForOne,
+    };
+  } catch (e) {
+    // If error, then check whether swap was necessary.
+    // If swap isn't necessary, then return 0 poolAmountIn.
+    // If swap was necessary, then propagate error.
+    const pool = await getPool(
+      token0,
+      token1,
+      feeOrTickSpacing,
+      chainId,
+      amm,
+      publicClient,
       blockNumber,
-    },
-  );
-
-  return {
-    poolAmountIn,
-    zeroForOne,
-  };
+    );
+    const token0Amount = Big(
+      getOtherTokenAmount(
+        token1,
+        amount1Desired.toString(),
+        tickLower,
+        tickUpper,
+        pool,
+      ).toSignificant(),
+    );
+    const token1Amount = Big(
+      getOtherTokenAmount(
+        token0,
+        amount0Desired.toString(),
+        tickLower,
+        tickUpper,
+        pool,
+      ).toSignificant(),
+    );
+    const token0PercentDifference = getPercentDifference(
+      Big(amount0Desired.toString()),
+      token0Amount,
+    );
+    const token1PercentDifference = getPercentDifference(
+      Big(amount1Desired.toString()),
+      token1Amount,
+    );
+    if (token0PercentDifference < 0.01 || token1PercentDifference < 0.01) {
+      return { poolAmountIn: 0n, zeroForOne: false };
+    }
+    throw e;
+  }
 };
 
 export const getOptimalSwapAmount = async (
