@@ -1,4 +1,9 @@
-import { AutomanV3__factory, Automan__factory, fractionToBig } from '@/index';
+import {
+  AutomanV3__factory,
+  Automan__factory,
+  fractionToBig,
+  getLogger,
+} from '@/index';
 import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
@@ -88,14 +93,7 @@ export function getOtherTokenAmount(
       pool,
       tickLower,
       tickUpper,
-      amount0: getCurrencyAmount(
-        pool.token0,
-        bigDecimal.round(
-          amount,
-          pool.token0.decimals,
-          bigDecimal.RoundingModes.DOWN,
-        ),
-      ).quotient,
+      amount0: amount,
       useFullPrecision: false,
     }).amount1;
   } else if (address === pool.token1.address) {
@@ -103,14 +101,7 @@ export function getOtherTokenAmount(
       pool,
       tickLower,
       tickUpper,
-      amount1: getCurrencyAmount(
-        pool.token1,
-        bigDecimal.round(
-          amount,
-          pool.token1.decimals,
-          bigDecimal.RoundingModes.DOWN,
-        ),
-      ).quotient,
+      amount1: amount,
     }).amount0;
   } else {
     throw new Error('Token address not in pool');
@@ -186,32 +177,36 @@ export const _getOptimalSwapAmount = async (
       publicClient,
       blockNumber,
     );
-    const token0Amount = Big(
-      getOtherTokenAmount(
-        token1,
-        amount1Desired.toString(),
-        tickLower,
-        tickUpper,
-        pool,
-      ).toSignificant(),
-    );
-    const token1Amount = Big(
-      getOtherTokenAmount(
-        token0,
-        amount0Desired.toString(),
-        tickLower,
-        tickUpper,
-        pool,
-      ).toSignificant(),
-    );
+    const token0Amount = getOtherTokenAmount(
+      token1,
+      amount1Desired.toString(),
+      tickLower,
+      tickUpper,
+      pool,
+    ).quotient;
+    const token1Amount = getOtherTokenAmount(
+      token0,
+      amount0Desired.toString(),
+      tickLower,
+      tickUpper,
+      pool,
+    ).quotient;
     const token0PercentDifference = getPercentDifference(
       Big(amount0Desired.toString()),
-      token0Amount,
+      Big(token0Amount.toString()),
     );
     const token1PercentDifference = getPercentDifference(
       Big(amount1Desired.toString()),
-      token1Amount,
+      Big(token1Amount.toString()),
     );
+    getLogger().info('SDK.getOptimalSwapAmount.CheckSwapNecessity', {
+      token0PercentDifference,
+      token1PercentDifference,
+      amount0Desired,
+      amount1Desired,
+      token0Amount: token0Amount.toString(),
+      token1Amount: token1Amount.toString(),
+    });
     if (token0PercentDifference < 0.01 || token1PercentDifference < 0.01) {
       return { poolAmountIn: 0n, zeroForOne: false };
     }
