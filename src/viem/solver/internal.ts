@@ -9,7 +9,6 @@ import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
-import bigDecimal from 'js-big-decimal';
 import {
   Address,
   GetContractReturnType,
@@ -18,7 +17,7 @@ import {
 } from 'viem';
 
 import { E_Solver, SwapRoute } from '.';
-import { getCurrencyAmount, getPool } from '..';
+import { getPool } from '..';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
