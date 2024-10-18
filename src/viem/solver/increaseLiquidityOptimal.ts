@@ -527,25 +527,11 @@ export async function increaseLiquidityOptimalV3(
     blockNumber,
   );
 
-  const solve = async (solver: E_Solver) => {
+  const estimateGas = async (swapData: Hex) => {
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
-      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
-        chainId,
-        amm,
-        fromAddress,
-        token0,
-        token1,
-        feeOrTickSpacing,
-        tickLower,
-        tickUpper,
-        slippage,
-        poolAmountIn,
-        zeroForOne,
-      });
-      const [liquidity, amount0, amount1] =
-        await simulateIncreaseLiquidityOptimalV3(
+      const [gasPrice, gasAmount] = await Promise.all([
+        publicClient.getGasPrice(),
+        estimateIncreaseLiquidityOptimalV3Gas(
           chainId,
           amm,
           publicClient,
@@ -554,13 +540,48 @@ export async function increaseLiquidityOptimalV3(
           increaseParams,
           swapData,
           blockNumber,
-        );
+        ),
+      ]);
+      return gasPrice * gasAmount;
+    } catch (e) {
+      getLogger().error('SDK.increaseLiquidityOptimalV3.EstimateGas.Error', {
+        error: JSON.stringify((e as Error).message),
+        swapData,
+        increaseParams,
+      });
+      return 0n;
+    }
+  };
 
-      let gasFeeEstimation = 0n;
-      try {
-        const [gasPrice, gasAmount] = await Promise.all([
-          publicClient.getGasPrice(),
-          estimateIncreaseLiquidityOptimalV3Gas(
+  const solve = async (solver: E_Solver) => {
+    let swapData: Hex = '0x';
+    let swapRoute: SwapRoute | undefined = undefined;
+    let liquidity: bigint = 0n;
+    let amount0: bigint = increaseParams.amount0Desired;
+    let amount1: bigint = increaseParams.amount1Desired;
+    let gasFeeEstimation: bigint = 0n;
+
+    try {
+      const slippage =
+        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+
+      if (poolAmountIn > 0n) {
+        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+          chainId,
+          amm,
+          fromAddress,
+          token0,
+          token1,
+          feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          slippage,
+          poolAmountIn,
+          zeroForOne,
+        }));
+
+        [liquidity, amount0, amount1] =
+          await simulateIncreaseLiquidityOptimalV3(
             chainId,
             amm,
             publicClient,
@@ -569,15 +590,9 @@ export async function increaseLiquidityOptimalV3(
             increaseParams,
             swapData,
             blockNumber,
-          ),
-        ]);
-        gasFeeEstimation = gasPrice * gasAmount;
-      } catch (e) {
-        getLogger().error('SDK.increaseLiquidityOptimalV3.EstimateGas.Error', {
-          error: JSON.stringify((e as Error).message),
-          swapData,
-          increaseParams,
-        });
+          );
+
+        gasFeeEstimation = await estimateGas(swapData);
       }
 
       const token0FeeAmount = zeroForOne
@@ -597,7 +612,7 @@ export async function increaseLiquidityOptimalV3(
         .mul(tokenInPrice)
         .mul(FEE_ZAP_RATIO);
 
-      getLogger().info('increaseLiquidityOptimalV3 fees ', {
+      getLogger().info('SDK.increaseLiquidityOptimalV3.fees ', {
         amm: amm,
         chainId: chainId,
         position: increaseOptions.tokenId,
