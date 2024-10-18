@@ -143,74 +143,73 @@ export const _getOptimalSwapAmount = async (
   amount1Desired: bigint,
   blockNumber?: bigint,
 ) => {
+  // First check if swap is necessary.
+  // If swap isn't necessary, then return 0 poolAmountIn.
+  const pool = await getPool(
+    token0,
+    token1,
+    feeOrTickSpacing,
+    chainId,
+    amm,
+    publicClient,
+    blockNumber,
+  );
+  const token0Amount = getOtherTokenAmount(
+    token1,
+    amount1Desired.toString(),
+    tickLower,
+    tickUpper,
+    pool,
+  ).quotient;
+  const token1Amount = getOtherTokenAmount(
+    token0,
+    amount0Desired.toString(),
+    tickLower,
+    tickUpper,
+    pool,
+  ).quotient;
+  const token0PercentDifference = getPercentDifference(
+    Big(amount0Desired.toString()),
+    Big(token0Amount.toString()),
+  );
+  const token1PercentDifference = getPercentDifference(
+    Big(amount1Desired.toString()),
+    Big(token1Amount.toString()),
+  );
+  getLogger().info('SDK.getOptimalSwapAmount.CheckSwapNecessity', {
+    token0PercentDifference,
+    token1PercentDifference,
+    amount0Desired,
+    amount1Desired,
+    token0Amount: token0Amount.toString(),
+    token1Amount: token1Amount.toString(),
+  });
+  if (token0PercentDifference < 0.01 || token1PercentDifference < 0.01) {
+    return { poolAmountIn: 0n, zeroForOne: false };
+  }
+
+  // If swap is necessary, then get the swap amounts.
+
   const automan = getAutomanContractFn(chainId, amm, publicClient);
   // get swap amounts using the same pool
   // Try catch because automan.read.getOptimalSwap() may result in out of gas error.
-  try {
-    const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
-      [
-        computePoolAddress(chainId, amm, token0, token1, feeOrTickSpacing),
-        tickLower,
-        tickUpper,
-        amount0Desired,
-        amount1Desired,
-      ],
-      {
-        blockNumber,
-      },
-    );
-    return {
-      poolAmountIn,
-      zeroForOne,
-    };
-  } catch (e) {
-    // If error, then check whether swap was necessary.
-    // If swap isn't necessary, then return 0 poolAmountIn.
-    // If swap was necessary, then propagate error.
-    const pool = await getPool(
-      token0,
-      token1,
-      feeOrTickSpacing,
-      chainId,
-      amm,
-      publicClient,
-      blockNumber,
-    );
-    const token0Amount = getOtherTokenAmount(
-      token1,
-      amount1Desired.toString(),
+  const [poolAmountIn, , zeroForOne] = await automan.read.getOptimalSwap(
+    [
+      computePoolAddress(chainId, amm, token0, token1, feeOrTickSpacing),
       tickLower,
       tickUpper,
-      pool,
-    ).quotient;
-    const token1Amount = getOtherTokenAmount(
-      token0,
-      amount0Desired.toString(),
-      tickLower,
-      tickUpper,
-      pool,
-    ).quotient;
-    const token0PercentDifference = getPercentDifference(
-      Big(amount0Desired.toString()),
-      Big(token0Amount.toString()),
-    );
-    const token1PercentDifference = getPercentDifference(
-      Big(amount1Desired.toString()),
-      Big(token1Amount.toString()),
-    );
-    getLogger().info('SDK.getOptimalSwapAmount.CheckSwapNecessity', {
-      token0PercentDifference,
-      token1PercentDifference,
       amount0Desired,
       amount1Desired,
-      token0Amount: token0Amount.toString(),
-      token1Amount: token1Amount.toString(),
-    });
-    if (token0PercentDifference < 0.01 || token1PercentDifference < 0.01) {
-      return { poolAmountIn: 0n, zeroForOne: false };
-    }
-    throw e;
-  }
+    ],
+    {
+      blockNumber,
+    },
+  );
+
+  return {
+    poolAmountIn,
+    zeroForOne,
+  };
 };
 
 export const getOptimalSwapAmount = async (
