@@ -850,23 +850,22 @@ describe.skip('Pool subgraph query tests', function () {
 
 describe('Pool tests', function () {
   it('getSlipStreamPools', async () => {
-    const client = getPublicClient(
-      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-    );
-    const blockNumber = 17514450n;
-    const pools = await getSlipStreamPools(client, blockNumber);
+    const chainId = ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID;
+    const client = getPublicClient(chainId);
+    const blockNumber = 126807301n;
+    const pools = await getSlipStreamPools(client, chainId, blockNumber);
     expect(Object.keys(pools).length).to.be.equal(107);
   });
 });
 
 describe('Stake position tests', function () {
   it('getSlipStreamStakePositions', async () => {
-    const client = getPublicClient(
-      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-    );
+    const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
+    const client = getPublicClient(chainId);
     const blockNumber = 19669550n;
     const stakedPositions = await getSlipStreamStakePositions(
       '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
+      chainId,
       client,
       undefined,
       blockNumber,
