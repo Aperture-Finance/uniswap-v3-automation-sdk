@@ -55,7 +55,7 @@ export async function getReinvestTx(
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
 
   const feeBips = getFeeReinvestBips(positionDetails);
-  getLogger().info('getReinvestTx fees', {
+  getLogger().info('SDK.getReinvestTx.Fees', {
     ownerAddress,
     amm,
     chainId,
@@ -128,7 +128,7 @@ export async function getReinvestV3Tx(
 
   const { token0FeeAmount, token1FeeAmount } =
     getFeeReinvestFeeAmount(positionDetails);
-  getLogger().info('getReinvestV3Tx fees', {
+  getLogger().info('SDK.getReinvestV3Tx.Fees', {
     ownerAddress,
     amm,
     chainId,
