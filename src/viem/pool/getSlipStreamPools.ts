@@ -15,12 +15,10 @@ export type SlipStreamPool = {
 
 export async function getSlipStreamPools(
   publicClient: PublicClient,
+  chainId: ApertureSupportedChainId,
   blockNumber?: bigint,
 ) {
-  const ammInfo = getAMMInfo(
-    ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-    AutomatedMarketMakerEnum.enum.SLIPSTREAM,
-  );
+  const ammInfo = getAMMInfo(chainId, AutomatedMarketMakerEnum.enum.SLIPSTREAM);
   const opt = {
     blockNumber,
   };
