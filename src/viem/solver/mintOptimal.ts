@@ -26,6 +26,7 @@ import {
   simulateMintOptimalV3,
 } from '../automan';
 import { getPool } from '../pool';
+import { get1InchApproveTarget } from './get1InchSolver';
 import { getOkxApproveTarget } from './getOkxSolver';
 import {
   _getOptimalSwapAmount,
@@ -267,6 +268,8 @@ async function getMintOptimalSwapData(
   swapRoute?: SwapRoute;
 }> {
   try {
+    const isOkx = getIsOkx();
+
     const { poolAmountIn, zeroForOne } = await _getOptimalSwapAmount(
       getAutomanContract,
       chainId,
@@ -283,7 +286,7 @@ async function getMintOptimalSwapData(
     );
 
     const ammInfo = getAMMInfo(chainId, amm)!;
-    const { tx, protocols } = await (getIsOkx()
+    const { tx, protocols } = await (isOkx
       ? getOkxSwap(
           chainId,
           zeroForOne ? mintParams.token0 : mintParams.token1,
@@ -302,11 +305,13 @@ async function getMintOptimalSwapData(
           includeRoute,
         ));
 
-    const approveTarget = await getOkxApproveTarget(
-      chainId,
-      zeroForOne ? mintParams.token0 : mintParams.token1,
-      poolAmountIn.toString(),
-    );
+    const approveTarget = await (isOkx
+      ? getOkxApproveTarget(
+          chainId,
+          zeroForOne ? mintParams.token0 : mintParams.token1,
+          poolAmountIn.toString(),
+        )
+      : get1InchApproveTarget(chainId));
 
     return {
       swapData: encodeOptimalSwapData(
@@ -413,30 +418,65 @@ export async function mintOptimalV2(
     blockNumber,
   );
 
-  const solve = async (solver: E_Solver) => {
+  const estimateGas = async (swapData: Hex) => {
     try {
-      const { swapData, swapRoute } = await getSolver(solver).mintOptimal({
-        chainId,
-        amm,
-        fromAddress,
-        token0,
-        token1,
-        feeOrTickSpacing,
-        tickLower,
-        tickUpper,
-        slippage,
-        poolAmountIn,
-        zeroForOne,
-      });
-      const [, liquidity, amount0, amount1] = await simulateMintOptimal(
-        chainId,
-        amm,
-        publicClient,
-        fromAddress,
-        mintParams,
+      const [gasPrice, gasAmount] = await Promise.all([
+        publicClient.getGasPrice(),
+        estimateMintOptimalGas(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          mintParams,
+          swapData,
+          blockNumber,
+        ),
+      ]);
+      return gasPrice * gasAmount;
+    } catch (e) {
+      getLogger().error('SDK.mintOptimalV2.EstimateGas.Error', {
+        error: JSON.stringify((e as Error).message),
         swapData,
-        blockNumber,
-      );
+        mintParams,
+      });
+      return 0n;
+    }
+  };
+
+  const solve = async (solver: E_Solver) => {
+    let swapData: Hex = '0x';
+    let swapRoute: SwapRoute | undefined = undefined;
+    let liquidity: bigint = 0n;
+    let amount0: bigint = mintParams.amount0Desired;
+    let amount1: bigint = mintParams.amount1Desired;
+    let gasFeeEstimation: bigint = 0n;
+
+    try {
+      if (poolAmountIn > 0n) {
+        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+          chainId,
+          amm,
+          fromAddress,
+          token0,
+          token1,
+          feeOrTickSpacing,
+          tickLower,
+          tickUpper,
+          slippage,
+          poolAmountIn,
+          zeroForOne,
+        }));
+        [, liquidity, amount0, amount1] = await simulateMintOptimal(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          mintParams,
+          swapData,
+          blockNumber,
+        );
+        gasFeeEstimation = await estimateGas(swapData);
+      }
 
       const pool = await getPool(
         token0,
@@ -447,29 +487,6 @@ export async function mintOptimalV2(
         publicClient,
         blockNumber,
       );
-
-      let gasFeeEstimation = 0n;
-      try {
-        const [gasPrice, gasAmount] = await Promise.all([
-          publicClient.getGasPrice(),
-          estimateMintOptimalGas(
-            chainId,
-            amm,
-            publicClient,
-            fromAddress,
-            mintParams,
-            swapData,
-            blockNumber,
-          ),
-        ]);
-        gasFeeEstimation = gasPrice * gasAmount;
-      } catch (e) {
-        getLogger().error('SDK.mintOptimalV2.EstimateGas.Error', {
-          error: JSON.stringify((e as Error).message),
-          swapData,
-          mintParams,
-        });
-      }
 
       return {
         solver,
@@ -665,7 +682,6 @@ export async function mintOptimalV3(
           poolAmountIn,
           zeroForOne,
         }));
-
         [, liquidity, amount0, amount1] = await simulateMintOptimalV3(
           chainId,
           amm,
