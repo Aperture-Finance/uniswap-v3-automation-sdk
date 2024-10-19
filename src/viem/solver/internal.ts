@@ -183,6 +183,7 @@ export const _getOptimalSwapAmount = async (
     token0Amount: token0Amount.toString(),
     token1Amount: token1Amount.toString(),
   });
+
   // If swap isn't necessary, then return 0 poolAmountIn.
   if (token0PercentDifference < 0.01 || token1PercentDifference < 0.01) {
     return { poolAmountIn: 0n, zeroForOne: false };
