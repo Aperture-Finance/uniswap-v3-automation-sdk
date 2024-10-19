@@ -143,8 +143,7 @@ export const _getOptimalSwapAmount = async (
   amount1Desired: bigint,
   blockNumber?: bigint,
 ) => {
-  // First check if swap is necessary.
-  // If swap isn't necessary, then return 0 poolAmountIn.
+  // Check if swap is necessary.
   const pool = await getPool(
     token0,
     token1,
@@ -184,12 +183,13 @@ export const _getOptimalSwapAmount = async (
     token0Amount: token0Amount.toString(),
     token1Amount: token1Amount.toString(),
   });
+
+  // If swap isn't necessary, then return 0 poolAmountIn.
   if (token0PercentDifference < 0.01 || token1PercentDifference < 0.01) {
     return { poolAmountIn: 0n, zeroForOne: false };
   }
 
   // If swap is necessary, then get the swap amounts.
-
   const automan = getAutomanContractFn(chainId, amm, publicClient);
   // get swap amounts using the same pool
   // Try catch because automan.read.getOptimalSwap() may result in out of gas error.
