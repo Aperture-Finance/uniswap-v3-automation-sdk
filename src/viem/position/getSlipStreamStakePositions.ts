@@ -1,3 +1,4 @@
+import { ApertureSupportedChainId } from '@/index';
 import { Address, PublicClient } from 'viem';
 
 import { getSlipStreamPools } from '../pool';
@@ -9,12 +10,13 @@ export type SlipStreamPosition = {
 
 export async function getSlipStreamStakePositions(
   owner: Address,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   gaugeAddresses?: Address[],
   blockNumber?: bigint,
 ) {
   if (!gaugeAddresses) {
-    const pools = await getSlipStreamPools(publicClient, blockNumber);
+    const pools = await getSlipStreamPools(publicClient, chainId, blockNumber);
     gaugeAddresses = pools.map((pool) => pool.gaugeAddress);
   }
   const opt = {
