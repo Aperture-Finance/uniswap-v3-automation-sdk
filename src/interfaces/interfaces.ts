@@ -548,7 +548,7 @@ export const MarketMakingActionSchema = BaseRecurringActionSchema.extend({
     RecurringPriceActionSchema,
     RecurringRatioActionSchema,
     RecurringDualActionSchema,
-  ])
+  ]),
 }).describe('Rebalance without swap using MMVault.');
 export type MarketMakingAction = z.infer<typeof MarketMakingActionSchema>;
 

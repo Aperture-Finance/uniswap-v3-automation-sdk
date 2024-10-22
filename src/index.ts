@@ -38,4 +38,8 @@ export {
   SlipStreamAutomanV3__factory,
   UniV3AutomanV3__factory,
 };
-export { ApertureMMVault, ApertureMMVault__factory, IApertureMMVault__factory } from './typechain-typesMMVault';
+export {
+  ApertureMMVault,
+  ApertureMMVault__factory,
+  IApertureMMVault__factory,
+} from './typechain-typesMMVault';

@@ -4,6 +4,7 @@ import {
   ContractFunctionArgs,
   ContractFunctionReturnType,
 } from 'viem';
+
 import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type MMVaultActionName = 'mint' | 'burn' | 'rebalance';
