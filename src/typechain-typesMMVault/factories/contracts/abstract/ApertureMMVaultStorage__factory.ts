@@ -1122,7 +1122,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class ApertureMMVaultStorage__factory {
   static readonly abi = _abi;

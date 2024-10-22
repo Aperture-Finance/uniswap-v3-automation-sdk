@@ -337,7 +337,7 @@ const _abi = [
     name: "Swap",
     type: "event",
   },
-];
+] as const;
 
 export class IUniswapV3PoolEvents__factory {
   static readonly abi = _abi;

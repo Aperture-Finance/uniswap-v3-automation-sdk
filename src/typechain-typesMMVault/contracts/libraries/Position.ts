@@ -18,13 +18,12 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
 export type RangeStruct = {
-  lowerTick: PromiseOrValue<BigNumberish>;
-  upperTick: PromiseOrValue<BigNumberish>;
-  feeTier: PromiseOrValue<BigNumberish>;
+  lowerTick: BigNumberish;
+  upperTick: BigNumberish;
+  feeTier: BigNumberish;
 };
 
 export type RangeStructOutput = [number, number, number] & {
@@ -49,20 +48,11 @@ export interface PositionInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "getLiquidityByRange",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [string, string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getPositionId",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "rangeExists",
@@ -113,17 +103,17 @@ export interface Position extends BaseContract {
 
   functions: {
     getLiquidityByRange(
-      pool_: PromiseOrValue<string>,
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      pool_: string,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { liquidity: BigNumber }>;
 
     getPositionId(
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string] & { positionId: string }>;
 
@@ -135,17 +125,17 @@ export interface Position extends BaseContract {
   };
 
   getLiquidityByRange(
-    pool_: PromiseOrValue<string>,
-    self_: PromiseOrValue<string>,
-    lowerTick_: PromiseOrValue<BigNumberish>,
-    upperTick_: PromiseOrValue<BigNumberish>,
+    pool_: string,
+    self_: string,
+    lowerTick_: BigNumberish,
+    upperTick_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getPositionId(
-    self_: PromiseOrValue<string>,
-    lowerTick_: PromiseOrValue<BigNumberish>,
-    upperTick_: PromiseOrValue<BigNumberish>,
+    self_: string,
+    lowerTick_: BigNumberish,
+    upperTick_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -157,17 +147,17 @@ export interface Position extends BaseContract {
 
   callStatic: {
     getLiquidityByRange(
-      pool_: PromiseOrValue<string>,
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      pool_: string,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getPositionId(
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -182,17 +172,17 @@ export interface Position extends BaseContract {
 
   estimateGas: {
     getLiquidityByRange(
-      pool_: PromiseOrValue<string>,
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      pool_: string,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getPositionId(
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -205,17 +195,17 @@ export interface Position extends BaseContract {
 
   populateTransaction: {
     getLiquidityByRange(
-      pool_: PromiseOrValue<string>,
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      pool_: string,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getPositionId(
-      self_: PromiseOrValue<string>,
-      lowerTick_: PromiseOrValue<BigNumberish>,
-      upperTick_: PromiseOrValue<BigNumberish>,
+      self_: string,
+      lowerTick_: BigNumberish,
+      upperTick_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

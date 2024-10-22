@@ -20,7 +20,6 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../../../../common";
 
 export interface IUniswapV3PoolOwnerActionsInterface extends utils.Interface {
@@ -35,15 +34,11 @@ export interface IUniswapV3PoolOwnerActionsInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "collectProtocol",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeProtocol",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [BigNumberish, BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -86,45 +81,45 @@ export interface IUniswapV3PoolOwnerActions extends BaseContract {
 
   functions: {
     collectProtocol(
-      recipient: PromiseOrValue<string>,
-      amount0Requested: PromiseOrValue<BigNumberish>,
-      amount1Requested: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      recipient: string,
+      amount0Requested: BigNumberish,
+      amount1Requested: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setFeeProtocol(
-      feeProtocol0: PromiseOrValue<BigNumberish>,
-      feeProtocol1: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feeProtocol0: BigNumberish,
+      feeProtocol1: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
 
   collectProtocol(
-    recipient: PromiseOrValue<string>,
-    amount0Requested: PromiseOrValue<BigNumberish>,
-    amount1Requested: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    recipient: string,
+    amount0Requested: BigNumberish,
+    amount1Requested: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setFeeProtocol(
-    feeProtocol0: PromiseOrValue<BigNumberish>,
-    feeProtocol1: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feeProtocol0: BigNumberish,
+    feeProtocol1: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     collectProtocol(
-      recipient: PromiseOrValue<string>,
-      amount0Requested: PromiseOrValue<BigNumberish>,
-      amount1Requested: PromiseOrValue<BigNumberish>,
+      recipient: string,
+      amount0Requested: BigNumberish,
+      amount1Requested: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
     setFeeProtocol(
-      feeProtocol0: PromiseOrValue<BigNumberish>,
-      feeProtocol1: PromiseOrValue<BigNumberish>,
+      feeProtocol0: BigNumberish,
+      feeProtocol1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -133,31 +128,31 @@ export interface IUniswapV3PoolOwnerActions extends BaseContract {
 
   estimateGas: {
     collectProtocol(
-      recipient: PromiseOrValue<string>,
-      amount0Requested: PromiseOrValue<BigNumberish>,
-      amount1Requested: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      recipient: string,
+      amount0Requested: BigNumberish,
+      amount1Requested: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setFeeProtocol(
-      feeProtocol0: PromiseOrValue<BigNumberish>,
-      feeProtocol1: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feeProtocol0: BigNumberish,
+      feeProtocol1: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     collectProtocol(
-      recipient: PromiseOrValue<string>,
-      amount0Requested: PromiseOrValue<BigNumberish>,
-      amount1Requested: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      recipient: string,
+      amount0Requested: BigNumberish,
+      amount1Requested: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setFeeProtocol(
-      feeProtocol0: PromiseOrValue<BigNumberish>,
-      feeProtocol1: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feeProtocol0: BigNumberish,
+      feeProtocol1: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }

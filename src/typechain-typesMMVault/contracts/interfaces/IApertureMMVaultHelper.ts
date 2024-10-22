@@ -18,13 +18,12 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
 export type RangeStruct = {
-  lowerTick: PromiseOrValue<BigNumberish>;
-  upperTick: PromiseOrValue<BigNumberish>;
-  feeTier: PromiseOrValue<BigNumberish>;
+  lowerTick: BigNumberish;
+  upperTick: BigNumberish;
+  feeTier: BigNumberish;
 };
 
 export type RangeStructOutput = [number, number, number] & {
@@ -33,10 +32,7 @@ export type RangeStructOutput = [number, number, number] & {
   feeTier: number;
 };
 
-export type AmountStruct = {
-  range: RangeStruct;
-  amount: PromiseOrValue<BigNumberish>;
-};
+export type AmountStruct = { range: RangeStruct; amount: BigNumberish };
 
 export type AmountStructOutput = [RangeStructOutput, BigNumber] & {
   range: RangeStructOutput;
@@ -44,7 +40,7 @@ export type AmountStructOutput = [RangeStructOutput, BigNumber] & {
 };
 
 export type PositionLiquidityStruct = {
-  liquidity: PromiseOrValue<BigNumberish>;
+  liquidity: BigNumberish;
   range: RangeStruct;
 };
 
@@ -54,12 +50,12 @@ export type PositionLiquidityStructOutput = [BigNumber, RangeStructOutput] & {
 };
 
 export type UnderlyingOutputStruct = {
-  amount0: PromiseOrValue<BigNumberish>;
-  amount1: PromiseOrValue<BigNumberish>;
-  fee0: PromiseOrValue<BigNumberish>;
-  fee1: PromiseOrValue<BigNumberish>;
-  leftOver0: PromiseOrValue<BigNumberish>;
-  leftOver1: PromiseOrValue<BigNumberish>;
+  amount0: BigNumberish;
+  amount1: BigNumberish;
+  fee0: BigNumberish;
+  fee1: BigNumberish;
+  leftOver0: BigNumberish;
+  leftOver1: BigNumberish;
 };
 
 export type UnderlyingOutputStructOutput = [
@@ -102,41 +98,31 @@ export interface IApertureMMVaultHelperInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "token0AndToken1ByRange",
-    values: [
-      RangeStruct[],
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ]
+    values: [RangeStruct[], string, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "token0AndToken1PlusFeesByRange",
-    values: [
-      RangeStruct[],
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ]
+    values: [RangeStruct[], string, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "totalLiquidity",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlying",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlyingAtPrice",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlyingWithFees",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlyingWithFeesAndLeftOver",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
 
   decodeFunctionResult(
@@ -200,9 +186,9 @@ export interface IApertureMMVaultHelper extends BaseContract {
   functions: {
     token0AndToken1ByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<
       [AmountStructOutput[], AmountStructOutput[]] & {
@@ -213,9 +199,9 @@ export interface IApertureMMVaultHelper extends BaseContract {
 
     token0AndToken1PlusFeesByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<
       [
@@ -232,7 +218,7 @@ export interface IApertureMMVaultHelper extends BaseContract {
     >;
 
     totalLiquidity(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<
       [PositionLiquidityStructOutput[]] & {
@@ -241,22 +227,22 @@ export interface IApertureMMVaultHelper extends BaseContract {
     >;
 
     totalUnderlying(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
     totalUnderlyingAtPrice(
-      vault_: PromiseOrValue<string>,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      vault_: string,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
     totalUnderlyingWithFees(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -268,7 +254,7 @@ export interface IApertureMMVaultHelper extends BaseContract {
     >;
 
     totalUnderlyingWithFeesAndLeftOver(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<
       [UnderlyingOutputStructOutput] & {
@@ -279,9 +265,9 @@ export interface IApertureMMVaultHelper extends BaseContract {
 
   token0AndToken1ByRange(
     ranges_: RangeStruct[],
-    token0_: PromiseOrValue<string>,
-    token1_: PromiseOrValue<string>,
-    vaultV2_: PromiseOrValue<string>,
+    token0_: string,
+    token1_: string,
+    vaultV2_: string,
     overrides?: CallOverrides
   ): Promise<
     [AmountStructOutput[], AmountStructOutput[]] & {
@@ -292,9 +278,9 @@ export interface IApertureMMVaultHelper extends BaseContract {
 
   token0AndToken1PlusFeesByRange(
     ranges_: RangeStruct[],
-    token0_: PromiseOrValue<string>,
-    token1_: PromiseOrValue<string>,
-    vaultV2_: PromiseOrValue<string>,
+    token0_: string,
+    token1_: string,
+    vaultV2_: string,
     overrides?: CallOverrides
   ): Promise<
     [
@@ -311,27 +297,27 @@ export interface IApertureMMVaultHelper extends BaseContract {
   >;
 
   totalLiquidity(
-    vault_: PromiseOrValue<string>,
+    vault_: string,
     overrides?: CallOverrides
   ): Promise<PositionLiquidityStructOutput[]>;
 
   totalUnderlying(
-    vault_: PromiseOrValue<string>,
+    vault_: string,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
   >;
 
   totalUnderlyingAtPrice(
-    vault_: PromiseOrValue<string>,
-    sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+    vault_: string,
+    sqrtPriceX96_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
   >;
 
   totalUnderlyingWithFees(
-    vault_: PromiseOrValue<string>,
+    vault_: string,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -343,16 +329,16 @@ export interface IApertureMMVaultHelper extends BaseContract {
   >;
 
   totalUnderlyingWithFeesAndLeftOver(
-    vault_: PromiseOrValue<string>,
+    vault_: string,
     overrides?: CallOverrides
   ): Promise<UnderlyingOutputStructOutput>;
 
   callStatic: {
     token0AndToken1ByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<
       [AmountStructOutput[], AmountStructOutput[]] & {
@@ -363,9 +349,9 @@ export interface IApertureMMVaultHelper extends BaseContract {
 
     token0AndToken1PlusFeesByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<
       [
@@ -382,27 +368,27 @@ export interface IApertureMMVaultHelper extends BaseContract {
     >;
 
     totalLiquidity(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<PositionLiquidityStructOutput[]>;
 
     totalUnderlying(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
     totalUnderlyingAtPrice(
-      vault_: PromiseOrValue<string>,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      vault_: string,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
     totalUnderlyingWithFees(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -414,7 +400,7 @@ export interface IApertureMMVaultHelper extends BaseContract {
     >;
 
     totalUnderlyingWithFeesAndLeftOver(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<UnderlyingOutputStructOutput>;
   };
@@ -424,43 +410,43 @@ export interface IApertureMMVaultHelper extends BaseContract {
   estimateGas: {
     token0AndToken1ByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     token0AndToken1PlusFeesByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalLiquidity(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalUnderlying(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalUnderlyingAtPrice(
-      vault_: PromiseOrValue<string>,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      vault_: string,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalUnderlyingWithFees(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalUnderlyingWithFeesAndLeftOver(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
@@ -468,43 +454,43 @@ export interface IApertureMMVaultHelper extends BaseContract {
   populateTransaction: {
     token0AndToken1ByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     token0AndToken1PlusFeesByRange(
       ranges_: RangeStruct[],
-      token0_: PromiseOrValue<string>,
-      token1_: PromiseOrValue<string>,
-      vaultV2_: PromiseOrValue<string>,
+      token0_: string,
+      token1_: string,
+      vaultV2_: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalLiquidity(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalUnderlying(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalUnderlyingAtPrice(
-      vault_: PromiseOrValue<string>,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      vault_: string,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalUnderlyingWithFees(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalUnderlyingWithFeesAndLeftOver(
-      vault_: PromiseOrValue<string>,
+      vault_: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

@@ -1,7 +1,5 @@
-// import { MMVaultBurnParams, UniV3MintParams } from '../automan';
 import { ApertureMMVault__factory } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, encodeFunctionData } from 'viem';
+import { Address, encodeFunctionData } from 'viem';
 
 import { MMVaultRebalanceParams } from './types';
 

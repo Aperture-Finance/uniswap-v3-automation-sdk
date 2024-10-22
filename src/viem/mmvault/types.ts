@@ -1,10 +1,9 @@
-import { ApertureMMVault__factory } from '@/index';
+import { ApertureMMVault__factory, IApertureMMVault__factory } from '@/index';
 import {
   AbiStateMutability,
   ContractFunctionArgs,
   ContractFunctionReturnType,
 } from 'viem';
-
 import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type MMVaultActionName = 'mint' | 'burn' | 'rebalance';
@@ -30,17 +29,7 @@ export type GetMMVaultReturnTypes<
   args // to dedup function name
 >;
 
-export type MMVaultMintParams = GetAbiFunctionParamsTypes<
-  typeof ApertureMMVault__factory.abi,
-  'mint'
->[0];
-
-export type MMVaultBurnParams = GetAbiFunctionParamsTypes<
-  typeof ApertureMMVault__factory.abi,
-  'burn'
->[0];
-
 export type MMVaultRebalanceParams = GetAbiFunctionParamsTypes<
-  typeof ApertureMMVault__factory.abi,
+  typeof IApertureMMVault__factory.abi,
   'rebalance'
 >[0];

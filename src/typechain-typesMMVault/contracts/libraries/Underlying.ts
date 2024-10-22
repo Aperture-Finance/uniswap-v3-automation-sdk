@@ -18,16 +18,15 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
 export type PositionUnderlyingStruct = {
-  positionId: PromiseOrValue<BytesLike>;
-  sqrtPriceX96: PromiseOrValue<BigNumberish>;
-  pool: PromiseOrValue<string>;
-  tick: PromiseOrValue<BigNumberish>;
-  lowerTick: PromiseOrValue<BigNumberish>;
-  upperTick: PromiseOrValue<BigNumberish>;
+  positionId: BytesLike;
+  sqrtPriceX96: BigNumberish;
+  pool: string;
+  tick: BigNumberish;
+  lowerTick: BigNumberish;
+  upperTick: BigNumberish;
 };
 
 export type PositionUnderlyingStructOutput = [
@@ -47,9 +46,9 @@ export type PositionUnderlyingStructOutput = [
 };
 
 export type RangeStruct = {
-  lowerTick: PromiseOrValue<BigNumberish>;
-  upperTick: PromiseOrValue<BigNumberish>;
-  feeTier: PromiseOrValue<BigNumberish>;
+  lowerTick: BigNumberish;
+  upperTick: BigNumberish;
+  feeTier: BigNumberish;
 };
 
 export type RangeStructOutput = [number, number, number] & {
@@ -60,10 +59,10 @@ export type RangeStructOutput = [number, number, number] & {
 
 export type UnderlyingPayloadStruct = {
   ranges: RangeStruct[];
-  factory: PromiseOrValue<string>;
-  token0: PromiseOrValue<string>;
-  token1: PromiseOrValue<string>;
-  self: PromiseOrValue<string>;
+  factory: string;
+  token0: string;
+  token1: string;
+  self: string;
 };
 
 export type UnderlyingPayloadStructOutput = [
@@ -81,9 +80,9 @@ export type UnderlyingPayloadStructOutput = [
 };
 
 export type RangeDataStruct = {
-  self: PromiseOrValue<string>;
+  self: string;
   range: RangeStruct;
-  pool: PromiseOrValue<string>;
+  pool: string;
 };
 
 export type RangeDataStructOutput = [string, RangeStructOutput, string] & {
@@ -123,21 +122,16 @@ export interface UnderlyingInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "computeMintAmounts",
     values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "getAmountsForDelta",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [BigNumberish, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getUnderlyingBalances",
@@ -145,31 +139,19 @@ export interface UnderlyingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getUnderlyingBalancesMint",
-    values: [
-      PositionUnderlyingStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [PositionUnderlyingStruct, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "subtractAdminFees",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlyingAtPriceWithFees",
-    values: [UnderlyingPayloadStruct, PromiseOrValue<BigNumberish>]
+    values: [UnderlyingPayloadStruct, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlyingForMint",
-    values: [
-      UnderlyingPayloadStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [UnderlyingPayloadStruct, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "totalUnderlyingWithFees",
@@ -177,15 +159,11 @@ export interface UnderlyingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "underlying",
-    values: [RangeDataStruct, PromiseOrValue<BigNumberish>]
+    values: [RangeDataStruct, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "underlyingMint",
-    values: [
-      RangeDataStruct,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [RangeDataStruct, BigNumberish, BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -257,19 +235,19 @@ export interface Underlying extends BaseContract {
 
   functions: {
     computeMintAmounts(
-      current0_: PromiseOrValue<BigNumberish>,
-      current1_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
-      amount0Max_: PromiseOrValue<BigNumberish>,
-      amount1Max_: PromiseOrValue<BigNumberish>,
+      current0_: BigNumberish,
+      current1_: BigNumberish,
+      totalSupply_: BigNumberish,
+      amount0Max_: BigNumberish,
+      amount1Max_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { mintAmount: BigNumber }>;
 
     getAmountsForDelta(
-      sqrtRatioX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioAX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioBX96: PromiseOrValue<BigNumberish>,
-      liquidity: PromiseOrValue<BigNumberish>,
+      sqrtRatioX96: BigNumberish,
+      sqrtRatioAX96: BigNumberish,
+      sqrtRatioBX96: BigNumberish,
+      liquidity: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -289,8 +267,8 @@ export interface Underlying extends BaseContract {
 
     getUnderlyingBalancesMint(
       positionUnderlying_: PositionUnderlyingStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -302,15 +280,15 @@ export interface Underlying extends BaseContract {
     >;
 
     subtractAdminFees(
-      rawFee0_: PromiseOrValue<BigNumberish>,
-      rawFee1_: PromiseOrValue<BigNumberish>,
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
+      rawFee0_: BigNumberish,
+      rawFee1_: BigNumberish,
+      managerFeeBPS_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber, BigNumber] & { fee0: BigNumber; fee1: BigNumber }>;
 
     totalUnderlyingAtPriceWithFees(
       underlyingPayload_: UnderlyingPayloadStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -323,8 +301,8 @@ export interface Underlying extends BaseContract {
 
     totalUnderlyingForMint(
       underlyingPayload_: UnderlyingPayloadStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -344,7 +322,7 @@ export interface Underlying extends BaseContract {
 
     underlying(
       underlying_: RangeDataStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -357,8 +335,8 @@ export interface Underlying extends BaseContract {
 
     underlyingMint(
       underlying_: RangeDataStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -371,19 +349,19 @@ export interface Underlying extends BaseContract {
   };
 
   computeMintAmounts(
-    current0_: PromiseOrValue<BigNumberish>,
-    current1_: PromiseOrValue<BigNumberish>,
-    totalSupply_: PromiseOrValue<BigNumberish>,
-    amount0Max_: PromiseOrValue<BigNumberish>,
-    amount1Max_: PromiseOrValue<BigNumberish>,
+    current0_: BigNumberish,
+    current1_: BigNumberish,
+    totalSupply_: BigNumberish,
+    amount0Max_: BigNumberish,
+    amount1Max_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getAmountsForDelta(
-    sqrtRatioX96: PromiseOrValue<BigNumberish>,
-    sqrtRatioAX96: PromiseOrValue<BigNumberish>,
-    sqrtRatioBX96: PromiseOrValue<BigNumberish>,
-    liquidity: PromiseOrValue<BigNumberish>,
+    sqrtRatioX96: BigNumberish,
+    sqrtRatioAX96: BigNumberish,
+    sqrtRatioBX96: BigNumberish,
+    liquidity: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -403,8 +381,8 @@ export interface Underlying extends BaseContract {
 
   getUnderlyingBalancesMint(
     positionUnderlying_: PositionUnderlyingStruct,
-    mintAmount_: PromiseOrValue<BigNumberish>,
-    totalSupply_: PromiseOrValue<BigNumberish>,
+    mintAmount_: BigNumberish,
+    totalSupply_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -416,15 +394,15 @@ export interface Underlying extends BaseContract {
   >;
 
   subtractAdminFees(
-    rawFee0_: PromiseOrValue<BigNumberish>,
-    rawFee1_: PromiseOrValue<BigNumberish>,
-    managerFeeBPS_: PromiseOrValue<BigNumberish>,
+    rawFee0_: BigNumberish,
+    rawFee1_: BigNumberish,
+    managerFeeBPS_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<[BigNumber, BigNumber] & { fee0: BigNumber; fee1: BigNumber }>;
 
   totalUnderlyingAtPriceWithFees(
     underlyingPayload_: UnderlyingPayloadStruct,
-    sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+    sqrtPriceX96_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -437,8 +415,8 @@ export interface Underlying extends BaseContract {
 
   totalUnderlyingForMint(
     underlyingPayload_: UnderlyingPayloadStruct,
-    mintAmount_: PromiseOrValue<BigNumberish>,
-    totalSupply_: PromiseOrValue<BigNumberish>,
+    mintAmount_: BigNumberish,
+    totalSupply_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -458,7 +436,7 @@ export interface Underlying extends BaseContract {
 
   underlying(
     underlying_: RangeDataStruct,
-    sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+    sqrtPriceX96_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -471,8 +449,8 @@ export interface Underlying extends BaseContract {
 
   underlyingMint(
     underlying_: RangeDataStruct,
-    mintAmount_: PromiseOrValue<BigNumberish>,
-    totalSupply_: PromiseOrValue<BigNumberish>,
+    mintAmount_: BigNumberish,
+    totalSupply_: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -485,19 +463,19 @@ export interface Underlying extends BaseContract {
 
   callStatic: {
     computeMintAmounts(
-      current0_: PromiseOrValue<BigNumberish>,
-      current1_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
-      amount0Max_: PromiseOrValue<BigNumberish>,
-      amount1Max_: PromiseOrValue<BigNumberish>,
+      current0_: BigNumberish,
+      current1_: BigNumberish,
+      totalSupply_: BigNumberish,
+      amount0Max_: BigNumberish,
+      amount1Max_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getAmountsForDelta(
-      sqrtRatioX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioAX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioBX96: PromiseOrValue<BigNumberish>,
-      liquidity: PromiseOrValue<BigNumberish>,
+      sqrtRatioX96: BigNumberish,
+      sqrtRatioAX96: BigNumberish,
+      sqrtRatioBX96: BigNumberish,
+      liquidity: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -517,8 +495,8 @@ export interface Underlying extends BaseContract {
 
     getUnderlyingBalancesMint(
       positionUnderlying_: PositionUnderlyingStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -530,15 +508,15 @@ export interface Underlying extends BaseContract {
     >;
 
     subtractAdminFees(
-      rawFee0_: PromiseOrValue<BigNumberish>,
-      rawFee1_: PromiseOrValue<BigNumberish>,
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
+      rawFee0_: BigNumberish,
+      rawFee1_: BigNumberish,
+      managerFeeBPS_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber, BigNumber] & { fee0: BigNumber; fee1: BigNumber }>;
 
     totalUnderlyingAtPriceWithFees(
       underlyingPayload_: UnderlyingPayloadStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -551,8 +529,8 @@ export interface Underlying extends BaseContract {
 
     totalUnderlyingForMint(
       underlyingPayload_: UnderlyingPayloadStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -572,7 +550,7 @@ export interface Underlying extends BaseContract {
 
     underlying(
       underlying_: RangeDataStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -585,8 +563,8 @@ export interface Underlying extends BaseContract {
 
     underlyingMint(
       underlying_: RangeDataStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -602,19 +580,19 @@ export interface Underlying extends BaseContract {
 
   estimateGas: {
     computeMintAmounts(
-      current0_: PromiseOrValue<BigNumberish>,
-      current1_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
-      amount0Max_: PromiseOrValue<BigNumberish>,
-      amount1Max_: PromiseOrValue<BigNumberish>,
+      current0_: BigNumberish,
+      current1_: BigNumberish,
+      totalSupply_: BigNumberish,
+      amount0Max_: BigNumberish,
+      amount1Max_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getAmountsForDelta(
-      sqrtRatioX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioAX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioBX96: PromiseOrValue<BigNumberish>,
-      liquidity: PromiseOrValue<BigNumberish>,
+      sqrtRatioX96: BigNumberish,
+      sqrtRatioAX96: BigNumberish,
+      sqrtRatioBX96: BigNumberish,
+      liquidity: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -625,28 +603,28 @@ export interface Underlying extends BaseContract {
 
     getUnderlyingBalancesMint(
       positionUnderlying_: PositionUnderlyingStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     subtractAdminFees(
-      rawFee0_: PromiseOrValue<BigNumberish>,
-      rawFee1_: PromiseOrValue<BigNumberish>,
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
+      rawFee0_: BigNumberish,
+      rawFee1_: BigNumberish,
+      managerFeeBPS_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalUnderlyingAtPriceWithFees(
       underlyingPayload_: UnderlyingPayloadStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     totalUnderlyingForMint(
       underlyingPayload_: UnderlyingPayloadStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -657,33 +635,33 @@ export interface Underlying extends BaseContract {
 
     underlying(
       underlying_: RangeDataStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     underlyingMint(
       underlying_: RangeDataStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     computeMintAmounts(
-      current0_: PromiseOrValue<BigNumberish>,
-      current1_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
-      amount0Max_: PromiseOrValue<BigNumberish>,
-      amount1Max_: PromiseOrValue<BigNumberish>,
+      current0_: BigNumberish,
+      current1_: BigNumberish,
+      totalSupply_: BigNumberish,
+      amount0Max_: BigNumberish,
+      amount1Max_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getAmountsForDelta(
-      sqrtRatioX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioAX96: PromiseOrValue<BigNumberish>,
-      sqrtRatioBX96: PromiseOrValue<BigNumberish>,
-      liquidity: PromiseOrValue<BigNumberish>,
+      sqrtRatioX96: BigNumberish,
+      sqrtRatioAX96: BigNumberish,
+      sqrtRatioBX96: BigNumberish,
+      liquidity: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -694,28 +672,28 @@ export interface Underlying extends BaseContract {
 
     getUnderlyingBalancesMint(
       positionUnderlying_: PositionUnderlyingStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     subtractAdminFees(
-      rawFee0_: PromiseOrValue<BigNumberish>,
-      rawFee1_: PromiseOrValue<BigNumberish>,
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
+      rawFee0_: BigNumberish,
+      rawFee1_: BigNumberish,
+      managerFeeBPS_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalUnderlyingAtPriceWithFees(
       underlyingPayload_: UnderlyingPayloadStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     totalUnderlyingForMint(
       underlyingPayload_: UnderlyingPayloadStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -726,14 +704,14 @@ export interface Underlying extends BaseContract {
 
     underlying(
       underlying_: RangeDataStruct,
-      sqrtPriceX96_: PromiseOrValue<BigNumberish>,
+      sqrtPriceX96_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     underlyingMint(
       underlying_: RangeDataStruct,
-      mintAmount_: PromiseOrValue<BigNumberish>,
-      totalSupply_: PromiseOrValue<BigNumberish>,
+      mintAmount_: BigNumberish,
+      totalSupply_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

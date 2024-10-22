@@ -24,13 +24,12 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
 export type RangeStruct = {
-  lowerTick: PromiseOrValue<BigNumberish>;
-  upperTick: PromiseOrValue<BigNumberish>;
-  feeTier: PromiseOrValue<BigNumberish>;
+  lowerTick: BigNumberish;
+  upperTick: BigNumberish;
+  feeTier: BigNumberish;
 };
 
 export type RangeStructOutput = [number, number, number] & {
@@ -40,7 +39,7 @@ export type RangeStructOutput = [number, number, number] & {
 };
 
 export type PositionLiquidityStruct = {
-  liquidity: PromiseOrValue<BigNumberish>;
+  liquidity: BigNumberish;
   range: RangeStruct;
 };
 
@@ -50,11 +49,11 @@ export type PositionLiquidityStructOutput = [BigNumber, RangeStructOutput] & {
 };
 
 export type SwapPayloadStruct = {
-  payload: PromiseOrValue<BytesLike>;
-  router: PromiseOrValue<string>;
-  amountIn: PromiseOrValue<BigNumberish>;
-  expectedMinReturn: PromiseOrValue<BigNumberish>;
-  zeroForOne: PromiseOrValue<boolean>;
+  payload: BytesLike;
+  router: string;
+  amountIn: BigNumberish;
+  expectedMinReturn: BigNumberish;
+  zeroForOne: boolean;
 };
 
 export type SwapPayloadStructOutput = [
@@ -75,10 +74,10 @@ export type RebalanceStruct = {
   burns: PositionLiquidityStruct[];
   mints: PositionLiquidityStruct[];
   swap: SwapPayloadStruct;
-  minBurn0: PromiseOrValue<BigNumberish>;
-  minBurn1: PromiseOrValue<BigNumberish>;
-  minDeposit0: PromiseOrValue<BigNumberish>;
-  minDeposit1: PromiseOrValue<BigNumberish>;
+  minBurn0: BigNumberish;
+  minBurn1: BigNumberish;
+  minDeposit0: BigNumberish;
+  minDeposit1: BigNumberish;
 };
 
 export type RebalanceStructOutput = [
@@ -100,15 +99,15 @@ export type RebalanceStructOutput = [
 };
 
 export type InitializePayloadStruct = {
-  feeTiers: PromiseOrValue<BigNumberish>[];
-  token0: PromiseOrValue<string>;
-  token1: PromiseOrValue<string>;
-  owner: PromiseOrValue<string>;
-  init0: PromiseOrValue<BigNumberish>;
-  init1: PromiseOrValue<BigNumberish>;
-  feeCollector: PromiseOrValue<string>;
-  managers: PromiseOrValue<string>[];
-  routers: PromiseOrValue<string>[];
+  feeTiers: BigNumberish[];
+  token0: string;
+  token1: string;
+  owner: string;
+  init0: BigNumberish;
+  init1: BigNumberish;
+  feeCollector: string;
+  managers: string[];
+  routers: string[];
 };
 
 export type InitializePayloadStructOutput = [
@@ -217,28 +216,25 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "addPools",
-    values: [PromiseOrValue<BigNumberish>[]]
+    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "allowance",
-    values: [PromiseOrValue<string>, PromiseOrValue<string>]
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "approve",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "balanceOf",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(
     functionFragment: "blacklistRouters",
-    values: [PromiseOrValue<string>[]]
+    values: [string[]]
   ): string;
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "decreaseAllowance",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
@@ -253,17 +249,13 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "increaseAllowance",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "init0", values?: undefined): string;
   encodeFunctionData(functionFragment: "init1", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      InitializePayloadStruct
-    ]
+    values: [string, string, InitializePayloadStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "managerBalance0",
@@ -277,15 +269,12 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
     functionFragment: "managerFeeBPS",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "managers",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "managers", values: [string]): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "removePools",
-    values: [PromiseOrValue<string>[]]
+    values: [string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -297,19 +286,19 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setInits",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setManagerFeeBPS",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setManagers",
-    values: [PromiseOrValue<string>[], PromiseOrValue<boolean>[]]
+    values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
     functionFragment: "setRestrictedMint",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
   encodeFunctionData(functionFragment: "token0", values?: undefined): string;
@@ -320,23 +309,19 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "transfer",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "transferFrom",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "whitelistRouters",
-    values: [PromiseOrValue<string>[]]
+    values: [string[]]
   ): string;
 
   decodeFunctionResult(functionFragment: "addPools", data: BytesLike): Result;
@@ -437,7 +422,7 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
     "LogBurn(address,uint256,uint256,uint256)": EventFragment;
     "LogCollectedFees(uint256,uint256)": EventFragment;
     "LogMint(address,uint256,uint256,uint256)": EventFragment;
-    "LogRebalance(tuple,uint256,uint256)": EventFragment;
+    "LogRebalance(((uint128,(int24,int24,uint24))[],(uint128,(int24,int24,uint24))[],(bytes,address,uint256,uint256,bool),uint256,uint256,uint256,uint256),uint256,uint256)": EventFragment;
     "LogRemovePools(address[])": EventFragment;
     "LogRestrictedMint(address)": EventFragment;
     "LogSetInits(uint256,uint256)": EventFragment;
@@ -697,38 +682,35 @@ export interface ApertureMMVaultStorage extends BaseContract {
 
   functions: {
     addPools(
-      feeTiers_: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feeTiers_: BigNumberish[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     allowance(
-      owner: PromiseOrValue<string>,
-      spender: PromiseOrValue<string>,
+      owner: string,
+      spender: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     approve(
-      spender: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    balanceOf(account: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     blacklistRouters(
-      routers_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     decimals(overrides?: CallOverrides): Promise<[number]>;
 
     decreaseAllowance(
-      spender: PromiseOrValue<string>,
-      subtractedValue: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      subtractedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     factory(overrides?: CallOverrides): Promise<[string]>;
@@ -742,9 +724,9 @@ export interface ApertureMMVaultStorage extends BaseContract {
     getRouters(overrides?: CallOverrides): Promise<[string[]]>;
 
     increaseAllowance(
-      spender: PromiseOrValue<string>,
-      addedValue: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      addedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     init0(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -752,10 +734,10 @@ export interface ApertureMMVaultStorage extends BaseContract {
     init1(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     initialize(
-      name_: PromiseOrValue<string>,
-      symbol_: PromiseOrValue<string>,
+      name_: string,
+      symbol_: string,
       params_: InitializePayloadStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     managerBalance0(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -764,46 +746,43 @@ export interface ApertureMMVaultStorage extends BaseContract {
 
     managerFeeBPS(overrides?: CallOverrides): Promise<[number]>;
 
-    managers(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    managers(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     removePools(
-      pools_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      pools_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     restrictedMint(overrides?: CallOverrides): Promise<[string]>;
 
     setInits(
-      init0_: PromiseOrValue<BigNumberish>,
-      init1_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      init0_: BigNumberish,
+      init1_: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setManagerFeeBPS(
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      managerFeeBPS_: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setManagers(
-      managers_: PromiseOrValue<string>[],
-      statuses_: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      managers_: string[],
+      statuses_: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setRestrictedMint(
-      minter_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      minter_: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     symbol(overrides?: CallOverrides): Promise<[string]>;
@@ -815,62 +794,59 @@ export interface ApertureMMVaultStorage extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transfer(
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      to: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     transferFrom(
-      from: PromiseOrValue<string>,
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      from: string,
+      to: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     whitelistRouters(
-      routers_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
 
   addPools(
-    feeTiers_: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    feeTiers_: BigNumberish[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   allowance(
-    owner: PromiseOrValue<string>,
-    spender: PromiseOrValue<string>,
+    owner: string,
+    spender: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   approve(
-    spender: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    spender: string,
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  balanceOf(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  balanceOf(account: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   blacklistRouters(
-    routers_: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    routers_: string[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   decimals(overrides?: CallOverrides): Promise<number>;
 
   decreaseAllowance(
-    spender: PromiseOrValue<string>,
-    subtractedValue: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    spender: string,
+    subtractedValue: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   factory(overrides?: CallOverrides): Promise<string>;
@@ -884,9 +860,9 @@ export interface ApertureMMVaultStorage extends BaseContract {
   getRouters(overrides?: CallOverrides): Promise<string[]>;
 
   increaseAllowance(
-    spender: PromiseOrValue<string>,
-    addedValue: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    spender: string,
+    addedValue: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   init0(overrides?: CallOverrides): Promise<BigNumber>;
@@ -894,10 +870,10 @@ export interface ApertureMMVaultStorage extends BaseContract {
   init1(overrides?: CallOverrides): Promise<BigNumber>;
 
   initialize(
-    name_: PromiseOrValue<string>,
-    symbol_: PromiseOrValue<string>,
+    name_: string,
+    symbol_: string,
     params_: InitializePayloadStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   managerBalance0(overrides?: CallOverrides): Promise<BigNumber>;
@@ -906,46 +882,43 @@ export interface ApertureMMVaultStorage extends BaseContract {
 
   managerFeeBPS(overrides?: CallOverrides): Promise<number>;
 
-  managers(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  managers(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   name(overrides?: CallOverrides): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
   removePools(
-    pools_: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    pools_: string[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   renounceOwnership(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   restrictedMint(overrides?: CallOverrides): Promise<string>;
 
   setInits(
-    init0_: PromiseOrValue<BigNumberish>,
-    init1_: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    init0_: BigNumberish,
+    init1_: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setManagerFeeBPS(
-    managerFeeBPS_: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    managerFeeBPS_: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setManagers(
-    managers_: PromiseOrValue<string>[],
-    statuses_: PromiseOrValue<boolean>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    managers_: string[],
+    statuses_: boolean[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setRestrictedMint(
-    minter_: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    minter_: string,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   symbol(overrides?: CallOverrides): Promise<string>;
@@ -957,61 +930,58 @@ export interface ApertureMMVaultStorage extends BaseContract {
   totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
   transfer(
-    to: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    to: string,
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   transferFrom(
-    from: PromiseOrValue<string>,
-    to: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    from: string,
+    to: string,
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   transferOwnership(
-    newOwner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    newOwner: string,
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   whitelistRouters(
-    routers_: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    routers_: string[],
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     addPools(
-      feeTiers_: PromiseOrValue<BigNumberish>[],
+      feeTiers_: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     allowance(
-      owner: PromiseOrValue<string>,
-      spender: PromiseOrValue<string>,
+      owner: string,
+      spender: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     approve(
-      spender: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      spender: string,
+      amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    balanceOf(account: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     blacklistRouters(
-      routers_: PromiseOrValue<string>[],
+      routers_: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     decimals(overrides?: CallOverrides): Promise<number>;
 
     decreaseAllowance(
-      spender: PromiseOrValue<string>,
-      subtractedValue: PromiseOrValue<BigNumberish>,
+      spender: string,
+      subtractedValue: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1026,8 +996,8 @@ export interface ApertureMMVaultStorage extends BaseContract {
     getRouters(overrides?: CallOverrides): Promise<string[]>;
 
     increaseAllowance(
-      spender: PromiseOrValue<string>,
-      addedValue: PromiseOrValue<BigNumberish>,
+      spender: string,
+      addedValue: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1036,8 +1006,8 @@ export interface ApertureMMVaultStorage extends BaseContract {
     init1(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
-      name_: PromiseOrValue<string>,
-      symbol_: PromiseOrValue<string>,
+      name_: string,
+      symbol_: string,
       params_: InitializePayloadStruct,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1048,43 +1018,37 @@ export interface ApertureMMVaultStorage extends BaseContract {
 
     managerFeeBPS(overrides?: CallOverrides): Promise<number>;
 
-    managers(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    managers(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    removePools(
-      pools_: PromiseOrValue<string>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
+    removePools(pools_: string[], overrides?: CallOverrides): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     restrictedMint(overrides?: CallOverrides): Promise<string>;
 
     setInits(
-      init0_: PromiseOrValue<BigNumberish>,
-      init1_: PromiseOrValue<BigNumberish>,
+      init0_: BigNumberish,
+      init1_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     setManagerFeeBPS(
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
+      managerFeeBPS_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     setManagers(
-      managers_: PromiseOrValue<string>[],
-      statuses_: PromiseOrValue<boolean>[],
+      managers_: string[],
+      statuses_: boolean[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     setRestrictedMint(
-      minter_: PromiseOrValue<string>,
+      minter_: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1097,38 +1061,38 @@ export interface ApertureMMVaultStorage extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     transfer(
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      to: string,
+      amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     transferFrom(
-      from: PromiseOrValue<string>,
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      from: string,
+      to: string,
+      amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
+      newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
     whitelistRouters(
-      routers_: PromiseOrValue<string>[],
+      routers_: string[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
     "Approval(address,address,uint256)"(
-      owner?: PromiseOrValue<string> | null,
-      spender?: PromiseOrValue<string> | null,
+      owner?: string | null,
+      spender?: string | null,
       value?: null
     ): ApprovalEventFilter;
     Approval(
-      owner?: PromiseOrValue<string> | null,
-      spender?: PromiseOrValue<string> | null,
+      owner?: string | null,
+      spender?: string | null,
       value?: null
     ): ApprovalEventFilter;
 
@@ -1136,12 +1100,12 @@ export interface ApertureMMVaultStorage extends BaseContract {
     Initialized(version?: null): InitializedEventFilter;
 
     "LPBurned(address,uint256,uint256)"(
-      user?: PromiseOrValue<string> | null,
+      user?: string | null,
       burnAmount0?: null,
       burnAmount1?: null
     ): LPBurnedEventFilter;
     LPBurned(
-      user?: PromiseOrValue<string> | null,
+      user?: string | null,
       burnAmount0?: null,
       burnAmount1?: null
     ): LPBurnedEventFilter;
@@ -1155,13 +1119,13 @@ export interface ApertureMMVaultStorage extends BaseContract {
     LogBlacklistRouters(routers?: null): LogBlacklistRoutersEventFilter;
 
     "LogBurn(address,uint256,uint256,uint256)"(
-      receiver?: PromiseOrValue<string> | null,
+      receiver?: string | null,
       burnAmount?: null,
       amount0Out?: null,
       amount1Out?: null
     ): LogBurnEventFilter;
     LogBurn(
-      receiver?: PromiseOrValue<string> | null,
+      receiver?: string | null,
       burnAmount?: null,
       amount0Out?: null,
       amount1Out?: null
@@ -1174,19 +1138,19 @@ export interface ApertureMMVaultStorage extends BaseContract {
     LogCollectedFees(fee0?: null, fee1?: null): LogCollectedFeesEventFilter;
 
     "LogMint(address,uint256,uint256,uint256)"(
-      receiver?: PromiseOrValue<string> | null,
+      receiver?: string | null,
       mintAmount?: null,
       amount0In?: null,
       amount1In?: null
     ): LogMintEventFilter;
     LogMint(
-      receiver?: PromiseOrValue<string> | null,
+      receiver?: string | null,
       mintAmount?: null,
       amount0In?: null,
       amount1In?: null
     ): LogMintEventFilter;
 
-    "LogRebalance(tuple,uint256,uint256)"(
+    "LogRebalance(((uint128,(int24,int24,uint24))[],(uint128,(int24,int24,uint24))[],(bytes,address,uint256,uint256,bool),uint256,uint256,uint256,uint256),uint256,uint256)"(
       rebalanceParams?: null,
       swapDelta0?: null,
       swapDelta1?: null
@@ -1238,60 +1202,57 @@ export interface ApertureMMVaultStorage extends BaseContract {
     ): LogWithdrawManagerBalanceEventFilter;
 
     "OwnershipTransferred(address,address)"(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
+      previousOwner?: string | null,
+      newOwner?: string | null
     ): OwnershipTransferredEventFilter;
     OwnershipTransferred(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
+      previousOwner?: string | null,
+      newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
     "Transfer(address,address,uint256)"(
-      from?: PromiseOrValue<string> | null,
-      to?: PromiseOrValue<string> | null,
+      from?: string | null,
+      to?: string | null,
       value?: null
     ): TransferEventFilter;
     Transfer(
-      from?: PromiseOrValue<string> | null,
-      to?: PromiseOrValue<string> | null,
+      from?: string | null,
+      to?: string | null,
       value?: null
     ): TransferEventFilter;
   };
 
   estimateGas: {
     addPools(
-      feeTiers_: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feeTiers_: BigNumberish[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     allowance(
-      owner: PromiseOrValue<string>,
-      spender: PromiseOrValue<string>,
+      owner: string,
+      spender: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     approve(
-      spender: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    balanceOf(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    balanceOf(account: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     blacklistRouters(
-      routers_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
 
     decreaseAllowance(
-      spender: PromiseOrValue<string>,
-      subtractedValue: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      subtractedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     factory(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1305,9 +1266,9 @@ export interface ApertureMMVaultStorage extends BaseContract {
     getRouters(overrides?: CallOverrides): Promise<BigNumber>;
 
     increaseAllowance(
-      spender: PromiseOrValue<string>,
-      addedValue: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      addedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     init0(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1315,10 +1276,10 @@ export interface ApertureMMVaultStorage extends BaseContract {
     init1(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
-      name_: PromiseOrValue<string>,
-      symbol_: PromiseOrValue<string>,
+      name_: string,
+      symbol_: string,
       params_: InitializePayloadStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     managerBalance0(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1327,46 +1288,43 @@ export interface ApertureMMVaultStorage extends BaseContract {
 
     managerFeeBPS(overrides?: CallOverrides): Promise<BigNumber>;
 
-    managers(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    managers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     removePools(
-      pools_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      pools_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     restrictedMint(overrides?: CallOverrides): Promise<BigNumber>;
 
     setInits(
-      init0_: PromiseOrValue<BigNumberish>,
-      init1_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      init0_: BigNumberish,
+      init1_: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setManagerFeeBPS(
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      managerFeeBPS_: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setManagers(
-      managers_: PromiseOrValue<string>[],
-      statuses_: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      managers_: string[],
+      statuses_: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setRestrictedMint(
-      minter_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      minter_: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     symbol(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1378,63 +1336,63 @@ export interface ApertureMMVaultStorage extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     transfer(
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      to: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     transferFrom(
-      from: PromiseOrValue<string>,
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      from: string,
+      to: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     whitelistRouters(
-      routers_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     addPools(
-      feeTiers_: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      feeTiers_: BigNumberish[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     allowance(
-      owner: PromiseOrValue<string>,
-      spender: PromiseOrValue<string>,
+      owner: string,
+      spender: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     approve(
-      spender: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     balanceOf(
-      account: PromiseOrValue<string>,
+      account: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     blacklistRouters(
-      routers_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     decreaseAllowance(
-      spender: PromiseOrValue<string>,
-      subtractedValue: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      subtractedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1448,9 +1406,9 @@ export interface ApertureMMVaultStorage extends BaseContract {
     getRouters(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     increaseAllowance(
-      spender: PromiseOrValue<string>,
-      addedValue: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      spender: string,
+      addedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     init0(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1458,10 +1416,10 @@ export interface ApertureMMVaultStorage extends BaseContract {
     init1(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialize(
-      name_: PromiseOrValue<string>,
-      symbol_: PromiseOrValue<string>,
+      name_: string,
+      symbol_: string,
       params_: InitializePayloadStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     managerBalance0(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1471,7 +1429,7 @@ export interface ApertureMMVaultStorage extends BaseContract {
     managerFeeBPS(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     managers(
-      arg0: PromiseOrValue<string>,
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1480,36 +1438,36 @@ export interface ApertureMMVaultStorage extends BaseContract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     removePools(
-      pools_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      pools_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     restrictedMint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setInits(
-      init0_: PromiseOrValue<BigNumberish>,
-      init1_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      init0_: BigNumberish,
+      init1_: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setManagerFeeBPS(
-      managerFeeBPS_: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      managerFeeBPS_: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setManagers(
-      managers_: PromiseOrValue<string>[],
-      statuses_: PromiseOrValue<boolean>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      managers_: string[],
+      statuses_: boolean[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setRestrictedMint(
-      minter_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      minter_: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1521,26 +1479,26 @@ export interface ApertureMMVaultStorage extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transfer(
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      to: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     transferFrom(
-      from: PromiseOrValue<string>,
-      to: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      from: string,
+      to: string,
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     whitelistRouters(
-      routers_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      routers_: string[],
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }

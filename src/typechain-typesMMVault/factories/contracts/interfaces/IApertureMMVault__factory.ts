@@ -1223,7 +1223,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class IApertureMMVault__factory {
   static readonly abi = _abi;

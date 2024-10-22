@@ -18,13 +18,12 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
 export type RangeStruct = {
-  lowerTick: PromiseOrValue<BigNumberish>;
-  upperTick: PromiseOrValue<BigNumberish>;
-  feeTier: PromiseOrValue<BigNumberish>;
+  lowerTick: BigNumberish;
+  upperTick: BigNumberish;
+  feeTier: BigNumberish;
 };
 
 export type RangeStructOutput = [number, number, number] & {
@@ -42,7 +41,7 @@ export interface PoolInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "validateTickSpacing",
-    values: [PromiseOrValue<string>, RangeStruct]
+    values: [string, RangeStruct]
   ): string;
 
   decodeFunctionResult(
@@ -81,21 +80,21 @@ export interface Pool extends BaseContract {
 
   functions: {
     validateTickSpacing(
-      pool_: PromiseOrValue<string>,
+      pool_: string,
       range_: RangeStruct,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
   };
 
   validateTickSpacing(
-    pool_: PromiseOrValue<string>,
+    pool_: string,
     range_: RangeStruct,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   callStatic: {
     validateTickSpacing(
-      pool_: PromiseOrValue<string>,
+      pool_: string,
       range_: RangeStruct,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -105,7 +104,7 @@ export interface Pool extends BaseContract {
 
   estimateGas: {
     validateTickSpacing(
-      pool_: PromiseOrValue<string>,
+      pool_: string,
       range_: RangeStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -113,7 +112,7 @@ export interface Pool extends BaseContract {
 
   populateTransaction: {
     validateTickSpacing(
-      pool_: PromiseOrValue<string>,
+      pool_: string,
       range_: RangeStruct,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
