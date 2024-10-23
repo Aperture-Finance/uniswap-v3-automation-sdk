@@ -182,7 +182,10 @@ export function normalizeTicks(
   isLte: boolean = true,
 ) {
   let tickLower: number, tickUpper: number;
-  if (action.type === ActionTypeEnum.enum.MarketMaking) {
+  if (
+    action.type === ActionTypeEnum.enum.MarketMakingMain ||
+    action.type === ActionTypeEnum.enum.MarketMakingIceberg
+  ) {
     return normalizeTicks(action.action, pool, isLte);
   } else if (action.type === ActionTypeEnum.enum.Rebalance) {
     tickLower =
