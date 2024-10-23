@@ -83,7 +83,8 @@ export const ActionTypeEnum = z
     'RecurringPrice',
     'RecurringRatio',
     'RecurringDualAction',
-    'MarketMaking',
+    'MarketMakingMain',
+    'MarketMakingIceberg',
   ])
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
@@ -533,7 +534,10 @@ const NonRecurringActionSchema = z.discriminatedUnion('type', [
 ]);
 
 export const MarketMakingActionSchema = BaseRecurringActionSchema.extend({
-  type: z.literal(ActionTypeEnum.enum.MarketMaking),
+  type: z.union([
+    z.literal(ActionTypeEnum.enum.MarketMakingMain),
+    z.literal(ActionTypeEnum.enum.MarketMakingIceberg),
+  ]),
   condition: ConditionSchema, // Regular condition when not below conditionMinPrice nor above conditionMaxPrice
   conditionMinPrice: z
     .string()
