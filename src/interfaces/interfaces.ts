@@ -651,7 +651,9 @@ const MMVaultTriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
   taskId: z
     .number()
     .nonnegative()
-    .describe("The task id of the MMVault trigger in Aperture's automation service."),
+    .describe(
+      "The task id of the MMVault trigger in Aperture's automation service.",
+    ),
 });
 
 // Used for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
@@ -689,33 +691,38 @@ export type CreateMMVaultTriggerPayload = z.infer<
   typeof CreateMMVaultTriggerPayloadSchema
 >;
 
-export const UpdateMMVaultTriggerPayloadSchema = MMVaultTriggerIdentifierSchema.extend({
-  action: ActionSchema.optional().describe(
-    'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
-  ),
-  condition: ConditionSchema.optional().describe(
-    'If populated, update the condition to details specified here; otherwise, condition details remain unchanged.',
-  ),
-  expiration: z
-    .number()
-    .int()
-    .positive()
-    .refine(
-      (date: number) =>
-        date <=
-        Math.floor(Date.now() / 1000) +
-          AUTOMATION_EXPIRATION_IN_SECS +
-          AUTOMATION_SLACK_IN_SECS,
-      {
-        message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
-      },
-    )
-    .describe('Unix timestamp in seconds when this trigger expires.'),
-});
-export type UpdateMMVaultTriggerPayload = z.infer<typeof UpdateMMVaultTriggerPayloadSchema>;
+export const UpdateMMVaultTriggerPayloadSchema =
+  MMVaultTriggerIdentifierSchema.extend({
+    action: ActionSchema.optional().describe(
+      'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
+    ),
+    condition: ConditionSchema.optional().describe(
+      'If populated, update the condition to details specified here; otherwise, condition details remain unchanged.',
+    ),
+    expiration: z
+      .number()
+      .int()
+      .positive()
+      .refine(
+        (date: number) =>
+          date <=
+          Math.floor(Date.now() / 1000) +
+            AUTOMATION_EXPIRATION_IN_SECS +
+            AUTOMATION_SLACK_IN_SECS,
+        {
+          message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
+        },
+      )
+      .describe('Unix timestamp in seconds when this trigger expires.'),
+  });
+export type UpdateMMVaultTriggerPayload = z.infer<
+  typeof UpdateMMVaultTriggerPayloadSchema
+>;
 
 export const DeleteMMVaultTriggerPayloadSchema = MMVaultTriggerIdentifierSchema;
-export type DeleteMMVaultTriggerPayload = z.infer<typeof DeleteMMVaultTriggerPayloadSchema>;
+export type DeleteMMVaultTriggerPayload = z.infer<
+  typeof DeleteMMVaultTriggerPayloadSchema
+>;
 
 export const PermitInfoSchema = z
   .object({
