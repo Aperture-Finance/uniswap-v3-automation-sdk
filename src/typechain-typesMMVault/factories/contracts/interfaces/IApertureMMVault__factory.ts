@@ -542,10 +542,23 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "decimals",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
-        name: "burnAmount_",
+        name: "mintAmount_",
         type: "uint256",
       },
       {
@@ -553,8 +566,18 @@ const _abi = [
         name: "receiver_",
         type: "address",
       },
+      {
+        internalType: "uint256",
+        name: "token0Max_",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1Max_",
+        type: "uint256",
+      },
     ],
-    name: "burn",
+    name: "deposit",
     outputs: [
       {
         internalType: "uint256",
@@ -568,19 +591,6 @@ const _abi = [
       },
     ],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "decimals",
-    outputs: [
-      {
-        internalType: "uint8",
-        name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -798,35 +808,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "mintAmount_",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "receiver_",
-        type: "address",
-      },
-    ],
-    name: "mint",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "amount0",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount1",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1218,6 +1199,45 @@ const _abi = [
     ],
     name: "whitelistRouters",
     outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "burnAmount_",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "receiver_",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "token0Min_",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1Min_",
+        type: "uint256",
+      },
+    ],
+    name: "withdraw",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amount0",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },

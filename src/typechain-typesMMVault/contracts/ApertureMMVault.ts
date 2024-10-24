@@ -139,9 +139,9 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "blacklistRouters(address[])": FunctionFragment;
-    "burn(uint256,address)": FunctionFragment;
     "decimals()": FunctionFragment;
     "decreaseAllowance(address,uint256)": FunctionFragment;
+    "deposit(uint256,address,uint256,uint256)": FunctionFragment;
     "factory()": FunctionFragment;
     "feeCollector()": FunctionFragment;
     "getPools()": FunctionFragment;
@@ -155,7 +155,6 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     "managerBalance1()": FunctionFragment;
     "managerFeeBPS()": FunctionFragment;
     "managers(address)": FunctionFragment;
-    "mint(uint256,address)": FunctionFragment;
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "rebalance(((uint128,(int24,int24,uint24))[],(uint128,(int24,int24,uint24))[],(bytes,address,uint256,uint256,bool),uint256,uint256,uint256,uint256),uint256)": FunctionFragment;
@@ -175,6 +174,7 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     "transferOwnership(address)": FunctionFragment;
     "uniswapV3MintCallback(uint256,uint256,bytes)": FunctionFragment;
     "whitelistRouters(address[])": FunctionFragment;
+    "withdraw(uint256,address,uint256,uint256)": FunctionFragment;
     "withdrawManagerBalance()": FunctionFragment;
   };
 
@@ -185,9 +185,9 @@ export interface ApertureMMVaultInterface extends utils.Interface {
       | "approve"
       | "balanceOf"
       | "blacklistRouters"
-      | "burn"
       | "decimals"
       | "decreaseAllowance"
+      | "deposit"
       | "factory"
       | "feeCollector"
       | "getPools"
@@ -201,7 +201,6 @@ export interface ApertureMMVaultInterface extends utils.Interface {
       | "managerBalance1"
       | "managerFeeBPS"
       | "managers"
-      | "mint"
       | "name"
       | "owner"
       | "rebalance"
@@ -221,6 +220,7 @@ export interface ApertureMMVaultInterface extends utils.Interface {
       | "transferOwnership"
       | "uniswapV3MintCallback"
       | "whitelistRouters"
+      | "withdraw"
       | "withdrawManagerBalance"
   ): FunctionFragment;
 
@@ -241,14 +241,14 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     functionFragment: "blacklistRouters",
     values: [string[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "burn",
-    values: [BigNumberish, string]
-  ): string;
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "decreaseAllowance",
     values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deposit",
+    values: [BigNumberish, string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
@@ -284,10 +284,6 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "managers", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "mint",
-    values: [BigNumberish, string]
-  ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -350,6 +346,10 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     values: [string[]]
   ): string;
   encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [BigNumberish, string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "withdrawManagerBalance",
     values?: undefined
   ): string;
@@ -362,12 +362,12 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     functionFragment: "blacklistRouters",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "decreaseAllowance",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "feeCollector",
@@ -396,7 +396,6 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "managers", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "rebalance", data: BytesLike): Result;
@@ -449,6 +448,7 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     functionFragment: "whitelistRouters",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawManagerBalance",
     data: BytesLike
@@ -746,17 +746,19 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    burn(
-      burnAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     decimals(overrides?: CallOverrides): Promise<[number]>;
 
     decreaseAllowance(
       spender: string,
       subtractedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    deposit(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Max_: BigNumberish,
+      token1Max_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -795,19 +797,13 @@ export interface ApertureMMVault extends BaseContract {
 
     managers(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-    mint(
-      mintAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     name(overrides?: CallOverrides): Promise<[string]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFeeAmount_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -882,6 +878,14 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    withdraw(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Min_: BigNumberish,
+      token1Min_: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     withdrawManagerBalance(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
@@ -911,17 +915,19 @@ export interface ApertureMMVault extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  burn(
-    burnAmount_: BigNumberish,
-    receiver_: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   decimals(overrides?: CallOverrides): Promise<number>;
 
   decreaseAllowance(
     spender: string,
     subtractedValue: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  deposit(
+    mintAmount_: BigNumberish,
+    receiver_: string,
+    token0Max_: BigNumberish,
+    token1Max_: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -960,19 +966,13 @@ export interface ApertureMMVault extends BaseContract {
 
   managers(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-  mint(
-    mintAmount_: BigNumberish,
-    receiver_: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   name(overrides?: CallOverrides): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
   rebalance(
     rebalanceParams_: RebalanceStruct,
-    gasFeeAmount: BigNumberish,
+    gasFeeAmount_: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1047,6 +1047,14 @@ export interface ApertureMMVault extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  withdraw(
+    mintAmount_: BigNumberish,
+    receiver_: string,
+    token0Min_: BigNumberish,
+    token1Min_: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   withdrawManagerBalance(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
@@ -1076,14 +1084,6 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    burn(
-      burnAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
-    >;
-
     decimals(overrides?: CallOverrides): Promise<number>;
 
     decreaseAllowance(
@@ -1091,6 +1091,16 @@ export interface ApertureMMVault extends BaseContract {
       subtractedValue: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    deposit(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Max_: BigNumberish,
+      token1Max_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
+    >;
 
     factory(overrides?: CallOverrides): Promise<string>;
 
@@ -1127,21 +1137,13 @@ export interface ApertureMMVault extends BaseContract {
 
     managers(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-    mint(
-      mintAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
-    >;
-
     name(overrides?: CallOverrides): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFeeAmount_: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1210,6 +1212,16 @@ export interface ApertureMMVault extends BaseContract {
       routers_: string[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    withdraw(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Min_: BigNumberish,
+      token1Min_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
+    >;
 
     withdrawManagerBalance(overrides?: CallOverrides): Promise<void>;
   };
@@ -1377,17 +1389,19 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    burn(
-      burnAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
 
     decreaseAllowance(
       spender: string,
       subtractedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    deposit(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Max_: BigNumberish,
+      token1Max_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1426,19 +1440,13 @@ export interface ApertureMMVault extends BaseContract {
 
     managers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    mint(
-      mintAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFeeAmount_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1513,6 +1521,14 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
+    withdraw(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Min_: BigNumberish,
+      token1Min_: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
     withdrawManagerBalance(
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
@@ -1546,17 +1562,19 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    burn(
-      burnAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     decreaseAllowance(
       spender: string,
       subtractedValue: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    deposit(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Max_: BigNumberish,
+      token1Max_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1598,19 +1616,13 @@ export interface ApertureMMVault extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    mint(
-      mintAmount_: BigNumberish,
-      receiver_: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFeeAmount_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1682,6 +1694,14 @@ export interface ApertureMMVault extends BaseContract {
 
     whitelistRouters(
       routers_: string[],
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      mintAmount_: BigNumberish,
+      receiver_: string,
+      token0Min_: BigNumberish,
+      token1Min_: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

@@ -514,9 +514,7 @@ export interface IUniswapV3Pool extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    slot0(
-      overrides?: CallOverrides
-    ): Promise<
+    slot0(overrides?: CallOverrides): Promise<
       [BigNumber, number, number, number, number, number, boolean] & {
         sqrtPriceX96: BigNumber;
         tick: number;
@@ -693,9 +691,7 @@ export interface IUniswapV3Pool extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  slot0(
-    overrides?: CallOverrides
-  ): Promise<
+  slot0(overrides?: CallOverrides): Promise<
     [BigNumber, number, number, number, number, number, boolean] & {
       sqrtPriceX96: BigNumber;
       tick: number;
@@ -882,9 +878,7 @@ export interface IUniswapV3Pool extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    slot0(
-      overrides?: CallOverrides
-    ): Promise<
+    slot0(overrides?: CallOverrides): Promise<
       [BigNumber, number, number, number, number, number, boolean] & {
         sqrtPriceX96: BigNumber;
         tick: number;
