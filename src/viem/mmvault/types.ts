@@ -34,3 +34,8 @@ export type MMVaultRebalanceParams = GetAbiFunctionParamsTypes<
   typeof IApertureMMVault__factory.abi,
   'rebalance'
 >[0];
+
+export type MMVaultRebalanceReturnType = GetMMVaultReturnTypes<
+  'rebalance',
+  [MMVaultRebalanceParams, bigint]
+>;
