@@ -90,7 +90,7 @@ export async function requestMMVaultRebalance<M extends keyof RpcReturnType>(
       data,
     },
     publicClient,
-    /* overrides= */ {},
+    /* overrides= */ undefined,
     blockNumber,
   );
 }
