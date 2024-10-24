@@ -155,7 +155,7 @@ export interface IApertureMMVaultInterface extends utils.Interface {
     "mint(uint256,address)": FunctionFragment;
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
-    "rebalance(((uint128,(int24,int24,uint24))[],(uint128,(int24,int24,uint24))[],(bytes,address,uint256,uint256,bool),uint256,uint256,uint256,uint256))": FunctionFragment;
+    "rebalance(((uint128,(int24,int24,uint24))[],(uint128,(int24,int24,uint24))[],(bytes,address,uint256,uint256,bool),uint256,uint256,uint256,uint256),uint256)": FunctionFragment;
     "removePools(address[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "restrictedMint()": FunctionFragment;
@@ -272,7 +272,7 @@ export interface IApertureMMVaultInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "rebalance",
-    values: [RebalanceStruct]
+    values: [RebalanceStruct, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "removePools",
@@ -730,6 +730,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
+      gasFeeAmount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -873,6 +874,7 @@ export interface IApertureMMVault extends BaseContract {
 
   rebalance(
     rebalanceParams_: RebalanceStruct,
+    gasFeeAmount: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1020,6 +1022,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
+      gasFeeAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1283,6 +1286,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
+      gasFeeAmount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1430,6 +1434,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
+      gasFeeAmount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

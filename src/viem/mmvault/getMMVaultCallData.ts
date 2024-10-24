@@ -27,10 +27,11 @@ export function getMMVaultBurnCalldata(
 
 export function getMMVaultRebalanceCalldata(
   rebalanceParams: MMVaultRebalanceParams,
+  gasFeeAmount: bigint,
 ) {
   return encodeFunctionData({
     abi: ApertureMMVault__factory.abi,
-    args: [rebalanceParams] as const,
+    args: [rebalanceParams, gasFeeAmount] as const,
     functionName: 'rebalance',
   });
 }

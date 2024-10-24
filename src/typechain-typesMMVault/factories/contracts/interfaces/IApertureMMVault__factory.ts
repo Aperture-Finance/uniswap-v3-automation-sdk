@@ -723,7 +723,7 @@ const _abi = [
             type: "uint256",
           },
           {
-            internalType: "address",
+            internalType: "address payable",
             name: "feeCollector",
             type: "address",
           },
@@ -983,6 +983,11 @@ const _abi = [
         internalType: "struct Rebalance",
         name: "rebalanceParams_",
         type: "tuple",
+      },
+      {
+        internalType: "uint256",
+        name: "gasFeeAmount",
+        type: "uint256",
       },
     ],
     name: "rebalance",

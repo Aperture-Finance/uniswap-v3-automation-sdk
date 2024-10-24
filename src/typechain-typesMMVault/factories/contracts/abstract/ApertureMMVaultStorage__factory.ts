@@ -628,7 +628,7 @@ const _abi = [
     name: "feeCollector",
     outputs: [
       {
-        internalType: "address",
+        internalType: "address payable",
         name: "",
         type: "address",
       },
@@ -787,7 +787,7 @@ const _abi = [
             type: "uint256",
           },
           {
-            internalType: "address",
+            internalType: "address payable",
             name: "feeCollector",
             type: "address",
           },
