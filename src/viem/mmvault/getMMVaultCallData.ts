@@ -3,25 +3,29 @@ import { Address, encodeFunctionData } from 'viem';
 
 import { MMVaultRebalanceParams } from './types';
 
-export function getMMVaultMintCalldata(
-  mintAmount = BigInt(0),
+export function getMMVaultDepositCalldata(
+  depositAmount: bigint,
   receiver: Address,
+  token0MaxAmount: bigint,
+  token1MaxAmount: bigint,
 ) {
   return encodeFunctionData({
     abi: ApertureMMVault__factory.abi,
-    args: [mintAmount, receiver] as const,
-    functionName: 'mint',
+    args: [depositAmount, receiver, token0MaxAmount, token1MaxAmount] as const,
+    functionName: 'deposit',
   });
 }
 
-export function getMMVaultBurnCalldata(
-  burnAmount = BigInt(0),
+export function getMMVaultWithdrawCalldata(
+  withdrawAmount: bigint,
   receiver: Address,
+  token0MinAmount: bigint,
+  token1MinAmount: bigint,
 ) {
   return encodeFunctionData({
     abi: ApertureMMVault__factory.abi,
-    args: [burnAmount, receiver] as const,
-    functionName: 'burn',
+    args: [withdrawAmount, receiver, token0MinAmount, token1MinAmount] as const,
+    functionName: 'withdraw',
   });
 }
 

@@ -7,7 +7,7 @@ import {
 
 import { GetAbiFunctionParamsTypes } from '../generics';
 
-export type MMVaultActionName = 'mint' | 'burn' | 'rebalance';
+export type MMVaultActionName = 'deposit' | 'withdraw' | 'rebalance';
 
 export type GetMMVaultParams<T extends MMVaultActionName> =
   GetAbiFunctionParamsTypes<typeof ApertureMMVault__factory.abi, T>;
