@@ -132,6 +132,15 @@ export async function checkPositionPermit(
   const npm = getNPM(chainId, amm, publicClient);
   try {
     const permitSignature = hexToSignature(permitInfo.signature as Hex);
+    console.log('SDK Permission Test: ', {
+      positionId,
+      chainId,
+      amm,
+      publicClient,
+      apertureAutoman,
+      npm,
+      permitSignature,
+    });
     await npm.simulate.permit(
       [
         apertureAutoman,
