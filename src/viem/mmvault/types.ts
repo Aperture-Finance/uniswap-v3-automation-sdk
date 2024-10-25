@@ -37,5 +37,5 @@ export type MMVaultRebalanceParams = GetAbiFunctionParamsTypes<
 
 export type MMVaultRebalanceReturnType = GetMMVaultReturnTypes<
   'rebalance',
-  [MMVaultRebalanceParams, bigint]
+  [MMVaultRebalanceParams, bigint, bigint, bigint]
 >;

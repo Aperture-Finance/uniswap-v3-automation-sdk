@@ -146,7 +146,26 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "LogCollectedFees",
+    name: "LogIcebergCollectedFees",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "fee0",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "fee1",
+        type: "uint256",
+      },
+    ],
+    name: "LogMainCollectedFees",
     type: "event",
   },
   {

@@ -32,6 +32,8 @@ export async function simulateMMVaultRebalance(
   mMVaultAddress: Address,
   rebalanceParams: MMVaultRebalanceParams,
   gasFeeAmount: bigint,
+  token0Fee: bigint,
+  token1Fee: bigint,
   publicClient: PublicClient,
   from: Address,
   blockNumber?: bigint,
@@ -41,6 +43,8 @@ export async function simulateMMVaultRebalance(
     mMVaultAddress,
     rebalanceParams,
     gasFeeAmount,
+    token0Fee,
+    token1Fee,
     publicClient,
     from,
     blockNumber,
@@ -65,6 +69,8 @@ export async function estimateMMVaultRebalanceGas(
       mMVaultAddress,
       rebalanceParams,
       /* gasFeeAmount= */ BigInt(1), // Include gas fee of reimbursing gas fee.
+      /* token0Fee= */ BigInt(1), // Include gas fee of paying management fees.
+      /* token1Fee= */ BigInt(0),
       publicClient,
       from,
       blockNumber,
@@ -77,11 +83,18 @@ export async function requestMMVaultRebalance<M extends keyof RpcReturnType>(
   mMVaultAddress: Address,
   rebalanceParams: MMVaultRebalanceParams,
   gasFeeAmount: bigint,
+  token0Fee: bigint,
+  token1Fee: bigint,
   publicClient: PublicClient,
   from: Address,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  const data = getMMVaultRebalanceCalldata(rebalanceParams, gasFeeAmount);
+  const data = getMMVaultRebalanceCalldata(
+    rebalanceParams,
+    gasFeeAmount,
+    token0Fee,
+    token1Fee,
+  );
   return tryRequestWithOverrides(
     method,
     {

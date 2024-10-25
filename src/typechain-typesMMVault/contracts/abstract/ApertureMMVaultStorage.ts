@@ -420,7 +420,8 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
     "LogAddPools(uint24[])": EventFragment;
     "LogBlacklistRouters(address[])": EventFragment;
     "LogBurn(address,uint256,uint256,uint256)": EventFragment;
-    "LogCollectedFees(uint256,uint256)": EventFragment;
+    "LogIcebergCollectedFees(uint256,uint256)": EventFragment;
+    "LogMainCollectedFees(uint256,uint256)": EventFragment;
     "LogMint(address,uint256,uint256,uint256)": EventFragment;
     "LogRebalance(((uint128,(int24,int24,uint24))[],(uint128,(int24,int24,uint24))[],(bytes,address,uint256,uint256,bool),uint256,uint256,uint256,uint256),uint256,uint256)": EventFragment;
     "LogRemovePools(address[])": EventFragment;
@@ -440,7 +441,8 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "LogAddPools"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "LogBlacklistRouters"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "LogBurn"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "LogCollectedFees"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "LogIcebergCollectedFees"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "LogMainCollectedFees"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "LogMint"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "LogRebalance"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "LogRemovePools"): EventFragment;
@@ -516,17 +518,29 @@ export type LogBurnEvent = TypedEvent<
 
 export type LogBurnEventFilter = TypedEventFilter<LogBurnEvent>;
 
-export interface LogCollectedFeesEventObject {
+export interface LogIcebergCollectedFeesEventObject {
   fee0: BigNumber;
   fee1: BigNumber;
 }
-export type LogCollectedFeesEvent = TypedEvent<
+export type LogIcebergCollectedFeesEvent = TypedEvent<
   [BigNumber, BigNumber],
-  LogCollectedFeesEventObject
+  LogIcebergCollectedFeesEventObject
 >;
 
-export type LogCollectedFeesEventFilter =
-  TypedEventFilter<LogCollectedFeesEvent>;
+export type LogIcebergCollectedFeesEventFilter =
+  TypedEventFilter<LogIcebergCollectedFeesEvent>;
+
+export interface LogMainCollectedFeesEventObject {
+  fee0: BigNumber;
+  fee1: BigNumber;
+}
+export type LogMainCollectedFeesEvent = TypedEvent<
+  [BigNumber, BigNumber],
+  LogMainCollectedFeesEventObject
+>;
+
+export type LogMainCollectedFeesEventFilter =
+  TypedEventFilter<LogMainCollectedFeesEvent>;
 
 export interface LogMintEventObject {
   receiver: string;
@@ -1131,11 +1145,23 @@ export interface ApertureMMVaultStorage extends BaseContract {
       amount1Out?: null
     ): LogBurnEventFilter;
 
-    "LogCollectedFees(uint256,uint256)"(
+    "LogIcebergCollectedFees(uint256,uint256)"(
       fee0?: null,
       fee1?: null
-    ): LogCollectedFeesEventFilter;
-    LogCollectedFees(fee0?: null, fee1?: null): LogCollectedFeesEventFilter;
+    ): LogIcebergCollectedFeesEventFilter;
+    LogIcebergCollectedFees(
+      fee0?: null,
+      fee1?: null
+    ): LogIcebergCollectedFeesEventFilter;
+
+    "LogMainCollectedFees(uint256,uint256)"(
+      fee0?: null,
+      fee1?: null
+    ): LogMainCollectedFeesEventFilter;
+    LogMainCollectedFees(
+      fee0?: null,
+      fee1?: null
+    ): LogMainCollectedFeesEventFilter;
 
     "LogMint(address,uint256,uint256,uint256)"(
       receiver?: string | null,

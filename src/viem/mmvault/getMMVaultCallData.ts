@@ -32,10 +32,12 @@ export function getMMVaultWithdrawCalldata(
 export function getMMVaultRebalanceCalldata(
   rebalanceParams: MMVaultRebalanceParams,
   gasFeeAmount: bigint,
+  token0Fee: bigint,
+  token1Fee: bigint,
 ) {
   return encodeFunctionData({
     abi: ApertureMMVault__factory.abi,
-    args: [rebalanceParams, gasFeeAmount] as const,
+    args: [rebalanceParams, gasFeeAmount, token0Fee, token1Fee] as const,
     functionName: 'rebalance',
   });
 }
