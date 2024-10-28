@@ -156,8 +156,10 @@ export async function checkPositionPermit(
         value: BigInt(0),
       },
     );
+    console.log('SDK Permission Test Succeeded');
     return true;
   } catch (err) {
+    console.log('SDK Permission Test Error: ', err);
     return false;
   }
 }
