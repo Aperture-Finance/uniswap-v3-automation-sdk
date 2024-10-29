@@ -225,6 +225,25 @@ const CHAIN_ID_TO_INFO: {
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
       },
+      [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
+        // https://velodrome.finance/security#contracts
+        factory: getAddress('0xCc0bDDB707055e04e497aB22a59c2aF4391cd12F'),
+        poolImplementation: getAddress(
+          '0xc28aD28853A547556780BEBF7847628501A3bCbb',
+        ),
+        nonfungiblePositionManager: getAddress(
+          '0x416b433906b1B72FA758e166e239c43d68dC6F29',
+        ),
+        optimalSwapRouter: getAddress(
+          '0x920eE1aDa5C16E82BB0d7876a174407D63C8ec09',
+        ),
+        apertureAutoman: getAddress(
+          '0x000000A117EDD4AA34C39f87eFa66A521c590DA1',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x0000003d82D9fb11e644B84195218DfD3aeC3f73',
+        ),
+      },
     },
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
@@ -313,6 +332,7 @@ const CHAIN_ID_TO_INFO: {
           'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
       },
       [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
+        // https://aerodrome.finance/security#contracts
         factory: getAddress('0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A'),
         poolImplementation: getAddress(
           '0xeC8E5342B19977B4eF8892e02D8DAEcfa1315831',
