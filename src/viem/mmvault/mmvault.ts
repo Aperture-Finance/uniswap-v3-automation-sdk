@@ -1,4 +1,7 @@
-import { ApertureMMVault__factory } from '@/index';
+import {
+  ApertureMMVaultHelper__factory,
+  ApertureMMVault__factory,
+} from '@/index';
 import {
   Address,
   GetContractReturnType,
@@ -24,6 +27,21 @@ export function getMMVaultContract(
   return getContract({
     address: mMVaultAddress,
     abi: ApertureMMVault__factory.abi,
+    client: walletClient ?? publicClient!,
+  });
+}
+
+export function getMMVaultHelperContract(
+  mMVaultHelperAddress: Address,
+  publicClient?: PublicClient,
+  walletClient?: WalletClient,
+): GetContractReturnType<
+  typeof ApertureMMVaultHelper__factory.abi,
+  PublicClient | WalletClient
+> {
+  return getContract({
+    address: mMVaultHelperAddress,
+    abi: ApertureMMVaultHelper__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }

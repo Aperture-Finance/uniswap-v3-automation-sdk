@@ -41,5 +41,6 @@ export {
 export {
   ApertureMMVault,
   ApertureMMVault__factory,
+  ApertureMMVaultHelper__factory,
   IApertureMMVault__factory,
 } from './typechain-typesMMVault';
