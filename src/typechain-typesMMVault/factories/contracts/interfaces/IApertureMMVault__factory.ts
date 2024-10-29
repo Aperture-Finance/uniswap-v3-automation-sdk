@@ -989,6 +989,16 @@ const _abi = [
         name: "gasFeeAmount",
         type: "uint256",
       },
+      {
+        internalType: "uint256",
+        name: "token0Fee_",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "token1Fee_",
+        type: "uint256",
+      },
     ],
     name: "rebalance",
     outputs: [],
