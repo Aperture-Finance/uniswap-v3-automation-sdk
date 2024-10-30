@@ -32,7 +32,6 @@ export function getMMVaultContract(
 }
 
 export function getMMVaultHelperContract(
-  mMVaultHelperAddress: Address,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
@@ -40,7 +39,7 @@ export function getMMVaultHelperContract(
   PublicClient | WalletClient
 > {
   return getContract({
-    address: mMVaultHelperAddress,
+    address: '0x89E4bE1F999E3a58D16096FBe405Fc2a1d7F07D6',
     abi: ApertureMMVaultHelper__factory.abi,
     client: walletClient ?? publicClient!,
   });
