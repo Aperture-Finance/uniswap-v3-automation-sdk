@@ -77,6 +77,8 @@ export async function estimateMMVaultRebalanceGas(
   mMVaultAddress: Address,
   rebalanceParams: MMVaultRebalanceParams,
   publicClient: PublicClient,
+  token0Fee = BigInt(0),
+  token1Fee = BigInt(0),
   from: Address,
   blockNumber?: bigint,
 ): Promise<bigint> {
@@ -86,8 +88,8 @@ export async function estimateMMVaultRebalanceGas(
       mMVaultAddress,
       rebalanceParams,
       /* gasFeeAmount= */ BigInt(1), // Include gas fee of reimbursing gas fee.
-      /* token0Fee= */ BigInt(1), // Include gas fee of paying management fees.
-      /* token1Fee= */ BigInt(0),
+      token0Fee,
+      token1Fee,
       publicClient,
       from,
       blockNumber,

@@ -688,7 +688,7 @@ export const CreateMMVaultTriggerPayloadSchema =
     feeTier: z.number().int().describe('The feeTier of the position.'),
     action: ActionSchema,
     condition: ConditionSchema,
-    expiration: z
+    expirationUnix: z
       .number()
       .int()
       .positive()
@@ -703,13 +703,6 @@ export const CreateMMVaultTriggerPayloadSchema =
         },
       )
       .describe('Unix timestamp in seconds when this trigger expires.'),
-    autoCompound: z
-      .object({
-        action: ReinvestActionSchema,
-        condition: AccruedFeesConditionSchema,
-      })
-      .optional()
-      .describe('If populated, a reinvest trigger will be created as well.'),
   });
 export type CreateMMVaultTriggerPayload = z.infer<
   typeof CreateMMVaultTriggerPayloadSchema
@@ -723,7 +716,7 @@ export const UpdateMMVaultTriggerPayloadSchema =
     condition: ConditionSchema.optional().describe(
       'If populated, update the condition to details specified here; otherwise, condition details remain unchanged.',
     ),
-    expiration: z
+    expirationUnix: z
       .number()
       .int()
       .positive()

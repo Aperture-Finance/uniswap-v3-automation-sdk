@@ -44,3 +44,4 @@ export {
   ApertureMMVaultHelper__factory,
   IApertureMMVault__factory,
 } from './typechain-typesMMVault';
+export * from './typechain-typesMMVault/contracts/ApertureMMVault'; // For structs
