@@ -740,7 +740,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFee_: BigNumberish,
       token0Fee_: BigNumberish,
       token1Fee_: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -890,7 +890,7 @@ export interface IApertureMMVault extends BaseContract {
 
   rebalance(
     rebalanceParams_: RebalanceStruct,
-    gasFeeAmount: BigNumberish,
+    gasFee_: BigNumberish,
     token0Fee_: BigNumberish,
     token1Fee_: BigNumberish,
     overrides?: Overrides & { from?: string }
@@ -1042,7 +1042,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFee_: BigNumberish,
       token0Fee_: BigNumberish,
       token1Fee_: BigNumberish,
       overrides?: CallOverrides
@@ -1326,7 +1326,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFee_: BigNumberish,
       token0Fee_: BigNumberish,
       token1Fee_: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -1480,7 +1480,7 @@ export interface IApertureMMVault extends BaseContract {
 
     rebalance(
       rebalanceParams_: RebalanceStruct,
-      gasFeeAmount: BigNumberish,
+      gasFee_: BigNumberish,
       token0Fee_: BigNumberish,
       token1Fee_: BigNumberish,
       overrides?: Overrides & { from?: string }

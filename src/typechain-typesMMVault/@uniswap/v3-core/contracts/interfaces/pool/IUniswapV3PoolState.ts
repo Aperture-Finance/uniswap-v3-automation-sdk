@@ -163,7 +163,9 @@ export interface IUniswapV3PoolState extends BaseContract {
       [BigNumber, BigNumber] & { token0: BigNumber; token1: BigNumber }
     >;
 
-    slot0(overrides?: CallOverrides): Promise<
+    slot0(
+      overrides?: CallOverrides
+    ): Promise<
       [BigNumber, number, number, number, number, number, boolean] & {
         sqrtPriceX96: BigNumber;
         tick: number;
@@ -241,7 +243,9 @@ export interface IUniswapV3PoolState extends BaseContract {
     overrides?: CallOverrides
   ): Promise<[BigNumber, BigNumber] & { token0: BigNumber; token1: BigNumber }>;
 
-  slot0(overrides?: CallOverrides): Promise<
+  slot0(
+    overrides?: CallOverrides
+  ): Promise<
     [BigNumber, number, number, number, number, number, boolean] & {
       sqrtPriceX96: BigNumber;
       tick: number;
@@ -321,7 +325,9 @@ export interface IUniswapV3PoolState extends BaseContract {
       [BigNumber, BigNumber] & { token0: BigNumber; token1: BigNumber }
     >;
 
-    slot0(overrides?: CallOverrides): Promise<
+    slot0(
+      overrides?: CallOverrides
+    ): Promise<
       [BigNumber, number, number, number, number, number, boolean] & {
         sqrtPriceX96: BigNumber;
         tick: number;
