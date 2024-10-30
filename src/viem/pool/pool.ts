@@ -344,6 +344,36 @@ async function getPopulatedTicksInRange(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ) {
+  console.log(
+    123,
+    pool,
+    computePoolAddress(
+      chainId,
+      amm,
+      pool.token0,
+      pool.token1,
+      amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+        ? pool.tickSpacing
+        : pool.fee,
+    ),
+  );
+  console.log(
+    1234,
+    amm,
+    computePoolAddress(
+      chainId,
+      amm,
+      pool.token0,
+      pool.token1,
+      amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+        ? pool.tickSpacing
+        : pool.fee,
+    ),
+    tickLower,
+    tickUpper,
+    publicClient ?? getPublicClient(chainId),
+    blockNumber,
+  );
   const ticks = await viem.getPopulatedTicksInRange(
     amm,
     computePoolAddress(
@@ -360,6 +390,7 @@ async function getPopulatedTicksInRange(
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
+  console.log(1235, ticks);
   return ticks.map(({ tick, liquidityNet }) => ({ tick, liquidityNet }));
 }
 
