@@ -407,11 +407,14 @@ export async function getLiquidityArrayForPool(
     publicClient,
     blockNumber,
   );
-  const liquidityArray = reconstructLiquidityArray(
-    populatedTicks,
-    tickCurrentAligned,
-    pool.liquidity,
-  );
+  const liquidityArray =
+    populatedTicks.length === 0
+      ? []
+      : reconstructLiquidityArray(
+          populatedTicks,
+          tickCurrentAligned,
+          pool.liquidity,
+        );
   return liquidityArray.map(([tick, liquidityActive]) => {
     const price = tickToPrice(token0, token1, tick);
     return {
