@@ -533,44 +533,23 @@ const NonRecurringActionSchema = z.discriminatedUnion('type', [
   RebalanceActionSchema,
 ]);
 
-export const MarketMakingActionSchema = BaseRecurringActionSchema.extend({
-  condition: ConditionSchema, // Regular condition when not below conditionMinTick nor above conditionMaxTick
-  conditionMinTick: z
-    .number()
-    .int()
-    .optional()
-    .describe('If set, stop market making when below conditionMinTick.'),
-  conditionMaxTick: z
-    .number()
-    .int()
-    .optional()
-    .describe('If set, stop market making when above conditionMaxTick.'),
-  action: RecurringRatioActionSchema,
+export const MarketMakingBaseActionSchema = BaseRecurringActionSchema.extend({
+  ...RatioActionSchema.shape,
 }).describe('Rebalance without swap using MMVault.');
 
-export const MarketMakingMainActionSchema = MarketMakingActionSchema.extend({
-  type: z.literal(ActionTypeEnum.enum.MarketMakingMain),
-}).describe('Main liquidity provider for automated market making.');
+export const MarketMakingMainActionSchema = MarketMakingBaseActionSchema.extend(
+  {
+    type: z.literal(ActionTypeEnum.enum.MarketMakingMain),
+  },
+).describe('Main liquidity provider for automated market making.');
 export type MarketMakingMainAction = z.infer<
   typeof MarketMakingMainActionSchema
 >;
 
-export const MarketMakingIcebergActionSchema = MarketMakingActionSchema.extend({
-  type: z.literal(ActionTypeEnum.enum.MarketMakingIceberg),
-  inputTokenAddress: AddressSchema.describe(
-    'The address of the input token for the limit order, i.e. the token which the user provided and wants to sell. Must be one of the two tokens in the position.',
-  ),
-  remainingInputTokenAmount: z
-    .number()
-    .int()
-    .nonnegative()
-    .describe('The amount of remaining input token amount.'),
-  batchSize: z
-    .number()
-    .int()
-    .positive()
-    .describe('The size of each iceberg limit order.'),
-}).describe('Iceberg limit order using MMVault.');
+export const MarketMakingIcebergActionSchema =
+  MarketMakingBaseActionSchema.extend({
+    type: z.literal(ActionTypeEnum.enum.MarketMakingIceberg),
+  }).describe('Iceberg limit order using MMVault.');
 export type MarketMakingIcebergAction = z.infer<
   typeof MarketMakingIcebergActionSchema
 >;
