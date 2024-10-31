@@ -647,7 +647,7 @@ export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
 const MMVaultBaseTriggerPayloadSchema = ClientTypeSchema.extend({
   amm: ammEnumWithUniswapV3Default,
   chainId: ApertureSupportedChainIdEnum,
-  mmvaultAddress: AddressSchema.describe('The checksummed MMVault address.'),
+  mMVaultAddress: AddressSchema.describe('The checksummed MMVault address.'),
 });
 
 const MMVaultTriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
