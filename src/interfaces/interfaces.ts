@@ -660,7 +660,7 @@ const MMVaultTriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
 });
 
 // Used for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
-export const CreateTriggerPayloadMMVaultSchema =
+export const CreateTriggerPayloadSchemaMMVault =
   MMVaultBaseTriggerPayloadSchema.extend({
     tickLower: z.number().int().describe('The lower tick of the position.'),
     tickUpper: z.number().int().describe('The upper tick of the position.'),
@@ -684,10 +684,10 @@ export const CreateTriggerPayloadMMVaultSchema =
       .describe('Unix timestamp in seconds when this trigger expires.'),
   });
 export type CreateTriggerPayloadMMVault = z.infer<
-  typeof CreateTriggerPayloadMMVaultSchema
+  typeof CreateTriggerPayloadSchemaMMVault
 >;
 
-export const UpdateTriggerMMVaultPayloadSchema =
+export const UpdateTriggerPayloadSchemaMMVault =
   MMVaultTriggerIdentifierSchema.extend({
     action: ActionSchema.optional().describe(
       'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
@@ -711,13 +711,13 @@ export const UpdateTriggerMMVaultPayloadSchema =
       )
       .describe('Unix timestamp in seconds when this trigger expires.'),
   });
-export type UpdateTriggerMMVaultPayload = z.infer<
-  typeof UpdateTriggerMMVaultPayloadSchema
+export type UpdateTriggerPayloadMMVault = z.infer<
+  typeof UpdateTriggerPayloadSchemaMMVault
 >;
 
-export const PayloadSchema = MMVaultTriggerIdentifierSchema;
-export type DeleteTriggerMMVaultPayload = z.infer<
-  typeof DeleteTriggerMMVaultPayloadSchema
+export const DeleteTriggerPayloadSchemaMMVault = MMVaultTriggerIdentifierSchema;
+export type DeleteTriggerPayloadMMVault = z.infer<
+  typeof DeleteTriggerPayloadSchemaMMVault
 >;
 
 export const PermitInfoSchema = z
