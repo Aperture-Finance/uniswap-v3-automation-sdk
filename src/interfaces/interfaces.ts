@@ -665,6 +665,31 @@ export const CreateTriggerPayloadSchemaMMVault =
     tickLower: z.number().int().describe('The lower tick of the position.'),
     tickUpper: z.number().int().describe('The upper tick of the position.'),
     feeTier: z.number().int().describe('The feeTier of the position.'),
+    tickMin: z.number().int().describe('The minimum tick for market making.'),
+    tickMax: z.number().int().describe('The maximum tick for market making.'),
+    mainIsToken1ProjectToken: z
+      .boolean()
+      .describe(
+        'If true, token1 is the project token; if false, token0 is the project token.',
+      ),
+    mainPercentOfProjectTokens: z
+      .number()
+      .describe(
+        'The percentage of project tokens to be used for main market making.',
+      ),
+    icebergIsToken1InputToken: z
+      .boolean()
+      .describe(
+        'If true, token1 is the input token for iceberg limit order; if false, token0 is the input token.',
+      ),
+    icebergRemainingTokens: z
+      .number()
+      .nonnegative()
+      .describe('The remaining tokens to be sold in iceberg limit order.'),
+    icebergBatchSize: z
+      .number()
+      .positive()
+      .describe('The batch size of iceberg limit order.'),
     action: ActionSchema,
     condition: ConditionSchema,
     expirationUnix: z
