@@ -681,12 +681,18 @@ export const CreateTriggerPayloadSchemaMMVault =
       ),
     icebergRemainingTokens: z
       .number()
+      .int()
       .nonnegative()
-      .describe('The remaining tokenAmount to be sold in iceberg limit order. Should include decimals, so 1e6 for 1USDC.'),
+      .describe(
+        'The remaining tokenAmount to be sold in iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
+      ),
     icebergBatchSize: z
       .number()
+      .int()
       .positive()
-      .describe('The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.'),
+      .describe(
+        'The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
+      ),
     action: ActionSchema,
     condition: ConditionSchema,
     expirationUnix: z
