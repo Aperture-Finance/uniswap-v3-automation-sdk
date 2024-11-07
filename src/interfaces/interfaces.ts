@@ -662,9 +662,6 @@ const MMVaultTriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
 // Used for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
 export const CreateTriggerPayloadSchemaMMVault =
   MMVaultBaseTriggerPayloadSchema.extend({
-    tickLower: z.number().int().describe('The lower tick of the position.'),
-    tickUpper: z.number().int().describe('The upper tick of the position.'),
-    feeTier: z.number().int().describe('The feeTier of the position.'),
     tickMin: z.number().int().describe('The minimum tick for market making.'),
     tickMax: z.number().int().describe('The maximum tick for market making.'),
     mainIsToken1ProjectToken: z
