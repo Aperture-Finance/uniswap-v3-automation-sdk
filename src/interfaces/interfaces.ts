@@ -644,13 +644,13 @@ export const UpdateTriggerPayloadSchema = TriggerIdentifierSchema.extend({
 });
 export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
 
-const MMVaultBaseTriggerPayloadSchema = ClientTypeSchema.extend({
+const BaseTriggerPayloadSchemaMMVault = ClientTypeSchema.extend({
   amm: ammEnumWithUniswapV3Default,
   chainId: ApertureSupportedChainIdEnum,
   mMVaultAddress: AddressSchema.describe('The checksummed MMVault address.'),
 });
 
-const MMVaultTriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
+const TriggerIdentifierSchemaMMVault = BaseTriggerPayloadSchemaMMVault.extend({
   taskId: z
     .number()
     .nonnegative()
@@ -661,7 +661,7 @@ const MMVaultTriggerIdentifierSchema = BaseTriggerPayloadSchema.extend({
 
 // Used for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
 export const CreateTriggerPayloadSchemaMMVault =
-  MMVaultBaseTriggerPayloadSchema.extend({
+  BaseTriggerPayloadSchemaMMVault.extend({
     tickMin: z.number().int().describe('The minimum tick for market making.'),
     tickMax: z.number().int().describe('The maximum tick for market making.'),
     mainIsToken1ProjectToken: z
@@ -716,7 +716,7 @@ export type CreateTriggerPayloadMMVault = z.infer<
 >;
 
 export const UpdateTriggerPayloadSchemaMMVault =
-  MMVaultTriggerIdentifierSchema.extend({
+  TriggerIdentifierSchemaMMVault.extend({
     action: ActionSchema.optional().describe(
       'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
     ),
@@ -743,7 +743,7 @@ export type UpdateTriggerPayloadMMVault = z.infer<
   typeof UpdateTriggerPayloadSchemaMMVault
 >;
 
-export const DeleteTriggerPayloadSchemaMMVault = MMVaultTriggerIdentifierSchema;
+export const DeleteTriggerPayloadSchemaMMVault = TriggerIdentifierSchemaMMVault;
 export type DeleteTriggerPayloadMMVault = z.infer<
   typeof DeleteTriggerPayloadSchemaMMVault
 >;
