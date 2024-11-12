@@ -6,3 +6,4 @@ export * as interfaces from "./interfaces";
 export * as libraries from "./libraries";
 export { ApertureMMVault__factory } from "./ApertureMMVault__factory";
 export { ApertureMMVaultHelper__factory } from "./ApertureMMVaultHelper__factory";
+export { TommyToken__factory } from "./TommyToken__factory";

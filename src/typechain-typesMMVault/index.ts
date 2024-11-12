@@ -22,6 +22,10 @@ export type { IERC20Upgradeable } from "./@openzeppelin/contracts-upgradeable/to
 export { IERC20Upgradeable__factory } from "./factories/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable__factory";
 export type { ContextUpgradeable } from "./@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable";
 export { ContextUpgradeable__factory } from "./factories/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable__factory";
+export type { ERC20 } from "./@openzeppelin/contracts/token/ERC20/ERC20";
+export { ERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/ERC20__factory";
+export type { IERC20Metadata } from "./@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata";
+export { IERC20Metadata__factory } from "./factories/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata__factory";
 export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
 export type { IUniswapV3MintCallback } from "./@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback";
@@ -58,3 +62,5 @@ export type { Position } from "./contracts/libraries/Position";
 export { Position__factory } from "./factories/contracts/libraries/Position__factory";
 export type { Underlying } from "./contracts/libraries/Underlying";
 export { Underlying__factory } from "./factories/contracts/libraries/Underlying__factory";
+export type { TommyToken } from "./contracts/TommyToken";
+export { TommyToken__factory } from "./factories/contracts/TommyToken__factory";

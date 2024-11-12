@@ -9,3 +9,4 @@ import type * as libraries from "./libraries";
 export type { libraries };
 export type { ApertureMMVault } from "./ApertureMMVault";
 export type { ApertureMMVaultHelper } from "./ApertureMMVaultHelper";
+export type { TommyToken } from "./TommyToken";

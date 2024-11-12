@@ -1277,6 +1277,19 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "address payable",
+        name: "receiver_",
+        type: "address",
+      },
+    ],
+    name: "withdrawNativeTokens",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
 export class IApertureMMVault__factory {

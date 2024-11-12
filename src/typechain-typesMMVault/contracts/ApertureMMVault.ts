@@ -176,6 +176,7 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     "whitelistRouters(address[])": FunctionFragment;
     "withdraw(uint256,address,uint256,uint256)": FunctionFragment;
     "withdrawManagerBalance()": FunctionFragment;
+    "withdrawNativeTokens(address)": FunctionFragment;
   };
 
   getFunction(
@@ -222,6 +223,7 @@ export interface ApertureMMVaultInterface extends utils.Interface {
       | "whitelistRouters"
       | "withdraw"
       | "withdrawManagerBalance"
+      | "withdrawNativeTokens"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -353,6 +355,10 @@ export interface ApertureMMVaultInterface extends utils.Interface {
     functionFragment: "withdrawManagerBalance",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawNativeTokens",
+    values: [string]
+  ): string;
 
   decodeFunctionResult(functionFragment: "addPools", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
@@ -451,6 +457,10 @@ export interface ApertureMMVaultInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawManagerBalance",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawNativeTokens",
     data: BytesLike
   ): Result;
 
@@ -905,6 +915,11 @@ export interface ApertureMMVault extends BaseContract {
     withdrawManagerBalance(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
+
+    withdrawNativeTokens(
+      receiver_: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
   };
 
   addPools(
@@ -1077,6 +1092,11 @@ export interface ApertureMMVault extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  withdrawNativeTokens(
+    receiver_: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     addPools(
       feeTiers_: BigNumberish[],
@@ -1244,6 +1264,11 @@ export interface ApertureMMVault extends BaseContract {
     >;
 
     withdrawManagerBalance(overrides?: CallOverrides): Promise<void>;
+
+    withdrawNativeTokens(
+      receiver_: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
@@ -1566,6 +1591,11 @@ export interface ApertureMMVault extends BaseContract {
     withdrawManagerBalance(
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
+
+    withdrawNativeTokens(
+      receiver_: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1742,6 +1772,11 @@ export interface ApertureMMVault extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     withdrawManagerBalance(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    withdrawNativeTokens(
+      receiver_: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
