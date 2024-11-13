@@ -1,3 +1,5 @@
+import { ApertureSupportedChainId } from '@/index';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import { Address } from 'viem';
 
@@ -43,21 +45,36 @@ export type AnalyticPositionSubgraphData = {
 
 /**
  * Fetches position analytics data for the specified address.
- * @param address The wallet address to fetch analytics data for.
+ * @param walletAddress The wallet address to fetch analytics data for.
  * @param skip Subgraph can fetch max 1000 result in a batch, so we should skip the offset when query.
  */
-export async function getPositionAnalytics(address: string, skip: number) {
+export async function getPositionAnalytics(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  walletAddress: string,
+  skip: number,
+) {
+  // const analytics_subgraph_url = getAMMInfo(
+  //   chainId,
+  //   amm,
+  // )?.analytics_subgraph_url;
+  // if (analytics_subgraph_url === undefined) {
+  //   throw 'Analytics subgraph URL is not defined for the specified chain id and amm';
+  // }
+
+  // TODO: change the subgraph to proper URL after final release
+  const analytics_subgraph_url =
+    'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/jiaqi-subgraph-test/0.1.0/gn';
+  if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) return [];
+
   const analyticPositionSubgraph: AnalyticPositionSubgraphData[] | undefined = (
-    await axios.post(
-      // TODO: change the subgraph to proper URL after final release
-      'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/jiaqi-subgraph-test/0.1.0/gn',
-      {
-        operationName: 'AnalyticPosition',
-        variables: {
-          account: address,
-          skip,
-        },
-        query: `
+    await axios.post(analytics_subgraph_url, {
+      operationName: 'AnalyticPosition',
+      variables: {
+        account: walletAddress,
+        skip,
+      },
+      query: `
           query AnalyticPosition($account: String!, $skip: Int!) {
             positions(first: 1000, skip: $skip, where: {owner: $account}) {
               id
@@ -95,8 +112,7 @@ export async function getPositionAnalytics(address: string, skip: number) {
             }
           }
         `,
-      },
-    )
+    })
   ).data.data?.positions;
   return analyticPositionSubgraph;
 }
