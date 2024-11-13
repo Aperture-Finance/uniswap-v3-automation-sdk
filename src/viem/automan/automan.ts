@@ -694,7 +694,7 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     mintParams,
     tokenId,
     feeBips,
-    undefined,
+    /* permitInfo= */ undefined,
     swapData,
   );
   from = getFromAddress(from);
@@ -736,7 +736,7 @@ export async function requestRebalanceV3<M extends keyof RpcReturnType>(
     tokenId,
     token0FeeAmount,
     token1FeeAmount,
-    undefined,
+    /* permitInfo= */ undefined,
     swapData,
   );
   from = getFromAddress(from);
@@ -931,7 +931,7 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
     amount0Min,
     amount1Min,
     feeBips,
-    undefined,
+    /* permitInfo= */ undefined,
     swapData,
   );
   from = getFromAddress(from);
@@ -975,7 +975,7 @@ export async function requestReinvestV3<M extends keyof RpcReturnType>(
     amount1Min,
     token0FeeAmount,
     token1FeeAmount,
-    undefined,
+    /* permitInfo= */ undefined,
     swapData,
   );
   from = getFromAddress(from);

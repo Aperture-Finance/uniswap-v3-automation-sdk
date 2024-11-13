@@ -83,6 +83,8 @@ export const ActionTypeEnum = z
     'RecurringPrice',
     'RecurringRatio',
     'RecurringDualAction',
+    'MarketMakingMain',
+    'MarketMakingIceberg',
   ])
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
@@ -531,11 +533,34 @@ const NonRecurringActionSchema = z.discriminatedUnion('type', [
   RebalanceActionSchema,
 ]);
 
+export const MarketMakingBaseActionSchema = BaseRecurringActionSchema.extend({
+  ...RatioActionSchema.shape,
+}).describe('Rebalance without swap using MMVault.');
+
+export const MarketMakingMainActionSchema = MarketMakingBaseActionSchema.extend(
+  {
+    type: z.literal(ActionTypeEnum.enum.MarketMakingMain),
+  },
+).describe('Main liquidity provider for automated market making.');
+export type MarketMakingMainAction = z.infer<
+  typeof MarketMakingMainActionSchema
+>;
+
+export const MarketMakingIcebergActionSchema =
+  MarketMakingBaseActionSchema.extend({
+    type: z.literal(ActionTypeEnum.enum.MarketMakingIceberg),
+  }).describe('Iceberg limit order using MMVault.');
+export type MarketMakingIcebergAction = z.infer<
+  typeof MarketMakingIcebergActionSchema
+>;
+
 export const RecurringActionSchema = z.discriminatedUnion('type', [
   RecurringPercentageActionSchema,
   RecurringPriceActionSchema,
   RecurringRatioActionSchema,
   RecurringDualActionSchema,
+  MarketMakingMainActionSchema,
+  MarketMakingIcebergActionSchema,
 ]);
 export type RecurringAction = z.infer<typeof RecurringActionSchema>;
 
@@ -618,6 +643,110 @@ export const UpdateTriggerPayloadSchema = TriggerIdentifierSchema.extend({
     .describe('Unix timestamp in seconds when this trigger expires.'),
 });
 export type UpdateTriggerPayload = z.infer<typeof UpdateTriggerPayloadSchema>;
+
+const BaseTriggerPayloadSchemaMMVault = ClientTypeSchema.extend({
+  amm: ammEnumWithUniswapV3Default,
+  chainId: ApertureSupportedChainIdEnum,
+  mMVaultAddress: AddressSchema.describe('The checksummed MMVault address.'),
+});
+
+const TriggerIdentifierSchemaMMVault = BaseTriggerPayloadSchemaMMVault.extend({
+  taskId: z
+    .number()
+    .nonnegative()
+    .describe(
+      "The task id of the MMVault trigger in Aperture's automation service.",
+    ),
+});
+
+// Used for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
+export const CreateTriggerPayloadSchemaMMVault =
+  BaseTriggerPayloadSchemaMMVault.extend({
+    tickMin: z.number().int().describe('The minimum tick for market making.'),
+    tickMax: z.number().int().describe('The maximum tick for market making.'),
+    mainIsToken1ProjectToken: z
+      .boolean()
+      .describe(
+        'If true, token1 is the project token; if false, token0 is the project token.',
+      ),
+    mainPercentOfProjectTokens: z
+      .number()
+      .describe(
+        'The percentage of project tokens to be used for main market making.',
+      ),
+    icebergIsToken1InputToken: z
+      .boolean()
+      .describe(
+        'If true, token1 is the input token for iceberg limit order; if false, token0 is the input token.',
+      ),
+    icebergRemainingTokens: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(
+        'The remaining tokenAmount to be sold in iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
+      ),
+    icebergBatchSize: z
+      .number()
+      .int()
+      .positive()
+      .describe(
+        'The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
+      ),
+    action: ActionSchema,
+    condition: ConditionSchema,
+    expirationUnix: z
+      .number()
+      .int()
+      .positive()
+      .refine(
+        (date: number) =>
+          date <=
+          Math.floor(Date.now() / 1000) +
+            AUTOMATION_EXPIRATION_IN_SECS +
+            AUTOMATION_SLACK_IN_SECS,
+        {
+          message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
+        },
+      )
+      .describe('Unix timestamp in seconds when this trigger expires.'),
+  });
+export type CreateTriggerPayloadMMVault = z.infer<
+  typeof CreateTriggerPayloadSchemaMMVault
+>;
+
+export const UpdateTriggerPayloadSchemaMMVault =
+  TriggerIdentifierSchemaMMVault.extend({
+    action: ActionSchema.optional().describe(
+      'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
+    ),
+    condition: ConditionSchema.optional().describe(
+      'If populated, update the condition to details specified here; otherwise, condition details remain unchanged.',
+    ),
+    expirationUnix: z
+      .number()
+      .int()
+      .positive()
+      .refine(
+        (date: number) =>
+          date <=
+          Math.floor(Date.now() / 1000) +
+            AUTOMATION_EXPIRATION_IN_SECS +
+            AUTOMATION_SLACK_IN_SECS,
+        {
+          message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
+        },
+      )
+      .describe('Unix timestamp in seconds when this trigger expires.'),
+  });
+export type UpdateTriggerPayloadMMVault = z.infer<
+  typeof UpdateTriggerPayloadSchemaMMVault
+>;
+
+export const DeleteTriggerPayloadSchemaMMVault = TriggerIdentifierSchemaMMVault;
+export type DeleteTriggerPayloadMMVault = z.infer<
+  typeof DeleteTriggerPayloadSchemaMMVault
+>;
 
 export const PermitInfoSchema = z
   .object({
