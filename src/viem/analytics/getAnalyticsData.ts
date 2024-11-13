@@ -45,12 +45,14 @@ export type AnalyticPositionSubgraphData = {
 
 /**
  * Fetches position analytics data for the specified address.
+ * @param amm Automated Market Maker.
+ * @param chainId Chain id.
  * @param walletAddress The wallet address to fetch analytics data for.
  * @param skip Subgraph can fetch max 1000 result in a batch, so we should skip the offset when query.
  */
 export async function getPositionAnalytics(
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   walletAddress: string,
   skip: number,
 ) {
@@ -65,7 +67,11 @@ export async function getPositionAnalytics(
   // TODO: change the subgraph to proper URL after final release
   const analytics_subgraph_url =
     'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/jiaqi-subgraph-test/0.1.0/gn';
-  if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) return [];
+  if (
+    amm !== 'UNISWAP_V3' &&
+    chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID
+  )
+    return [];
 
   const analyticPositionSubgraph: AnalyticPositionSubgraphData[] | undefined = (
     await axios.post(analytics_subgraph_url, {
