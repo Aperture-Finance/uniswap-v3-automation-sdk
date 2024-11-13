@@ -81,9 +81,10 @@ export async function getPositionAnalytics(address: string) {
                 closedMarketPrice
                 headPosition {
                   id
-                }
-                rebalancePositions {
-                  id
+                  rebalancePositions {
+                    id
+                    closedTimestamp
+                  }
                 }
                 activityLogs
               }
