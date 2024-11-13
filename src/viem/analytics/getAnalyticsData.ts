@@ -32,10 +32,11 @@ export type AnalyticPositionSubgraphData = {
 
   headPosition: {
     id: string;
+    rebalancePositions: {
+      id: string;
+      closedTimestamp?: bigint;
+    }[];
   };
-  rebalancePositions: {
-    id: string;
-  }[];
   activityLogs: string[];
 };
 
