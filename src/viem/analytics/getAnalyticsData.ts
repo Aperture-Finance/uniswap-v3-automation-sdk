@@ -9,6 +9,7 @@ export type AnalyticPositionSubgraphData = {
   tickLower: number;
   tickUpper: number;
 
+  liquidity: bigint;
   investedToken0Amount: bigint;
   investedToken1Amount: bigint;
   withdrawnToken0Amount: bigint;
@@ -43,8 +44,9 @@ export type AnalyticPositionSubgraphData = {
 /**
  * Fetches position analytics data for the specified address.
  * @param address The wallet address to fetch analytics data for.
+ * @param skip Subgraph can fetch max 1000 result in a batch, so we should skip the offset when query.
  */
-export async function getPositionAnalytics(address: string) {
+export async function getPositionAnalytics(address: string, skip: number) {
   const analyticPositionSubgraph: AnalyticPositionSubgraphData[] | undefined = (
     await axios.post(
       // TODO: change the subgraph to proper URL after final release
@@ -53,44 +55,46 @@ export async function getPositionAnalytics(address: string) {
         operationName: 'AnalyticPosition',
         variables: {
           account: address,
+          skip,
         },
         query: `
-            query AnalyticPosition($account: String!) {
-              positions(where: {owner: $account}) {
+          query AnalyticPosition($account: String!, $skip: Int!) {
+            positions(first: 1000, skip: $skip, where: {owner: $account}) {
+              id
+              owner
+              tokenId
+              poolAddress
+              tickLower
+              tickUpper
+              liquidity
+              investedToken0Amount
+              investedToken1Amount
+              withdrawnToken0Amount
+              withdrawnToken1Amount
+              currentToken0Amount
+              currentToken1Amount
+              averageToken0Amount
+              averageToken1Amount
+              collectedToken0Amount
+              collectedToken1Amount
+              reinvestedToken0Amount
+              reinvestedToken1Amount
+              gasCost
+              createdTimestamp
+              updatedTimestamp
+              closedTimestamp
+              closedMarketPrice
+              headPosition {
                 id
-                owner
-                tokenId
-                poolAddress
-                tickLower
-                tickUpper
-                investedToken0Amount
-                investedToken1Amount
-                withdrawnToken0Amount
-                withdrawnToken1Amount
-                currentToken0Amount
-                currentToken1Amount
-                averageToken0Amount
-                averageToken1Amount
-                collectedToken0Amount
-                collectedToken1Amount
-                reinvestedToken0Amount
-                reinvestedToken1Amount
-                gasCost
-                createdTimestamp
-                updatedTimestamp
-                closedTimestamp
-                closedMarketPrice
-                headPosition {
+                rebalancePositions {
                   id
-                  rebalancePositions {
-                    id
-                    closedTimestamp
-                  }
+                  closedTimestamp
                 }
-                activityLogs
               }
+              activityLogs
             }
-            `,
+          }
+        `,
       },
     )
   ).data.data?.positions;
