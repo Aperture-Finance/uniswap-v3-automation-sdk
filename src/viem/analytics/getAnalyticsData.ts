@@ -77,7 +77,7 @@ export async function getPositionAnalytics(
     await axios.post(analytics_subgraph_url, {
       operationName: 'AnalyticPosition',
       variables: {
-        account: walletAddress,
+        account: walletAddress.toLowerCase(),
         skip,
       },
       query: `
