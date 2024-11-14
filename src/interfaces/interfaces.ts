@@ -659,88 +659,75 @@ const TriggerIdentifierSchemaMMVault = BaseTriggerPayloadSchemaMMVault.extend({
     ),
 });
 
-// Used for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
-export const CreateTriggerPayloadSchemaMMVault =
+// Base payload for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
+export const CreateTriggerPayloadSchemaBaseMMVault =
   BaseTriggerPayloadSchemaMMVault.extend({
-    tickMin: z.number().int().describe('The minimum tick for market making.'),
-    tickMax: z.number().int().describe('The maximum tick for market making.'),
-    mainIsToken1ProjectToken: z
+    tickMin: z
+      .number()
+      .int()
+      .optional()
+      .describe('The minimum tick for market making.'),
+    tickMax: z
+      .number()
+      .int()
+      .optional()
+      .describe('The maximum tick for market making.'),
+    condition: ConditionSchema,
+    action: ActionSchema,
+    isToken1ProjectToken: z
       .boolean()
       .describe(
         'If true, token1 is the project token; if false, token0 is the project token.',
       ),
-    mainPercentOfProjectTokens: z
+    expirationUnix: z
+      .number()
+      .int()
+      .positive()
+      .refine(
+        (date: number) =>
+          date <=
+          Math.floor(Date.now() / 1000) +
+            AUTOMATION_EXPIRATION_IN_SECS +
+            AUTOMATION_SLACK_IN_SECS,
+        {
+          message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
+        },
+      )
+      .describe('Unix timestamp in seconds when this trigger expires.'),
+  });
+
+export const CreateTriggerPayloadSchemaMainMMVault =
+  CreateTriggerPayloadSchemaBaseMMVault.extend({
+    percentOfProjectTokens: z
       .number()
       .describe(
         'The percentage of project tokens to be used for main market making.',
       ),
-    icebergIsToken1InputToken: z
-      .boolean()
-      .describe(
-        'If true, token1 is the input token for iceberg limit order; if false, token0 is the input token.',
-      ),
-    icebergRemainingTokens: z
-      .number()
-      .int()
-      .nonnegative()
-      .describe(
-        'The remaining tokenAmount to be sold in iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
-      ),
-    icebergBatchSize: z
+  });
+export type CreateTriggerPayloadMainMMVault = z.infer<
+  typeof CreateTriggerPayloadSchemaMainMMVault
+>;
+
+export const CreateTriggerPayloadSchemaIcebergMMVault =
+  CreateTriggerPayloadSchemaBaseMMVault.extend({
+    batchSize: z
       .number()
       .int()
       .positive()
       .describe(
         'The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
       ),
-    action: ActionSchema,
-    condition: ConditionSchema,
-    expirationUnix: z
+    cooldownSec: z
       .number()
       .int()
       .positive()
-      .refine(
-        (date: number) =>
-          date <=
-          Math.floor(Date.now() / 1000) +
-            AUTOMATION_EXPIRATION_IN_SECS +
-            AUTOMATION_SLACK_IN_SECS,
-        {
-          message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
-        },
-      )
-      .describe('Unix timestamp in seconds when this trigger expires.'),
+      .optional()
+      .describe(
+        'The cooldown time in seconds before setting up the next iceberg.',
+      ),
   });
-export type CreateTriggerPayloadMMVault = z.infer<
-  typeof CreateTriggerPayloadSchemaMMVault
->;
-
-export const UpdateTriggerPayloadSchemaMMVault =
-  TriggerIdentifierSchemaMMVault.extend({
-    action: ActionSchema.optional().describe(
-      'If populated, update the action to details specified here; otherwise, action details remain unchanged.',
-    ),
-    condition: ConditionSchema.optional().describe(
-      'If populated, update the condition to details specified here; otherwise, condition details remain unchanged.',
-    ),
-    expirationUnix: z
-      .number()
-      .int()
-      .positive()
-      .refine(
-        (date: number) =>
-          date <=
-          Math.floor(Date.now() / 1000) +
-            AUTOMATION_EXPIRATION_IN_SECS +
-            AUTOMATION_SLACK_IN_SECS,
-        {
-          message: `Expiration time must be within AUTOMATION_EXPIRATION_IN_SECS=${AUTOMATION_EXPIRATION_IN_SECS} + AUTOMATION_SLACK_IN_SECS=${AUTOMATION_SLACK_IN_SECS}`,
-        },
-      )
-      .describe('Unix timestamp in seconds when this trigger expires.'),
-  });
-export type UpdateTriggerPayloadMMVault = z.infer<
-  typeof UpdateTriggerPayloadSchemaMMVault
+export type CreateTriggerPayloadIcebergMMVault = z.infer<
+  typeof CreateTriggerPayloadSchemaIcebergMMVault
 >;
 
 export const DeleteTriggerPayloadSchemaMMVault = TriggerIdentifierSchemaMMVault;
