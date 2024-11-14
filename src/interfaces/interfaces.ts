@@ -722,13 +722,13 @@ export const CreateTriggerPayloadSchemaIcebergMMVault =
       .describe(
         'The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
       ),
-    cooldownSec: z
+    delaySec: z
       .number()
       .int()
       .positive()
       .optional()
       .describe(
-        'The cooldown time in seconds before setting up the next iceberg.',
+        'The delay in seconds before shifting liquidity if iceberg is still not forfilled. Leave empty or 0 to never shift liquidity.',
       ),
   });
 export type CreateTriggerPayloadIcebergMMVault = z.infer<
