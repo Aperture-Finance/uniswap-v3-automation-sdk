@@ -693,12 +693,12 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
 
 export const CreateTriggerPayloadSchemaMainMMVault =
   CreateTriggerPayloadSchemaBaseMMVault.extend({
-    isToken1ProjectToken: z
+    mainIsToken1ProjectToken: z
       .boolean()
       .describe(
         'If true, token1 is the project token; if false, token0 is the project token.',
       ),
-    percentOfProjectTokens: z
+    mainPercentOfProjectTokens: z
       .number()
       .describe(
         'The percentage of project tokens to be used for main market making.',
@@ -710,19 +710,19 @@ export type CreateTriggerPayloadMainMMVault = z.infer<
 
 export const CreateTriggerPayloadSchemaIcebergMMVault =
   CreateTriggerPayloadSchemaBaseMMVault.extend({
-    isToken1InputToken: z
+    icebergIsToken1InputToken: z
       .boolean()
       .describe(
         'If true, token1 is the input token; if false, token0 is the input token.',
       ),
-    batchSize: z
+    icebergBatchSize: z
       .number()
       .int()
       .positive()
       .describe(
         'The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
       ),
-    delaySec: z
+    icebergDelaySec: z
       .number()
       .int()
       .positive()
