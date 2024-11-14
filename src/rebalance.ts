@@ -182,7 +182,7 @@ export function normalizeTicks(
   isLte: boolean = true,
 ) {
   let tickLower: number, tickUpper: number;
-  if (action.type == ActionTypeEnum.enum.Rebalance) {
+  if (action.type === ActionTypeEnum.enum.Rebalance) {
     tickLower =
       action.tickLower + (action.isCurrentTickOffset ? pool.tickCurrent : 0);
     tickUpper =
@@ -232,12 +232,16 @@ export function normalizeTicks(
     );
   } else if (
     action.type === ActionTypeEnum.enum.RecurringRatio ||
+    action.type === ActionTypeEnum.enum.MarketMakingMain ||
+    action.type === ActionTypeEnum.enum.MarketMakingIceberg ||
     (action.type === ActionTypeEnum.enum.RecurringDualAction &&
       ((isLte && 'tickRangeWidth' in action.lteAction) ||
         (!isLte && 'tickRangeWidth' in action.gteAction)))
   ) {
     const recurringRatioAction =
-      action.type === ActionTypeEnum.enum.RecurringRatio
+      action.type === ActionTypeEnum.enum.RecurringRatio ||
+      action.type === ActionTypeEnum.enum.MarketMakingMain ||
+      action.type === ActionTypeEnum.enum.MarketMakingIceberg
         ? action
         : ((isLte ? action.lteAction : action.gteAction) as RatioAction);
     ({ tickLower, tickUpper } = rangeWidthRatioToTicks(
