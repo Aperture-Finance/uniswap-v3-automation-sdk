@@ -674,11 +674,6 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
       .describe('The maximum tick for market making.'),
     condition: ConditionSchema,
     action: ActionSchema,
-    isToken1ProjectToken: z
-      .boolean()
-      .describe(
-        'If true, token1 is the project token; if false, token0 is the project token.',
-      ),
     expirationUnix: z
       .number()
       .int()
@@ -698,6 +693,11 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
 
 export const CreateTriggerPayloadSchemaMainMMVault =
   CreateTriggerPayloadSchemaBaseMMVault.extend({
+    isToken1ProjectToken: z
+      .boolean()
+      .describe(
+        'If true, token1 is the project token; if false, token0 is the project token.',
+      ),
     percentOfProjectTokens: z
       .number()
       .describe(
@@ -710,6 +710,11 @@ export type CreateTriggerPayloadMainMMVault = z.infer<
 
 export const CreateTriggerPayloadSchemaIcebergMMVault =
   CreateTriggerPayloadSchemaBaseMMVault.extend({
+    isToken1InputToken: z
+      .boolean()
+      .describe(
+        'If true, token1 is the input token; if false, token0 is the input token.',
+      ),
     batchSize: z
       .number()
       .int()
