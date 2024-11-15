@@ -107,6 +107,7 @@ export type InitializePayloadStruct = {
   init1: BigNumberish;
   feeCollector: string;
   managers: string[];
+  managerFeeBPS: BigNumberish;
   routers: string[];
 };
 
@@ -119,6 +120,7 @@ export type InitializePayloadStructOutput = [
   BigNumber,
   string,
   string[],
+  number,
   string[]
 ] & {
   feeTiers: number[];
@@ -129,6 +131,7 @@ export type InitializePayloadStructOutput = [
   init1: BigNumber;
   feeCollector: string;
   managers: string[];
+  managerFeeBPS: number;
   routers: string[];
 };
 
@@ -149,7 +152,7 @@ export interface ApertureMMVaultStorageInterface extends utils.Interface {
     "increaseAllowance(address,uint256)": FunctionFragment;
     "init0()": FunctionFragment;
     "init1()": FunctionFragment;
-    "initialize(string,string,(uint24[],address,address,address,uint256,uint256,address,address[],address[]))": FunctionFragment;
+    "initialize(string,string,(uint24[],address,address,address,uint256,uint256,address,address[],uint16,address[]))": FunctionFragment;
     "managerBalance0()": FunctionFragment;
     "managerBalance1()": FunctionFragment;
     "managerFeeBPS()": FunctionFragment;
