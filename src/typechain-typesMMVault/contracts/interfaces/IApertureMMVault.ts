@@ -107,6 +107,7 @@ export type InitializePayloadStruct = {
   init1: BigNumberish;
   feeCollector: string;
   managers: string[];
+  managerFeeBPS: BigNumberish;
   routers: string[];
 };
 
@@ -119,6 +120,7 @@ export type InitializePayloadStructOutput = [
   BigNumber,
   string,
   string[],
+  number,
   string[]
 ] & {
   feeTiers: number[];
@@ -129,6 +131,7 @@ export type InitializePayloadStructOutput = [
   init1: BigNumber;
   feeCollector: string;
   managers: string[];
+  managerFeeBPS: number;
   routers: string[];
 };
 
@@ -147,7 +150,7 @@ export interface IApertureMMVaultInterface extends utils.Interface {
     "getRouters()": FunctionFragment;
     "init0()": FunctionFragment;
     "init1()": FunctionFragment;
-    "initialize(string,string,(uint24[],address,address,address,uint256,uint256,address,address[],address[]))": FunctionFragment;
+    "initialize(string,string,(uint24[],address,address,address,uint256,uint256,address,address[],uint16,address[]))": FunctionFragment;
     "manager()": FunctionFragment;
     "managerBalance0()": FunctionFragment;
     "managerBalance1()": FunctionFragment;
@@ -172,7 +175,7 @@ export interface IApertureMMVaultInterface extends utils.Interface {
     "whitelistRouters(address[])": FunctionFragment;
     "withdraw(uint256,address,uint256,uint256)": FunctionFragment;
     "withdrawManagerBalance()": FunctionFragment;
-    "withdrawNativeTokens(address)": FunctionFragment;
+    "withdrawNativeTokens(address,uint256)": FunctionFragment;
   };
 
   getFunction(
@@ -333,7 +336,7 @@ export interface IApertureMMVaultInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawNativeTokens",
-    values: [string]
+    values: [string, BigNumberish]
   ): string;
 
   decodeFunctionResult(functionFragment: "addPools", data: BytesLike): Result;
@@ -834,6 +837,7 @@ export interface IApertureMMVault extends BaseContract {
 
     withdrawNativeTokens(
       receiver_: string,
+      amount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
@@ -989,6 +993,7 @@ export interface IApertureMMVault extends BaseContract {
 
   withdrawNativeTokens(
     receiver_: string,
+    amount: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1141,6 +1146,7 @@ export interface IApertureMMVault extends BaseContract {
 
     withdrawNativeTokens(
       receiver_: string,
+      amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -1435,6 +1441,7 @@ export interface IApertureMMVault extends BaseContract {
 
     withdrawNativeTokens(
       receiver_: string,
+      amount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
@@ -1594,6 +1601,7 @@ export interface IApertureMMVault extends BaseContract {
 
     withdrawNativeTokens(
       receiver_: string,
+      amount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };

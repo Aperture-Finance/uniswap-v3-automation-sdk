@@ -816,6 +816,11 @@ const _abi = [
             type: "address[]",
           },
           {
+            internalType: "uint16",
+            name: "managerFeeBPS",
+            type: "uint16",
+          },
+          {
             internalType: "address[]",
             name: "routers",
             type: "address[]",
