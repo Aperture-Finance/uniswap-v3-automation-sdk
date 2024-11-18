@@ -83,11 +83,14 @@ export const ActionTypeEnum = z
     'RecurringPrice',
     'RecurringRatio',
     'RecurringDualAction',
-    'MarketMakingMain',
-    'MarketMakingIceberg',
   ])
   .describe('The type of action to take.');
 export type ActionTypeEnum = z.infer<typeof ActionTypeEnum>;
+
+export const MarketMakingTypeEnum = z
+  .enum(['Main', 'Iceberg'])
+  .describe('The type of market to make.');
+export type MarketMakingTypeEnum = z.infer<typeof MarketMakingTypeEnum>;
 
 export const GeneralResponseSchema = z.object({
   isError: z.boolean().optional().describe('True if an error occurred.'),
@@ -537,30 +540,11 @@ export const MarketMakingBaseActionSchema = BaseRecurringActionSchema.extend({
   ...RatioActionSchema.shape,
 }).describe('Rebalance without swap using MMVault.');
 
-export const MarketMakingMainActionSchema = MarketMakingBaseActionSchema.extend(
-  {
-    type: z.literal(ActionTypeEnum.enum.MarketMakingMain),
-  },
-).describe('Main liquidity provider for automated market making.');
-export type MarketMakingMainAction = z.infer<
-  typeof MarketMakingMainActionSchema
->;
-
-export const MarketMakingIcebergActionSchema =
-  MarketMakingBaseActionSchema.extend({
-    type: z.literal(ActionTypeEnum.enum.MarketMakingIceberg),
-  }).describe('Iceberg limit order using MMVault.');
-export type MarketMakingIcebergAction = z.infer<
-  typeof MarketMakingIcebergActionSchema
->;
-
 export const RecurringActionSchema = z.discriminatedUnion('type', [
   RecurringPercentageActionSchema,
   RecurringPriceActionSchema,
   RecurringRatioActionSchema,
   RecurringDualActionSchema,
-  MarketMakingMainActionSchema,
-  MarketMakingIcebergActionSchema,
 ]);
 export type RecurringAction = z.infer<typeof RecurringActionSchema>;
 
@@ -673,7 +657,7 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
       .optional()
       .describe('The maximum tick for market making.'),
     condition: ConditionSchema,
-    action: ActionSchema,
+    action: RecurringRatioActionSchema,
     expirationUnix: z
       .number()
       .int()
@@ -693,6 +677,7 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
 
 export const CreateTriggerPayloadSchemaMainMMVault =
   CreateTriggerPayloadSchemaBaseMMVault.extend({
+    type: z.literal(MarketMakingTypeEnum.enum.Main),
     mainIsToken1ProjectToken: z
       .boolean()
       .describe(
@@ -704,12 +689,10 @@ export const CreateTriggerPayloadSchemaMainMMVault =
         'The percentage of project tokens to be used for main market making.',
       ),
   });
-export type CreateTriggerPayloadMainMMVault = z.infer<
-  typeof CreateTriggerPayloadSchemaMainMMVault
->;
 
 export const CreateTriggerPayloadSchemaIcebergMMVault =
   CreateTriggerPayloadSchemaBaseMMVault.extend({
+    type: z.literal(MarketMakingTypeEnum.enum.Iceberg),
     icebergIsToken1InputToken: z
       .boolean()
       .describe(
@@ -731,8 +714,13 @@ export const CreateTriggerPayloadSchemaIcebergMMVault =
         'The delay in seconds before shifting liquidity if iceberg is still not forfilled. Leave empty or 0 to never shift liquidity.',
       ),
   });
-export type CreateTriggerPayloadIcebergMMVault = z.infer<
-  typeof CreateTriggerPayloadSchemaIcebergMMVault
+
+export const CreateTriggerPayloadSchemaMMVault = z.discriminatedUnion('type', [
+  CreateTriggerPayloadSchemaMainMMVault,
+  CreateTriggerPayloadSchemaIcebergMMVault,
+]);
+export type CreateTriggerPayloadMMVault = z.infer<
+  typeof CreateTriggerPayloadSchemaMMVault
 >;
 
 export const DeleteTriggerPayloadSchemaMMVault = TriggerIdentifierSchemaMMVault;
