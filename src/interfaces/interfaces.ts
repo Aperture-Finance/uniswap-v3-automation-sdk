@@ -699,8 +699,7 @@ export const CreateTriggerPayloadSchemaIcebergMMVault =
         'If true, token1 is the input token; if false, token0 is the input token.',
       ),
     icebergBatchSize: z
-      .number()
-      .int()
+      .bigint()
       .positive()
       .describe(
         'The tokenAmount batch size of iceberg limit order. Should include decimals, so 1e6 for 1USDC.',
