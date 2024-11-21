@@ -762,6 +762,11 @@ const _abi = [
             type: "address[]",
           },
           {
+            internalType: "uint16",
+            name: "managerFeeBPS",
+            type: "uint16",
+          },
+          {
             internalType: "address[]",
             name: "routers",
             type: "address[]",
@@ -1283,6 +1288,11 @@ const _abi = [
         internalType: "address payable",
         name: "receiver_",
         type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
       },
     ],
     name: "withdrawNativeTokens",
