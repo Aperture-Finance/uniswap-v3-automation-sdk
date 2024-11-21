@@ -5,7 +5,16 @@ import axios from 'axios';
 export type AnalyticPositionSubgraphData = {
   id: string;
   tokenId: bigint;
+
   liquidity: bigint;
+  investedToken0Amount: bigint;
+  investedToken1Amount: bigint;
+  withdrawnToken0Amount: bigint;
+  withdrawnToken1Amount: bigint;
+  collectedToken0Amount: bigint;
+  collectedToken1Amount: bigint;
+  reinvestedToken0Amount: bigint;
+  reinvestedToken1Amount: bigint;
   gasCost: bigint;
 
   createdTimestamp: bigint;
@@ -22,7 +31,16 @@ export type AnalyticPositionSubgraphData = {
       tokenId: bigint;
       tickLower: number;
       tickUpper: number;
+
       liquidity: bigint;
+      investedToken0Amount: bigint;
+      investedToken1Amount: bigint;
+      withdrawnToken0Amount: bigint;
+      withdrawnToken1Amount: bigint;
+      collectedToken0Amount: bigint;
+      collectedToken1Amount: bigint;
+      reinvestedToken0Amount: bigint;
+      reinvestedToken1Amount: bigint;
       gasCost: bigint;
 
       createdTimestamp: bigint;
@@ -77,7 +95,16 @@ export async function getPositionAnalytics(
             positions(first: 1000, skip: $skip, where: {owner: $account}) {
               id
               tokenId
+
               liquidity
+              investedToken0Amount
+              investedToken1Amount
+              withdrawnToken0Amount
+              withdrawnToken1Amount
+              collectedToken0Amount
+              collectedToken1Amount
+              reinvestedToken0Amount
+              reinvestedToken1Amount
               gasCost
 
               createdTimestamp
@@ -94,7 +121,16 @@ export async function getPositionAnalytics(
                   tokenId
                   tickLower
                   tickUpper
+
                   liquidity
+                  investedToken0Amount
+                  investedToken1Amount
+                  withdrawnToken0Amount
+                  withdrawnToken1Amount
+                  collectedToken0Amount
+                  collectedToken1Amount
+                  reinvestedToken0Amount
+                  reinvestedToken1Amount
                   gasCost
 
                   createdTimestamp
