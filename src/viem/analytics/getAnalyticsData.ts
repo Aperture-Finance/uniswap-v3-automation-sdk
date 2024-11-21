@@ -1,46 +1,38 @@
 import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
-import { Address } from 'viem';
 
 export type AnalyticPositionSubgraphData = {
   id: string;
-  owner: Address;
   tokenId: bigint;
-  poolAddress: Address;
-  tickLower: number;
-  tickUpper: number;
-
   liquidity: bigint;
-  investedToken0Amount: bigint;
-  investedToken1Amount: bigint;
-  withdrawnToken0Amount: bigint;
-  withdrawnToken1Amount: bigint;
-  currentToken0Amount: bigint;
-  currentToken1Amount: bigint;
-
-  averageToken0Amount: bigint;
-  averageToken1Amount: bigint;
-
-  collectedToken0Amount: bigint;
-  collectedToken1Amount: bigint;
-  reinvestedToken0Amount: bigint;
-  reinvestedToken1Amount: bigint;
-
   gasCost: bigint;
+
   createdTimestamp: bigint;
-  updatedTimestamp: bigint;
   closedTimestamp?: bigint;
   closedMarketPrice?: bigint;
+  closedToken0USDPrice?: number;
+  closedToken1USDPrice?: number;
+  activityLogs: string[];
 
   headPosition: {
     id: string;
     rebalancePositions: {
       id: string;
+      tokenId: bigint;
+      tickLower: number;
+      tickUpper: number;
+      liquidity: bigint;
+      gasCost: bigint;
+
+      createdTimestamp: bigint;
       closedTimestamp?: bigint;
+      closedMarketPrice?: bigint;
+      closedToken0USDPrice?: number;
+      closedToken1USDPrice?: number;
+      activityLogs: string[];
     }[];
   };
-  activityLogs: string[];
 };
 
 /**
@@ -66,7 +58,7 @@ export async function getPositionAnalytics(
 
   // TODO: change the subgraph to proper URL after final release
   const analytics_subgraph_url =
-    'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/jiaqi-subgraph-test/0.1.0/gn';
+    'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/jiaqi-subgraph-test/0.2.0/gn';
   if (
     amm !== 'UNISWAP_V3' &&
     chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID
@@ -84,37 +76,35 @@ export async function getPositionAnalytics(
           query AnalyticPosition($account: String!, $skip: Int!) {
             positions(first: 1000, skip: $skip, where: {owner: $account}) {
               id
-              owner
               tokenId
-              poolAddress
-              tickLower
-              tickUpper
               liquidity
-              investedToken0Amount
-              investedToken1Amount
-              withdrawnToken0Amount
-              withdrawnToken1Amount
-              currentToken0Amount
-              currentToken1Amount
-              averageToken0Amount
-              averageToken1Amount
-              collectedToken0Amount
-              collectedToken1Amount
-              reinvestedToken0Amount
-              reinvestedToken1Amount
               gasCost
+
               createdTimestamp
-              updatedTimestamp
               closedTimestamp
               closedMarketPrice
+              closedToken0USDPrice
+              closedToken1USDPrice
+              activityLogs
+
               headPosition {
                 id
                 rebalancePositions {
                   id
+                  tokenId
+                  tickLower
+                  tickUpper
+                  liquidity
+                  gasCost
+
+                  createdTimestamp
                   closedTimestamp
+                  closedMarketPrice
+                  closedToken0USDPrice
+                  closedToken1USDPrice
+                  activityLogs
                 }
               }
-              activityLogs
             }
           }
         `,
