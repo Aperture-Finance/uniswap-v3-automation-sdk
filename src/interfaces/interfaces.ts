@@ -712,6 +712,13 @@ export const CreateTriggerPayloadSchemaIcebergMMVault =
       .describe(
         'The delay in seconds before shifting liquidity if iceberg is still not forfilled. Leave empty or 0 to never shift liquidity.',
       ),
+    icebergPercentOfOutputTokenFee: z
+      .number()
+      .nonnegative()
+      .optional()
+      .describe(
+        'The percent of output tokens to send to feeCollector on each iceberg limit order.',
+      ),
   });
 
 export const CreateTriggerPayloadSchemaMMVault = z.discriminatedUnion('type', [
