@@ -46,18 +46,16 @@ export async function getPositionAnalytics(
   chainId: ApertureSupportedChainId,
   walletAddress: string,
   skip: number,
+  subgraphUrl: string, // TODO: add the subgraph URL to chain info
 ) {
-  // const analytics_subgraph_url = getAMMInfo(
+  // const subgraphUrl = getAMMInfo(
   //   chainId,
   //   amm,
   // )?.analytics_subgraph_url;
-  // if (analytics_subgraph_url === undefined) {
+  // if (subgraphUrl === undefined) {
   //   throw 'Analytics subgraph URL is not defined for the specified chain id and amm';
   // }
 
-  // TODO: change the subgraph to proper URL after final release
-  const analytics_subgraph_url =
-    'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/jiaqi-subgraph-test/0.2.0/gn';
   if (
     amm !== 'UNISWAP_V3' &&
     chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID
@@ -65,7 +63,7 @@ export async function getPositionAnalytics(
     return [];
 
   const analyticPositionSubgraph: AnalyticPositionSubgraphData[] | undefined = (
-    await axios.post(analytics_subgraph_url, {
+    await axios.post(subgraphUrl, {
       operationName: 'AnalyticPosition',
       variables: {
         account: walletAddress.toLowerCase(),
