@@ -5,6 +5,8 @@ import axios from 'axios';
 export type AnalyticPositionSubgraphData = {
   id: string;
   tokenId: bigint;
+  tickLower: number;
+  tickUpper: number;
 
   liquidity: bigint;
   investedToken0Amount: bigint;
@@ -28,27 +30,6 @@ export type AnalyticPositionSubgraphData = {
     id: string;
     rebalancePositions: {
       id: string;
-      tokenId: bigint;
-      tickLower: number;
-      tickUpper: number;
-
-      liquidity: bigint;
-      investedToken0Amount: bigint;
-      investedToken1Amount: bigint;
-      withdrawnToken0Amount: bigint;
-      withdrawnToken1Amount: bigint;
-      collectedToken0Amount: bigint;
-      collectedToken1Amount: bigint;
-      reinvestedToken0Amount: bigint;
-      reinvestedToken1Amount: bigint;
-      gasCost: bigint;
-
-      createdTimestamp: bigint;
-      closedTimestamp?: bigint;
-      closedMarketPrice?: bigint;
-      closedToken0USDPrice?: number;
-      closedToken1USDPrice?: number;
-      activityLogs: string[];
     }[];
   };
 };
@@ -95,6 +76,8 @@ export async function getPositionAnalytics(
             positions(first: 1000, skip: $skip, where: {owner: $account}) {
               id
               tokenId
+              tickLower
+              tickUpper
 
               liquidity
               investedToken0Amount
@@ -118,27 +101,6 @@ export async function getPositionAnalytics(
                 id
                 rebalancePositions {
                   id
-                  tokenId
-                  tickLower
-                  tickUpper
-
-                  liquidity
-                  investedToken0Amount
-                  investedToken1Amount
-                  withdrawnToken0Amount
-                  withdrawnToken1Amount
-                  collectedToken0Amount
-                  collectedToken1Amount
-                  reinvestedToken0Amount
-                  reinvestedToken1Amount
-                  gasCost
-
-                  createdTimestamp
-                  closedTimestamp
-                  closedMarketPrice
-                  closedToken0USDPrice
-                  closedToken1USDPrice
-                  activityLogs
                 }
               }
             }
