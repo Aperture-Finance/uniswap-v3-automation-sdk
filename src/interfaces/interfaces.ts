@@ -673,6 +673,7 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
         },
       )
       .describe('Unix timestamp in seconds when this trigger expires.'),
+    notificationTelegramChatId: z.number().int().optional(),
   });
 
 export const CreateTriggerPayloadSchemaMainMMVault =
