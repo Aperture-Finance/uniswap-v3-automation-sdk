@@ -1,4 +1,5 @@
 export * from './activity';
+export * from './analytics';
 export * from './automan';
 export * from './currency';
 export * from './mmvault';

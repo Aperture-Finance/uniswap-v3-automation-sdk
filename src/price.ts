@@ -180,7 +180,7 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
  */
 export async function getTokenHistoricalPricesFromCoingecko(
   token: Token,
-  durationDays: number,
+  durationDays: number | 'max',
   vsCurrency?: string,
   apiKey?: string,
 ): Promise<CoingeckoHistoricalPriceDatapoint[]> {
