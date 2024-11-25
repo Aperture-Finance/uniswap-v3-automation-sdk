@@ -646,6 +646,7 @@ const TriggerIdentifierSchemaMMVault = BaseTriggerPayloadSchemaMMVault.extend({
 // Base payload for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
 export const CreateTriggerPayloadSchemaBaseMMVault =
   BaseTriggerPayloadSchemaMMVault.extend({
+    feeTier: z.number().int().optional().describe('The fee tier of the pool.'),
     tickMin: z
       .number()
       .int()
