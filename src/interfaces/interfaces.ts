@@ -646,7 +646,13 @@ const TriggerIdentifierSchemaMMVault = BaseTriggerPayloadSchemaMMVault.extend({
 // Base payload for creating MMVault triggers for both main liquidity pool and iceberg limit orders.
 export const CreateTriggerPayloadSchemaBaseMMVault =
   BaseTriggerPayloadSchemaMMVault.extend({
-    feeTier: z.number().int().optional().describe('The fee tier of the pool.'),
+    feeTier: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        'The fee tier of the pool and position. If not provided, then the MMVault needs a position to extract feeTier from.',
+      ),
     tickMin: z
       .number()
       .int()
@@ -674,7 +680,13 @@ export const CreateTriggerPayloadSchemaBaseMMVault =
         },
       )
       .describe('Unix timestamp in seconds when this trigger expires.'),
-    notificationTelegramChatId: z.number().int().optional(),
+    notificationTelegramChatId: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        'The Telegram ChatId for notifications if known. Can override with "/listen {partitionKey}" command in a chat with @aperture_maas_bot.',
+      ),
   });
 
 export const CreateTriggerPayloadSchemaMainMMVault =
