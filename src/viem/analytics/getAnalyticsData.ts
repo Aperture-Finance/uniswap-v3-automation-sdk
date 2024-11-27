@@ -32,6 +32,7 @@ export type AnalyticPositionSubgraphData = {
     id: string;
     rebalancePositions: {
       id: string;
+      closedTimestamp?: bigint;
     }[];
   };
 };
@@ -103,6 +104,7 @@ export async function getPositionAnalytics(
               id
               rebalancePositions {
                 id
+                closedTimestamp
               }
             }
           }
