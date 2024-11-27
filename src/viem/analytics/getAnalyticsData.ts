@@ -7,6 +7,7 @@ export type AnalyticPositionSubgraphData = {
   tokenId: bigint;
   tickLower: number;
   tickUpper: number;
+  poolAddress: string;
 
   liquidity: bigint;
   investedToken0Amount: bigint;
@@ -24,12 +25,14 @@ export type AnalyticPositionSubgraphData = {
   closedMarketPrice?: bigint;
   closedToken0USDPrice?: number;
   closedToken1USDPrice?: number;
+  closedNativeUSDPrice?: number;
   activityLogs: string[];
 
   headPosition: {
     id: string;
     rebalancePositions: {
       id: string;
+      closedTimestamp?: bigint;
     }[];
   };
 };
@@ -70,40 +73,43 @@ export async function getPositionAnalytics(
         skip,
       },
       query: `
-          query AnalyticPosition($account: String!, $skip: Int!) {
-            positions(first: 1000, skip: $skip, where: {owner: $account}) {
+        query AnalyticPosition($account: String!, $skip: Int!) {
+          positions(first: 1000, skip: $skip, where: {owner: $account}) {
+            id
+            tokenId
+            poolAddress
+            tickLower
+            tickUpper
+
+            liquidity
+            investedToken0Amount
+            investedToken1Amount
+            withdrawnToken0Amount
+            withdrawnToken1Amount
+            collectedToken0Amount
+            collectedToken1Amount
+            reinvestedToken0Amount
+            reinvestedToken1Amount
+            gasCost
+
+            createdTimestamp
+            closedTimestamp
+            closedMarketPrice
+            closedToken0USDPrice
+            closedToken1USDPrice
+            closedNativeUSDPrice
+            activityLogs
+
+            headPosition {
               id
-              tokenId
-              tickLower
-              tickUpper
-
-              liquidity
-              investedToken0Amount
-              investedToken1Amount
-              withdrawnToken0Amount
-              withdrawnToken1Amount
-              collectedToken0Amount
-              collectedToken1Amount
-              reinvestedToken0Amount
-              reinvestedToken1Amount
-              gasCost
-
-              createdTimestamp
-              closedTimestamp
-              closedMarketPrice
-              closedToken0USDPrice
-              closedToken1USDPrice
-              activityLogs
-
-              headPosition {
+              rebalancePositions {
                 id
-                rebalancePositions {
-                  id
-                }
+                closedTimestamp
               }
             }
           }
-        `,
+        }
+      `,
     })
   ).data.data?.positions;
   return analyticPositionSubgraph;
