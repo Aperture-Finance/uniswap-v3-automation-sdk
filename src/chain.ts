@@ -95,7 +95,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bd91729ce1dd9a77d8e3',
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
@@ -151,7 +151,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bd91729ce1dd9a77d8e3',
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
@@ -220,7 +220,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bd91729ce1dd9a77d8e3',
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
@@ -273,7 +273,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000e2f3dd82130669b730bdf170d12df35233',
+          '0x000000E2F3Dd82130669b730Bdf170D12DF35233',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
@@ -292,7 +292,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000076a5feff94a54834fe1b2803a6da672e03',
+          '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
         ),
         subgraph_url:
           'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
@@ -326,7 +326,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000EDb4489cB49FE07246f39345c9f838cD',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000c51119e2bde2419c5e6fd273a81b79a8e3',
+          '0x000000C51119E2bDE2419C5e6fD273a81B79A8E3',
         ),
         subgraph_url:
           'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
