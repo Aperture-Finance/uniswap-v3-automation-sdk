@@ -25,6 +25,13 @@ const FEE_DEFAULT_REINVEST_RATIO = parseFloat(
   // Default flat 3% fee on the reinvest amount.
   process.env.FEE_DEFAULT_REINVEST_RATIO || '0.03',
 );
+// https://basescan.org/address/0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b
+export const BASE_VIRTUAL_ADDRESS =
+  '0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b';
+export const IS_VIRTUAL_FEE_FREE =
+  // Regularly gets incorrect price from CoinGecko.
+  // True by default, set to false to re-enable fees on VIRTUAL.
+  process.env.IS_VIRTUAL_FEE_FREE !== 'false';
 
 export function getFeeReinvestRatio(feeAmount: number) {
   return FEE_REINVEST_RATIO[feeAmount] || FEE_DEFAULT_REINVEST_RATIO;

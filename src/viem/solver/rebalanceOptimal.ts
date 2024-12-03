@@ -15,8 +15,10 @@ import {
   simulateRemoveLiquidityV3,
 } from '../automan';
 import {
+  BASE_VIRTUAL_ADDRESS,
   FEE_REBALANCE_SWAP_RATIO,
   FEE_REBALANCE_USD,
+  IS_VIRTUAL_FEE_FREE,
   MAX_FEE_PIPS,
   getFeeReinvestRatio,
   getTokensInUsd,
@@ -120,12 +122,32 @@ export async function rebalanceOptimalV2(
   const calcFeeBips = async () => {
     const { poolAmountIn, zeroForOne, receive0, receive1 } =
       await simulateAndGetOptimalSwapAmount(/* feeBips= */ 0n);
+    const isBaseAndVirtualFeeFree =
+      chainId === ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID &&
+      IS_VIRTUAL_FEE_FREE;
+    // Use adjustedTokenPricesUsd for swap and reinvest fee calculation to account for
+    // variations from CoinGecko of specific coins such as VIRTUAL.
+    // Use tokenPricesUsd for calculating feeBips since it's acceptable to undercharge.
+    const adjustedTokenPricesUsd: [string, string] = [
+      isBaseAndVirtualFeeFree &&
+      position.token0.address === BASE_VIRTUAL_ADDRESS
+        ? '0'
+        : tokenPricesUsd[0],
+      isBaseAndVirtualFeeFree &&
+      position.token1.address === BASE_VIRTUAL_ADDRESS
+        ? '0'
+        : tokenPricesUsd[1],
+    ];
+    // collectableTokenInUsd is used for feeOnRebalanceReinvestUsd
     const collectableTokenInUsd = getTokensInUsd(
       position.tokensOwed0,
       position.tokensOwed1,
-      tokenPricesUsd,
+      adjustedTokenPricesUsd,
     );
-    const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+    // tokenInPrice is used for feeOnRebalanceSwapUsd
+    const tokenInPrice = zeroForOne
+      ? adjustedTokenPricesUsd[0]
+      : adjustedTokenPricesUsd[1];
 
     const decimals = zeroForOne
       ? position.pool.token0.decimals
@@ -229,6 +251,8 @@ export async function rebalanceOptimalV2(
       token0Usd: token0Usd.toString(),
       token1Usd: token1Usd.toString(),
       positionUsd: positionUsd.toString(),
+      isBaseAndVirtualFeeFree,
+      adjustedTokenPricesUsd,
       ...logdata,
     });
 
