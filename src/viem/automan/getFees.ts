@@ -25,6 +25,9 @@ const FEE_DEFAULT_REINVEST_RATIO = parseFloat(
   // Default flat 3% fee on the reinvest amount.
   process.env.FEE_DEFAULT_REINVEST_RATIO || '0.03',
 );
+// https://basescan.org/address/0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b
+export const BASE_VIRTUAL_ADDRESS =
+  '0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b';
 
 export function getFeeReinvestRatio(feeAmount: number) {
   return FEE_REINVEST_RATIO[feeAmount] || FEE_DEFAULT_REINVEST_RATIO;
