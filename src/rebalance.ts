@@ -231,17 +231,14 @@ export function normalizeTicks(
       upperPrice.toString(),
     );
   } else if (
+    // Includes market making (MM) because MM hardcoded to use RecurringRatio.
     action.type === ActionTypeEnum.enum.RecurringRatio ||
-    action.type === ActionTypeEnum.enum.MarketMakingMain ||
-    action.type === ActionTypeEnum.enum.MarketMakingIceberg ||
     (action.type === ActionTypeEnum.enum.RecurringDualAction &&
       ((isLte && 'tickRangeWidth' in action.lteAction) ||
         (!isLte && 'tickRangeWidth' in action.gteAction)))
   ) {
     const recurringRatioAction =
-      action.type === ActionTypeEnum.enum.RecurringRatio ||
-      action.type === ActionTypeEnum.enum.MarketMakingMain ||
-      action.type === ActionTypeEnum.enum.MarketMakingIceberg
+      action.type === ActionTypeEnum.enum.RecurringRatio
         ? action
         : ((isLte ? action.lteAction : action.gteAction) as RatioAction);
     ({ tickLower, tickUpper } = rangeWidthRatioToTicks(
