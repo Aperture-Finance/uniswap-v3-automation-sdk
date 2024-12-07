@@ -1,6 +1,7 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfo, getLogger } from '@/index';
 import Big from 'big.js';
 
+import { BASE_VIRTUAL_ADDRESS } from '../automan';
 import { fetchQuoteToNativeCurrency } from '../routing';
 
 /**
@@ -24,6 +25,15 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
     tokenAddress,
     rawNativeCurrencyAmount,
   ).catch(() => undefined);
+  if (
+    chainId === ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID &&
+    tokenAddress === BASE_VIRTUAL_ADDRESS
+  ) {
+    getLogger().info('BASE_VIRTUAL fetched price', {
+      rawNativeCurrencyAmount,
+      rawTokenAmount,
+    });
+  }
   if (rawTokenAmount === undefined) {
     return '-1';
   }
