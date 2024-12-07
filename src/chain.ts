@@ -414,7 +414,7 @@ const CHAIN_ID_TO_INFO: {
           '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
         ),
         apertureAutomanV3: getAddress(
-          '0x000000bf0e089a0991bab3cd0e111213c71a5ad3',
+          '0x000000bf0E089A0991baB3CD0E111213c71a5aD3',
         ),
         subgraph_url:
           'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-manta-pacific/uniswap-v3/gn',
@@ -487,7 +487,7 @@ const CHAIN_ID_TO_INFO: {
           '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000027bc53f021f3564180f347425edaa20883',
+          '0x00000027bC53f021F3564180f347425eDAA20883',
         ),
         subgraph_url:
           'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
