@@ -77,7 +77,9 @@ export async function getTokenPriceFromCoingecko(
   vsCurrencies?: string,
   apiKey?: string,
 ): Promise<number> {
-  const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
+  const { coingecko_asset_platform_id, coinGeckoNativeCurrencySymbol } =
+    getChainInfo(token.chainId);
+  if (coinGeckoNativeCurrencySymbol === vsCurrencies) return 1;
   if (coingecko_asset_platform_id === undefined) return 0;
   vsCurrencies = vsCurrencies ?? 'usd';
   let priceResponse: AxiosResponse;
