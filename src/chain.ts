@@ -74,6 +74,10 @@ export interface ChainInfo {
   rpc_url?: string;
   // Only populated for networks with a CoinGecko asset platform ID.
   coingecko_asset_platform_id?: string;
+  // For getTokenPriceFromCoingecko's vs_currencies, case sensitive.
+  // Only populated if supported as vs_currencies:
+  // https://api.coingecko.com/api/v3/simple/supported_vs_currencies
+  coinGeckoNativeCurrencySymbol?: string;
 }
 
 const CHAIN_ID_TO_INFO: {
@@ -134,6 +138,7 @@ const CHAIN_ID_TO_INFO: {
     // rpc_url: 'https://mainnet.infura.io/v3/84842078b09946638c03157f83405213',
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
+    coinGeckoNativeCurrencySymbol: 'eth',
   },
   [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
     chain: arbitrum,
@@ -165,6 +170,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'arbitrum-one',
+    coinGeckoNativeCurrencySymbol: 'eth',
     infura_network_id: 'arbitrum',
     rpc_url: 'https://arbitrum-one.publicnode.com',
     maxGasCeiling: 0.2,
@@ -253,6 +259,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'optimistic-ethereum',
+    coinGeckoNativeCurrencySymbol: 'eth',
     infura_network_id: 'optimism',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -306,6 +313,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped BNB',
     ),
     coingecko_asset_platform_id: 'binance-smart-chain',
+    coinGeckoNativeCurrencySymbol: 'bnb',
     rpc_url: 'https://bsc-dataseed.bnbchain.org',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -359,6 +367,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'base',
+    coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://mainnet.base.org',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -421,6 +430,7 @@ const CHAIN_ID_TO_INFO: {
       },
     },
     coingecko_asset_platform_id: 'manta-pacific',
+    coinGeckoNativeCurrencySymbol: 'eth',
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       getAddress('0x0Dc808adcE2099A9F62AA87D9670745AbA741746'),
@@ -457,6 +467,7 @@ const CHAIN_ID_TO_INFO: {
           'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
       },
     },
+    coinGeckoNativeCurrencySymbol: 'eth',
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_TESTNET_CHAIN_ID,
       getAddress('0xdB1fE098232A00A8B81dd6c2A911f2486cb374EE'),
@@ -493,6 +504,7 @@ const CHAIN_ID_TO_INFO: {
           'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
       },
     },
+    coinGeckoNativeCurrencySymbol: 'eth',
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
       getAddress('0x5300000000000000000000000000000000000004'),
