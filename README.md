@@ -49,13 +49,13 @@ When debugging with frontend / backend environment, you don't have to release a 
 
 Here's the step:
 
-1. Build sdk
+1. Build this sdk repo
 
 ```
-yarn build
+❯ yarn && yarn build
 ```
 
-2. Run `yarn link` in current repo root
+2. Run `yarn link` in this sdk repo root
 
 ```
 ❯ yarn link
@@ -72,19 +72,26 @@ yarn link v1.22.22
 success Using linked package for "@aperture_finance/uniswap-v3-automation-sdk".
 ```
 
-4. After make changes on current repo, you will need to run build again
+4. (Optional) If making changes on this sdk repo, you will need to re-build this sdk repo
 
 ```
-yarn
-yarn build
+❯ yarn && yarn build
 ```
 
-5. Use unlink to clean up the soft link
+5. Use unlink followed by `yarn install --force` in the target project to clean up the soft link
 
 ```
 ❯ yarn unlink @aperture_finance/uniswap-v3-automation-sdk
 yarn unlink v1.22.22
 success Removed linked package "@aperture_finance/uniswap-v3-automation-sdk".
+❯ yarn install --force
+```
+
+6. (Optional) Run `yarn unlink` in this sdk repo to unlink
+
+```
+❯ yarn unlink @aperture_finance/uniswap-v3-automation-sdk
+success Unregistered "@aperture_finance/uniswap-v3-automation-sdk".
 ```
 
 ## Version Naming Conventions
