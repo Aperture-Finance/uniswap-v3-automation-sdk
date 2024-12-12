@@ -82,10 +82,6 @@ export async function getTokenPriceFromCoingecko(
     coingecko_asset_platform_id,
     coinGeckoNativeCurrencySymbol,
   } = getChainInfo(token.chainId);
-  console.log({
-    tokenAddress: token.address,
-    wrappedNativeCurrencyAddress: wrappedNativeCurrency.address,
-  });
   if (
     token.address === wrappedNativeCurrency.address &&
     vsCurrencies === coinGeckoNativeCurrencySymbol
