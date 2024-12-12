@@ -72,8 +72,12 @@ export interface ChainInfo {
   infura_network_id?: InfuraNetworkId;
   // Only populated for networks that do not have an Infura endpoint.
   rpc_url?: string;
+  // coingecko_asset_platform_id is basically the chain name for coingecko api to look up price by address.
   // Only populated for networks with a CoinGecko asset platform ID.
   coingecko_asset_platform_id?: string;
+  // For getTokenPriceFromCoingecko's vs_currencies, case sensitive.
+  // https://api.coingecko.com/api/v3/simple/supported_vs_currencies
+  coinGeckoNativeCurrencySymbol: string;
 }
 
 const CHAIN_ID_TO_INFO: {
@@ -128,6 +132,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'ethereum',
+    coinGeckoNativeCurrencySymbol: 'eth',
     infura_network_id: 'mainnet',
     rpc_url: 'https://ethereum.publicnode.com',
     // infura rpc is easy to hit rate limit
@@ -165,6 +170,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'arbitrum-one',
+    coinGeckoNativeCurrencySymbol: 'eth',
     infura_network_id: 'arbitrum',
     rpc_url: 'https://arbitrum-one.publicnode.com',
     maxGasCeiling: 0.2,
@@ -200,6 +206,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Matic',
     ),
     coingecko_asset_platform_id: 'polygon-pos',
+    coinGeckoNativeCurrencySymbol: 'matic',
     infura_network_id: 'matic',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -253,6 +260,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'optimistic-ethereum',
+    coinGeckoNativeCurrencySymbol: 'eth',
     infura_network_id: 'optimism',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -306,6 +314,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped BNB',
     ),
     coingecko_asset_platform_id: 'binance-smart-chain',
+    coinGeckoNativeCurrencySymbol: 'bnb',
     rpc_url: 'https://bsc-dataseed.bnbchain.org',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -359,6 +368,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'base',
+    coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://mainnet.base.org',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
@@ -393,6 +403,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped AVAX',
     ),
     coingecko_asset_platform_id: 'avalanche',
+    coinGeckoNativeCurrencySymbol: 'avax',
     infura_network_id: 'avalanche',
     rpc_url: 'https://avalanche-c-chain-rpc.publicnode.com',
     maxGasCeiling: 0.2,
@@ -420,7 +431,6 @@ const CHAIN_ID_TO_INFO: {
           'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-manta-pacific/uniswap-v3/gn',
       },
     },
-    coingecko_asset_platform_id: 'manta-pacific',
     wrappedNativeCurrency: new Token(
       ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID,
       getAddress('0x0Dc808adcE2099A9F62AA87D9670745AbA741746'),
@@ -428,6 +438,8 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    coingecko_asset_platform_id: 'manta-pacific',
+    coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://manta-pacific-aperture.calderachain.xyz/http',
     maxGasCeiling: 0.2,
     routingApiInfo: {
@@ -464,6 +476,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://manta-testnet.calderachain.xyz/http',
     maxGasCeiling: 0.2,
     routingApiInfo: {
@@ -501,6 +514,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coingecko_asset_platform_id: 'scroll',
+    coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://rpc.scroll.io',
     maxGasCeiling: 0.2,
     routingApiInfo: {
