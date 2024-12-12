@@ -52,7 +52,7 @@ Here's the step:
 1. Build this sdk repo
 
 ```
-❯ yarn build
+❯ yarn && yarn build
 ```
 
 2. Run `yarn link` in this sdk repo root
@@ -72,13 +72,13 @@ yarn link v1.22.22
 success Using linked package for "@aperture_finance/uniswap-v3-automation-sdk".
 ```
 
-4. (Optional) If making changes on this sdk repo, you will need to build again
+4. (Optional) If making changes on this sdk repo, you will need to re-build this sdk repo
 
 ```
 ❯ yarn && yarn build
 ```
 
-5. Use unlink followed by yarn install --force in the target project to clean up the soft link
+5. Use unlink followed by `yarn install --force` in the target project to clean up the soft link
 
 ```
 ❯ yarn unlink @aperture_finance/uniswap-v3-automation-sdk
@@ -87,7 +87,7 @@ success Removed linked package "@aperture_finance/uniswap-v3-automation-sdk".
 ❯ yarn install --force
 ```
 
-6. (Optional) Run `yarn unlink` to unregister this sdk repo
+6. (Optional) Run `yarn unlink` in this sdk repo to unlink
 
 ```
 ❯ yarn unlink @aperture_finance/uniswap-v3-automation-sdk
