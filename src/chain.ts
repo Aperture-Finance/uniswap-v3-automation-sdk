@@ -72,8 +72,9 @@ export interface ChainInfo {
   infura_network_id?: InfuraNetworkId;
   // Only populated for networks that do not have an Infura endpoint.
   rpc_url?: string;
-  // Essentially the chain name for coingecko api to look up price by address.
-  coingecko_asset_platform_id: string;
+  // coingecko_asset_platform_id is basically the chain name for coingecko api to look up price by address.
+  // Only populated for networks with a CoinGecko asset platform ID.
+  coingecko_asset_platform_id?: string;
   // For getTokenPriceFromCoingecko's vs_currencies, case sensitive.
   // https://api.coingecko.com/api/v3/simple/supported_vs_currencies
   coinGeckoNativeCurrencySymbol: string;
@@ -475,7 +476,6 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
-    coingecko_asset_platform_id: 'manta-pacific',
     coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://manta-testnet.calderachain.xyz/http',
     maxGasCeiling: 0.2,

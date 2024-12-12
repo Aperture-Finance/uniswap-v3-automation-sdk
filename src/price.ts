@@ -82,6 +82,7 @@ export async function getTokenPriceFromCoingecko(
     coingecko_asset_platform_id,
     coinGeckoNativeCurrencySymbol,
   } = getChainInfo(token.chainId);
+  if (coingecko_asset_platform_id === undefined) return 0;
   if (
     token.address === wrappedNativeCurrency.address &&
     vsCurrencies === coinGeckoNativeCurrencySymbol
@@ -147,6 +148,7 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
   apiKey?: string,
 ): Promise<{ [address: string]: number }> {
   const { coingecko_asset_platform_id } = getChainInfo(chainId);
+  if (coingecko_asset_platform_id === undefined) return {};
   const addresses = tokens.toString();
   const priceResponse: AxiosResponse = await axios.get(
     `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}${apiKey ? `&x_cg_pro_api_key=${apiKey}` : ''}`,
@@ -175,9 +177,7 @@ export async function getTokenHistoricalPricesFromCoingecko(
   apiKey?: string,
 ): Promise<CoingeckoHistoricalPriceDatapoint[]> {
   const { coingecko_asset_platform_id } = getChainInfo(token.chainId);
-  if (coingecko_asset_platform_id === undefined) {
-    return [];
-  }
+  if (coingecko_asset_platform_id === undefined) return [];
   const priceResponse: AxiosResponse = await axios.get(
     `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/coins/${coingecko_asset_platform_id}/contract/${token.address}/market_chart?vs_currency=${vsCurrency}&days=${durationDays}${apiKey ? `&x_cg_pro_api_key=${apiKey}` : ''}`,
   );
