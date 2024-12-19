@@ -37,7 +37,6 @@ import { arbitrum, base, mainnet } from 'viem/chains';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
-  DOUBLE_TICK,
   IERC20__factory,
   MAX_PRICE,
   MIN_PRICE,
@@ -77,9 +76,7 @@ import {
   estimateReinvestGas,
   generateAccessList,
   getERC20Overrides,
-  getFeeTierDistribution,
   getIncreaseLiquidityOptimalSwapInfo,
-  getLiquidityArrayForPool,
   getMintOptimalSwapInfo,
   getMintedPositionIdFromTxReceipt,
   getNPM,
@@ -90,7 +87,6 @@ import {
   getRebalanceTx,
   getSlipStreamPools,
   getSlipStreamStakePositions,
-  getTickToLiquidityMapForPool,
   getToken,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
@@ -691,160 +687,6 @@ describe('Price to tick conversion', function () {
   it('Human price to closest tick', function () {
     const tick = humanPriceToClosestTick(token0, token1, maxPrice.toFixed());
     expect(tick).to.equal(TickMath.MAX_TICK - 1);
-  });
-});
-
-// subgragh endpoint has been deprecated
-describe.skip('Pool subgraph query tests', function () {
-  it('Fee tier distribution - Uniswap V3', async function () {
-    const [distribution, distributionOppositeTokenOrder] = await Promise.all([
-      getFeeTierDistribution(
-        chainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-        WBTC_ADDRESS,
-        WETH_ADDRESS,
-      ),
-      getFeeTierDistribution(
-        chainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-        WETH_ADDRESS,
-        WBTC_ADDRESS,
-      ),
-    ]);
-    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
-    expect(
-      Object.values(distribution).reduce(
-        (partialSum, num) => partialSum + num,
-        0,
-      ),
-    ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
-  });
-
-  it('Fee tier distribution - PancakeSwap V3', async function () {
-    const USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
-    const [distribution, distributionOppositeTokenOrder] = await Promise.all([
-      getFeeTierDistribution(
-        chainId,
-        AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
-        WETH_ADDRESS,
-        USDT_ADDRESS,
-      ),
-      getFeeTierDistribution(
-        chainId,
-        AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
-        USDT_ADDRESS,
-        WETH_ADDRESS,
-      ),
-    ]);
-    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
-    expect(
-      Object.values(distribution).reduce(
-        (partialSum, num) => partialSum + num,
-        0,
-      ),
-    ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
-  });
-
-  it('Fee tier distribution - UniswapV3 on BNB chain', async function () {
-    const bnbChainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
-    const WETH_BNB = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
-    const BTCB_BNB = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
-    const [distribution, distributionOppositeTokenOrder] = await Promise.all([
-      getFeeTierDistribution(
-        bnbChainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-        WETH_BNB,
-        BTCB_BNB,
-      ),
-      getFeeTierDistribution(
-        bnbChainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
-        BTCB_BNB,
-        WETH_BNB,
-      ),
-    ]);
-    expect(distribution).to.deep.equal(distributionOppositeTokenOrder);
-    expect(
-      Object.values(distribution).reduce(
-        (partialSum, num) => partialSum + num,
-        0,
-      ),
-    ).to.be.approximately(/*expected=*/ 1, /*delta=*/ 1e-9);
-  });
-
-  async function testLiquidityDistribution(
-    chainId: ApertureSupportedChainId,
-    amm: AutomatedMarketMakerEnum,
-    pool: Pool,
-  ) {
-    const tickCurrentAligned =
-      Math.floor(pool.tickCurrent / pool.tickSpacing) * pool.tickSpacing;
-    const tickLower = pool.tickCurrent - DOUBLE_TICK;
-    const tickUpper = pool.tickCurrent + DOUBLE_TICK;
-    const [liquidityArr, tickToLiquidityMap] = await Promise.all([
-      getLiquidityArrayForPool(chainId, amm, pool, tickLower, tickUpper),
-      getTickToLiquidityMapForPool(chainId, amm, pool, tickLower, tickUpper),
-    ]);
-    expect(liquidityArr.length).to.be.greaterThan(0);
-    expect(tickToLiquidityMap.size).to.be.greaterThan(0);
-    for (const liquidity of tickToLiquidityMap.values()) {
-      expect(JSBI.greaterThanOrEqual(liquidity, JSBI.BigInt(0))).to.equal(true);
-    }
-    expect(
-      liquidityArr[
-        liquidityArr.findIndex(({ tick }) => tick > tickCurrentAligned) - 1
-      ].liquidityActive,
-    ).to.equal(pool.liquidity.toString());
-  }
-
-  it('Tick liquidity distribution - Ethereum mainnet', async function () {
-    const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.LOW,
-      chainId,
-      UNIV3_AMM,
-      getPublicClient(chainId),
-    );
-    await testLiquidityDistribution(chainId, UNIV3_AMM, pool);
-  });
-
-  it('Tick liquidity distribution - Arbitrum mainnet', async function () {
-    const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const WETH_ARBITRUM = getAddress(
-      '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
-    );
-    const USDC_ARBITRUM = getAddress(
-      '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
-    );
-    const pool = await getPool(
-      WETH_ARBITRUM,
-      USDC_ARBITRUM,
-      FeeAmount.LOW,
-      arbitrumChainId,
-      UNIV3_AMM,
-      getPublicClient(arbitrumChainId),
-    );
-    await testLiquidityDistribution(arbitrumChainId, UNIV3_AMM, pool);
-  });
-
-  it('Tick liquidity distribution - PCSV3 on the BNB chain', async function () {
-    const bnbChainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
-    const WETH_BNB = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
-    const BTCB_BNB = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
-    const pool = await getPool(
-      WETH_BNB,
-      BTCB_BNB,
-      FeeAmount.PCS_V3_MEDIUM,
-      bnbChainId,
-      AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
-      getPublicClient(bnbChainId),
-    );
-    await testLiquidityDistribution(
-      bnbChainId,
-      AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
-      pool,
-    );
   });
 });
 
