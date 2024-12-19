@@ -81,7 +81,7 @@ export interface ChainInfo {
   maxGasCeiling: number;
   alchemyNetworkId?: AlchemyNetworkId;
   infura_network_id?: InfuraNetworkId;
-  rpc_url?: string;
+  rpc_url: string;
   // coingecko_asset_platform_id is basically the chain name for coingecko api to look up price by address.
   // Only populated for networks with a CoinGecko asset platform ID.
   coingecko_asset_platform_id?: string;
@@ -145,7 +145,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'eth',
     infura_network_id: '',
-    rpc_url: 'https://ethereum.publicnode.com',
+    rpc_url: 'https://ethereum-rpc.publicnode.com',
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -182,7 +182,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'arb',
     infura_network_id: 'arbitrum',
-    rpc_url: 'https://arbitrum-one.publicnode.com',
+    rpc_url: 'https://arbitrum-one-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -219,6 +219,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'matic',
     alchemyNetworkId: 'polygon',
     infura_network_id: 'polygon',
+    rpc_url: 'https://polygon-rpc.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -274,6 +275,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'opt',
     infura_network_id: 'optimism',
+    rpc_url: 'https://optimism-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -329,7 +331,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'bnb',
     alchemyNetworkId: 'bnb',
     infura_network_id: 'bsc',
-    rpc_url: 'https://bsc-dataseed.bnbchain.org',
+    rpc_url: 'https://bsc-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -385,7 +387,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'base',
     infura_network_id: 'base',
-    rpc_url: 'https://mainnet.base.org',
+    rpc_url: 'https://base-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -457,7 +459,7 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'manta-pacific',
     coinGeckoNativeCurrencySymbol: 'eth',
-    rpc_url: 'https://manta-pacific-aperture.calderachain.xyz/http',
+    rpc_url: 'https://pacific-rpc.manta.network/http',
     maxGasCeiling: 0.2,
     routingApiInfo: {
       type: 'ROUTING_API',
@@ -494,7 +496,7 @@ const CHAIN_ID_TO_INFO: {
       'Wrapped Ether',
     ),
     coinGeckoNativeCurrencySymbol: 'eth',
-    rpc_url: 'https://manta-testnet.calderachain.xyz/http',
+    rpc_url: 'https://manta-pacific-testnet.drpc.org',
     maxGasCeiling: 0.2,
     routingApiInfo: {
       type: 'ROUTING_API',
@@ -534,7 +536,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'scroll',
     infura_network_id: 'scroll',
-    rpc_url: 'https://rpc.scroll.io',
+    rpc_url: 'https://scroll-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: {
       type: 'ROUTING_API',
