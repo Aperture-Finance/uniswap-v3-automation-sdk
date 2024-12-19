@@ -64,9 +64,7 @@ export interface AmmInfo {
   // Aperture's Automan contract address.
   apertureAutoman: Address;
   apertureAutomanV3: Address;
-  // The subgraph URL for the AMM.
-  // For Uniswap, refer to https://docs.uniswap.org/api/subgraph/overview.
-  // For PancakeSwap, refer to https://github.com/pancakeswap/pancake-subgraph.
+  // The subgraph URL for the AMM. Currently unset for all AMMs as there are no public, free endpoints.
   subgraph_url?: string;
 }
 
@@ -111,8 +109,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
@@ -130,8 +126,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -167,8 +161,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -204,8 +196,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -241,8 +231,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
       },
       [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
         // https://velodrome.finance/security#contracts
@@ -297,8 +285,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x000000E2F3Dd82130669b730Bdf170D12DF35233',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
       },
       [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
         factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
@@ -316,8 +302,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -353,8 +337,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x000000C51119E2bDE2419C5e6fD273a81B79A8E3',
         ),
-        subgraph_url:
-          'https://api.studio.thegraph.com/query/48211/uniswap-v3-base/version/latest',
       },
       [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
         // https://aerodrome.finance/security#contracts
@@ -409,8 +391,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000075Cd3dAd5805699d0E1C5734e27B3264e3',
         ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -446,8 +426,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x000000bf0E089A0991baB3CD0E111213c71a5aD3',
         ),
-        subgraph_url:
-          'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-manta-pacific/uniswap-v3/gn',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -484,8 +462,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x0000000000000000000000000000000000000000',
         ),
-        subgraph_url:
-          'https://d3lcl3uht06cq4.cloudfront.net/subgraphs/name/aperture/uniswap-v3',
       },
     },
     wrappedNativeCurrency: new Token(
@@ -521,8 +497,6 @@ const CHAIN_ID_TO_INFO: {
         apertureAutomanV3: getAddress(
           '0x00000027bC53f021F3564180f347425eDAA20883',
         ),
-        subgraph_url:
-          'https://api.goldsky.com/api/public/project_clnz7akg41cv72ntv0uhyd3ai/subgraphs/aperture-scroll/uniswap-v3/gn',
       },
     },
     wrappedNativeCurrency: new Token(
