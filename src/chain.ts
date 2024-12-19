@@ -558,7 +558,7 @@ export function getRpcEndpoint(chainId: ApertureSupportedChainId) {
   const { alchemyNetworkId, infura_network_id, rpc_url } =
     CHAIN_ID_TO_INFO[chainId];
   console.log(
-    `tommyzhao, ALCHEMY_API_KEY=${process.env.ALCHEMY_API_KEY}, INFURA_API_KEY=${process.env.INFURA_API_KEY}, alchemyNetworkId=${alchemyNetworkId}, infura_network_id=${infura_network_id}, rpc_url=${rpc_url}`,
+    `tommyzhao, ALCHEMY_API_KEY=${process.env.ALCHEMY_API_KEY}, ${process.env.ALCHEMY_API_KEY?.length}, INFURA_API_KEY=${process.env.INFURA_API_KEY}, ${process.env.INFURA_API_KEY?.length}, alchemyNetworkId=${alchemyNetworkId}, infura_network_id=${infura_network_id}, rpc_url=${rpc_url}`,
   );
   if (process.env.ALCHEMY_API_KEY && alchemyNetworkId !== undefined) {
     return `https://${alchemyNetworkId}-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
