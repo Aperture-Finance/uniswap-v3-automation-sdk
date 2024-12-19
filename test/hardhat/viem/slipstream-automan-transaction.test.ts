@@ -25,6 +25,7 @@ import {
   SlipStreamAutoman__factory,
   SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
+  getRpcEndpoint,
 } from '../../../src';
 import {
   E_Solver,
@@ -69,7 +70,7 @@ describe('SlipStreamAutoman transaction tests', function () {
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient, blockNumber, `${process.env.BASE_RPC_URL}`);
+    await resetFork(testClient, blockNumber, getRpcEndpoint(chainId));
     await testClient.impersonateAccount({
       address: eoa,
     });

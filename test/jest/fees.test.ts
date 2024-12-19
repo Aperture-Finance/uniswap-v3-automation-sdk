@@ -8,7 +8,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { config as dotenvConfig } from 'dotenv';
 import JSBI from 'jsbi';
 
-import { ApertureSupportedChainId, getChainInfo } from '../../src';
+import { ApertureSupportedChainId, getRpcEndpoint } from '../../src';
 import { getPool, getPublicClient } from '../../src/viem';
 import {
   MAX_FEE_PIPS,
@@ -33,10 +33,7 @@ describe('getFeeBips', () => {
   it.skip('should return the min fee bips between both tokens', async () => {
     const chainId: ApertureSupportedChainId =
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(
-      chainId,
-      `https://${getChainInfo(chainId).infura_network_id}-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    );
+    const client = getPublicClient(chainId, getRpcEndpoint(chainId));
     const pool: Pool = await getPool(
       token0,
       token1,
@@ -135,10 +132,7 @@ describe('getFeeBips', () => {
   it.skip('should have different feeBips for different fee tier', async () => {
     const chainId: ApertureSupportedChainId =
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(
-      chainId,
-      `https://${getChainInfo(chainId).infura_network_id}-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    );
+    const client = getPublicClient(chainId, getRpcEndpoint(chainId));
     const collectableTokenAmounts: CollectableTokenAmounts = {
       token0Amount: CurrencyAmount.fromRawAmount(token0, 123),
       token1Amount: CurrencyAmount.fromRawAmount(token1, 456),
@@ -208,10 +202,7 @@ describe('getFeeBips', () => {
   it.skip('should still have fees if principal all in a token', async () => {
     const chainId: ApertureSupportedChainId =
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(
-      chainId,
-      `https://${getChainInfo(chainId).infura_network_id}-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    );
+    const client = getPublicClient(chainId, getRpcEndpoint(chainId));
     const pool = await getPool(
       token0,
       token1,
@@ -269,10 +260,7 @@ describe('getFeeBips', () => {
   it.skip('should not be greater than MAX_FEE_PIPS', async () => {
     const chainId: ApertureSupportedChainId =
       ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(
-      chainId,
-      `https://${getChainInfo(chainId).infura_network_id}-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    );
+    const client = getPublicClient(chainId, getRpcEndpoint(chainId));
     const pool = await getPool(
       token0,
       token1,

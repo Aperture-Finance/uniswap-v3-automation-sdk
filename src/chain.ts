@@ -32,14 +32,25 @@ const UNISWAP_OFFICIAL_ROUTING_API_INFO: ChainSpecificRoutingAPIInfo = {
   type: 'UNIFIED_ROUTING_API',
 };
 
-export type InfuraNetworkId =
-  | 'mainnet'
-  | 'arbitrum'
-  | 'matic'
-  | 'optimism'
-  | 'bnbsmartchain'
+export type AlchemyNetworkId =
+  | 'arb'
+  | 'avax'
   | 'base'
-  | 'avalanche';
+  | 'bnb'
+  | 'eth'
+  | 'polygon'
+  | 'opt'
+  | 'scroll';
+
+export type InfuraNetworkId =
+  | 'arbitrum'
+  | 'avalanche'
+  | 'base'
+  | 'bsc'
+  | '' // Ethereum
+  | 'polygon'
+  | 'optimism'
+  | 'scroll';
 
 export interface AmmInfo {
   factory: Address;
@@ -68,9 +79,8 @@ export interface ChainInfo {
   routingApiInfo: ChainSpecificRoutingAPIInfo;
   // Automan maximum allowed gas deduction ceiling.
   maxGasCeiling: number;
-  // Only populated for networks that have an Infura endpoint.
+  alchemyNetworkId?: AlchemyNetworkId;
   infura_network_id?: InfuraNetworkId;
-  // Only populated for networks that do not have an Infura endpoint.
   rpc_url?: string;
   // coingecko_asset_platform_id is basically the chain name for coingecko api to look up price by address.
   // Only populated for networks with a CoinGecko asset platform ID.
@@ -83,63 +93,6 @@ export interface ChainInfo {
 const CHAIN_ID_TO_INFO: {
   [key in ApertureSupportedChainId]: ChainInfo;
 } = {
-  [ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]: {
-    chain: mainnet,
-    amms: {
-      [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
-        factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
-        nonfungiblePositionManager: getAddress(
-          '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
-        ),
-        swapRouter: getAddress('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'),
-        optimalSwapRouter: getAddress(
-          '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
-        ),
-        apertureAutoman: getAddress(
-          '0x00000000Ede6d8D217c60f93191C060747324bca',
-        ),
-        apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
-        ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
-      },
-      [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
-        factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
-        poolDeployer: getAddress('0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9'),
-        nonfungiblePositionManager: getAddress(
-          '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
-        ),
-        swapRouter: getAddress('0x13f4EA83D0bd40E75C8222255bc855a974568Dd4'),
-        optimalSwapRouter: getAddress(
-          '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
-        ),
-        apertureAutoman: getAddress(
-          '0x000000EEd287174A06550eabE6A00074255CaB34',
-        ),
-        apertureAutomanV3: getAddress(
-          '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
-        ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
-      },
-    },
-    wrappedNativeCurrency: new Token(
-      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      getAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
-      18,
-      'WETH',
-      'Wrapped Ether',
-    ),
-    coingecko_asset_platform_id: 'ethereum',
-    coinGeckoNativeCurrencySymbol: 'eth',
-    infura_network_id: 'mainnet',
-    rpc_url: 'https://ethereum.publicnode.com',
-    // infura rpc is easy to hit rate limit
-    // rpc_url: 'https://mainnet.infura.io/v3/84842078b09946638c03157f83405213',
-    maxGasCeiling: 0.5,
-    routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
-  },
   [ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID]: {
     chain: arbitrum,
     amms: {
@@ -171,151 +124,46 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'arbitrum-one',
     coinGeckoNativeCurrencySymbol: 'eth',
+    alchemyNetworkId: 'arb',
     infura_network_id: 'arbitrum',
     rpc_url: 'https://arbitrum-one.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
-  [ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID]: {
-    chain: polygon,
+  [ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID]: {
+    chain: avalanche,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
-        factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
+        factory: getAddress('0x740b1c1de25031C31FF4fC9A62f554A55cdC1baD'),
         nonfungiblePositionManager: getAddress(
-          '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+          '0x655C406EBFa14EE2006250925e54ec43AD184f8B',
         ),
-        swapRouter: getAddress('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'),
+        swapRouter: getAddress('0xbb00FF08d01D300023C629E8fFfFcb65A5a578cE'),
         optimalSwapRouter: getAddress(
-          '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+          '0x039eC83141218fC68bd85E0067d696769E0576bf',
         ),
         apertureAutoman: getAddress(
-          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+          '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
+          '0x00000075Cd3dAd5805699d0E1C5734e27B3264e3',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
+          'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
       },
     },
     wrappedNativeCurrency: new Token(
-      ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID,
-      getAddress('0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'),
+      ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
+      getAddress('0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'),
       18,
-      'WMATIC',
-      'Wrapped Matic',
+      'WAVAX',
+      'Wrapped AVAX',
     ),
-    coingecko_asset_platform_id: 'polygon-pos',
-    coinGeckoNativeCurrencySymbol: 'matic',
-    infura_network_id: 'matic',
-    maxGasCeiling: 0.2,
-    routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
-  },
-  [ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID]: {
-    chain: optimism,
-    amms: {
-      [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
-        factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
-        nonfungiblePositionManager: getAddress(
-          '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
-        ),
-        swapRouter: getAddress('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'),
-        optimalSwapRouter: getAddress(
-          '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
-        ),
-        apertureAutoman: getAddress(
-          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
-        ),
-        apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
-        ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
-      },
-      [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
-        // https://velodrome.finance/security#contracts
-        factory: getAddress('0xCc0bDDB707055e04e497aB22a59c2aF4391cd12F'),
-        poolImplementation: getAddress(
-          '0xc28aD28853A547556780BEBF7847628501A3bCbb',
-        ),
-        nonfungiblePositionManager: getAddress(
-          '0x416b433906b1B72FA758e166e239c43d68dC6F29',
-        ),
-        optimalSwapRouter: getAddress(
-          '0x920eE1aDa5C16E82BB0d7876a174407D63C8ec09',
-        ),
-        apertureAutoman: getAddress(
-          '0x000000A117EDD4AA34C39f87eFa66A521c590DA1',
-        ),
-        apertureAutomanV3: getAddress(
-          '0x0000003d82D9fb11e644B84195218DfD3aeC3f73',
-        ),
-      },
-    },
-    wrappedNativeCurrency: new Token(
-      ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
-      getAddress('0x4200000000000000000000000000000000000006'),
-      18,
-      'WETH',
-      'Wrapped Ether',
-    ),
-    coingecko_asset_platform_id: 'optimistic-ethereum',
-    coinGeckoNativeCurrencySymbol: 'eth',
-    infura_network_id: 'optimism',
-    maxGasCeiling: 0.2,
-    routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
-  },
-  [ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID]: {
-    chain: bsc,
-    amms: {
-      [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
-        factory: getAddress('0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7'),
-        nonfungiblePositionManager: getAddress(
-          '0x7b8A01B39D58278b5DE7e48c8449c9f4F5170613',
-        ),
-        swapRouter: getAddress('0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2'),
-        optimalSwapRouter: getAddress(
-          '0xE0529B92EBdd478B36BC22434625d898ebE4b489',
-        ),
-        apertureAutoman: getAddress(
-          '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
-        ),
-        apertureAutomanV3: getAddress(
-          '0x000000E2F3Dd82130669b730Bdf170D12DF35233',
-        ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
-      },
-      [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
-        factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
-        poolDeployer: getAddress('0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9'),
-        nonfungiblePositionManager: getAddress(
-          '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
-        ),
-        swapRouter: getAddress('0x13f4EA83D0bd40E75C8222255bc855a974568Dd4'),
-        optimalSwapRouter: getAddress(
-          '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
-        ),
-        apertureAutoman: getAddress(
-          '0x000000EEd287174A06550eabE6A00074255CaB34',
-        ),
-        apertureAutomanV3: getAddress(
-          '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
-        ),
-        subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
-      },
-    },
-    wrappedNativeCurrency: new Token(
-      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
-      getAddress('0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'),
-      18,
-      'WBNB',
-      'Wrapped BNB',
-    ),
-    coingecko_asset_platform_id: 'binance-smart-chain',
-    coinGeckoNativeCurrencySymbol: 'bnb',
-    rpc_url: 'https://bsc-dataseed.bnbchain.org',
+    coingecko_asset_platform_id: 'avalanche',
+    coinGeckoNativeCurrencySymbol: 'avax',
+    alchemyNetworkId: 'avax',
+    infura_network_id: 'avalanche',
+    rpc_url: 'https://avalanche-c-chain-rpc.publicnode.com',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -369,44 +217,122 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'base',
     coinGeckoNativeCurrencySymbol: 'eth',
+    alchemyNetworkId: 'base',
+    infura_network_id: 'base',
     rpc_url: 'https://mainnet.base.org',
     maxGasCeiling: 0.2,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
-  [ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID]: {
-    chain: avalanche,
+  [ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID]: {
+    chain: bsc,
     amms: {
       [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
-        factory: getAddress('0x740b1c1de25031C31FF4fC9A62f554A55cdC1baD'),
+        factory: getAddress('0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7'),
         nonfungiblePositionManager: getAddress(
-          '0x655C406EBFa14EE2006250925e54ec43AD184f8B',
+          '0x7b8A01B39D58278b5DE7e48c8449c9f4F5170613',
         ),
-        swapRouter: getAddress('0xbb00FF08d01D300023C629E8fFfFcb65A5a578cE'),
+        swapRouter: getAddress('0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2'),
         optimalSwapRouter: getAddress(
-          '0x039eC83141218fC68bd85E0067d696769E0576bf',
+          '0xE0529B92EBdd478B36BC22434625d898ebE4b489',
         ),
         apertureAutoman: getAddress(
-          '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
+          '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
         apertureAutomanV3: getAddress(
-          '0x00000075Cd3dAd5805699d0E1C5734e27B3264e3',
+          '0x000000E2F3Dd82130669b730Bdf170D12DF35233',
         ),
         subgraph_url:
-          'https://api.thegraph.com/subgraphs/name/lynnshaoyu/uniswap-v3-avax',
+          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc',
+      },
+      [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
+        factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
+        poolDeployer: getAddress('0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9'),
+        nonfungiblePositionManager: getAddress(
+          '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
+        ),
+        swapRouter: getAddress('0x13f4EA83D0bd40E75C8222255bc855a974568Dd4'),
+        optimalSwapRouter: getAddress(
+          '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
+        ),
+        apertureAutoman: getAddress(
+          '0x000000EEd287174A06550eabE6A00074255CaB34',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
+        ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc',
       },
     },
     wrappedNativeCurrency: new Token(
-      ApertureSupportedChainId.AVALANCHE_MAINNET_CHAIN_ID,
-      getAddress('0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'),
+      ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
+      getAddress('0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'),
       18,
-      'WAVAX',
-      'Wrapped AVAX',
+      'WBNB',
+      'Wrapped BNB',
     ),
-    coingecko_asset_platform_id: 'avalanche',
-    coinGeckoNativeCurrencySymbol: 'avax',
-    infura_network_id: 'avalanche',
-    rpc_url: 'https://avalanche-c-chain-rpc.publicnode.com',
+    coingecko_asset_platform_id: 'binance-smart-chain',
+    coinGeckoNativeCurrencySymbol: 'bnb',
+    alchemyNetworkId: 'bnb',
+    infura_network_id: 'bsc',
+    rpc_url: 'https://bsc-dataseed.bnbchain.org',
     maxGasCeiling: 0.2,
+    routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
+  },
+  [ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]: {
+    chain: mainnet,
+    amms: {
+      [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
+        factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
+        nonfungiblePositionManager: getAddress(
+          '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+        ),
+        swapRouter: getAddress('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'),
+        optimalSwapRouter: getAddress(
+          '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+        ),
+        apertureAutoman: getAddress(
+          '0x00000000Ede6d8D217c60f93191C060747324bca',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
+        ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
+      },
+      [AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3]: {
+        factory: getAddress('0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865'),
+        poolDeployer: getAddress('0x41ff9AA7e16B8B1a8a8dc4f0eFacd93D02d071c9'),
+        nonfungiblePositionManager: getAddress(
+          '0x46A15B0b27311cedF172AB29E4f4766fbE7F4364',
+        ),
+        swapRouter: getAddress('0x13f4EA83D0bd40E75C8222255bc855a974568Dd4'),
+        optimalSwapRouter: getAddress(
+          '0x00000E719aEae2afAD3B00BE068b00Dc2770dc00',
+        ),
+        apertureAutoman: getAddress(
+          '0x000000EEd287174A06550eabE6A00074255CaB34',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
+        ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
+      },
+    },
+    wrappedNativeCurrency: new Token(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+      getAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
+      18,
+      'WETH',
+      'Wrapped Ether',
+    ),
+    coingecko_asset_platform_id: 'ethereum',
+    coinGeckoNativeCurrencySymbol: 'eth',
+    alchemyNetworkId: 'eth',
+    infura_network_id: '',
+    rpc_url: 'https://ethereum.publicnode.com',
+    maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
   [ApertureSupportedChainId.MANTA_PACIFIC_MAINNET_CHAIN_ID]: {
@@ -484,6 +410,97 @@ const CHAIN_ID_TO_INFO: {
       url: 'https://uniswap-routing.aperture.finance/quote',
     },
   },
+  [ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID]: {
+    chain: polygon,
+    amms: {
+      [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
+        factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
+        nonfungiblePositionManager: getAddress(
+          '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+        ),
+        swapRouter: getAddress('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'),
+        optimalSwapRouter: getAddress(
+          '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+        ),
+        apertureAutoman: getAddress(
+          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
+        ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-polygon',
+      },
+    },
+    wrappedNativeCurrency: new Token(
+      ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID,
+      getAddress('0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'),
+      18,
+      'WMATIC',
+      'Wrapped Matic',
+    ),
+    coingecko_asset_platform_id: 'polygon-pos',
+    coinGeckoNativeCurrencySymbol: 'matic',
+    alchemyNetworkId: 'polygon',
+    infura_network_id: 'polygon',
+    maxGasCeiling: 0.2,
+    routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
+  },
+  [ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID]: {
+    chain: optimism,
+    amms: {
+      [AutomatedMarketMakerEnum.enum.UNISWAP_V3]: {
+        factory: getAddress('0x1F98431c8aD98523631AE4a59f267346ea31F984'),
+        nonfungiblePositionManager: getAddress(
+          '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',
+        ),
+        swapRouter: getAddress('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'),
+        optimalSwapRouter: getAddress(
+          '0x00000000063E0E1E06A0FE61e16bE8Bdec1BEA31',
+        ),
+        apertureAutoman: getAddress(
+          '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
+        ),
+        subgraph_url:
+          'https://api.thegraph.com/subgraphs/name/ianlapham/optimism-post-regenesis',
+      },
+      [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
+        // https://velodrome.finance/security#contracts
+        factory: getAddress('0xCc0bDDB707055e04e497aB22a59c2aF4391cd12F'),
+        poolImplementation: getAddress(
+          '0xc28aD28853A547556780BEBF7847628501A3bCbb',
+        ),
+        nonfungiblePositionManager: getAddress(
+          '0x416b433906b1B72FA758e166e239c43d68dC6F29',
+        ),
+        optimalSwapRouter: getAddress(
+          '0x920eE1aDa5C16E82BB0d7876a174407D63C8ec09',
+        ),
+        apertureAutoman: getAddress(
+          '0x000000A117EDD4AA34C39f87eFa66A521c590DA1',
+        ),
+        apertureAutomanV3: getAddress(
+          '0x0000003d82D9fb11e644B84195218DfD3aeC3f73',
+        ),
+      },
+    },
+    wrappedNativeCurrency: new Token(
+      ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
+      getAddress('0x4200000000000000000000000000000000000006'),
+      18,
+      'WETH',
+      'Wrapped Ether',
+    ),
+    coingecko_asset_platform_id: 'optimistic-ethereum',
+    coinGeckoNativeCurrencySymbol: 'eth',
+    alchemyNetworkId: 'opt',
+    infura_network_id: 'optimism',
+    maxGasCeiling: 0.2,
+    routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
+  },
   [ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID]: {
     chain: scroll,
     amms: {
@@ -515,6 +532,8 @@ const CHAIN_ID_TO_INFO: {
     ),
     coingecko_asset_platform_id: 'scroll',
     coinGeckoNativeCurrencySymbol: 'eth',
+    alchemyNetworkId: 'scroll',
+    infura_network_id: 'scroll',
     rpc_url: 'https://rpc.scroll.io',
     maxGasCeiling: 0.2,
     routingApiInfo: {
@@ -533,4 +552,21 @@ export function getAMMInfo(
   amm: AutomatedMarketMakerEnum,
 ) {
   return CHAIN_ID_TO_INFO[chainId].amms[amm];
+}
+
+export function getRpcEndpoint(chainId: ApertureSupportedChainId) {
+  const { alchemyNetworkId, infura_network_id, rpc_url } =
+    CHAIN_ID_TO_INFO[chainId];
+  if (process.env.ALCHEMY_API_KEY && alchemyNetworkId !== undefined) {
+    return `https://${alchemyNetworkId}-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+  }
+  if (process.env.INFURA_API_KEY && infura_network_id !== undefined) {
+    // infura_network_id may be empty (in the case for Ethereum).
+    if (infura_network_id === '') {
+      return `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
+    } else {
+      return `https://${infura_network_id}-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
+    }
+  }
+  return rpc_url;
 }
