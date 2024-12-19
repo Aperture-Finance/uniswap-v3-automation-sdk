@@ -46,6 +46,7 @@ export const WalletTypeEnum = z.enum([
   'HALO',
   'BYBIT',
   'BINANCE',
+  'SAFE',
 ]);
 export const WalletConnectSubtypeEnum = z.enum([
   'HALO',
