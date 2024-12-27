@@ -614,7 +614,7 @@ export async function increaseLiquidityOptimalV3(
       const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
       const decimals = zeroForOne
         ? token0Amount.currency.decimals
-        : token0Amount.currency.decimals;
+        : token1Amount.currency.decimals;
       const feeUSD = new Big(poolAmountIn.toString())
         .div(10 ** decimals)
         .mul(tokenInPrice)
