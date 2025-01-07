@@ -251,7 +251,10 @@ export async function getBulkPools(
         slot0Result.status !== 'success' ||
         liquidityResult.status !== 'success'
       ) {
-        console.warn(`Failed to fetch pool data for tokens ${poolId}`);
+        console.warn(`Failed to fetch pool data for tokens ${poolId}`, {
+          slot0Result,
+          liquidityResult,
+        });
         return null;
       }
 
@@ -275,6 +278,9 @@ export async function getBulkPools(
         if (feeResult?.status !== 'success') {
           console.warn(
             `Failed to fetch Slipstream pool fee for tokens ${poolId}`,
+            {
+              feeResult,
+            },
           );
           return null;
         }
