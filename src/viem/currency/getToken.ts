@@ -1,9 +1,37 @@
 import { ApertureSupportedChainId, ERC20__factory } from '@/index';
 import { IERC20__factory } from '@/typechain-types';
+import { TimedCache } from '@/utils/cache';
 import { Token } from '@uniswap/sdk-core';
 import { Address, PublicClient } from 'viem';
 
 import { getPublicClient } from '../public_client';
+
+// Cache structure: chainId -> address -> Token
+const tokenCaches = new Map<
+  ApertureSupportedChainId,
+  TimedCache<string, Token>
+>();
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+function getCachedToken(
+  address: string,
+  chainId: ApertureSupportedChainId,
+): Token | undefined {
+  const chainCache = tokenCaches.get(chainId);
+  if (!chainCache) return undefined;
+  return chainCache.get(address);
+}
+
+function cacheToken(token: Token, chainId: ApertureSupportedChainId): void {
+  let chainCache = tokenCaches.get(chainId);
+  if (!chainCache) {
+    chainCache = new TimedCache<string, Token>(CACHE_DURATION);
+    tokenCaches.set(chainId, chainCache);
+  }
+
+  chainCache.set(token.address, token);
+}
 
 export async function getToken(
   tokenAddress: Address,
@@ -12,6 +40,17 @@ export async function getToken(
   blockNumber?: bigint,
   showSymbolAndName?: boolean,
 ): Promise<Token> {
+  // Check cache first (only if not requesting a specific block)
+  if (!blockNumber) {
+    const cachedToken = getCachedToken(tokenAddress, chainId);
+    if (cachedToken) {
+      // If we need full token info and cached token has it, return cached
+      if (!showSymbolAndName || (cachedToken.symbol && cachedToken.name)) {
+        return cachedToken;
+      }
+    }
+  }
+
   const client = publicClient ?? getPublicClient(chainId);
   const contract = {
     address: tokenAddress,
@@ -50,7 +89,14 @@ export async function getToken(
           nameResult.status === 'success'
             ? (nameResult.result as string)
             : undefined;
-        return new Token(chainId, tokenAddress, decimals, symbol, name);
+        const token = new Token(chainId, tokenAddress, decimals, symbol, name);
+
+        // Cache the token if not requesting a specific block
+        if (!blockNumber) {
+          cacheToken(token, chainId);
+        }
+
+        return token;
       }
 
       console.log(
@@ -70,7 +116,18 @@ export async function getToken(
       });
 
       if (decimalsResult.status === 'success') {
-        return new Token(chainId, tokenAddress, Number(decimalsResult.result));
+        const token = new Token(
+          chainId,
+          tokenAddress,
+          Number(decimalsResult.result),
+        );
+
+        // Cache the token if not requesting a specific block
+        if (!blockNumber) {
+          cacheToken(token, chainId);
+        }
+
+        return token;
       }
 
       console.log(

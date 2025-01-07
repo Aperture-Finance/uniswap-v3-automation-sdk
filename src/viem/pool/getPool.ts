@@ -39,57 +39,96 @@ export async function getPool(
   publicClient?: PublicClient,
   blockNumber?: bigint,
 ): Promise<Pool> {
-  publicClient = publicClient ?? getPublicClient(chainId);
+  const client = publicClient ?? getPublicClient(chainId);
   const poolContract = getPoolContract(
     tokenA,
     tokenB,
     feeOrTickSpacing,
     chainId,
     amm,
-    publicClient,
+    client,
   );
-  const opts = { blockNumber };
-  // If the specified pool has not been created yet, then the slot0() and liquidity() calls should fail (and throw an error).
-  // Also update the tokens to the canonical type.
-  const [slot0, inRangeLiquidity, tokenACanon, tokenBCanon] = await Promise.all(
-    [
-      poolContract.read.slot0(opts),
-      poolContract.read.liquidity(opts),
-      getToken(
-        (typeof tokenA === 'string' ? tokenA : tokenA.address) as Address,
-        chainId,
-        publicClient,
-        blockNumber,
-      ),
-      getToken(
-        (typeof tokenB === 'string' ? tokenB : tokenB.address) as Address,
-        chainId,
-        publicClient,
-        blockNumber,
-      ),
-    ],
-  );
-  let fee = feeOrTickSpacing;
-  let tickSpacing: number | undefined = undefined;
-  if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
-    fee = await poolContract.read.fee(opts);
-    tickSpacing = feeOrTickSpacing;
-  }
 
-  const [sqrtPriceX96, tick] = slot0;
-  if (sqrtPriceX96 === BigInt(0)) {
-    throw 'Pool has been created but not yet initialized';
+  const tokenAAddress = (
+    typeof tokenA === 'string' ? tokenA : tokenA.address
+  ) as Address;
+  const tokenBAddress = (
+    typeof tokenB === 'string' ? tokenB : tokenB.address
+  ) as Address;
+
+  try {
+    const contracts = [
+      {
+        ...poolContract,
+        functionName: 'slot0',
+      },
+      {
+        ...poolContract,
+        functionName: 'liquidity',
+      },
+    ];
+
+    // Add fee call for Slipstream pools
+    if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
+      contracts.push({
+        ...poolContract,
+        functionName: 'fee',
+      });
+    }
+
+    const [tokenACanon, tokenBCanon, poolResults] = await Promise.all([
+      getToken(tokenAAddress, chainId, client, blockNumber),
+      getToken(tokenBAddress, chainId, client, blockNumber),
+      client.multicall({
+        contracts,
+        blockNumber,
+      }),
+    ]);
+
+    const [slot0Result, liquidityResult, feeResult] = poolResults;
+
+    if (
+      slot0Result.status !== 'success' ||
+      liquidityResult.status !== 'success'
+    ) {
+      throw new Error('Failed to fetch pool data');
+    }
+
+    const [sqrtPriceX96, tick] = slot0Result.result as unknown as [
+      bigint,
+      number,
+    ];
+    if (sqrtPriceX96 === BigInt(0)) {
+      throw new Error('Pool has been created but not yet initialized');
+    }
+
+    const inRangeLiquidity = liquidityResult.result as bigint;
+
+    let fee = feeOrTickSpacing;
+    let tickSpacing: number | undefined = undefined;
+
+    if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
+      if (feeResult?.status !== 'success') {
+        throw new Error('Failed to fetch Slipstream pool fee');
+      }
+      fee = Number(feeResult.result);
+      tickSpacing = feeOrTickSpacing;
+    }
+
+    return new Pool(
+      tokenACanon,
+      tokenBCanon,
+      fee,
+      sqrtPriceX96.toString(),
+      inRangeLiquidity.toString(),
+      tick,
+      undefined,
+      tickSpacing,
+    );
+  } catch (error) {
+    console.error('Error fetching pool data:', error);
+    throw error;
   }
-  return new Pool(
-    tokenACanon,
-    tokenBCanon,
-    fee,
-    sqrtPriceX96.toString(),
-    inRangeLiquidity.toString(),
-    tick,
-    undefined,
-    tickSpacing,
-  );
 }
 
 /**
