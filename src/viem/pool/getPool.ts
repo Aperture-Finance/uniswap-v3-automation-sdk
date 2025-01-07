@@ -2,6 +2,7 @@ import {
   ApertureSupportedChainId,
   IUniswapV3Pool__factory,
   computePoolAddress,
+  getLogger,
 } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
@@ -251,7 +252,10 @@ export async function getBulkPools(
         slot0Result.status !== 'success' ||
         liquidityResult.status !== 'success'
       ) {
-        console.warn(`Failed to fetch pool data for tokens ${poolId}`);
+        console.warn(`Failed to fetch pool data for tokens ${poolId}`, {
+          slot0Result,
+          liquidityResult,
+        });
         return null;
       }
 
@@ -275,6 +279,9 @@ export async function getBulkPools(
         if (feeResult?.status !== 'success') {
           console.warn(
             `Failed to fetch Slipstream pool fee for tokens ${poolId}`,
+            {
+              feeResult,
+            },
           );
           return null;
         }
@@ -302,7 +309,9 @@ export async function getBulkPools(
       );
     });
   } catch (error) {
-    console.error('Error in bulk pool fetch:', error);
+    getLogger().error('Error in bulk pool fetch:', {
+      msg: (error as Error).message,
+    });
     throw error;
   }
 }
