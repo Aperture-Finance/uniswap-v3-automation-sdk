@@ -2,6 +2,7 @@ import {
   ApertureSupportedChainId,
   IUniswapV3Pool__factory,
   computePoolAddress,
+  getLogger,
 } from '@/index';
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
@@ -308,7 +309,7 @@ export async function getBulkPools(
       );
     });
   } catch (error) {
-    console.error('Error in bulk pool fetch:', error);
+    getLogger().error('Error in bulk pool fetch:', error);
     throw error;
   }
 }
