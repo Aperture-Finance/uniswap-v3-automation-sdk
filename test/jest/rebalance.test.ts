@@ -6,7 +6,7 @@ import Big from 'big.js';
 import { ActionTypeEnum, ApertureSupportedChainId } from '../../src/interfaces';
 import { normalizeTicks } from '../../src/rebalance';
 import { rangeWidthRatioToTicks } from '../../src/tick';
-import { getToken } from '../../src/viem/currency/currency';
+import { getToken } from '../../src/viem/currency';
 import { getPool } from '../../src/viem/pool';
 
 const ETHEREUM_MAINNET_ETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
