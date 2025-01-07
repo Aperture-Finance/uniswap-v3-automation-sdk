@@ -3,7 +3,7 @@ import hre from 'hardhat';
 import { PublicClient, TestClient } from 'viem';
 
 import { ApertureSupportedChainId } from '../../../src';
-import { bulkGetPool, getPool } from '../../../src/viem';
+import { getBulkPools, getPool } from '../../../src/viem';
 import {
   DAI_ADDRESS,
   USDC_ADDRESS,
@@ -139,7 +139,7 @@ describe('Viem - Pool tests', function () {
         },
       ];
 
-      const pools = await bulkGetPool(
+      const pools = await getBulkPools(
         poolParams,
         chainId,
         AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
@@ -187,13 +187,13 @@ describe('Viem - Pool tests', function () {
       ];
 
       const [pools1, pools2] = await Promise.all([
-        bulkGetPool(
+        getBulkPools(
           poolParams1,
           chainId,
           AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
           publicClient,
         ),
-        bulkGetPool(
+        getBulkPools(
           poolParams2,
           chainId,
           AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
@@ -217,7 +217,7 @@ describe('Viem - Pool tests', function () {
       ];
 
       await expect(
-        bulkGetPool(
+        getBulkPools(
           poolParams,
           chainId,
           AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
@@ -241,7 +241,7 @@ describe('Viem - Pool tests', function () {
       ];
 
       await expect(
-        bulkGetPool(
+        getBulkPools(
           poolParams,
           chainId,
           AutomatedMarketMakerEnum.Enum.UNISWAP_V3,

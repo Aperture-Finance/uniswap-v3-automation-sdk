@@ -16,7 +16,7 @@ import {
   getContract,
 } from 'viem';
 
-import { bulkGetToken, getToken } from '../currency';
+import { getBulkTokens, getToken } from '../currency';
 import { getPublicClient } from '../public_client';
 
 /**
@@ -157,7 +157,7 @@ export function getPoolContract(
   });
 }
 
-export async function bulkGetPool(
+export async function getBulkPools(
   params: {
     tokenA: Token | string;
     tokenB: Token | string;
@@ -216,7 +216,7 @@ export async function bulkGetPool(
 
     // Fetch all tokens and pool data in parallel
     const [tokens, poolResults] = await Promise.all([
-      bulkGetToken(Array.from(tokenAddresses), chainId, client, blockNumber),
+      getBulkTokens(Array.from(tokenAddresses), chainId, client, blockNumber),
       client.multicall({
         contracts,
         blockNumber,

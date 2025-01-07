@@ -143,7 +143,7 @@ export async function getToken(
   }
 }
 
-export async function bulkGetToken(
+export async function getBulkTokens(
   tokens: Address[],
   chainId: ApertureSupportedChainId,
   publicClient?: PublicClient,
@@ -227,7 +227,7 @@ export async function bulkGetToken(
   }
 }
 
-export async function bulkGetTokenBalance(
+export async function getBulkTokenBalances(
   client: PublicClient,
   wallet: Address,
   tokens: Address[],
