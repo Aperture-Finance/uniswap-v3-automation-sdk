@@ -309,7 +309,9 @@ export async function getBulkPools(
       );
     });
   } catch (error) {
-    getLogger().error('Error in bulk pool fetch:', error);
+    getLogger().error('Error in bulk pool fetch:', {
+      msg: (error as Error).message,
+    });
     throw error;
   }
 }
