@@ -7,6 +7,7 @@ import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
 import { ISlipStreamCLPool__factory } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { logger } from 'ethers';
 import {
   Address,
   GetContractReturnType,
@@ -166,7 +167,7 @@ export async function bulkGetPool(
   amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   blockNumber?: bigint,
-): Promise<Pool[]> {
+): Promise<Array<Pool | null>> {
   const client = publicClient ?? getPublicClient(chainId);
 
   try {
@@ -229,6 +230,15 @@ export async function bulkGetPool(
 
     // Process results
     return params.map(({ tokenA, tokenB, feeOrTickSpacing }, index) => {
+      const tokenAAddress = (
+        typeof tokenA === 'string' ? tokenA : tokenA.address
+      ).toLowerCase();
+      const tokenBAddress = (
+        typeof tokenB === 'string' ? tokenB : tokenB.address
+      ).toLowerCase();
+
+      const poolId = `${tokenAAddress}-${tokenBAddress}-${feeOrTickSpacing}`;
+
       const baseIndex =
         amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
           ? index * 3
@@ -242,9 +252,8 @@ export async function bulkGetPool(
         slot0Result.status !== 'success' ||
         liquidityResult.status !== 'success'
       ) {
-        throw new Error(
-          `Failed to fetch pool data for tokens ${tokenA} and ${tokenB}`,
-        );
+        console.warn(`Failed to fetch pool data for tokens ${poolId}`);
+        return null;
       }
 
       const [sqrtPriceX96, tick] = slot0Result.result as unknown as [
@@ -252,9 +261,10 @@ export async function bulkGetPool(
         number,
       ];
       if (sqrtPriceX96 === BigInt(0)) {
-        throw new Error(
-          `Pool has been created but not yet initialized for tokens ${tokenA} and ${tokenB}`,
+        console.warn(
+          `Pool has been created but not yet initialized for tokens ${poolId}`,
         );
+        return null;
       }
 
       const inRangeLiquidity = liquidityResult.result as bigint;
@@ -264,26 +274,21 @@ export async function bulkGetPool(
 
       if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
         if (feeResult?.status !== 'success') {
-          throw new Error(
-            `Failed to fetch Slipstream pool fee for tokens ${tokenA} and ${tokenB}`,
+          console.warn(
+            `Failed to fetch Slipstream pool fee for tokens ${poolId}`,
           );
+          return null;
         }
         fee = Number(feeResult.result);
         tickSpacing = feeOrTickSpacing;
       }
 
-      const tokenAAddress = (
-        typeof tokenA === 'string' ? tokenA : tokenA.address
-      ).toLowerCase();
-      const tokenBAddress = (
-        typeof tokenB === 'string' ? tokenB : tokenB.address
-      ).toLowerCase();
-
       const tokenACanon = tokenMap.get(tokenAAddress);
       const tokenBCanon = tokenMap.get(tokenBAddress);
 
       if (!tokenACanon || !tokenBCanon) {
-        throw new Error('Token not found in fetched tokens');
+        console.warn(`Token not found in fetched tokens for ${poolId}`);
+        return null;
       }
 
       return new Pool(
