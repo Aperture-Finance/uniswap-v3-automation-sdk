@@ -7,7 +7,6 @@ import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
 import { ISlipStreamCLPool__factory } from 'aperture-lens';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { logger } from 'ethers';
 import {
   Address,
   GetContractReturnType,
