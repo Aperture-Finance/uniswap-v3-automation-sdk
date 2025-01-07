@@ -18,6 +18,10 @@ function getCachedToken(
   address: string,
   chainId: ApertureSupportedChainId,
 ): Token | undefined {
+  if (process.env.IS_SDK_TEST_MODE) {
+    return undefined;
+  }
+
   const chainCache = tokenCaches.get(chainId);
   if (!chainCache) return undefined;
   return chainCache.get(address);
