@@ -23,8 +23,6 @@ export class TimedCache<K, V> {
       return undefined;
     }
 
-    console.debug('cache hit', key);
-
     return entry.data;
   }
 

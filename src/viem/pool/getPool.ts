@@ -15,7 +15,7 @@ import {
   getContract,
 } from 'viem';
 
-import { getToken } from '../currency';
+import { bulkGetToken, getToken } from '../currency';
 import { getPublicClient } from '../public_client';
 
 /**
@@ -154,4 +154,151 @@ export function getPoolContract(
         : IUniswapV3Pool__factory.abi,
     client: walletClient ?? publicClient!,
   });
+}
+
+export async function bulkGetPool(
+  params: {
+    tokenA: Token | string;
+    tokenB: Token | string;
+    feeOrTickSpacing: number;
+  }[],
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient?: PublicClient,
+  blockNumber?: bigint,
+): Promise<Pool[]> {
+  const client = publicClient ?? getPublicClient(chainId);
+
+  try {
+    // Create pool contracts for each parameter set
+    const poolContracts: GetContractReturnType<
+      | typeof IUniswapV3Pool__factory.abi
+      | typeof ISlipStreamCLPool__factory.abi,
+      PublicClient | WalletClient
+    >[] = params.map(({ tokenA, tokenB, feeOrTickSpacing }) =>
+      getPoolContract(tokenA, tokenB, feeOrTickSpacing, chainId, amm, client),
+    );
+
+    // Prepare token addresses for bulk fetching
+    const tokenAddresses = new Set<Address>();
+    params.forEach(({ tokenA, tokenB }) => {
+      tokenAddresses.add(
+        (typeof tokenA === 'string' ? tokenA : tokenA.address) as Address,
+      );
+      tokenAddresses.add(
+        (typeof tokenB === 'string' ? tokenB : tokenB.address) as Address,
+      );
+    });
+
+    // Create multicall contracts array
+    const contracts = poolContracts.flatMap((poolContract) => {
+      const baseContracts = [
+        {
+          ...poolContract,
+          functionName: 'slot0',
+        },
+        {
+          ...poolContract,
+          functionName: 'liquidity',
+        },
+      ];
+
+      if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
+        baseContracts.push({
+          ...poolContract,
+          functionName: 'fee',
+        });
+      }
+
+      return baseContracts;
+    });
+
+    // Fetch all tokens and pool data in parallel
+    const [tokens, poolResults] = await Promise.all([
+      bulkGetToken(Array.from(tokenAddresses), chainId, client, blockNumber),
+      client.multicall({
+        contracts,
+        blockNumber,
+      }),
+    ]);
+
+    // Create a map of token addresses to Token objects
+    const tokenMap = new Map(
+      tokens.map((token) => [token.address.toLowerCase(), token]),
+    );
+
+    // Process results
+    return params.map(({ tokenA, tokenB, feeOrTickSpacing }, index) => {
+      const baseIndex =
+        amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM
+          ? index * 3
+          : index * 2;
+      const [slot0Result, liquidityResult, feeResult] = poolResults.slice(
+        baseIndex,
+        baseIndex + (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM ? 3 : 2),
+      );
+
+      if (
+        slot0Result.status !== 'success' ||
+        liquidityResult.status !== 'success'
+      ) {
+        throw new Error(
+          `Failed to fetch pool data for tokens ${tokenA} and ${tokenB}`,
+        );
+      }
+
+      const [sqrtPriceX96, tick] = slot0Result.result as unknown as [
+        bigint,
+        number,
+      ];
+      if (sqrtPriceX96 === BigInt(0)) {
+        throw new Error(
+          `Pool has been created but not yet initialized for tokens ${tokenA} and ${tokenB}`,
+        );
+      }
+
+      const inRangeLiquidity = liquidityResult.result as bigint;
+
+      let fee = feeOrTickSpacing;
+      let tickSpacing: number | undefined = undefined;
+
+      if (amm === AutomatedMarketMakerEnum.Enum.SLIPSTREAM) {
+        if (feeResult?.status !== 'success') {
+          throw new Error(
+            `Failed to fetch Slipstream pool fee for tokens ${tokenA} and ${tokenB}`,
+          );
+        }
+        fee = Number(feeResult.result);
+        tickSpacing = feeOrTickSpacing;
+      }
+
+      const tokenAAddress = (
+        typeof tokenA === 'string' ? tokenA : tokenA.address
+      ).toLowerCase();
+      const tokenBAddress = (
+        typeof tokenB === 'string' ? tokenB : tokenB.address
+      ).toLowerCase();
+
+      const tokenACanon = tokenMap.get(tokenAAddress);
+      const tokenBCanon = tokenMap.get(tokenBAddress);
+
+      if (!tokenACanon || !tokenBCanon) {
+        throw new Error('Token not found in fetched tokens');
+      }
+
+      return new Pool(
+        tokenACanon,
+        tokenBCanon,
+        fee,
+        sqrtPriceX96.toString(),
+        inRangeLiquidity.toString(),
+        tick,
+        undefined,
+        tickSpacing,
+      );
+    });
+  } catch (error) {
+    console.error('Error in bulk pool fetch:', error);
+    throw error;
+  }
 }

@@ -3,7 +3,7 @@ import hre from 'hardhat';
 import { PublicClient, TestClient } from 'viem';
 
 import { ApertureSupportedChainId } from '../../../src';
-import { getPool } from '../../../src/viem';
+import { bulkGetPool, getPool } from '../../../src/viem';
 import {
   DAI_ADDRESS,
   USDC_ADDRESS,
@@ -121,6 +121,133 @@ describe('Viem - Pool tests', function () {
           publicClient,
         ),
       ).to.be.rejectedWith('Pool has been created but not yet initialized');
+    });
+  });
+
+  describe('bulkGetPool', () => {
+    it('fetches multiple UniswapV3 pools correctly', async function () {
+      const poolParams = [
+        {
+          tokenA: USDC_ADDRESS,
+          tokenB: WETH_ADDRESS,
+          feeOrTickSpacing: 500, // 0.05% fee tier
+        },
+        {
+          tokenA: DAI_ADDRESS,
+          tokenB: USDC_ADDRESS,
+          feeOrTickSpacing: 100, // 0.01% fee tier
+        },
+      ];
+
+      const pools = await bulkGetPool(
+        poolParams,
+        chainId,
+        AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
+        publicClient,
+      );
+
+      expect(pools.length).to.equal(2);
+
+      // Check USDC/WETH pool
+      expect(pools[0].token0.address.toLowerCase()).to.equal(
+        USDC_ADDRESS.toLowerCase(),
+      );
+      expect(pools[0].token1.address.toLowerCase()).to.equal(
+        WETH_ADDRESS.toLowerCase(),
+      );
+      expect(pools[0].fee).to.equal(500);
+      expect(pools[0].liquidity.toString()).to.not.equal('0');
+
+      // Check DAI/USDC pool
+      expect(pools[1].token0.address.toLowerCase()).to.equal(
+        DAI_ADDRESS.toLowerCase(),
+      );
+      expect(pools[1].token1.address.toLowerCase()).to.equal(
+        USDC_ADDRESS.toLowerCase(),
+      );
+      expect(pools[1].fee).to.equal(100);
+      expect(pools[1].liquidity.toString()).to.not.equal('0');
+    });
+
+    it('handles token order correctly in bulk fetching', async function () {
+      const poolParams1 = [
+        {
+          tokenA: WETH_ADDRESS,
+          tokenB: USDC_ADDRESS,
+          feeOrTickSpacing: 500,
+        },
+      ];
+
+      const poolParams2 = [
+        {
+          tokenA: USDC_ADDRESS,
+          tokenB: WETH_ADDRESS,
+          feeOrTickSpacing: 500,
+        },
+      ];
+
+      const [pools1, pools2] = await Promise.all([
+        bulkGetPool(
+          poolParams1,
+          chainId,
+          AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
+          publicClient,
+        ),
+        bulkGetPool(
+          poolParams2,
+          chainId,
+          AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
+          publicClient,
+        ),
+      ]);
+
+      // Verify both pools have the same token order
+      expect(pools1[0].token0.address).to.equal(pools2[0].token0.address);
+      expect(pools1[0].token1.address).to.equal(pools2[0].token1.address);
+      expect(pools1[0].fee).to.equal(pools2[0].fee);
+    });
+
+    it('throws error for non-existent pools in bulk', async function () {
+      const poolParams = [
+        {
+          tokenA: WETH_ADDRESS,
+          tokenB: USDC_ADDRESS,
+          feeOrTickSpacing: 50, // Invalid fee tier
+        },
+      ];
+
+      await expect(
+        bulkGetPool(
+          poolParams,
+          chainId,
+          AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
+          publicClient,
+        ),
+      ).to.be.rejected;
+    });
+
+    it('handles mixed valid and invalid pools appropriately', async function () {
+      const poolParams = [
+        {
+          tokenA: USDC_ADDRESS,
+          tokenB: WETH_ADDRESS,
+          feeOrTickSpacing: 500, // Valid fee tier
+        },
+        {
+          tokenA: WETH_ADDRESS,
+          tokenB: USDC_ADDRESS,
+          feeOrTickSpacing: 50, // Invalid fee tier
+        },
+      ];
+
+      await expect(
+        bulkGetPool(
+          poolParams,
+          chainId,
+          AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
+          publicClient,
+        ),
+      ).to.be.rejected;
     });
   });
 });

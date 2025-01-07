@@ -12,7 +12,7 @@ const tokenCaches = new Map<
   TimedCache<string, Token>
 >();
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 function getCachedToken(
   address: string,
@@ -46,6 +46,7 @@ export async function getToken(
     if (cachedToken) {
       // If we need full token info and cached token has it, return cached
       if (!showSymbolAndName || (cachedToken.symbol && cachedToken.name)) {
+        console.debug('getToken hit cache', tokenAddress);
         return cachedToken;
       }
     }
