@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, ERC20__factory } from '@/index';
 import { IERC20__factory } from '@/typechain-types';
 import { Token } from '@uniswap/sdk-core';
-import { Address, PublicClient, getContract } from 'viem';
+import { Address, PublicClient } from 'viem';
 
 import { getPublicClient } from '../public_client';
 
@@ -12,30 +12,76 @@ export async function getToken(
   blockNumber?: bigint,
   showSymbolAndName?: boolean,
 ): Promise<Token> {
-  const contract = getContract({
+  const client = publicClient ?? getPublicClient(chainId);
+  const contract = {
     address: tokenAddress,
     abi: ERC20__factory.abi,
-    client: publicClient ?? getPublicClient(chainId),
-  });
-  const opts = { blockNumber };
-  if (showSymbolAndName) {
-    try {
-      const [decimals, symbol, name] = await Promise.all([
-        contract.read.decimals(opts),
-        contract.read.symbol(opts),
-        contract.read.name(opts),
-      ]);
-      return new Token(chainId, tokenAddress, decimals, symbol, name);
-    } catch (e) {
+  };
+
+  try {
+    if (showSymbolAndName) {
+      const multicallResults = await client.multicall({
+        contracts: [
+          {
+            ...contract,
+            functionName: 'decimals',
+          },
+          {
+            ...contract,
+            functionName: 'symbol',
+          },
+          {
+            ...contract,
+            functionName: 'name',
+          },
+        ],
+        blockNumber,
+      });
+
+      const [decimalsResult, symbolResult, nameResult] = multicallResults;
+
+      if (decimalsResult.status === 'success') {
+        const decimals = decimalsResult.result as number;
+        const symbol =
+          symbolResult.status === 'success'
+            ? (symbolResult.result as string)
+            : undefined;
+        const name =
+          nameResult.status === 'success'
+            ? (nameResult.result as string)
+            : undefined;
+        return new Token(chainId, tokenAddress, decimals, symbol, name);
+      }
+
       console.log(
         `Not able to fetch token info for tokenAddress ${tokenAddress}`,
-        e,
+        decimalsResult.error,
+      );
+      return new Token(chainId, tokenAddress, 18);
+    } else {
+      const [decimalsResult] = await client.multicall({
+        contracts: [
+          {
+            ...contract,
+            functionName: 'decimals',
+          },
+        ],
+        blockNumber,
+      });
+
+      if (decimalsResult.status === 'success') {
+        return new Token(chainId, tokenAddress, Number(decimalsResult.result));
+      }
+
+      console.log(
+        `Not able to fetch decimals for tokenAddress ${tokenAddress}`,
+        decimalsResult.error,
       );
       return new Token(chainId, tokenAddress, 18);
     }
-  } else {
-    const decimals = await contract.read.decimals(opts);
-    return new Token(chainId, tokenAddress, decimals);
+  } catch (error) {
+    console.error('Error fetching token info:', error);
+    return new Token(chainId, tokenAddress, 18);
   }
 }
 
