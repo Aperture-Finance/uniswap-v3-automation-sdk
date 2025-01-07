@@ -12,3 +12,4 @@ export * from './public_client';
 export * from './routing';
 export * from './solver';
 export * from './transaction';
+export * from './token';
