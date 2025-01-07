@@ -2,7 +2,7 @@ import hre from 'hardhat';
 import { PublicClient, TestClient } from 'viem';
 
 import { ApertureSupportedChainId } from '../../../src';
-import { bulkGetToken, getToken } from '../../../src/viem';
+import { getBulkTokens, getToken } from '../../../src/viem';
 import { WBTC_ADDRESS, WETH_ADDRESS, expect, resetFork } from '../common';
 
 describe('Viem - Currency tests', function () {
@@ -75,7 +75,7 @@ describe('Viem - Currency tests', function () {
 
   describe('bulkGetToken', () => {
     it('Get multiple tokens info in bulk', async function () {
-      const tokens = await bulkGetToken(
+      const tokens = await getBulkTokens(
         [WBTC_ADDRESS, WETH_ADDRESS],
         chainId,
         publicClient,
@@ -97,7 +97,7 @@ describe('Viem - Currency tests', function () {
     });
 
     it('Get multiple tokens decimals only in bulk', async function () {
-      const tokens = await bulkGetToken(
+      const tokens = await getBulkTokens(
         [WBTC_ADDRESS, WETH_ADDRESS],
         chainId,
         publicClient,
@@ -117,7 +117,7 @@ describe('Viem - Currency tests', function () {
 
     it('Handles errors gracefully when fetching invalid tokens', async function () {
       const invalidAddress = '0x0000000000000000000000000000000000000000';
-      const tokens = await bulkGetToken(
+      const tokens = await getBulkTokens(
         [invalidAddress, WETH_ADDRESS],
         chainId,
         publicClient,

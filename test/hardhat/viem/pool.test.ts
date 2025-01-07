@@ -216,14 +216,14 @@ describe('Viem - Pool tests', function () {
         },
       ];
 
-      await expect(
-        getBulkPools(
+      expect(
+        await getBulkPools(
           poolParams,
           chainId,
           AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
           publicClient,
         ),
-      ).to.be.rejected;
+      ).to.deep.equal([null]);
     });
 
     it('handles mixed valid and invalid pools appropriately', async function () {
@@ -240,14 +240,22 @@ describe('Viem - Pool tests', function () {
         },
       ];
 
-      await expect(
-        getBulkPools(
-          poolParams,
-          chainId,
-          AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
-          publicClient,
-        ),
-      ).to.be.rejected;
+      const [pool1, pool2] = await getBulkPools(
+        poolParams,
+        chainId,
+        AutomatedMarketMakerEnum.Enum.UNISWAP_V3,
+        publicClient,
+      );
+
+      expect(pool1?.token0.address.toLowerCase()).to.equal(
+        USDC_ADDRESS.toLowerCase(),
+      );
+      expect(pool1?.token1.address.toLowerCase()).to.equal(
+        WETH_ADDRESS.toLowerCase(),
+      );
+      expect(pool1?.fee).to.equal(500);
+
+      expect(pool2).to.be.null;
     });
   });
 });
