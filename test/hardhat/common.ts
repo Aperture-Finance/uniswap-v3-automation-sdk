@@ -20,6 +20,8 @@ export const UNIV3_AMM = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 export const WHALE_ADDRESS = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 export const WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 export const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+export const DAI_ADDRESS = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
+export const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 // Owner of position id 4 on Ethereum mainnet.
 export const eoa = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
 // A fixed epoch second value representing a moment in the year 2099.

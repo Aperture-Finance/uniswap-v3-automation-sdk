@@ -1,8 +1,4 @@
-import {
-  ApertureSupportedChainId,
-  ERC20__factory,
-  getChainInfo,
-} from '@/index';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import {
   Currency,
   CurrencyAmount,
@@ -10,9 +6,7 @@ import {
   NativeCurrency,
   Token,
 } from '@uniswap/sdk-core';
-import { Address, PublicClient, getContract, parseUnits } from 'viem';
-
-import { getPublicClient } from '../public_client';
+import { parseUnits } from 'viem';
 
 // The `Currency` type is defined as `Currency = NativeCurrency | Token`.
 // When a liquidity pool involves ETH, i.e. WETH is one of the two tokens in the pool, the
@@ -22,40 +16,6 @@ import { getPublicClient } from '../public_client';
 // WETH. If the former, `getNativeEther()` should be used to represent native ether; in the
 // latter case, `getToken()` with WETH's address should be invoked to represent the WETH
 // token, similar to all other ERC-20 tokens.
-
-export async function getToken(
-  tokenAddress: Address,
-  chainId: ApertureSupportedChainId,
-  publicClient?: PublicClient,
-  blockNumber?: bigint,
-  showSymbolAndName?: boolean,
-): Promise<Token> {
-  const contract = getContract({
-    address: tokenAddress,
-    abi: ERC20__factory.abi,
-    client: publicClient ?? getPublicClient(chainId),
-  });
-  const opts = { blockNumber };
-  if (showSymbolAndName) {
-    try {
-      const [decimals, symbol, name] = await Promise.all([
-        contract.read.decimals(opts),
-        contract.read.symbol(opts),
-        contract.read.name(opts),
-      ]);
-      return new Token(chainId, tokenAddress, decimals, symbol, name);
-    } catch (e) {
-      console.log(
-        `Not able to fetch token info for tokenAddress ${tokenAddress}`,
-        e,
-      );
-      return new Token(chainId, tokenAddress, 18);
-    }
-  } else {
-    const decimals = await contract.read.decimals(opts);
-    return new Token(chainId, tokenAddress, decimals);
-  }
-}
 
 class MaticNativeCurrency extends NativeCurrency {
   equals(other: Currency): boolean {
