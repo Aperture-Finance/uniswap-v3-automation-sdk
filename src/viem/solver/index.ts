@@ -7,6 +7,7 @@ export { getOkxQuote, getOkxSwap } from './getOkxSolver'; // TODO: remove when c
 export { get1InchQuote } from './get1InchSolver';
 
 export * from './increaseLiquidityOptimal';
+export * from './decreaseLiquiditySingle';
 export * from './mintOptimal';
 export * from './rebalanceOptimal';
 export * from './types';

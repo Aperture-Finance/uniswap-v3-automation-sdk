@@ -128,26 +128,19 @@ export function getAutomanDecreaseLiquidityCalldata(
 }
 
 export function getAutomanV3DecreaseLiquidityCalldata(
-  tokenId: bigint,
-  liquidity: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  decreaseLiquidityParams: DecreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
   permitInfo?: PermitInfo,
 ): Hex {
-  const params: DecreaseLiquidityParams = {
-    tokenId,
-    liquidity,
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: AutomanV3__factory.abi,
-      args: [params, token0FeeAmount, token1FeeAmount] as const,
+      args: [
+        decreaseLiquidityParams,
+        token0FeeAmount,
+        token1FeeAmount,
+      ] as const,
       functionName: 'decreaseLiquidity',
     });
   }
@@ -155,7 +148,7 @@ export function getAutomanV3DecreaseLiquidityCalldata(
   return encodeFunctionData({
     abi: AutomanV3__factory.abi,
     args: [
-      params,
+      decreaseLiquidityParams,
       token0FeeAmount,
       token1FeeAmount,
       BigInt(permitInfo.deadline),
@@ -164,6 +157,45 @@ export function getAutomanV3DecreaseLiquidityCalldata(
       s,
     ] as const,
     functionName: 'decreaseLiquidity',
+  });
+}
+
+export function getAutomanV3DecreaseLiquiditySingleCalldata(
+  decreaseLiquidityParams: DecreaseLiquidityParams,
+  zeroForOne: boolean,
+  swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  permitInfo?: PermitInfo,
+): Hex {
+  if (permitInfo === undefined) {
+    return encodeFunctionData({
+      abi: AutomanV3__factory.abi,
+      args: [
+        decreaseLiquidityParams,
+        zeroForOne,
+        token0FeeAmount,
+        token1FeeAmount,
+        swapData,
+      ] as const,
+      functionName: 'decreaseLiquiditySingle',
+    });
+  }
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
+  return encodeFunctionData({
+    abi: AutomanV3__factory.abi,
+    args: [
+      decreaseLiquidityParams,
+      zeroForOne,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData,
+      BigInt(permitInfo.deadline),
+      Number(v),
+      r,
+      s,
+    ] as const,
+    functionName: 'decreaseLiquiditySingle',
   });
 }
 

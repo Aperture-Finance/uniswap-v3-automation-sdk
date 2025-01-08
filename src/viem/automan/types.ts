@@ -18,6 +18,7 @@ export type AutomanActionName =
   | 'mintOptimal'
   | 'increaseLiquidityOptimal'
   | 'decreaseLiquidity'
+  | 'decreaseLiquiditySingle'
   | 'reinvest'
   | 'rebalance'
   | 'removeLiquidity';
@@ -40,6 +41,24 @@ export type GetAutomanReturnTypes<
   >,
 > = ContractFunctionReturnType<
   typeof Automan__factory.abi,
+  AbiStateMutability,
+  functionName,
+  args // to dedup function name
+>;
+
+export type GetAutomanV3ReturnTypes<
+  functionName extends AutomanActionName,
+  args extends ContractFunctionArgs<
+    typeof AutomanV3__factory.abi,
+    AbiStateMutability,
+    functionName
+  > = ContractFunctionArgs<
+    typeof AutomanV3__factory.abi,
+    AbiStateMutability,
+    functionName
+  >,
+> = ContractFunctionReturnType<
+  typeof AutomanV3__factory.abi,
   AbiStateMutability,
   functionName,
   args // to dedup function name
@@ -84,3 +103,13 @@ export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof ICommonNonfungiblePositionManager__factory.abi,
   'decreaseLiquidity'
 >[0];
+
+export type DecreaseLiquidityReturnType = GetAutomanV3ReturnTypes<
+  'decreaseLiquidity',
+  [DecreaseLiquidityParams, bigint, bigint]
+>;
+
+export type DecreaseLiquiditySingleReturnType = GetAutomanV3ReturnTypes<
+  'decreaseLiquiditySingle',
+  [DecreaseLiquidityParams, boolean, bigint, bigint, Hex]
+>;
