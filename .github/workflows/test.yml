@@ -30,3 +30,4 @@ jobs: # each workflow consists of 1+ jobs; by default, all jobs run in parallel
         env:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          IS_SDK_TEST_MODE: 1
