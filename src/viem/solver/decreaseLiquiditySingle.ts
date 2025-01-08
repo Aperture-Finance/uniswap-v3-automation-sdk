@@ -48,27 +48,31 @@ export async function decreaseLiquiditySingleV3(
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
+  const liquidityToDecrease = // not the liquidity in SolverResult
+    BigInt(position.liquidity.toString()) *
+    BigInt(decreaseOptions.liquidityPercentage.toSignificant());
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseOptions.tokenId.toString()),
-    liquidity:
-      BigInt(position.liquidity.toString()) *
-      BigInt(decreaseOptions.liquidityPercentage.toSignificant()),
+    liquidity: liquidityToDecrease,
     amount0Min: 0n,
     amount1Min: 0n,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
   const token0 = position.pool.token0;
   const token1 = position.pool.token1;
-  const [positionAmount0, positionAmount1] = await simulateDecreaseLiquidity(
-    chainId,
-    amm,
-    publicClient,
-    from,
-    position,
-    decreaseLiquidityParams,
-    blockNumber,
-  );
-  const swapAmountIn = zeroForOne ? positionAmount0 : positionAmount1;
+  const [positionInitialAmount0, positionInitialAmount1] =
+    await simulateDecreaseLiquidity(
+      chainId,
+      amm,
+      publicClient,
+      from,
+      position,
+      decreaseLiquidityParams,
+      blockNumber,
+    );
+  const swapAmountIn = zeroForOne
+    ? positionInitialAmount0
+    : positionInitialAmount1;
 
   const estimateGas = async (swapData: Hex) => {
     try {
@@ -100,14 +104,14 @@ export async function decreaseLiquiditySingleV3(
   const solve = async (solver: E_Solver) => {
     const swapData: Hex = '0x';
     const swapRoute: SwapRoute | undefined = undefined;
-    let swapAmountOut: bigint = 0n;
+    let amountOut: bigint = 0n;
     let gasFeeEstimation: bigint = 0n;
 
     try {
       const slippage =
         Number(decreaseOptions.slippageTolerance.toSignificant()) / 100;
       if (swapAmountIn > 0n) {
-        swapAmountOut = await simulateDecreaseLiquiditySingleV3(
+        amountOut = await simulateDecreaseLiquiditySingleV3(
           chainId,
           amm,
           publicClient,
@@ -145,39 +149,43 @@ export async function decreaseLiquiditySingleV3(
         token1PricesUsd: tokenPricesUsd[1],
         token0FeeAmount: token0FeeAmount.toString(),
         token1FeeAmount: token1FeeAmount.toString(),
+        liquidityToDecrease: liquidityToDecrease.toString(),
         zeroForOne,
         swapAmountIn: swapAmountIn.toString(),
+        amountOut: amountOut.toString(),
       });
 
       return {
         solver,
-        amount0: zeroForOne ? 0n : positionAmount0 + swapAmountOut,
-        amount1: zeroForOne ? positionAmount1 + swapAmountOut : 0n,
-        liquidity: swapAmountOut, // Required for SolverResult, can be used to compare solvers.
+        amount0: zeroForOne ? 0n : amountOut,
+        amount1: zeroForOne ? amountOut : 0n,
+        liquidity: amountOut, // Required for SolverResult, can be used to compare solvers.
         swapData,
         gasFeeEstimation,
         swapRoute: getSwapRoute(
           token0.address as Address,
           token1.address as Address,
-          zeroForOne ? swapAmountIn : swapAmountOut,
+          /* deltaAmount0= */ zeroForOne
+            ? swapAmountIn
+            : amountOut - positionInitialAmount0,
           swapRoute,
         ),
         swapPath: getSwapPath(
           token0.address as Address,
           token1.address as Address,
-          positionAmount0,
-          positionAmount1,
-          zeroForOne ? 0n : positionAmount0 + swapAmountOut,
-          zeroForOne ? positionAmount1 + swapAmountOut : 0n,
+          positionInitialAmount0,
+          positionInitialAmount1,
+          zeroForOne ? 0n : amountOut,
+          zeroForOne ? amountOut : 0n,
           slippage,
         ),
         feeUSD: feeUSD.toFixed(),
         priceImpact: calcPriceImpact(
           position.pool,
-          positionAmount0,
-          positionAmount1,
-          zeroForOne ? 0n : positionAmount0 + swapAmountOut,
-          zeroForOne ? positionAmount1 + swapAmountOut : 0n,
+          positionInitialAmount0,
+          positionInitialAmount1,
+          zeroForOne ? 0n : amountOut,
+          zeroForOne ? amountOut : 0n,
         ),
         token0FeeAmount,
         token1FeeAmount,
