@@ -133,7 +133,9 @@ export function getAutomanV3DecreaseLiquidityCalldata(
   token1FeeAmount = BigInt(0),
   permitInfo?: PermitInfo,
 ): Hex {
+  console.log('tommyzhao getAutomanV3DecreaseLiquidityCalldata 136');
   if (permitInfo === undefined) {
+    console.log('tommyzhao getAutomanV3DecreaseLiquidityCalldata 138');
     return encodeFunctionData({
       abi: AutomanV3__factory.abi,
       args: [
@@ -144,6 +146,7 @@ export function getAutomanV3DecreaseLiquidityCalldata(
       functionName: 'decreaseLiquidity',
     });
   }
+  console.log('tommyzhao getAutomanV3DecreaseLiquidityCalldata 148');
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
     abi: AutomanV3__factory.abi,
@@ -392,7 +395,9 @@ export function getAutomanV3ReinvestCalldata(
     amount1Min,
     deadline,
   };
+  console.log('tommyzhao debug getAutomanV3ReinvestCalldata 398');
   if (permitInfo === undefined) {
+    console.log('tommyzhao debug getAutomanV3ReinvestCalldata 400');
     return encodeFunctionData({
       abi: AutomanV3__factory.abi,
       args: [params, token0FeeAmount, token1FeeAmount, swapData] as const,

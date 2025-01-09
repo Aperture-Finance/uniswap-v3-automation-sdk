@@ -1,5 +1,6 @@
 export * from './getAddLiquidityTxs';
 export * from './getCollectTx';
+export * from './getDecreaseLiquiditySingleTx';
 export * from './getIncreaseLiquidityOptimalTx';
 export * from './getMMVaultTx';
 export * from './getMintOptimalTx';

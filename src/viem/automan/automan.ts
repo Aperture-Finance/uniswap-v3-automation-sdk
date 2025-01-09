@@ -583,6 +583,7 @@ export async function simulateDecreaseLiquidity(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   blockNumber?: bigint,
 ): Promise<DecreaseLiquidityReturnType> {
+  console.log('tommyzhao simulateDecreaseLiquidity 586');
   const returnData = await requestDecreaseLiquidity(
     'eth_call',
     chainId,
@@ -593,6 +594,7 @@ export async function simulateDecreaseLiquidity(
     decreaseLiquidityParams,
     blockNumber,
   );
+  console.log('tommyzhao simulateDecreaseLiquidity 597');
   return decodeFunctionResult({
     abi: AutomanV3__factory.abi,
     data: returnData,
@@ -610,7 +612,9 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
+  console.log('tommyzhao requestDecreaseLiquidity 615');
   const data = getAutomanV3DecreaseLiquidityCalldata(decreaseLiquidityParams);
+  console.log(`tommyzhao requestDecreaseLiquidity 617, data=${data}`);
   const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
 
   const [token0Overrides, token1Overrides] = await Promise.all([
@@ -630,6 +634,7 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
     ),
   ]);
 
+  console.log(`tommyzhao requestDecreaseLiquidity 637, method=${method}, from=${from}, to=${apertureAutomanV3}, data=${data}, blockNumber=${blockNumber}`);
   return tryRequestWithOverrides(
     method,
     {

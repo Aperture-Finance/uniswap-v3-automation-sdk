@@ -29,7 +29,7 @@ import { SolverResult } from './types';
  * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param position The current position to simulate the call from.
- * @param decreaseOptions Decrease liquidity options.
+ * @param decreaseLiquidityOptions Decrease liquidity options.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fromAddress The address to decrease liquidity from.
@@ -41,23 +41,26 @@ export async function decreaseLiquiditySingleV3(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   position: Position,
-  decreaseOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
+  decreaseLiquidityOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
   zeroForOne: boolean,
   from: Address,
   tokenPricesUsd: [string, string],
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
+  console.log(`tommyzhao decreaseLiquiditySingleV3 51, position.liquidity.toString()=${position.liquidity.toString()}, decreaseLiquidityOptions.liquidityPercentage.toSignificant()=${decreaseLiquidityOptions.liquidityPercentage.toSignificant()}, quotient=${decreaseLiquidityOptions.liquidityPercentage.quotient}, numerator=${decreaseLiquidityOptions.liquidityPercentage.numerator}, denominator=${decreaseLiquidityOptions.liquidityPercentage.denominator}`);
   const liquidityToDecrease = // not the liquidity in SolverResult
-    BigInt(position.liquidity.toString()) *
-    BigInt(decreaseOptions.liquidityPercentage.toSignificant());
+  decreaseLiquidityOptions.liquidityPercentage.multiply(position.liquidity).asFraction.toFixed(0);
+    // BigInt(Big(position.liquidity.toString()).mul(decreaseLiquidityOptions.liquidityPercentage.quotient).div(decreaseLiquidityOptions.liquidityPercentage.denominator).toFixed(0));
+  console.log(`tommyzhao decreaseLiquiditySingleV3 55, liquidityToDecrease=${liquidityToDecrease}, toFixed=${liquidityToDecrease}`);
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
-    tokenId: BigInt(decreaseOptions.tokenId.toString()),
-    liquidity: liquidityToDecrease,
+    tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
+    liquidity: BigInt(liquidityToDecrease),
     amount0Min: 0n,
     amount1Min: 0n,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
+  console.log('tommyzhao decreaseLiquiditySingleV3 62');
   const token0 = position.pool.token0;
   const token1 = position.pool.token1;
   const [positionInitialAmount0, positionInitialAmount1] =
@@ -74,6 +77,7 @@ export async function decreaseLiquiditySingleV3(
     ? positionInitialAmount0
     : positionInitialAmount1;
 
+    console.log('tommyzhao decreaseLiquiditySingleV3 78');
   const estimateGas = async (swapData: Hex) => {
     try {
       const [gasPrice, gasAmount] = await Promise.all([
@@ -101,6 +105,7 @@ export async function decreaseLiquiditySingleV3(
     }
   };
 
+  console.log('tommyzhao decreaseLiquiditySingleV3 106');
   const solve = async (solver: E_Solver) => {
     const swapData: Hex = '0x';
     const swapRoute: SwapRoute | undefined = undefined;
@@ -109,7 +114,7 @@ export async function decreaseLiquiditySingleV3(
 
     try {
       const slippage =
-        Number(decreaseOptions.slippageTolerance.toSignificant()) / 100;
+        Number(decreaseLiquidityOptions.slippageTolerance.toSignificant()) / 100;
       if (swapAmountIn > 0n) {
         amountOut = await simulateDecreaseLiquiditySingleV3(
           chainId,
@@ -140,10 +145,11 @@ export async function decreaseLiquiditySingleV3(
         .mul(tokenInPrice)
         .mul(FEE_ZAP_RATIO);
 
+        console.log('tommyzhao decreaseLiquiditySingleV3 146');
       getLogger().info('SDK.decreaseLiquiditySingleV3.fees ', {
         amm: amm,
         chainId: chainId,
-        position: decreaseOptions.tokenId,
+        position: decreaseLiquidityOptions.tokenId,
         totalDecreaseLiquiditySingleFeeUsd: feeUSD.toString(),
         token0PricesUsd: tokenPricesUsd[0],
         token1PricesUsd: tokenPricesUsd[1],
@@ -203,5 +209,6 @@ export async function decreaseLiquiditySingleV3(
     }
   };
 
+  console.log('tommyzhao decreaseLiquiditySingleV3 209');
   return buildOptimalSolutions(solve, includeSolvers);
 }

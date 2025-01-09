@@ -6,7 +6,7 @@ import {
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import { getAutomanV3DecreaseLiquiditySingleCalldata } from '../automan';
+import { DecreaseLiquidityParams, getAutomanV3DecreaseLiquiditySingleCalldata } from '../automan';
 import { PositionDetails } from '../position';
 import { convertCollectableTokenAmountToExpectedCurrencyOwed } from './transaction';
 
@@ -46,6 +46,20 @@ export async function getDecreaseLiquiditySingleV3Tx(
       blockNumber,
     );
   }
+  // debug
+  const collectOptions = {
+    recipient,
+    ...convertCollectableTokenAmountToExpectedCurrencyOwed(
+      {
+        token0Amount: positionDetails.tokensOwed0,
+        token1Amount: positionDetails.tokensOwed1,
+      },
+      chainId,
+      positionDetails.token0,
+      positionDetails.token1,
+      receiveNativeIfApplicable,
+    ),
+  };
   const { value } = NonfungiblePositionManager.removeCallParameters(
     positionDetails.position,
     {
@@ -56,26 +70,26 @@ export async function getDecreaseLiquiditySingleV3Tx(
       // However, here we only pass the accrued fees in `collectOptions` because the principal
       // liquidity is added to what is passed here by `NonfungiblePositionManager.removeCallParameters()`
       // when constructing the `collect()` call.
-      collectOptions: {
-        recipient,
-        ...convertCollectableTokenAmountToExpectedCurrencyOwed(
-          {
-            token0Amount: positionDetails.tokensOwed0,
-            token1Amount: positionDetails.tokensOwed1,
-          },
-          chainId,
-          positionDetails.token0,
-          positionDetails.token1,
-          receiveNativeIfApplicable,
-        ),
-      },
+      collectOptions,
+      // collectOptions: {
+      //   recipient,
+      //   ...convertCollectableTokenAmountToExpectedCurrencyOwed(
+      //     {
+      //       token0Amount: positionDetails.tokensOwed0,
+      //       token1Amount: positionDetails.tokensOwed1,
+      //     },
+      //     chainId,
+      //     positionDetails.token0,
+      //     positionDetails.token1,
+      //     receiveNativeIfApplicable,
+      //   ),
+      // },
     },
   );
-  const decreaseLiquidityParams = {
+  console.log(`tommyzhao getDecreaseLiquiditySingleV3Tx 63, collectOptions=${JSON.stringify(collectOptions)}, value=${value}`);
+  const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
-    liquidity:
-      BigInt(positionDetails.liquidity.toString()) *
-      BigInt(decreaseLiquidityOptions.liquidityPercentage.toSignificant()),
+    liquidity: BigInt(decreaseLiquidityOptions.liquidityPercentage.multiply(positionDetails.liquidity).asFraction.toFixed(0)),
     amount0Min,
     amount1Min,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),

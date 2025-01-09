@@ -239,6 +239,7 @@ export async function requestWithOverrides<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
+  console.log(`tommyzhao requestWithOverrides blockTag=${blockTag}`);
   const params = overrides ? [tx, blockTag, overrides] : [tx, blockTag];
   return await publicClient.request({
     // @ts-expect-error viem doesn't include 'eth_createAccessList'
@@ -385,6 +386,7 @@ export async function tryRequestWithOverrides<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   try {
+    console.log('tommyzhao tryRequestWithOverrides 388');
     return await requestWithOverrides(
       method,
       tx,
@@ -393,6 +395,7 @@ export async function tryRequestWithOverrides<M extends keyof RpcReturnType>(
       blockNumber,
     );
   } catch (e) {
+    console.log('tommyzhao catch tryRequestWithOverrides 397');
     const blockTag = blockNumber ? toHex(blockNumber) : 'latest';
     return await publicClient.request({
       // @ts-expect-error viem doesn't include 'eth_createAccessList'

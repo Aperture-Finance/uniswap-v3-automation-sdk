@@ -1,5 +1,9 @@
 // yarn test:hardhat test/hardhat/viem/univ3-AutomanV3-transaction.test.ts
-import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+import {
+  FeeAmount,
+  RemoveLiquidityOptions,
+  nearestUsableTick,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import hre, { ethers } from 'hardhat';
@@ -10,6 +14,7 @@ import {
   TestClient,
   WalletClient,
   encodeAbiParameters,
+  getContract,
   parseAbiParameters,
   walletActions,
 } from 'viem';
@@ -20,6 +25,7 @@ import {
   ConditionTypeEnum,
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
+  IERC20__factory,
   IOCKEY_LOGGER,
   UniV3AutomanV3,
   UniV3AutomanV3__factory,
@@ -32,6 +38,8 @@ import {
   PositionDetails,
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
+  getDecreaseLiquiditySingleSwapInfoV3,
+  getDecreaseLiquiditySingleV3Tx,
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfoV3,
   getIncreaseLiquidityOptimalV3Tx,
@@ -62,6 +70,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
   const blockNumber = 17188000n;
   let automanV3Contract: UniV3AutomanV3;
   const automanV3Address = getAMMInfo(chainId, amm)!.apertureAutomanV3;
+  const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
@@ -69,6 +78,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
+    console.log('tommyzhao before each');
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
 
@@ -87,7 +97,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
     );
     await automanV3Contract.deployed();
     await automanV3Contract.setFeeConfig({
-      feeCollector: WHALE_ADDRESS,
+      feeCollector,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
@@ -106,6 +116,9 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       router.address as `0x${string}`;
 
     // Owner of position id 4 sets AutomanV3 as operator.
+    console.log(
+      `tommyzhao setting approval for all, automanV3Contract.address=${automanV3Contract.address}`,
+    );
     const { request } = await publicClient.simulateContract({
       abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
@@ -154,7 +167,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
     }
   }
 
-  it('Reinvest', async function () {
+  it('ReinvestV3', async function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
@@ -719,5 +732,152 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
     });
+  });
+
+  it('Decrease Liquidity Single', async function () {
+    const chainInfo = getAMMInfo(chainId, amm);
+    console.log('tommyzhao test case 726');
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    // token0 = WBTC = https://etherscan.io/address/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
+    // token1 = WETH = https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+    const pool = existingPosition.pool;
+    console.log(
+      `tommyzhao test case 743, liquidity=${existingPosition.liquidity}`,
+    );
+
+    const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+      tokenId: Number(positionId),
+      liquidityPercentage: new Percent(49, 100),
+      slippageTolerance: new Percent(5, 1000),
+      deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      collectOptions: {
+        expectedCurrencyOwed0: existingPosition.tokensOwed0,
+        expectedCurrencyOwed1: existingPosition.tokensOwed1,
+        recipient: eoa,
+      },
+    };
+    const zeroForOne = true;
+    const receiveNativeIfApplicable = true;
+    const {
+      swapData,
+      liquidity,
+      amount0,
+      amount1,
+      token0FeeAmount,
+      token1FeeAmount,
+    } = (
+      await getDecreaseLiquiditySingleSwapInfoV3(
+        decreaseLiquidityOptions,
+        chainId,
+        amm,
+        zeroForOne,
+        eoa,
+        /* tokenPricesUsd= */ ['60000', '3000'],
+        publicClient,
+        [E_Solver.SamePool],
+        existingPosition.position,
+      )
+    )[0];
+    console.log(
+      `amount0=${amount0}, amount1=${amount1}, liquidity=${liquidity}`,
+    );
+    const txRequest = await getDecreaseLiquiditySingleV3Tx(
+      decreaseLiquidityOptions,
+      zeroForOne,
+      eoa,
+      chainId,
+      amm,
+      publicClient,
+      swapData,
+      receiveNativeIfApplicable,
+      existingPosition,
+      /* amount0Min= */ 0n,
+      /* amount1Min= */ 0n,
+      /* token0FeeAmount= */ token0FeeAmount,
+      /* token1FeeAmount= */ token1FeeAmount,
+    );
+
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+    console.log(
+      `tommyzhao 793, txRequest.to=${txRequest.to}, txRequest.data=${txRequest.data}, txRequest.from=${txRequest.from}, walletClient.chain=${walletClient.chain}, token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}`,
+    );
+
+    // Log states before sending the transaction.
+    const wbtcContract = getContract({
+      address: WBTC_ADDRESS,
+      abi: IERC20__factory.abi,
+      client: publicClient,
+    });
+    const wethContract = getContract({
+      address: WETH_ADDRESS,
+      abi: IERC20__factory.abi,
+      client: publicClient,
+    });
+    console.log('tommzhao 822');
+    const [eoaWbtcBalanceBefore, eoaWethBalanceBefore, eoaNativeBalanceBefore, feeCollectorWbtcBalanceBefore, feeCollectorWethBalanceBefore, feeCollectorNativeBalanceBefore] = await Promise.all([
+      wbtcContract.read.balanceOf([eoa]),
+      wethContract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: eoa }),
+      wbtcContract.read.balanceOf([feeCollector]),
+      wethContract.read.balanceOf([feeCollector]),
+      publicClient.getBalance({ address: feeCollector }),
+    ]);
+    console.log('tommzhao 829');
+
+    // Send the transaction and wait for the receipt.
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    // Get states after the transaction.
+    const [eoaWbtcBalanceAfter, eoaWethBalanceAfter, eoaNativeBalanceAfter, feeCollectorWbtcBalanceAfter, feeCollectorWethBalanceAfter, feeCollectorNativeBalanceAfter] = await Promise.all([
+      wbtcContract.read.balanceOf([eoa]),
+      wethContract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: eoa }),
+      wbtcContract.read.balanceOf([feeCollector]),
+      wethContract.read.balanceOf([feeCollector]),
+      publicClient.getBalance({ address: feeCollector }),
+    ]);
+
+    // Test that there's fees collected.
+    expect(
+      Number((token0FeeAmount || 0n) + (token1FeeAmount || 0n)),
+    ).to.be.greaterThan(0);
+    console.log(`token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}`);
+    console.log(`eoaWbtcBalanceBefore=${eoaWbtcBalanceBefore}, eoaWbtcBalanceAfter=${eoaWbtcBalanceAfter}, diff=${eoaWbtcBalanceAfter - eoaWbtcBalanceBefore}`);
+    console.log(`eoaWethBalanceBefore=${eoaWethBalanceBefore}, eoaWbtcBalanceAfter=${eoaWethBalanceAfter}, diff=${eoaWethBalanceAfter - eoaWethBalanceBefore}`);
+    console.log(`eoaNativeBalanceBefore=${eoaNativeBalanceBefore}, eoaNativeBalanceAfter=${eoaNativeBalanceAfter}, diff=${eoaNativeBalanceAfter - eoaNativeBalanceBefore}`);
+    console.log(`feeCollectorWbtcBalanceBefore=${feeCollectorWbtcBalanceBefore}, feeCollectorWbtcBalanceAfter=${feeCollectorWbtcBalanceAfter}, diff=${feeCollectorWbtcBalanceAfter - feeCollectorWbtcBalanceBefore}`);
+    console.log(`feeCollectorWethBalanceBefore=${feeCollectorWethBalanceBefore}, feeCollectorWbtcBalanceAfter=${feeCollectorWethBalanceAfter}, diff=${feeCollectorWethBalanceAfter - feeCollectorWethBalanceBefore}`);
+    console.log(`feeCollectorNativeBalanceBefore=${feeCollectorNativeBalanceBefore}, feeCollectorNativeBalanceAfter=${feeCollectorNativeBalanceAfter}, diff=${feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore}`);
+
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.LT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
   });
 });
