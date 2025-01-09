@@ -29,7 +29,7 @@ import { SolverResult } from './types';
  * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
  * @param position The current position to simulate the call from.
- * @param decreaseOptions Decrease liquidity options.
+ * @param decreaseLiquidityOptions Decrease liquidity options.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param fromAddress The address to decrease liquidity from.
@@ -41,18 +41,22 @@ export async function decreaseLiquiditySingleV3(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   position: Position,
-  decreaseOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
+  decreaseLiquidityOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
   zeroForOne: boolean,
   from: Address,
   tokenPricesUsd: [string, string],
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
-  const liquidityToDecrease = // not the liquidity in SolverResult
-    BigInt(position.liquidity.toString()) *
-    BigInt(decreaseOptions.liquidityPercentage.toSignificant());
+  // Use BigInt math for precision, not the liquidity in SolverResult
+  const liquidityToDecrease =
+    (BigInt(position.liquidity.toString()) *
+      BigInt(
+        decreaseLiquidityOptions.liquidityPercentage.numerator.toString(),
+      )) /
+    BigInt(decreaseLiquidityOptions.liquidityPercentage.denominator.toString());
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
-    tokenId: BigInt(decreaseOptions.tokenId.toString()),
+    tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
     liquidity: liquidityToDecrease,
     amount0Min: 0n,
     amount1Min: 0n,
@@ -109,7 +113,8 @@ export async function decreaseLiquiditySingleV3(
 
     try {
       const slippage =
-        Number(decreaseOptions.slippageTolerance.toSignificant()) / 100;
+        Number(decreaseLiquidityOptions.slippageTolerance.toSignificant()) /
+        100;
       if (swapAmountIn > 0n) {
         amountOut = await simulateDecreaseLiquiditySingleV3(
           chainId,
@@ -139,16 +144,32 @@ export async function decreaseLiquiditySingleV3(
         .div(10 ** decimals)
         .mul(tokenInPrice)
         .mul(FEE_ZAP_RATIO);
-
+      const tokenOutSlippage =
+        (amountOut *
+          BigInt(
+            decreaseLiquidityOptions.slippageTolerance.numerator.toString(),
+          )) /
+        BigInt(
+          decreaseLiquidityOptions.slippageTolerance.denominator.toString(),
+        );
+      // Based on current automan contracts, fees are in swapInputToken whereas slippage are in swapOutputToken.
+      const token0OutAfterSlippage = zeroForOne
+        ? 0n
+        : amountOut - tokenOutSlippage;
+      const token1OutAfterSlippage = zeroForOne
+        ? amountOut - tokenOutSlippage
+        : 0n;
       getLogger().info('SDK.decreaseLiquiditySingleV3.fees ', {
         amm: amm,
         chainId: chainId,
-        position: decreaseOptions.tokenId,
+        position: decreaseLiquidityOptions.tokenId,
         totalDecreaseLiquiditySingleFeeUsd: feeUSD.toString(),
         token0PricesUsd: tokenPricesUsd[0],
         token1PricesUsd: tokenPricesUsd[1],
         token0FeeAmount: token0FeeAmount.toString(),
         token1FeeAmount: token1FeeAmount.toString(),
+        token0OutAfterSlippage: token0OutAfterSlippage.toString(),
+        token1OutAfterSlippage: token1OutAfterSlippage.toString(),
         liquidityToDecrease: liquidityToDecrease.toString(),
         zeroForOne,
         swapAmountIn: swapAmountIn.toString(),
@@ -157,8 +178,8 @@ export async function decreaseLiquiditySingleV3(
 
       return {
         solver,
-        amount0: zeroForOne ? 0n : amountOut,
-        amount1: zeroForOne ? amountOut : 0n,
+        amount0: token0OutAfterSlippage, // Used for amount0Min
+        amount1: token1OutAfterSlippage, // Used for amount1Min
         liquidity: amountOut, // Required for SolverResult, can be used to compare solvers.
         swapData,
         gasFeeEstimation,

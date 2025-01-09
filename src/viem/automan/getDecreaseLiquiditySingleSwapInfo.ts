@@ -7,7 +7,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
-import { decreaseLiquiditySingleV3 } from '../solver';
+import { SolverResult, decreaseLiquiditySingleV3 } from '../solver';
 import { E_Solver } from '../solver';
 
 /**
@@ -33,7 +33,7 @@ export async function getDecreaseLiquiditySingleSwapInfoV3(
   includeSolvers?: E_Solver[],
   position?: Position,
   blockNumber?: bigint,
-) {
+): Promise<SolverResult[]> {
   if (position === undefined) {
     ({ position } = await PositionDetails.fromPositionId(
       chainId,

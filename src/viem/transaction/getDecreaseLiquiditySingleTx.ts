@@ -1,14 +1,13 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import {
-  NonfungiblePositionManager,
-  RemoveLiquidityOptions,
-} from '@aperture_finance/uniswap-v3-sdk';
+import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import { getAutomanV3DecreaseLiquiditySingleCalldata } from '../automan';
+import {
+  DecreaseLiquidityParams,
+  getAutomanV3DecreaseLiquiditySingleCalldata,
+} from '../automan';
 import { PositionDetails } from '../position';
-import { convertCollectableTokenAmountToExpectedCurrencyOwed } from './transaction';
 
 /**
  * Generates an unsigned transaction that removes partial or entire liquidity from the specified position and claim accrued fees.
@@ -29,7 +28,6 @@ export async function getDecreaseLiquiditySingleV3Tx(
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
   swapData: Hex,
-  receiveNativeIfApplicable?: boolean,
   positionDetails?: PositionDetails,
   amount0Min: bigint = 0n,
   amount1Min: bigint = 0n,
@@ -46,36 +44,16 @@ export async function getDecreaseLiquiditySingleV3Tx(
       blockNumber,
     );
   }
-  const { value } = NonfungiblePositionManager.removeCallParameters(
-    positionDetails.position,
-    {
-      ...decreaseLiquidityOptions,
-      // Note that the `collect()` function of the NPM contract takes `CollectOptions` with
-      // `expectedCurrencyOwed0` and `expectedCurrencyOwed1` that should include both the
-      // decreased principal liquidity and the accrued fees.
-      // However, here we only pass the accrued fees in `collectOptions` because the principal
-      // liquidity is added to what is passed here by `NonfungiblePositionManager.removeCallParameters()`
-      // when constructing the `collect()` call.
-      collectOptions: {
-        recipient,
-        ...convertCollectableTokenAmountToExpectedCurrencyOwed(
-          {
-            token0Amount: positionDetails.tokensOwed0,
-            token1Amount: positionDetails.tokensOwed1,
-          },
-          chainId,
-          positionDetails.token0,
-          positionDetails.token1,
-          receiveNativeIfApplicable,
-        ),
-      },
-    },
-  );
-  const decreaseLiquidityParams = {
+  // Use BigInt math for precision, not the liquidity in SolverResult
+  const liquidityToDecrease =
+    (BigInt(positionDetails.liquidity.toString()) *
+      BigInt(
+        decreaseLiquidityOptions.liquidityPercentage.numerator.toString(),
+      )) /
+    BigInt(decreaseLiquidityOptions.liquidityPercentage.denominator.toString());
+  const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
-    liquidity:
-      BigInt(positionDetails.liquidity.toString()) *
-      BigInt(decreaseLiquidityOptions.liquidityPercentage.toSignificant()),
+    liquidity: liquidityToDecrease,
     amount0Min,
     amount1Min,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
@@ -90,7 +68,6 @@ export async function getDecreaseLiquiditySingleV3Tx(
   return {
     to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
     data,
-    value: BigInt(value),
     from: recipient as Address,
   };
 }
