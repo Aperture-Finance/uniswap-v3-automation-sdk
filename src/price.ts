@@ -177,7 +177,7 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
 export async function getTokenPriceListFromGeckoTerminalWithAddresses(
   chainId: ApertureSupportedChainId,
   tokens: string[],
-): Promise<{ [address: string]: string | null }> {
+): Promise<{ [address: string]: number | null }> {
   const { gecko_terminal_platform_id } = getChainInfo(chainId);
   if (gecko_terminal_platform_id === undefined) return {};
   const addresses = tokens.toString();
@@ -187,12 +187,48 @@ export async function getTokenPriceListFromGeckoTerminalWithAddresses(
   const responseData = priceResponse.data.data.attributes.token_prices;
   // Coingecko call example: https://{GECKO_TERMINAL_URL}/simple/networks/eth/token_price/0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA,0xF433089366899D83a9f26A773D59ec7eCF30355e,0x04abEdA201850aC0124161F037Efd70c74ddC74C,0xA4EED63db85311E22dF4473f87CcfC3DaDCFA3E3,0x1985365e9f78359a9B6AD760e32412f4a445E862
   return Object.keys(responseData).reduce(
-    (obj: { [address: string]: string | null }, address: string) => {
-      obj[address] = responseData[address];
+    (obj: { [address: string]: number | null }, address: string) => {
+      obj[address] = responseData[address]
+        ? Number(responseData[address])
+        : null;
       return obj;
     },
     {},
   );
+}
+
+/**
+ * Fetches tokens' current price from Coingecko in a batch. And if the price is not available, we will fetch again with Gecko Terminal API.
+ * @param chainId The chain id.
+ * @param tokens The checksum addresses of tokens to fetch price information for. All tokens must have the same chain id. The number of tokens cannot be too big, exact threshold unknown but 50 should be safe; otherwise only some tokens will be fetched.
+ * @param apiKey The Coingecko API key to use. Use the free api if not specified.
+ * @returns The tokens' current USD price. For example,
+ * {
+ *    0xbe9895146f7af43049ca1c1ae358b0541ea49704: 1783.17,
+ *    0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce: 0.00000681
+ * }
+ */
+export async function getTokenPriceList(
+  chainId: ApertureSupportedChainId,
+  tokens: string[],
+  apiKey?: string,
+): Promise<{ [address: string]: number | null }> {
+  const coingeckoPriceList = await getTokenPriceListFromCoingeckoWithAddresses(
+    chainId,
+    tokens,
+    'usd',
+    apiKey,
+  );
+  const coingeckoSupportedTokens = Object.keys(coingeckoPriceList);
+  const noCoingeckoPriceTokens = tokens.filter(
+    (token) => !coingeckoSupportedTokens.includes(token.toLowerCase()),
+  );
+  const geckoTerminalPriceList =
+    await getTokenPriceListFromGeckoTerminalWithAddresses(
+      chainId,
+      noCoingeckoPriceTokens,
+    );
+  return Object.assign(coingeckoPriceList, geckoTerminalPriceList);
 }
 
 /**
