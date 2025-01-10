@@ -7,7 +7,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
-import { DEFAULT_SOLVERS, E_Solver, SwapRoute } from '.';
+import { DEFAULT_SOLVERS, E_Solver, SwapRoute, getSolver } from '.';
 import {
   DecreaseLiquidityParams,
   FEE_ZAP_RATIO,
@@ -106,8 +106,8 @@ export async function decreaseLiquiditySingleV3(
   };
 
   const solve = async (solver: E_Solver) => {
-    const swapData: Hex = '0x';
-    const swapRoute: SwapRoute | undefined = undefined;
+    let swapData: Hex = '0x';
+    let swapRoute: SwapRoute | undefined = undefined;
     let amountOut: bigint = 0n;
     let gasFeeEstimation: bigint = 0n;
 
@@ -115,7 +115,24 @@ export async function decreaseLiquiditySingleV3(
       const slippage =
         Number(decreaseLiquidityOptions.slippageTolerance.toSignificant()) /
         100;
+      const swapFeeAmount = BigInt(
+        new Big(swapAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+      );
       if (swapAmountIn > 0n) {
+        // Although it's mintOptimal, it's the same swapData and swapRoute.
+        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+          chainId,
+          amm,
+          fromAddress: from,
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          feeOrTickSpacing: position.pool.tickSpacing,
+          tickLower: position.tickLower,
+          tickUpper: position.tickUpper,
+          slippage,
+          poolAmountIn: swapAmountIn - swapFeeAmount,
+          zeroForOne,
+        }));
         amountOut = await simulateDecreaseLiquiditySingleV3(
           chainId,
           amm,
@@ -130,14 +147,8 @@ export async function decreaseLiquiditySingleV3(
         gasFeeEstimation = await estimateGas(swapData);
       }
 
-      const token0FeeAmount = zeroForOne
-        ? BigInt(new Big(swapAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
-        : 0n;
-      const token1FeeAmount = zeroForOne
-        ? 0n
-        : BigInt(
-            new Big(swapAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
-          );
+      const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
+      const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
       const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
       const decimals = zeroForOne ? token0.decimals : token1.decimals;
       const feeUSD = new Big(swapAmountIn.toString())
@@ -153,6 +164,8 @@ export async function decreaseLiquiditySingleV3(
           decreaseLiquidityOptions.slippageTolerance.denominator.toString(),
         );
       // Based on current automan contracts, fees are in swapInputToken whereas slippage are in swapOutputToken.
+      const token0Out = zeroForOne ? 0n : amountOut;
+      const token1Out = zeroForOne ? amountOut : 0n;
       const token0OutAfterSlippage = zeroForOne
         ? 0n
         : amountOut - tokenOutSlippage;
@@ -186,9 +199,7 @@ export async function decreaseLiquiditySingleV3(
         swapRoute: getSwapRoute(
           token0.address as Address,
           token1.address as Address,
-          /* deltaAmount0= */ zeroForOne
-            ? swapAmountIn
-            : amountOut - positionInitialAmount0,
+          /* deltaAmount0= */ token0Out - positionInitialAmount0, // Actual amount doesn't matter, just whether it's positive or negative.
           swapRoute,
         ),
         swapPath: getSwapPath(
@@ -196,8 +207,8 @@ export async function decreaseLiquiditySingleV3(
           token1.address as Address,
           positionInitialAmount0,
           positionInitialAmount1,
-          zeroForOne ? 0n : amountOut,
-          zeroForOne ? amountOut : 0n,
+          token0Out,
+          token1Out,
           slippage,
         ),
         feeUSD: feeUSD.toFixed(),
@@ -205,8 +216,8 @@ export async function decreaseLiquiditySingleV3(
           position.pool,
           positionInitialAmount0,
           positionInitialAmount1,
-          zeroForOne ? 0n : amountOut,
-          zeroForOne ? amountOut : 0n,
+          token0Out,
+          token1Out,
         ),
         token0FeeAmount,
         token1FeeAmount,
