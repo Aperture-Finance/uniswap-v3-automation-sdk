@@ -89,7 +89,7 @@ export async function getTokenPriceFromCoingecko(
   ) {
     return 1;
   }
-  // Coingecko call example: https://{COINGECKO_URL}/api/v3/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&vs_currencies=usd
+  // Coingecko call example: https://{COINGECKO_URL}/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&vs_currencies=usd
   // https://coingecko-api.aperture.finance/api/v3/simple/token_price/base?contract_addresses=0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b&vs_currencies=usd
   const priceResponse: AxiosResponse = await axios.get(
     `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}${apiKey ? `&x_cg_pro_api_key=${apiKey}` : ''}`,
@@ -153,7 +153,7 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
   const priceResponse: AxiosResponse = await axios.get(
     `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}${apiKey ? `&x_cg_pro_api_key=${apiKey}` : ''}`,
   );
-  // Coingecko call example: https://{COINGECKO_URL}/api/v3/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&vs_currencies=usd
+  // Coingecko call example: https://{COINGECKO_URL}/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&vs_currencies=usd
   return Object.keys(priceResponse.data).reduce(
     (obj: { [address: string]: number }, address: string) => {
       obj[address] = priceResponse.data[address][vsCurrencies!];
@@ -161,6 +161,76 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
     },
     {},
   );
+}
+
+/**
+ * Fetches tokens' current price from Gecko Terminal in a batch.
+ * @param chainId The chain id.
+ * @param tokens The checksum addresses of tokens to fetch price information for. All tokens must have the same chain id. The number of tokens cannot be too big, exact threshold unknown but 50 should be safe; otherwise only some tokens will be fetched.
+ * @param apiKey The Coingecko API key to use. Use the free api if not specified.
+ * @returns The tokens' current USD price. For example,
+ * {
+ *    0xbe9895146f7af43049ca1c1ae358b0541ea49704: 1783.17,
+ *    0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce: 0.00000681
+ * }
+ */
+export async function getTokenPriceListFromGeckoTerminalWithAddresses(
+  chainId: ApertureSupportedChainId,
+  tokens: string[],
+  apiKey?: string,
+): Promise<{ [address: string]: number | null }> {
+  const { gecko_terminal_platform_id } = getChainInfo(chainId);
+  if (gecko_terminal_platform_id === undefined) return {};
+  const addresses = tokens.toString();
+  const priceResponse: AxiosResponse = await axios.get(
+    `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/onchain/simple/networks/${gecko_terminal_platform_id}/token_price/${addresses}`,
+  );
+  const responseData = priceResponse.data.data.attributes.token_prices;
+  // Coingecko call example: https://{COINGECKO_URL}/onchain/simple/networks/eth/token_price/0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA,0xF433089366899D83a9f26A773D59ec7eCF30355e,0x04abEdA201850aC0124161F037Efd70c74ddC74C
+  return Object.keys(responseData).reduce(
+    (obj: { [address: string]: number | null }, address: string) => {
+      obj[address] = responseData[address]
+        ? Number(responseData[address])
+        : null;
+      return obj;
+    },
+    {},
+  );
+}
+
+/**
+ * Fetches tokens' current price from Coingecko in a batch. And if the price is not available, we will fetch again with Gecko Terminal API.
+ * @param chainId The chain id.
+ * @param tokens The checksum addresses of tokens to fetch price information for. All tokens must have the same chain id. The number of tokens cannot be too big, exact threshold unknown but 50 should be safe; otherwise only some tokens will be fetched.
+ * @param apiKey The Coingecko API key to use. Use the free api if not specified.
+ * @returns The tokens' current USD price. For example,
+ * {
+ *    0xbe9895146f7af43049ca1c1ae358b0541ea49704: 1783.17,
+ *    0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce: 0.00000681
+ * }
+ */
+export async function getTokenPriceListWithAddresses(
+  chainId: ApertureSupportedChainId,
+  tokens: string[],
+  apiKey?: string,
+): Promise<{ [address: string]: number | null }> {
+  const coingeckoPriceList = await getTokenPriceListFromCoingeckoWithAddresses(
+    chainId,
+    tokens,
+    'usd',
+    apiKey,
+  );
+  const coingeckoSupportedTokens = Object.keys(coingeckoPriceList);
+  const noCoingeckoPriceTokens = tokens.filter(
+    (token) => !coingeckoSupportedTokens.includes(token.toLowerCase()),
+  );
+  const geckoTerminalPriceList =
+    await getTokenPriceListFromGeckoTerminalWithAddresses(
+      chainId,
+      noCoingeckoPriceTokens,
+      apiKey,
+    );
+  return Object.assign(coingeckoPriceList, geckoTerminalPriceList);
 }
 
 /**

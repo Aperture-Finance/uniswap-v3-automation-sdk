@@ -59,6 +59,7 @@ import {
   getTokenPriceFromCoingecko,
   getTokenPriceListFromCoingecko,
   getTokenPriceListFromCoingeckoWithAddresses,
+  getTokenPriceListFromGeckoTerminalWithAddresses,
   humanPriceToClosestTick,
   normalizeTicks,
   priceToClosestUsableTick,
@@ -520,6 +521,18 @@ describe('CoinGecko tests', function () {
         'usd',
       ),
     ).to.be.rejectedWith('All tokens must have the same chain id');
+  });
+
+  it('Test GeckoTerminal price list', async function () {
+    {
+      const prices = await getTokenPriceListFromGeckoTerminalWithAddresses(
+        ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+        [WBTC_ADDRESS, WETH_ADDRESS],
+      );
+      for (const price of Object.values(prices)) {
+        expect(Number(price)).to.be.greaterThan(0);
+      }
+    }
   });
 
   it('Test CoinGecko historical price list', async function () {
