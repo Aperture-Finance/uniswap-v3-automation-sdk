@@ -18,6 +18,7 @@ export const Q192 = Q96.times(Q96);
 // timestamp in milliseconds, and the second element is the price at that timestamp.
 export type CoingeckoHistoricalPriceDatapoint = [number, number];
 
+export const GECKO_TERMINAL_URL = 'https://api.geckoterminal.com/api/v2';
 export const COINGECKO_PRO_URL = 'https://pro-api.coingecko.com/api/v3';
 // The proxy server adds a Coingecko Pro API key to the request header, and forwards the request to pro-api.coingecko.com.
 // This is intended to be used by the frontend to avoid exposing the API key.
@@ -89,7 +90,7 @@ export async function getTokenPriceFromCoingecko(
   ) {
     return 1;
   }
-  // Coingecko call example: https://{COINGECKO_URL}/api/v3/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&vs_currencies=usd
+  // Coingecko call example: https://{COINGECKO_URL}/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&vs_currencies=usd
   // https://coingecko-api.aperture.finance/api/v3/simple/token_price/base?contract_addresses=0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b&vs_currencies=usd
   const priceResponse: AxiosResponse = await axios.get(
     `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}?contract_addresses=${token.address}&vs_currencies=${vsCurrencies}${apiKey ? `&x_cg_pro_api_key=${apiKey}` : ''}`,
@@ -153,10 +154,41 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
   const priceResponse: AxiosResponse = await axios.get(
     `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/simple/token_price/${coingecko_asset_platform_id}?contract_addresses=${addresses}&vs_currencies=${vsCurrencies}${apiKey ? `&x_cg_pro_api_key=${apiKey}` : ''}`,
   );
-  // Coingecko call example: https://{COINGECKO_URL}/api/v3/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&vs_currencies=usd
+  // Coingecko call example: https://{COINGECKO_URL}/simple/token_price/ethereum?contract_addresses=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2&vs_currencies=usd
   return Object.keys(priceResponse.data).reduce(
     (obj: { [address: string]: number }, address: string) => {
       obj[address] = priceResponse.data[address][vsCurrencies!];
+      return obj;
+    },
+    {},
+  );
+}
+
+/**
+ * Fetches tokens' current price from Gecko Terminal in a batch.
+ * @param chainId The chain id.
+ * @param tokens The checksum addresses of tokens to fetch price information for. All tokens must have the same chain id. The number of tokens cannot be too big, exact threshold unknown but 50 should be safe; otherwise only some tokens will be fetched.
+ * @returns The tokens' current USD price. For example,
+ * {
+ *    0xbe9895146f7af43049ca1c1ae358b0541ea49704: 1783.17,
+ *    0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce: 0.00000681
+ * }
+ */
+export async function getTokenPriceListFromGeckoTerminalWithAddresses(
+  chainId: ApertureSupportedChainId,
+  tokens: string[],
+): Promise<{ [address: string]: string | null }> {
+  const { gecko_terminal_platform_id } = getChainInfo(chainId);
+  if (gecko_terminal_platform_id === undefined) return {};
+  const addresses = tokens.toString();
+  const priceResponse: AxiosResponse = await axios.get(
+    `${GECKO_TERMINAL_URL}/simple/networks/${gecko_terminal_platform_id}/token_price/${addresses}`,
+  );
+  const responseData = priceResponse.data.data.attributes.token_prices;
+  // Coingecko call example: https://{GECKO_TERMINAL_URL}/simple/networks/eth/token_price/0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA,0xF433089366899D83a9f26A773D59ec7eCF30355e,0x04abEdA201850aC0124161F037Efd70c74ddC74C,0xA4EED63db85311E22dF4473f87CcfC3DaDCFA3E3,0x1985365e9f78359a9B6AD760e32412f4a445E862
+  return Object.keys(responseData).reduce(
+    (obj: { [address: string]: string | null }, address: string) => {
+      obj[address] = responseData[address];
       return obj;
     },
     {},
