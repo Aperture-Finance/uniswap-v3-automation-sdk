@@ -177,7 +177,7 @@ export async function getTokenPriceListFromCoingeckoWithAddresses(
 export async function getTokenPriceListFromGeckoTerminalWithAddresses(
   chainId: ApertureSupportedChainId,
   tokens: string[],
-): Promise<{ [address: string]: number }> {
+): Promise<{ [address: string]: string | null }> {
   const { gecko_terminal_platform_id } = getChainInfo(chainId);
   if (gecko_terminal_platform_id === undefined) return {};
   const addresses = tokens.toString();
@@ -187,7 +187,7 @@ export async function getTokenPriceListFromGeckoTerminalWithAddresses(
   const responseData = priceResponse.data.data.attributes.token_prices;
   // Coingecko call example: https://{GECKO_TERMINAL_URL}/simple/networks/eth/token_price/0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA,0xF433089366899D83a9f26A773D59ec7eCF30355e,0x04abEdA201850aC0124161F037Efd70c74ddC74C,0xA4EED63db85311E22dF4473f87CcfC3DaDCFA3E3,0x1985365e9f78359a9B6AD760e32412f4a445E862
   return Object.keys(responseData).reduce(
-    (obj: { [address: string]: number }, address: string) => {
+    (obj: { [address: string]: string | null }, address: string) => {
       obj[address] = responseData[address];
       return obj;
     },
