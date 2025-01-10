@@ -208,7 +208,7 @@ export async function getTokenPriceListFromGeckoTerminalWithAddresses(
  *    0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce: 0.00000681
  * }
  */
-export async function getTokenPriceList(
+export async function getTokenPriceListWithAddresses(
   chainId: ApertureSupportedChainId,
   tokens: string[],
   apiKey?: string,
