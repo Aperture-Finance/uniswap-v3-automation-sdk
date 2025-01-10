@@ -80,6 +80,8 @@ export interface ChainInfo {
   alchemyNetworkId?: AlchemyNetworkId;
   infura_network_id?: InfuraNetworkId;
   rpc_url: string;
+  // gecko_terminal_platform_id is basically the chain name for gecko terminal api to look up price by address.
+  gecko_terminal_platform_id?: string;
   // coingecko_asset_platform_id is basically the chain name for coingecko api to look up price by address.
   // Only populated for networks with a CoinGecko asset platform ID.
   coingecko_asset_platform_id?: string;
@@ -135,6 +137,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    gecko_terminal_platform_id: 'eth',
     coingecko_asset_platform_id: 'ethereum',
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'eth',
@@ -170,6 +173,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    gecko_terminal_platform_id: 'arbitrum',
     coingecko_asset_platform_id: 'arbitrum-one',
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'arb',
@@ -205,6 +209,7 @@ const CHAIN_ID_TO_INFO: {
       'WMATIC',
       'Wrapped Matic',
     ),
+    gecko_terminal_platform_id: 'polygon_pos',
     coingecko_asset_platform_id: 'polygon-pos',
     coinGeckoNativeCurrencySymbol: 'matic',
     alchemyNetworkId: 'polygon',
@@ -259,6 +264,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    gecko_terminal_platform_id: 'optimism',
     coingecko_asset_platform_id: 'optimistic-ethereum',
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'opt',
@@ -311,6 +317,7 @@ const CHAIN_ID_TO_INFO: {
       'WBNB',
       'Wrapped BNB',
     ),
+    gecko_terminal_platform_id: 'bsc',
     coingecko_asset_platform_id: 'binance-smart-chain',
     coinGeckoNativeCurrencySymbol: 'bnb',
     alchemyNetworkId: 'bnb',
@@ -365,6 +372,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    gecko_terminal_platform_id: 'base',
     coingecko_asset_platform_id: 'base',
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'base',
@@ -400,6 +408,7 @@ const CHAIN_ID_TO_INFO: {
       'WAVAX',
       'Wrapped AVAX',
     ),
+    gecko_terminal_platform_id: 'avax',
     coingecko_asset_platform_id: 'avalanche',
     coinGeckoNativeCurrencySymbol: 'avax',
     alchemyNetworkId: 'avax',
@@ -435,6 +444,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    gecko_terminal_platform_id: 'manta-pacific',
     coingecko_asset_platform_id: 'manta-pacific',
     coinGeckoNativeCurrencySymbol: 'eth',
     rpc_url: 'https://pacific-rpc.manta.network/http',
@@ -506,6 +516,7 @@ const CHAIN_ID_TO_INFO: {
       'WETH',
       'Wrapped Ether',
     ),
+    gecko_terminal_platform_id: 'scroll',
     coingecko_asset_platform_id: 'scroll',
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'scroll',
