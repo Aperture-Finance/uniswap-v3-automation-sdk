@@ -64,6 +64,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
           solutions[0].target_address,
           solutions[0].call_data,
         ),
+        approveTarget: APPROVE_TARGET,
       };
     },
   };

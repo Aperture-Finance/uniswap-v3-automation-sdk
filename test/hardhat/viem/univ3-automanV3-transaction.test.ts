@@ -772,7 +772,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
-        existingPosition.position,
+        existingPosition,
       )
     )[0];
     const txRequest = await getDecreaseLiquiditySingleV3Tx(
@@ -918,7 +918,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
         /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
-        existingPosition.position,
+        existingPosition,
       )
     )[0];
     const txRequest = await getDecreaseLiquiditySingleV3Tx(

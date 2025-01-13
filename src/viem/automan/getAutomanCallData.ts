@@ -163,9 +163,9 @@ export function getAutomanV3DecreaseLiquidityCalldata(
 export function getAutomanV3DecreaseLiquiditySingleCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   zeroForOne: boolean,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData: Hex = '0x',
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
   permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {

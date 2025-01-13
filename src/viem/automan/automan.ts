@@ -579,6 +579,7 @@ export async function simulateDecreaseLiquidity(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
+  owner: Address,
   position: Position,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   blockNumber?: bigint,
@@ -589,7 +590,7 @@ export async function simulateDecreaseLiquidity(
     amm,
     publicClient,
     from,
-    position,
+    owner,
     decreaseLiquidityParams,
     blockNumber,
   );
@@ -605,30 +606,14 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  from: Address,
-  position: Position,
+  from: Address | undefined,
+  owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
+  from = getFromAddress(from);
   const data = getAutomanV3DecreaseLiquidityCalldata(decreaseLiquidityParams);
   const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
-
-  const [token0Overrides, token1Overrides] = await Promise.all([
-    getERC20Overrides(
-      position.pool.token0.address as Address,
-      from,
-      apertureAutomanV3,
-      decreaseLiquidityParams.amount0Min,
-      publicClient,
-    ),
-    getERC20Overrides(
-      position.pool.token1.address as Address,
-      from,
-      apertureAutomanV3,
-      decreaseLiquidityParams.amount1Min,
-      publicClient,
-    ),
-  ]);
 
   return tryRequestWithOverrides(
     method,
@@ -639,8 +624,7 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
     },
     publicClient,
     {
-      ...token0Overrides,
-      ...token1Overrides,
+      ...getNPMApprovalOverrides(chainId, amm, owner),
     },
     blockNumber,
   );
@@ -651,10 +635,15 @@ export async function simulateDecreaseLiquiditySingleV3(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
+  owner: Address,
   position: Position,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   zeroForOne: boolean,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData: Hex = '0x',
+  swapAmountIn: bigint,
+  approveTarget: Address,
   blockNumber?: bigint,
 ): Promise<DecreaseLiquiditySingleReturnType> {
   const returnData = await requestDecreaseLiquiditySingleV3(
@@ -663,10 +652,15 @@ export async function simulateDecreaseLiquiditySingleV3(
     amm,
     publicClient,
     from,
+    owner,
     position,
     decreaseLiquidityParams,
     zeroForOne,
+    token0FeeAmount,
+    token1FeeAmount,
     swapData,
+    swapAmountIn,
+    approveTarget,
     blockNumber,
   );
   return decodeFunctionResult({
@@ -681,10 +675,15 @@ export async function estimateDecreaseLiquiditySingleV3Gas(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address,
+  owner: Address,
   position: Position,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   zeroForOne: boolean,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData: Hex = '0x',
+  swapAmountIn: bigint,
+  approveTarget: Address,
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
@@ -694,10 +693,15 @@ export async function estimateDecreaseLiquiditySingleV3Gas(
       amm,
       publicClient,
       from,
+      owner,
       position,
       decreaseLiquidityParams,
       zeroForOne,
+      token0FeeAmount,
+      token1FeeAmount,
       swapData,
+      swapAmountIn,
+      approveTarget,
       blockNumber,
     ),
   );
@@ -710,36 +714,27 @@ export async function requestDecreaseLiquiditySingleV3<
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  from: Address,
+  from: Address | undefined,
+  owner: Address,
   position: Position,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   zeroForOne: boolean,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData: Hex = '0x',
+  swapAmountIn: bigint,
+  approveTarget: Address,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
+  from = getFromAddress(from);
   const data = getAutomanV3DecreaseLiquiditySingleCalldata(
     decreaseLiquidityParams,
     zeroForOne,
+    token0FeeAmount,
+    token1FeeAmount,
     swapData,
   );
-  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
-
-  const [token0Overrides, token1Overrides] = await Promise.all([
-    getERC20Overrides(
-      position.pool.token0.address as Address,
-      from,
-      apertureAutomanV3,
-      decreaseLiquidityParams.amount0Min,
-      publicClient,
-    ),
-    getERC20Overrides(
-      position.pool.token1.address as Address,
-      from,
-      apertureAutomanV3,
-      decreaseLiquidityParams.amount1Min,
-      publicClient,
-    ),
-  ]);
+  const { apertureAutomanV3, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
 
   return tryRequestWithOverrides(
     method,
@@ -750,8 +745,17 @@ export async function requestDecreaseLiquiditySingleV3<
     },
     publicClient,
     {
-      ...token0Overrides,
-      ...token1Overrides,
+      ...getNPMApprovalOverrides(chainId, amm, owner),
+      ...getControllerOverrides(chainId, amm, from),
+      ...await getERC20Overrides(
+        (zeroForOne
+          ? position.pool.token1.address
+          : position.pool.token0.address) as Address,
+        optimalSwapRouter!,
+        approveTarget,
+        swapAmountIn,
+        publicClient,
+      ),
     },
     blockNumber,
   );

@@ -1,8 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
-import {
-  Position,
-  RemoveLiquidityOptions,
-} from '@aperture_finance/uniswap-v3-sdk';
+import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
@@ -31,23 +28,24 @@ export async function getDecreaseLiquiditySingleSwapInfoV3(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  position?: Position,
+  positionDetails?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
-  if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
+  if (positionDetails === undefined) {
+    positionDetails = await PositionDetails.fromPositionId(
       chainId,
       amm,
       BigInt(removeLiquidityOptions.tokenId.toString()),
       publicClient,
-    ));
+      blockNumber,
+    );
   }
 
   return await decreaseLiquiditySingleV3(
     chainId,
     amm,
     publicClient,
-    position,
+    positionDetails,
     removeLiquidityOptions,
     zeroForOne,
     recipient,

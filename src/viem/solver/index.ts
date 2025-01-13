@@ -14,6 +14,7 @@ export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {
   swapData: '0x',
+  approveTarget: '0x0000000000000000000000000000000000000000',
 };
 
 export const getSolver = (solver: E_Solver): ISolver => {

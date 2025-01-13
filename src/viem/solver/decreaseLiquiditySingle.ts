@@ -1,8 +1,5 @@
 import { ApertureSupportedChainId, getLogger } from '@/index';
-import {
-  Position,
-  RemoveLiquidityOptions,
-} from '@aperture_finance/uniswap-v3-sdk';
+import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
@@ -15,6 +12,7 @@ import {
   simulateDecreaseLiquidity,
   simulateDecreaseLiquiditySingleV3,
 } from '../automan';
+import { PositionDetails } from '../position';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
@@ -40,7 +38,7 @@ export async function decreaseLiquiditySingleV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  position: Position,
+  positionDetails: PositionDetails,
   decreaseLiquidityOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
   zeroForOne: boolean,
   from: Address,
@@ -50,7 +48,7 @@ export async function decreaseLiquiditySingleV3(
 ): Promise<SolverResult[]> {
   // Use BigInt math for precision, not the liquidity in SolverResult
   const liquidityToDecrease =
-    (BigInt(position.liquidity.toString()) *
+    (BigInt(positionDetails.liquidity.toString()) *
       BigInt(
         decreaseLiquidityOptions.liquidityPercentage.numerator.toString(),
       )) /
@@ -62,23 +60,30 @@ export async function decreaseLiquiditySingleV3(
     amount1Min: 0n,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  const token0 = position.pool.token0;
-  const token1 = position.pool.token1;
+  const token0 = positionDetails.token0;
+  const token1 = positionDetails.token1;
   const [positionInitialAmount0, positionInitialAmount1] =
     await simulateDecreaseLiquidity(
       chainId,
       amm,
       publicClient,
       from,
-      position,
+      positionDetails.owner,
+      positionDetails.position,
       decreaseLiquidityParams,
       blockNumber,
     );
-  const swapAmountIn = zeroForOne
+  let swapAmountIn = zeroForOne
     ? positionInitialAmount0
     : positionInitialAmount1;
+  const swapFeeAmount = BigInt(
+    new Big(swapAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+  );
+  swapAmountIn -= swapFeeAmount;
+  const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
+  const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
 
-  const estimateGas = async (swapData: Hex) => {
+  const estimateGas = async (swapData: Hex, approveTarget: Address) => {
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
@@ -87,10 +92,15 @@ export async function decreaseLiquiditySingleV3(
           amm,
           publicClient,
           from,
-          position,
+          positionDetails.owner,
+          positionDetails.position,
           decreaseLiquidityParams,
           zeroForOne,
+          token0FeeAmount,
+          token1FeeAmount,
           swapData,
+          swapAmountIn,
+          approveTarget,
           blockNumber,
         ),
       ]);
@@ -108,6 +118,7 @@ export async function decreaseLiquiditySingleV3(
   const solve = async (solver: E_Solver) => {
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
+    let approveTarget: Address | undefined = undefined;
     let amountOut: bigint = 0n;
     let gasFeeEstimation: bigint = 0n;
 
@@ -115,22 +126,24 @@ export async function decreaseLiquiditySingleV3(
       const slippage =
         Number(decreaseLiquidityOptions.slippageTolerance.toSignificant()) /
         100;
-      const swapFeeAmount = BigInt(
-        new Big(swapAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
-      );
       if (swapAmountIn > 0n) {
         // Although it's mintOptimal, it's the same swapData and swapRoute.
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute, approveTarget } = await getSolver(
+          solver,
+        ).mintOptimal({
           chainId,
           amm,
           fromAddress: from,
           token0: token0.address as Address,
           token1: token1.address as Address,
-          feeOrTickSpacing: position.pool.tickSpacing,
-          tickLower: position.tickLower,
-          tickUpper: position.tickUpper,
+          feeOrTickSpacing:
+            amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+              ? positionDetails.tickSpacing
+              : positionDetails.fee,
+          tickLower: positionDetails.tickLower,
+          tickUpper: positionDetails.tickUpper,
           slippage,
-          poolAmountIn: swapAmountIn - swapFeeAmount,
+          poolAmountIn: swapAmountIn,
           zeroForOne,
         }));
         amountOut = await simulateDecreaseLiquiditySingleV3(
@@ -138,17 +151,20 @@ export async function decreaseLiquiditySingleV3(
           amm,
           publicClient,
           from,
-          position,
+          positionDetails.owner,
+          positionDetails.position,
           decreaseLiquidityParams,
           zeroForOne,
+          token0FeeAmount,
+          token1FeeAmount,
           swapData,
+          swapAmountIn,
+          approveTarget!,
           blockNumber,
         );
-        gasFeeEstimation = await estimateGas(swapData);
+        gasFeeEstimation = await estimateGas(swapData, approveTarget!);
       }
 
-      const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
-      const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
       const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
       const decimals = zeroForOne ? token0.decimals : token1.decimals;
       const feeUSD = new Big(swapAmountIn.toString())
@@ -213,7 +229,7 @@ export async function decreaseLiquiditySingleV3(
         ),
         feeUSD: feeUSD.toFixed(),
         priceImpact: calcPriceImpact(
-          position.pool,
+          positionDetails.pool,
           positionInitialAmount0,
           positionInitialAmount1,
           token0Out,

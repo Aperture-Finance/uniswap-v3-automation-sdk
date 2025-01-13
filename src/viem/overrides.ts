@@ -71,14 +71,14 @@ export function getNPMApprovalOverrides(
   amm: AutomatedMarketMakerEnum,
   owner: Address,
 ): StateOverrides {
-  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
-    chainId,
-    amm,
-  )!;
+  const { apertureAutoman, apertureAutomanV3, nonfungiblePositionManager } =
+    getAMMInfo(chainId, amm)!;
   return {
     [nonfungiblePositionManager]: {
       stateDiff: {
         [computeOperatorApprovalSlot(owner, apertureAutoman)]:
+          encodeAbiParameters(parseAbiParameters('bool'), [true]),
+        [computeOperatorApprovalSlot(owner, apertureAutomanV3)]:
           encodeAbiParameters(parseAbiParameters('bool'), [true]),
       },
     },

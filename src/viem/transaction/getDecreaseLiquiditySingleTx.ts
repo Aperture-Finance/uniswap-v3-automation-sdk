@@ -61,9 +61,9 @@ export async function getDecreaseLiquiditySingleV3Tx(
   const data = getAutomanV3DecreaseLiquiditySingleCalldata(
     decreaseLiquidityParams,
     zeroForOne,
-    swapData,
     token0FeeAmount,
     token1FeeAmount,
+    swapData,
   );
   return {
     to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
