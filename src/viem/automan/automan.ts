@@ -580,7 +580,6 @@ export async function simulateDecreaseLiquidity(
   publicClient: PublicClient,
   from: Address,
   owner: Address,
-  position: Position,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   blockNumber?: bigint,
 ): Promise<DecreaseLiquidityReturnType> {
@@ -642,8 +641,6 @@ export async function simulateDecreaseLiquiditySingleV3(
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData: Hex = '0x',
-  swapAmountIn: bigint,
-  approveTarget: Address,
   blockNumber?: bigint,
 ): Promise<DecreaseLiquiditySingleReturnType> {
   const returnData = await requestDecreaseLiquiditySingleV3(
@@ -659,8 +656,6 @@ export async function simulateDecreaseLiquiditySingleV3(
     token0FeeAmount,
     token1FeeAmount,
     swapData,
-    swapAmountIn,
-    approveTarget,
     blockNumber,
   );
   return decodeFunctionResult({
@@ -682,8 +677,6 @@ export async function estimateDecreaseLiquiditySingleV3Gas(
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData: Hex = '0x',
-  swapAmountIn: bigint,
-  approveTarget: Address,
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
@@ -700,8 +693,6 @@ export async function estimateDecreaseLiquiditySingleV3Gas(
       token0FeeAmount,
       token1FeeAmount,
       swapData,
-      swapAmountIn,
-      approveTarget,
       blockNumber,
     ),
   );
@@ -722,8 +713,6 @@ export async function requestDecreaseLiquiditySingleV3<
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData: Hex = '0x',
-  swapAmountIn: bigint,
-  approveTarget: Address,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   from = getFromAddress(from);
@@ -734,7 +723,7 @@ export async function requestDecreaseLiquiditySingleV3<
     token1FeeAmount,
     swapData,
   );
-  const { apertureAutomanV3, optimalSwapRouter } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
 
   return tryRequestWithOverrides(
     method,
@@ -747,15 +736,6 @@ export async function requestDecreaseLiquiditySingleV3<
     {
       ...getNPMApprovalOverrides(chainId, amm, owner),
       ...getControllerOverrides(chainId, amm, from),
-      ...await getERC20Overrides(
-        (zeroForOne
-          ? position.pool.token1.address
-          : position.pool.token0.address) as Address,
-        optimalSwapRouter!,
-        approveTarget,
-        swapAmountIn,
-        publicClient,
-      ),
     },
     blockNumber,
   );

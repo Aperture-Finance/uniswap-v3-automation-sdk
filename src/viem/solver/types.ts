@@ -14,7 +14,6 @@ export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
 export interface SolvedSwapInfo {
   swapData: Hex;
   swapRoute?: SwapRoute;
-  approveTarget: Address;
 }
 
 export interface SolveMintOptimalProps {

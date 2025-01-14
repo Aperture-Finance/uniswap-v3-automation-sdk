@@ -94,7 +94,6 @@ export const getOkxSolver = (): ISolver => {
           tx.data,
         ),
         swapRoute: protocols,
-        approveTarget,
       };
     },
   };

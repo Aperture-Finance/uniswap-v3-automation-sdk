@@ -69,7 +69,6 @@ export async function decreaseLiquiditySingleV3(
       publicClient,
       from,
       positionDetails.owner,
-      positionDetails.position,
       decreaseLiquidityParams,
       blockNumber,
     );
@@ -83,7 +82,7 @@ export async function decreaseLiquiditySingleV3(
   const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
   const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
 
-  const estimateGas = async (swapData: Hex, approveTarget: Address) => {
+  const estimateGas = async (swapData: Hex) => {
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
@@ -99,8 +98,6 @@ export async function decreaseLiquiditySingleV3(
           token0FeeAmount,
           token1FeeAmount,
           swapData,
-          swapAmountIn,
-          approveTarget,
           blockNumber,
         ),
       ]);
@@ -118,7 +115,6 @@ export async function decreaseLiquiditySingleV3(
   const solve = async (solver: E_Solver) => {
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
-    let approveTarget: Address | undefined = undefined;
     let amountOut: bigint = 0n;
     let gasFeeEstimation: bigint = 0n;
 
@@ -128,9 +124,7 @@ export async function decreaseLiquiditySingleV3(
         100;
       if (swapAmountIn > 0n) {
         // Although it's mintOptimal, it's the same swapData and swapRoute.
-        ({ swapData, swapRoute, approveTarget } = await getSolver(
-          solver,
-        ).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
           fromAddress: from,
@@ -158,11 +152,9 @@ export async function decreaseLiquiditySingleV3(
           token0FeeAmount,
           token1FeeAmount,
           swapData,
-          swapAmountIn,
-          approveTarget!,
           blockNumber,
         );
-        gasFeeEstimation = await estimateGas(swapData, approveTarget!);
+        gasFeeEstimation = await estimateGas(swapData);
       }
 
       const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
