@@ -12,12 +12,18 @@ import { PositionDetails } from '../position';
 /**
  * Generates an unsigned transaction that removes partial or entire liquidity from the specified position and claim accrued fees.
  * @param decreaseLiquidityOptions Remove liquidity options. RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
+ * @param zeroForOne If true, collect in token1. If false, collect in token0.
  * @param recipient The recipient address (connected wallet address).
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param client Viem public client.
- * @param receiveNativeIfApplicable If set to true and the position involves native, send native instead of wrappedNative to `recipient`.
- * @param position Uniswap SDK Position object for the specified position (optional); if undefined, one will be created.
+ * @param swapData Swap data after collecting.
+ * @param positionDetails Uniswap SDK PositionDetails for the specified position (optional); if undefined, one will be created.
+ * @param amount0Min Min amount of token0 to receive.
+ * @param amount1Min Min amount of token1 to receive.
+ * @param token0FeeAmount Fee amount for token0.
+ * @param token1FeeAmount Fee amount for token1.
+ * @param blockNumber Optional. The block number to simulate the call from.
  * @returns The unsigned tx.
  */
 export async function getDecreaseLiquiditySingleV3Tx(
@@ -33,7 +39,6 @@ export async function getDecreaseLiquiditySingleV3Tx(
   amount1Min: bigint = 0n,
   token0FeeAmount: bigint = 0n,
   token1FeeAmount: bigint = 0n,
-  blockNumber?: bigint,
 ): Promise<TransactionRequest> {
   if (positionDetails === undefined) {
     positionDetails = await PositionDetails.fromPositionId(
@@ -41,7 +46,6 @@ export async function getDecreaseLiquiditySingleV3Tx(
       amm,
       BigInt(decreaseLiquidityOptions.tokenId.toString()),
       client,
-      blockNumber,
     );
   }
   // Use BigInt math for precision, not the liquidity in SolverResult

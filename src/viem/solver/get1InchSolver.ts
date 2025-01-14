@@ -87,7 +87,6 @@ export const get1InchSolver = (): ISolver => {
           tx.data,
         ),
         swapRoute: protocols,
-        approveTarget,
       };
     },
   };

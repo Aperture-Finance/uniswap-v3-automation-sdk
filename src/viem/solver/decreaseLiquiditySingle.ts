@@ -26,11 +26,11 @@ import { SolverResult } from './types';
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
  * @param publicClient Viem public client.
- * @param position The current position to simulate the call from.
+ * @param positionDetails Uniswap SDK PositionDetails for the specified position.
  * @param decreaseLiquidityOptions Decrease liquidity options.
- * @param token0Amount The token0 amount.
- * @param token1Amount The token1 amount.
- * @param fromAddress The address to decrease liquidity from.
+ * @param zeroForOne If true, collect in token1. If false, collect in token0.
+ * @param from The address to decrease liquidity for.
+ * @param tokenPricesUsd The prices of the two tokens in the pool in usd.
  * @param blockNumber Optional. The block number to simulate the call from.
  * @param includeSolvers Optional. The solvers to include.
  */

@@ -573,7 +573,7 @@ export async function requestIncreaseLiquidityOptimalV3<
   );
 }
 
-// Without swap nor fees to get the initial amount to swap.
+// Without swap nor fees to get the initial position amounts.
 export async function simulateDecreaseLiquidity(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

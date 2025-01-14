@@ -12,11 +12,12 @@ import { E_Solver } from '../solver';
  * @param removeLiquidityOptions Decrease liquidity options.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
- * @param token0Amount The token0 amount.
- * @param token1Amount The token1 amount.
+ * @param zeroForOne If true, collect in token1. If false, collect in token0.
  * @param recipient The recipient address.
+ * @param tokenPricesUsd The prices of the two tokens in the pool in usd.
  * @param publicClient Viem public client.
- * @param position The current position to simulate the call from.
+ * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
+ * @param positionDetails Uniswap SDK PositionDetails for the specified position (optional); if undefined, one will be created.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getDecreaseLiquiditySingleSwapInfoV3(
