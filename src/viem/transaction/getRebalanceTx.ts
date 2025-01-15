@@ -8,7 +8,7 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanRebalanceCalldata,
-  getAutomanV3RebalanceCalldata,
+  getAutomanV4RebalanceCalldata,
 } from '../automan';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
@@ -191,8 +191,8 @@ export async function getRebalanceV3Tx(
   return {
     tx: {
       from: ownerAddress,
-      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
-      data: getAutomanV3RebalanceCalldata(
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+      data: getAutomanV4RebalanceCalldata(
         amm,
         mintParams,
         existingPositionId,

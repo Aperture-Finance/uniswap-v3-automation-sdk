@@ -8,7 +8,7 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanMintOptimalCalldata,
-  getAutomanV3MintOptimalCalldata,
+  getAutomanV4MintOptimalCalldata,
 } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
@@ -212,7 +212,7 @@ export async function getMintOptimalV3Tx(
           deadline,
         };
 
-  const data = getAutomanV3MintOptimalCalldata(
+  const data = getAutomanV4MintOptimalCalldata(
     amm,
     mintParams,
     swapData,
@@ -222,7 +222,7 @@ export async function getMintOptimalV3Tx(
 
   return {
     tx: {
-      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
       data,
       value,
       from: recipient,

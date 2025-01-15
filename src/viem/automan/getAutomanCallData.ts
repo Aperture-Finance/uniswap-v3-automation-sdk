@@ -1,7 +1,7 @@
 import {
-  AutomanV3__factory,
+  AutomanV4__factory,
   Automan__factory,
-  ISlipStreamAutomanV3__factory,
+  ISlipStreamAutomanV4__factory,
   ISlipStreamAutoman__factory,
   PermitInfo,
 } from '@/index';
@@ -34,7 +34,7 @@ export function getAutomanMintOptimalCalldata(
   });
 }
 
-export function getAutomanV3MintOptimalCalldata(
+export function getAutomanV4MintOptimalCalldata(
   amm: AutomatedMarketMakerEnum,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   swapData: Hex = '0x',
@@ -43,7 +43,7 @@ export function getAutomanV3MintOptimalCalldata(
 ): Hex {
   if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
     return encodeFunctionData({
-      abi: ISlipStreamAutomanV3__factory.abi,
+      abi: ISlipStreamAutomanV4__factory.abi,
       args: [
         mintParams as SlipStreamMintParams,
         swapData,
@@ -54,7 +54,7 @@ export function getAutomanV3MintOptimalCalldata(
     });
   }
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [
       mintParams as UniV3MintParams,
       swapData,
@@ -76,14 +76,14 @@ export function getAutomanIncreaseLiquidityOptimalCallData(
   });
 }
 
-export function getAutomanV3IncreaseLiquidityOptimalCallData(
+export function getAutomanV4IncreaseLiquidityOptimalCallData(
   increaseParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
 ): Hex {
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [increaseParams, swapData, token0FeeAmount, token1FeeAmount] as const,
     functionName: 'increaseLiquidityOptimal',
   });
@@ -127,7 +127,7 @@ export function getAutomanDecreaseLiquidityCalldata(
   });
 }
 
-export function getAutomanV3DecreaseLiquidityCalldata(
+export function getAutomanV4DecreaseLiquidityCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
@@ -135,7 +135,7 @@ export function getAutomanV3DecreaseLiquidityCalldata(
 ): Hex {
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: AutomanV3__factory.abi,
+      abi: AutomanV4__factory.abi,
       args: [
         decreaseLiquidityParams,
         token0FeeAmount,
@@ -146,7 +146,7 @@ export function getAutomanV3DecreaseLiquidityCalldata(
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [
       decreaseLiquidityParams,
       token0FeeAmount,
@@ -160,7 +160,7 @@ export function getAutomanV3DecreaseLiquidityCalldata(
   });
 }
 
-export function getAutomanV3DecreaseLiquiditySingleCalldata(
+export function getAutomanV4DecreaseLiquiditySingleCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   zeroForOne: boolean,
   token0FeeAmount: bigint,
@@ -170,7 +170,7 @@ export function getAutomanV3DecreaseLiquiditySingleCalldata(
 ): Hex {
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: AutomanV3__factory.abi,
+      abi: AutomanV4__factory.abi,
       args: [
         decreaseLiquidityParams,
         zeroForOne,
@@ -183,7 +183,7 @@ export function getAutomanV3DecreaseLiquiditySingleCalldata(
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [
       decreaseLiquidityParams,
       zeroForOne,
@@ -264,7 +264,7 @@ export function getAutomanRebalanceCalldata(
   });
 }
 
-export function getAutomanV3RebalanceCalldata(
+export function getAutomanV4RebalanceCalldata(
   amm: AutomatedMarketMakerEnum,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
@@ -276,7 +276,7 @@ export function getAutomanV3RebalanceCalldata(
   if (permitInfo === undefined) {
     if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
       return encodeFunctionData({
-        abi: ISlipStreamAutomanV3__factory.abi,
+        abi: ISlipStreamAutomanV4__factory.abi,
         args: [
           mintParams as SlipStreamMintParams,
           tokenId,
@@ -288,7 +288,7 @@ export function getAutomanV3RebalanceCalldata(
       });
     }
     return encodeFunctionData({
-      abi: AutomanV3__factory.abi,
+      abi: AutomanV4__factory.abi,
       args: [
         mintParams as UniV3MintParams,
         tokenId,
@@ -302,7 +302,7 @@ export function getAutomanV3RebalanceCalldata(
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
     return encodeFunctionData({
-      abi: ISlipStreamAutomanV3__factory.abi,
+      abi: ISlipStreamAutomanV4__factory.abi,
       args: [
         mintParams as SlipStreamMintParams,
         tokenId,
@@ -318,7 +318,7 @@ export function getAutomanV3RebalanceCalldata(
     });
   }
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [
       mintParams as UniV3MintParams,
       tokenId,
@@ -374,7 +374,7 @@ export function getAutomanReinvestCalldata(
   });
 }
 
-export function getAutomanV3ReinvestCalldata(
+export function getAutomanV4ReinvestCalldata(
   tokenId: bigint,
   deadline: bigint,
   amount0Min = BigInt(0),
@@ -394,14 +394,14 @@ export function getAutomanV3ReinvestCalldata(
   };
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: AutomanV3__factory.abi,
+      abi: AutomanV4__factory.abi,
       args: [params, token0FeeAmount, token1FeeAmount, swapData] as const,
       functionName: 'reinvest',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [
       params,
       token0FeeAmount,
@@ -453,7 +453,7 @@ export function getAutomanRemoveLiquidityCalldata(
   });
 }
 
-export function getAutomanV3RemoveLiquidityCalldata(
+export function getAutomanV4RemoveLiquidityCalldata(
   tokenId: bigint,
   deadline: bigint,
   amount0Min = BigInt(0),
@@ -471,14 +471,14 @@ export function getAutomanV3RemoveLiquidityCalldata(
   };
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: AutomanV3__factory.abi,
+      abi: AutomanV4__factory.abi,
       args: [params, token0FeeAmount, token1FeeAmount] as const,
       functionName: 'removeLiquidity',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     args: [
       params,
       token0FeeAmount,

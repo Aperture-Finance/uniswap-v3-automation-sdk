@@ -1,6 +1,6 @@
 import {
   ApertureSupportedChainId,
-  AutomanV3__factory,
+  AutomanV4__factory,
   Automan__factory,
   getAMMInfo,
 } from '@/index';
@@ -36,13 +36,13 @@ import {
   getAutomanRebalanceCalldata,
   getAutomanReinvestCalldata,
   getAutomanRemoveLiquidityCalldata,
-  getAutomanV3DecreaseLiquidityCalldata,
-  getAutomanV3DecreaseLiquiditySingleCalldata,
-  getAutomanV3IncreaseLiquidityOptimalCallData,
-  getAutomanV3MintOptimalCalldata,
-  getAutomanV3RebalanceCalldata,
-  getAutomanV3ReinvestCalldata,
-  getAutomanV3RemoveLiquidityCalldata,
+  getAutomanV4DecreaseLiquidityCalldata,
+  getAutomanV4DecreaseLiquiditySingleCalldata,
+  getAutomanV4IncreaseLiquidityOptimalCallData,
+  getAutomanV4MintOptimalCalldata,
+  getAutomanV4RebalanceCalldata,
+  getAutomanV4ReinvestCalldata,
+  getAutomanV4RemoveLiquidityCalldata,
 } from './getAutomanCallData';
 import { getFromAddress } from './internal';
 import {
@@ -74,18 +74,18 @@ export function getAutomanContract(
   });
 }
 
-export function getAutomanV3Contract(
+export function getAutomanV4Contract(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient?: PublicClient,
   walletClient?: WalletClient,
 ): GetContractReturnType<
-  typeof AutomanV3__factory.abi,
+  typeof AutomanV4__factory.abi,
   PublicClient | WalletClient
 > {
   return getContract({
-    address: getAMMInfo(chainId, amm)!.apertureAutomanV3,
-    abi: AutomanV3__factory.abi,
+    address: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+    abi: AutomanV4__factory.abi,
     client: walletClient ?? publicClient!,
   });
 }
@@ -197,7 +197,7 @@ export async function simulateMintOptimalV3(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     data: returnData,
     functionName: 'mintOptimal',
   });
@@ -311,26 +311,26 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   checkTicks(amm, mintParams);
-  const data = getAutomanV3MintOptimalCalldata(
+  const data = getAutomanV4MintOptimalCalldata(
     amm,
     mintParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,
   );
-  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(
       mintParams.token0,
       from,
-      apertureAutomanV3,
+      apertureAutomanV4,
       mintParams.amount0Desired,
       publicClient,
     ),
     getERC20Overrides(
       mintParams.token1,
       from,
-      apertureAutomanV3,
+      apertureAutomanV4,
       mintParams.amount1Desired,
       publicClient,
     ),
@@ -339,7 +339,7 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: apertureAutomanV3,
+      to: apertureAutomanV4,
       data,
     },
     publicClient,
@@ -413,7 +413,7 @@ export async function simulateIncreaseLiquidityOptimalV3(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     data: returnData,
     functionName: 'increaseLiquidityOptimal',
   });
@@ -534,24 +534,24 @@ export async function requestIncreaseLiquidityOptimalV3<
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  const data = getAutomanV3IncreaseLiquidityOptimalCallData(
+  const data = getAutomanV4IncreaseLiquidityOptimalCallData(
     increaseParams,
     swapData,
   );
-  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
 
   const [token0Overrides, token1Overrides] = await Promise.all([
     getERC20Overrides(
       position.pool.token0.address as Address,
       from,
-      apertureAutomanV3,
+      apertureAutomanV4,
       increaseParams.amount0Desired,
       publicClient,
     ),
     getERC20Overrides(
       position.pool.token1.address as Address,
       from,
-      apertureAutomanV3,
+      apertureAutomanV4,
       increaseParams.amount1Desired,
       publicClient,
     ),
@@ -561,7 +561,7 @@ export async function requestIncreaseLiquidityOptimalV3<
     method,
     {
       from,
-      to: apertureAutomanV3,
+      to: apertureAutomanV4,
       data,
     },
     publicClient,
@@ -594,7 +594,7 @@ export async function simulateDecreaseLiquidity(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     data: returnData,
     functionName: 'decreaseLiquidity',
   });
@@ -611,14 +611,14 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   from = getFromAddress(from);
-  const data = getAutomanV3DecreaseLiquidityCalldata(decreaseLiquidityParams);
-  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+  const data = getAutomanV4DecreaseLiquidityCalldata(decreaseLiquidityParams);
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
 
   return tryRequestWithOverrides(
     method,
     {
       from,
-      to: apertureAutomanV3,
+      to: apertureAutomanV4,
       data,
     },
     publicClient,
@@ -659,7 +659,7 @@ export async function simulateDecreaseLiquiditySingleV3(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     data: returnData,
     functionName: 'decreaseLiquiditySingle',
   });
@@ -716,20 +716,20 @@ export async function requestDecreaseLiquiditySingleV3<
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   from = getFromAddress(from);
-  const data = getAutomanV3DecreaseLiquiditySingleCalldata(
+  const data = getAutomanV4DecreaseLiquiditySingleCalldata(
     decreaseLiquidityParams,
     zeroForOne,
     token0FeeAmount,
     token1FeeAmount,
     swapData,
   );
-  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
 
   return tryRequestWithOverrides(
     method,
     {
       from,
-      to: apertureAutomanV3,
+      to: apertureAutomanV4,
       data,
     },
     publicClient,
@@ -821,7 +821,7 @@ export async function simulateRemoveLiquidityV3(
   blockNumber?: bigint,
   customDestContract?: Address,
 ): Promise<RemoveLiquidityReturnType> {
-  const data = getAutomanV3RemoveLiquidityCalldata(
+  const data = getAutomanV4RemoveLiquidityCalldata(
     tokenId,
     BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     amount0Min,
@@ -830,9 +830,9 @@ export async function simulateRemoveLiquidityV3(
     token1FeeAmount,
   );
   const destContract =
-    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutomanV3;
+    customDestContract ?? getAMMInfo(chainId, amm)!.apertureAutomanV4;
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     data: await tryRequestWithOverrides(
       'eth_call',
       {
@@ -903,7 +903,7 @@ export async function requestRebalanceV3<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   checkTicks(amm, mintParams);
-  const data = getAutomanV3RebalanceCalldata(
+  const data = getAutomanV4RebalanceCalldata(
     amm,
     mintParams,
     tokenId,
@@ -921,7 +921,7 @@ export async function requestRebalanceV3<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
       data,
     },
     publicClient,
@@ -1017,7 +1017,7 @@ export async function simulateRebalanceV3(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: AutomanV4__factory.abi,
     data,
     functionName: 'rebalance',
   });
@@ -1141,7 +1141,7 @@ export async function requestReinvestV3<M extends keyof RpcReturnType>(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  const data = getAutomanV3ReinvestCalldata(
+  const data = getAutomanV4ReinvestCalldata(
     tokenId,
     deadline,
     amount0Min,
@@ -1160,7 +1160,7 @@ export async function requestReinvestV3<M extends keyof RpcReturnType>(
     method,
     {
       from,
-      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
       data,
     },
     publicClient,

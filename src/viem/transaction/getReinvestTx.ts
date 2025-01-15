@@ -10,7 +10,7 @@ import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import {
   getAutomanReinvestCalldata,
-  getAutomanV3ReinvestCalldata,
+  getAutomanV4ReinvestCalldata,
 } from '../automan';
 import {
   getFeeReinvestBips,
@@ -124,7 +124,7 @@ export async function getReinvestV3Tx(
     client,
   );
   const { pool, tickLower, tickUpper, position } = positionDetails;
-  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
 
   const { token0FeeAmount, token1FeeAmount } =
     getFeeReinvestFeeAmount(positionDetails);
@@ -140,7 +140,7 @@ export async function getReinvestV3Tx(
     token0FeeAmount,
     token1FeeAmount,
   });
-  const data = getAutomanV3ReinvestCalldata(
+  const data = getAutomanV4ReinvestCalldata(
     positionId,
     deadlineEpochSeconds,
     0n /*amount0Min*/, // Setting this to zero for tx simulation.
@@ -153,7 +153,7 @@ export async function getReinvestV3Tx(
     pool,
     tickLower,
     tickUpper,
-    apertureAutomanV3,
+    apertureAutomanV4,
     ownerAddress,
     'reinvest',
     data,
@@ -163,8 +163,8 @@ export async function getReinvestV3Tx(
   return {
     tx: {
       from: ownerAddress,
-      to: apertureAutomanV3,
-      data: getAutomanV3ReinvestCalldata(
+      to: apertureAutomanV4,
+      data: getAutomanV4ReinvestCalldata(
         positionId,
         deadlineEpochSeconds,
         BigInt(amounts.amount0Min),

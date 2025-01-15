@@ -5,7 +5,7 @@ import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
   DecreaseLiquidityParams,
-  getAutomanV3DecreaseLiquiditySingleCalldata,
+  getAutomanV4DecreaseLiquiditySingleCalldata,
 } from '../automan';
 import { PositionDetails } from '../position';
 
@@ -62,7 +62,7 @@ export async function getDecreaseLiquiditySingleV3Tx(
     amount1Min,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  const data = getAutomanV3DecreaseLiquiditySingleCalldata(
+  const data = getAutomanV4DecreaseLiquiditySingleCalldata(
     decreaseLiquidityParams,
     zeroForOne,
     token0FeeAmount,
@@ -70,7 +70,7 @@ export async function getDecreaseLiquiditySingleV3Tx(
     swapData,
   );
   return {
-    to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
+    to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
     data,
     from: recipient as Address,
   };

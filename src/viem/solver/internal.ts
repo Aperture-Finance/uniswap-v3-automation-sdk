@@ -1,5 +1,5 @@
 import {
-  AutomanV3__factory,
+  AutomanV4__factory,
   Automan__factory,
   fractionToBig,
   getLogger,
@@ -22,7 +22,7 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanContract,
-  getAutomanV3Contract,
+  getAutomanV4Contract,
 } from '../automan';
 import { SwapPath } from './types';
 import { SolverResult } from './types';
@@ -128,7 +128,7 @@ export const _getOptimalSwapAmount = async (
         PublicClient | WalletClient
       >
     | GetContractReturnType<
-        typeof AutomanV3__factory.abi,
+        typeof AutomanV4__factory.abi,
         PublicClient | WalletClient
       >,
   chainId: ApertureSupportedChainId,
@@ -255,7 +255,7 @@ export const getOptimalSwapAmountV3 = async (
   blockNumber?: bigint,
 ) => {
   return _getOptimalSwapAmount(
-    getAutomanV3Contract,
+    getAutomanV4Contract,
     chainId,
     amm,
     publicClient,
