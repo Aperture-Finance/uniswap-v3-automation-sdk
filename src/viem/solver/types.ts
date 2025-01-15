@@ -57,7 +57,7 @@ export type SwapPath = {
 };
 
 export type SolverResult = {
-  solver?: E_Solver; // TODO: make it required
+  solver: E_Solver;
   amount0: bigint;
   amount1: bigint;
   liquidity: bigint;

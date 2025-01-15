@@ -212,6 +212,7 @@ async function mintOptimalPool(
   }
 
   return {
+    solver: E_Solver.SamePool,
     amount0,
     amount1,
     liquidity,
@@ -228,7 +229,7 @@ async function mintOptimalRouter(
   mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
 ): Promise<SolverResult> {
-  const { swapData, swapRoute } = await getMintOptimalSwapData(
+  const { solver, swapData, swapRoute } = await getMintOptimalSwapData(
     chainId,
     amm,
     publicClient,
@@ -247,6 +248,7 @@ async function mintOptimalRouter(
     undefined,
   );
   return {
+    solver,
     amount0,
     amount1,
     liquidity,
@@ -264,6 +266,7 @@ async function getMintOptimalSwapData(
   blockNumber?: bigint,
   includeRoute?: boolean,
 ): Promise<{
+  solver: E_Solver;
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
@@ -314,6 +317,7 @@ async function getMintOptimalSwapData(
       : get1InchApproveTarget(chainId));
 
     return {
+      solver: isOkx ? E_Solver.OKX : E_Solver.OneInch,
       swapData: encodeOptimalSwapData(
         chainId,
         amm,
@@ -333,6 +337,7 @@ async function getMintOptimalSwapData(
     console.warn(`Failed to get swap data: ${e}`);
   }
   return {
+    solver: E_Solver.SamePool,
     swapData: '0x',
   };
 }

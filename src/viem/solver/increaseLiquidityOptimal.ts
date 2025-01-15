@@ -181,6 +181,7 @@ async function increaseLiquidityOptimalPool(
   }
 
   return {
+    solver: E_Solver.SamePool,
     amount0,
     amount1,
     liquidity,
@@ -199,15 +200,16 @@ async function increaseLiquidityOptimalRouter(
   slippage: number,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
-  const { swapData, swapRoute } = await getIncreaseLiquidityOptimalSwapData(
-    chainId,
-    amm,
-    publicClient,
-    position,
-    increaseParams,
-    slippage,
-    /* includeRoute= */ true,
-  );
+  const { solver, swapData, swapRoute } =
+    await getIncreaseLiquidityOptimalSwapData(
+      chainId,
+      amm,
+      publicClient,
+      position,
+      increaseParams,
+      slippage,
+      /* includeRoute= */ true,
+    );
   const [liquidity, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
     chainId,
     amm,
@@ -219,6 +221,7 @@ async function increaseLiquidityOptimalRouter(
     blockNumber,
   );
   return {
+    solver,
     amount0,
     amount1,
     liquidity,
@@ -236,6 +239,7 @@ async function getIncreaseLiquidityOptimalSwapData(
   slippage: number,
   includeRoute?: boolean,
 ): Promise<{
+  solver: E_Solver;
   swapData: Hex;
   swapRoute?: SwapRoute;
 }> {
@@ -296,6 +300,7 @@ async function getIncreaseLiquidityOptimalSwapData(
           includeRoute,
         ));
     return {
+      solver: isOkx ? E_Solver.OKX : E_Solver.OneInch,
       swapData: encodeOptimalSwapData(
         chainId,
         amm,
@@ -315,6 +320,7 @@ async function getIncreaseLiquidityOptimalSwapData(
     console.warn(`Failed to get swap data: ${e}`);
   }
   return {
+    solver: E_Solver.SamePool,
     swapData: '0x',
   };
 }
