@@ -35,16 +35,11 @@ async function main() {
   // token0 = weth = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
   // token1 = usdc = 0xaf88d065e77c8cc2239327c5edb3a432268e5831
   // tenderly revert due to not enough usdc from optSwapRouter to pool
-  const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+  const decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'> = {
     tokenId,
     liquidityPercentage: new Percent(10, 100), // position is $3.33 100%WETH. token0=weth, token1=usdc.. should take out $0.33 eth=.33/3116*1e18 token0amount = 1.06e14, $0.07 usdc
     slippageTolerance: new Percent(5, 1000),
     deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-    collectOptions: {
-      expectedCurrencyOwed0: positionDetails.tokensOwed0,
-      expectedCurrencyOwed1: positionDetails.tokensOwed1,
-      recipient: from,
-    },
   };
   const swapInfos = await getDecreaseLiquiditySingleSwapInfoV3(
     decreaseLiquidityOptions,

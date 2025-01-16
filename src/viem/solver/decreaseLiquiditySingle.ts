@@ -39,7 +39,7 @@ export async function decreaseLiquiditySingleV3(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   positionDetails: PositionDetails,
-  decreaseLiquidityOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
+  decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
   zeroForOne: boolean,
   from: Address,
   tokenPricesUsd: [string, string],

@@ -33,16 +33,11 @@ async function main() {
   );
   // token0 = airdrop = https://arbiscan.io/address/0xdc5F1BF636DcAdaE7e285A484Dc71A1F5adeE0A1
   // token1 = usdt = https://arbiscan.io/address/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9
-  const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+  const decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'> = {
     tokenId,
     liquidityPercentage: new Percent(100, 100), // position is $3.33 100%WETH. token0=weth, token1=usdc.. should take out $0.33 eth=.33/3116*1e18 token0amount = 1.06e14, $0.07 usdc
     slippageTolerance: new Percent(1000, 1000),
     deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-    collectOptions: {
-      expectedCurrencyOwed0: positionDetails.tokensOwed0,
-      expectedCurrencyOwed1: positionDetails.tokensOwed1,
-      recipient: from,
-    },
   };
   const swapInfos = await getDecreaseLiquiditySingleSwapInfoV3(
     decreaseLiquidityOptions,

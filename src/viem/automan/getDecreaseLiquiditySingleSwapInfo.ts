@@ -21,7 +21,7 @@ import { E_Solver } from '../solver';
  * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getDecreaseLiquiditySingleSwapInfoV3(
-  removeLiquidityOptions: RemoveLiquidityOptions,
+  removeLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   zeroForOne: boolean,
