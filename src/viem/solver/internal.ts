@@ -241,7 +241,7 @@ export const getOptimalSwapAmount = async (
   );
 };
 
-export const getOptimalSwapAmountV3 = async (
+export const getOptimalSwapAmountV4 = async (
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,

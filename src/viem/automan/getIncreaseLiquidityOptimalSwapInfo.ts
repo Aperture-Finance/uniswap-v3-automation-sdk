@@ -5,10 +5,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
-import {
-  increaseLiquidityOptimalV2,
-  increaseLiquidityOptimalV3,
-} from '../solver';
+import { increaseLiquidityOptimalV4 } from '../solver';
 import { E_Solver } from '../solver';
 
 /**
@@ -19,46 +16,12 @@ import { E_Solver } from '../solver';
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
  * @param recipient The recipient address.
+ * @param tokenPricesUsd The token prices in USD.
  * @param publicClient Viem public client.
  * @param position The current position to simulate the call from.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getIncreaseLiquidityOptimalSwapInfo(
-  increaseOptions: IncreaseOptions,
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  token0Amount: CurrencyAmount<Currency>,
-  token1Amount: CurrencyAmount<Currency>,
-  recipient: Address,
-  publicClient: PublicClient,
-  includeSolvers?: E_Solver[],
-  position?: Position,
-  blockNumber?: bigint,
-) {
-  if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      BigInt(increaseOptions.tokenId.toString()),
-      publicClient,
-    ));
-  }
-
-  return await increaseLiquidityOptimalV2(
-    chainId,
-    amm,
-    publicClient,
-    position,
-    increaseOptions,
-    token0Amount as CurrencyAmount<Token>,
-    token1Amount as CurrencyAmount<Token>,
-    recipient,
-    blockNumber,
-    includeSolvers,
-  );
-}
-
-export async function getIncreaseLiquidityOptimalSwapInfoV3(
+export async function getIncreaseLiquidityOptimalSwapInfoV4(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -80,7 +43,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV3(
     ));
   }
 
-  return await increaseLiquidityOptimalV3(
+  return await increaseLiquidityOptimalV4(
     chainId,
     amm,
     publicClient,

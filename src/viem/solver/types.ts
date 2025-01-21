@@ -28,6 +28,7 @@ export interface SolveMintOptimalProps {
   slippage: number; // 0.01 = 1%
   poolAmountIn: bigint;
   zeroForOne: boolean;
+  isUseOptimalSwapRouter?: boolean; // true by default as implemented in automanV1, but the optimalSwapRouter has been merged into automanV4.
 }
 
 export interface ISolver {

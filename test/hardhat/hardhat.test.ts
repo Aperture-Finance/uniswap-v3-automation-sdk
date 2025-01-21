@@ -77,7 +77,7 @@ import {
   estimateReinvestGas,
   generateAccessList,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfo,
+  getIncreaseLiquidityOptimalSwapInfoV4,
   getMintOptimalSwapInfo,
   getMintedPositionIdFromTxReceipt,
   getNPM,
@@ -1187,7 +1187,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapRoute } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: positionId,
           slippageTolerance: new Percent(5, 1000),

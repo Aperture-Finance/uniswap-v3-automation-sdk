@@ -90,47 +90,10 @@ export function getAutomanV4IncreaseLiquidityOptimalCallData(
 }
 
 export function getAutomanDecreaseLiquidityCalldata(
-  tokenId: bigint,
-  liquidity: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
-  feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
-): Hex {
-  const params: DecreaseLiquidityParams = {
-    tokenId,
-    liquidity,
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
-  if (permitInfo === undefined) {
-    return encodeFunctionData({
-      abi: Automan__factory.abi,
-      args: [params, feeBips] as const,
-      functionName: 'decreaseLiquidity',
-    });
-  }
-  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [
-      params,
-      feeBips,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
-    ] as const,
-    functionName: 'decreaseLiquidity',
-  });
-}
-
-export function getAutomanV4DecreaseLiquidityCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
+  isUnwrapNative = true,
   permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {
@@ -140,6 +103,7 @@ export function getAutomanV4DecreaseLiquidityCalldata(
         decreaseLiquidityParams,
         token0FeeAmount,
         token1FeeAmount,
+        isUnwrapNative,
       ] as const,
       functionName: 'decreaseLiquidity',
     });
@@ -151,6 +115,7 @@ export function getAutomanV4DecreaseLiquidityCalldata(
       decreaseLiquidityParams,
       token0FeeAmount,
       token1FeeAmount,
+      isUnwrapNative,
       BigInt(permitInfo.deadline),
       Number(v),
       r,
@@ -160,12 +125,13 @@ export function getAutomanV4DecreaseLiquidityCalldata(
   });
 }
 
-export function getAutomanV4DecreaseLiquiditySingleCalldata(
+export function getAutomanDecreaseLiquiditySingleCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   zeroForOne: boolean,
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData: Hex = '0x',
+  isUnwrapNative = true,
   permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {
@@ -177,6 +143,7 @@ export function getAutomanV4DecreaseLiquiditySingleCalldata(
         token0FeeAmount,
         token1FeeAmount,
         swapData,
+        isUnwrapNative,
       ] as const,
       functionName: 'decreaseLiquiditySingle',
     });
@@ -190,6 +157,7 @@ export function getAutomanV4DecreaseLiquiditySingleCalldata(
       token0FeeAmount,
       token1FeeAmount,
       swapData,
+      isUnwrapNative,
       BigInt(permitInfo.deadline),
       Number(v),
       r,
@@ -416,6 +384,7 @@ export function getAutomanV4ReinvestCalldata(
   });
 }
 
+// Uses AutomanV1 for backend.
 export function getAutomanRemoveLiquidityCalldata(
   tokenId: bigint,
   deadline: bigint,
@@ -444,45 +413,6 @@ export function getAutomanRemoveLiquidityCalldata(
     args: [
       params,
       feeBips,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
-    ] as const,
-    functionName: 'removeLiquidity',
-  });
-}
-
-export function getAutomanV4RemoveLiquidityCalldata(
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
-  permitInfo?: PermitInfo,
-): Hex {
-  const params: DecreaseLiquidityParams = {
-    tokenId,
-    liquidity: BigInt(0), // Param value ignored by Automan.
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
-  if (permitInfo === undefined) {
-    return encodeFunctionData({
-      abi: AutomanV4__factory.abi,
-      args: [params, token0FeeAmount, token1FeeAmount] as const,
-      functionName: 'removeLiquidity',
-    });
-  }
-  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
-  return encodeFunctionData({
-    abi: AutomanV4__factory.abi,
-    args: [
-      params,
-      token0FeeAmount,
-      token1FeeAmount,
       BigInt(permitInfo.deadline),
       Number(v),
       r,

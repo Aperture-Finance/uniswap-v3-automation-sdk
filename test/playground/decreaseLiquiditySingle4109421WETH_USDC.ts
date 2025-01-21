@@ -1,4 +1,4 @@
-// ts-node test/playground/decreaseLiquiditySingle4063431OneForZero.ts
+// ts-node test/playground/decreaseLiquiditySingle4109421WETH_USDC.ts
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -23,8 +23,8 @@ async function main() {
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const client = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
-  const tokenId = 4063431;
-  const zeroForOne = false;
+  const tokenId = 4109421;
+  const zeroForOne = true;
   const isUnwrapNative = true;
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
@@ -32,12 +32,12 @@ async function main() {
     BigInt(tokenId),
     client,
   );
-  // token0 = weth = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
+  // token0 = weth = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 = 100%
   // token1 = usdc = 0xaf88d065e77c8cc2239327c5edb3a432268e5831
   const decreaseLiquidityOptions: RemoveLiquidityOptions = {
     tokenId,
-    liquidityPercentage: new Percent(10, 100), // position is $3.33 100%WETH. token0=weth, token1=usdc.. should take out $0.33 eth=.33/3116*1e18 token0amount = 1.06e14, $0.07 usdc
-    slippageTolerance: new Percent(5, 1000),
+    liquidityPercentage: new Percent(100, 100), // position is $3.33 100%WETH. token0=weth, token1=usdc.. should take out $0.33 eth=.33/3116*1e18 token0amount = 1.06e14, $0.07 usdc
+    slippageTolerance: new Percent(1000, 1000),
     deadline: Math.floor(Date.now() / 1000 + 60 * 30),
     collectOptions: {
       expectedCurrencyOwed0: positionDetails.tokensOwed0,

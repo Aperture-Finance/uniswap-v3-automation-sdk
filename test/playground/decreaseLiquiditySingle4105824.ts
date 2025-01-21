@@ -1,4 +1,4 @@
-// ts-node test/playground/decreaseLiquiditySingle4063431OneForZero.ts
+// ts-node test/playground/decreaseLiquiditySingle4105824.ts
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -23,8 +23,8 @@ async function main() {
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const client = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
-  const tokenId = 4063431;
-  const zeroForOne = false;
+  const tokenId = 4105824;
+  const zeroForOne = true;
   const isUnwrapNative = true;
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
@@ -51,7 +51,7 @@ async function main() {
     amm,
     zeroForOne,
     from,
-    /* tokenPricesUsd= */ ['3225', '1'],
+    /* tokenPricesUsd= */ ['1', '1'],
     client,
     isUnwrapNative,
     DEFAULT_SOLVERS,

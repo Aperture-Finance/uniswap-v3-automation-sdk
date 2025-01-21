@@ -9,7 +9,7 @@ import {
   SlipStreamAutoman__factory as SlipStreamAutomanV4__factory,
   UniV3Automan as UniV3AutomanV4,
   UniV3Automan__factory as UniV3AutomanV4__factory,
-} from './typechain-typesV3';
+} from './typechain-typesV4';
 
 export * from './automan_client';
 export * from './constants';

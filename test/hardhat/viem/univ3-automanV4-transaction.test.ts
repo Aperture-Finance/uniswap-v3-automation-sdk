@@ -38,16 +38,16 @@ import {
   PositionDetails,
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
-  getDecreaseLiquiditySingleSwapInfoV3,
-  getDecreaseLiquiditySingleV3Tx,
+  getDecreaseLiquiditySingleSwapInfo,
+  getDecreaseLiquiditySingleTx,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfoV3,
-  getIncreaseLiquidityOptimalV3Tx,
-  getMintOptimalSwapInfoV3,
-  getMintOptimalV3Tx,
+  getIncreaseLiquidityOptimalSwapInfoV4,
+  getIncreaseLiquidityOptimalV4Tx,
+  getMintOptimalSwapInfoV4,
+  getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
-  getRebalanceSwapInfoV3,
+  getRebalanceSwapInfoV4,
   getRebalanceV3Tx,
   getReinvestV3Tx,
 } from '../../../src/viem';
@@ -224,7 +224,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfoV3(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
         eoa,
@@ -297,7 +297,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfoV3(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
         eoa,
@@ -394,7 +394,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getMintOptimalSwapInfoV3(
+      await getMintOptimalSwapInfoV4(
         chainId,
         amm,
         token0Amount,
@@ -409,7 +409,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         [E_Solver.OneInch],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalV3Tx(
+    const { tx: txRequest } = await getMintOptimalV4Tx(
       chainId,
       amm,
       token0Amount,
@@ -491,7 +491,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getMintOptimalSwapInfoV3(
+      await getMintOptimalSwapInfoV4(
         chainId,
         amm,
         token0Amount,
@@ -506,7 +506,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalV3Tx(
+    const { tx: txRequest } = await getMintOptimalV4Tx(
       chainId,
       amm,
       token0Amount,
@@ -580,7 +580,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfoV3(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -597,7 +597,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalV3Tx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV4Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
@@ -670,7 +670,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfoV3(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -687,7 +687,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalV3Tx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV4Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
@@ -732,6 +732,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
   it('Decrease Liquidity Single zeroForOne', async function () {
     const zeroForOne = true;
+    const isUnwrapNative = true;
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -763,7 +764,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       },
     };
     const { swapData, amount0, amount1, token0FeeAmount, token1FeeAmount } = (
-      await getDecreaseLiquiditySingleSwapInfoV3(
+      await getDecreaseLiquiditySingleSwapInfo(
         decreaseLiquidityOptions,
         chainId,
         amm,
@@ -771,11 +772,12 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         eoa,
         /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
+        isUnwrapNative,
         [E_Solver.SamePool],
         existingPosition,
       )
     )[0];
-    const txRequest = await getDecreaseLiquiditySingleV3Tx(
+    const txRequest = await getDecreaseLiquiditySingleTx(
       decreaseLiquidityOptions,
       zeroForOne,
       eoa,
@@ -878,6 +880,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
   it('Decrease Liquidity Single !zeroForOne', async function () {
     const zeroForOne = false;
+    const isUnwrapNative = true;
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -909,7 +912,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       },
     };
     const { swapData, amount0, amount1, token0FeeAmount, token1FeeAmount } = (
-      await getDecreaseLiquiditySingleSwapInfoV3(
+      await getDecreaseLiquiditySingleSwapInfo(
         decreaseLiquidityOptions,
         chainId,
         amm,
@@ -917,11 +920,12 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         eoa,
         /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
+        isUnwrapNative,
         [E_Solver.SamePool],
         existingPosition,
       )
     )[0];
-    const txRequest = await getDecreaseLiquiditySingleV3Tx(
+    const txRequest = await getDecreaseLiquiditySingleTx(
       decreaseLiquidityOptions,
       zeroForOne,
       eoa,

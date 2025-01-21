@@ -8,11 +8,11 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   estimateRebalanceGas,
-  estimateRebalanceV3Gas,
+  estimateRebalanceV4Gas,
+  simulateDecreaseLiquidity,
   simulateRebalance,
-  simulateRebalanceV3,
+  simulateRebalanceV4,
   simulateRemoveLiquidity,
-  simulateRemoveLiquidityV3,
 } from '../automan';
 import {
   FEE_REBALANCE_SWAP_RATIO,
@@ -26,7 +26,7 @@ import {
   buildOptimalSolutions,
   calcPriceImpact,
   getOptimalSwapAmount,
-  getOptimalSwapAmountV3,
+  getOptimalSwapAmountV4,
   getSwapPath,
   getSwapRoute,
 } from './internal';
@@ -34,6 +34,7 @@ import { SolverResult, SwapRoute } from './types';
 
 /**
  * Get the optimal amount of liquidity to rebalance for a given position.
+ * Used by both frontend and backend as of 2025 Jan.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
  * @param position Position details
@@ -338,6 +339,7 @@ export async function rebalanceOptimalV2(
           slippage,
           poolAmountIn,
           zeroForOne,
+          isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
         [, liquidity, amount0, amount1] = await simulateRebalance(
           chainId,
@@ -399,7 +401,7 @@ export async function rebalanceOptimalV2(
 
 // Same as rebalanceOptimalV2, but with feeAmounts instead of feeBips.
 // Do not use, but implemented to make it easier to migrate to future versions.
-export async function rebalanceOptimalV3(
+export async function rebalanceOptimalV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   position: PositionDetails,
@@ -435,21 +437,26 @@ export async function rebalanceOptimalV3(
     token0FeeAmount: bigint,
     token1FeeAmount: bigint,
   ) => {
-    const [receive0, receive1] = await simulateRemoveLiquidityV3(
-      chainId,
+    const [receive0, receive1] = await simulateDecreaseLiquidity(
       amm,
+      chainId,
       publicClient,
       fromAddress,
       position.owner,
-      BigInt(position.tokenId),
-      /*amount0Min =*/ undefined,
-      /*amount1Min =*/ undefined,
+      /* decreaseLiquidityParams= */ {
+        tokenId: BigInt(position.tokenId),
+        liquidity: BigInt(position.liquidity),
+        amount0Min: 0n,
+        amount1Min: 0n,
+        deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+      },
       token0FeeAmount,
       token1FeeAmount,
+      /* isUnwrapNative= */ true,
       blockNumber,
     );
 
-    const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
+    const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV4(
       chainId,
       amm,
       publicClient,
@@ -650,7 +657,7 @@ export async function rebalanceOptimalV3(
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateRebalanceV3Gas(
+        estimateRebalanceV4Gas(
           chainId,
           amm,
           publicClient,
@@ -666,7 +673,7 @@ export async function rebalanceOptimalV3(
       ]);
       return gasPrice * gasAmount;
     } catch (e) {
-      getLogger().error('SDK.rebalanceOptimalV3.EstimateGas.Error', {
+      getLogger().error('SDK.rebalanceOptimalV4.EstimateGas.Error', {
         error: JSON.stringify(e),
         swapData,
         mintParams,
@@ -701,8 +708,9 @@ export async function rebalanceOptimalV3(
           slippage,
           poolAmountIn,
           zeroForOne,
+          isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        [, liquidity, amount0, amount1] = await simulateRebalanceV3(
+        [, liquidity, amount0, amount1] = await simulateRebalanceV4(
           chainId,
           amm,
           publicClient,
@@ -753,12 +761,12 @@ export async function rebalanceOptimalV3(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.rebalanceOptimalV3.Error', {
+        getLogger().error('SDK.Solver.rebalanceOptimalV4.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.rebalanceOptimalV3.Warning', solver);
+        console.warn('SDK.Solver.rebalanceOptimalV4.Warning', solver);
       }
       return null;
     }

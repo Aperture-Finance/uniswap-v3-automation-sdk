@@ -12,7 +12,7 @@ import {
   PositionDetails,
   getPublicClient,
   getRebalanceSwapInfo,
-  getRebalanceSwapInfoV3,
+  getRebalanceSwapInfoV4,
 } from '../../src/viem';
 
 async function main() {
@@ -46,7 +46,7 @@ async function main() {
   console.log(swapInfos);
   console.log('done with rebalance v1 data');
 
-  const swapInfosV3 = await getRebalanceSwapInfoV3(
+  const swapInfosV3 = await getRebalanceSwapInfoV4(
     chainId,
     amm,
     from,

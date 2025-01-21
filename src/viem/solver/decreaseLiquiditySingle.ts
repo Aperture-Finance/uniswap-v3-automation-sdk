@@ -8,9 +8,9 @@ import { DEFAULT_SOLVERS, E_Solver, SwapRoute, getSolver } from '.';
 import {
   DecreaseLiquidityParams,
   FEE_ZAP_RATIO,
-  estimateDecreaseLiquiditySingleV3Gas,
+  estimateDecreaseLiquiditySingleGas,
   simulateDecreaseLiquidity,
-  simulateDecreaseLiquiditySingleV3,
+  simulateDecreaseLiquiditySingle,
 } from '../automan';
 import { PositionDetails } from '../position';
 import {
@@ -34,7 +34,7 @@ import { SolverResult } from './types';
  * @param blockNumber Optional. The block number to simulate the call from.
  * @param includeSolvers Optional. The solvers to include.
  */
-export async function decreaseLiquiditySingleV3(
+export async function decreaseLiquiditySingle(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -43,6 +43,7 @@ export async function decreaseLiquiditySingleV3(
   zeroForOne: boolean,
   from: Address,
   tokenPricesUsd: [string, string],
+  isUnwrapNative = true,
   blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ): Promise<SolverResult[]> {
@@ -64,12 +65,15 @@ export async function decreaseLiquiditySingleV3(
   const token1 = positionDetails.token1;
   const [positionInitialAmount0, positionInitialAmount1] =
     await simulateDecreaseLiquidity(
-      chainId,
       amm,
+      chainId,
       publicClient,
       from,
       positionDetails.owner,
       decreaseLiquidityParams,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
+      isUnwrapNative,
       blockNumber,
     );
   let swapAmountIn = zeroForOne
@@ -86,24 +90,24 @@ export async function decreaseLiquiditySingleV3(
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateDecreaseLiquiditySingleV3Gas(
+        estimateDecreaseLiquiditySingleGas(
           chainId,
           amm,
           publicClient,
           from,
           positionDetails.owner,
-          positionDetails.position,
           decreaseLiquidityParams,
           zeroForOne,
           token0FeeAmount,
           token1FeeAmount,
           swapData,
+          isUnwrapNative,
           blockNumber,
         ),
       ]);
       return gasPrice * gasAmount;
     } catch (e) {
-      getLogger().error('SDK.decreaseLiquiditySingleV3.EstimateGas.Error', {
+      getLogger().error('SDK.decreaseLiquiditySingleV4.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
         decreaseLiquidityParams,
@@ -139,19 +143,20 @@ export async function decreaseLiquiditySingleV3(
           slippage,
           poolAmountIn: swapAmountIn,
           zeroForOne,
+          isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        amountOut = await simulateDecreaseLiquiditySingleV3(
+        amountOut = await simulateDecreaseLiquiditySingle(
           chainId,
           amm,
           publicClient,
           from,
           positionDetails.owner,
-          positionDetails.position,
           decreaseLiquidityParams,
           zeroForOne,
           token0FeeAmount,
           token1FeeAmount,
           swapData,
+          isUnwrapNative,
           blockNumber,
         );
         gasFeeEstimation = await estimateGas(swapData);
@@ -180,7 +185,8 @@ export async function decreaseLiquiditySingleV3(
       const token1OutAfterSlippage = zeroForOne
         ? amountOut - tokenOutSlippage
         : 0n;
-      getLogger().info('SDK.decreaseLiquiditySingleV3.fees ', {
+      getLogger().info('SDK.decreaseLiquiditySingleV4.fees ', {
+        solver: solver,
         amm: amm,
         chainId: chainId,
         position: decreaseLiquidityOptions.tokenId,
@@ -232,12 +238,12 @@ export async function decreaseLiquiditySingleV3(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.decreaseLiquiditySingleV3.Error', {
+        getLogger().error('SDK.Solver.decreaseLiquiditySingle.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.decreaseLiquiditySingleV3.Warning', solver);
+        console.warn('SDK.Solver.decreaseLiquiditySingle.Warning', solver);
       }
       return null;
     }

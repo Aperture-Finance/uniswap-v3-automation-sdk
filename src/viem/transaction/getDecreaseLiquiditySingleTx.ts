@@ -5,7 +5,7 @@ import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
   DecreaseLiquidityParams,
-  getAutomanV4DecreaseLiquiditySingleCalldata,
+  getAutomanDecreaseLiquiditySingleCalldata,
 } from '../automan';
 import { PositionDetails } from '../position';
 
@@ -26,7 +26,7 @@ import { PositionDetails } from '../position';
  * @param blockNumber Optional. The block number to simulate the call from.
  * @returns The unsigned tx.
  */
-export async function getDecreaseLiquiditySingleV3Tx(
+export async function getDecreaseLiquiditySingleTx(
   decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   zeroForOne: boolean,
   recipient: string,
@@ -39,6 +39,7 @@ export async function getDecreaseLiquiditySingleV3Tx(
   amount1Min: bigint = 0n,
   token0FeeAmount: bigint = 0n,
   token1FeeAmount: bigint = 0n,
+  isUnwrapNative = true,
 ): Promise<TransactionRequest> {
   if (positionDetails === undefined) {
     positionDetails = await PositionDetails.fromPositionId(
@@ -62,12 +63,13 @@ export async function getDecreaseLiquiditySingleV3Tx(
     amount1Min,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-  const data = getAutomanV4DecreaseLiquiditySingleCalldata(
+  const data = getAutomanDecreaseLiquiditySingleCalldata(
     decreaseLiquidityParams,
     zeroForOne,
     token0FeeAmount,
     token1FeeAmount,
     swapData,
+    isUnwrapNative,
   );
   return {
     to: getAMMInfo(chainId, amm)!.apertureAutomanV4,

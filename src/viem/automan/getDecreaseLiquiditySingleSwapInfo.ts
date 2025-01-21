@@ -4,7 +4,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
-import { SolverResult, decreaseLiquiditySingleV3 } from '../solver';
+import { SolverResult, decreaseLiquiditySingle } from '../solver';
 import { E_Solver } from '../solver';
 
 /**
@@ -20,7 +20,7 @@ import { E_Solver } from '../solver';
  * @param positionDetails Uniswap SDK PositionDetails for the specified position (optional); if undefined, one will be created.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getDecreaseLiquiditySingleSwapInfoV3(
+export async function getDecreaseLiquiditySingleSwapInfo(
   removeLiquidityOptions: RemoveLiquidityOptions,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -28,6 +28,7 @@ export async function getDecreaseLiquiditySingleSwapInfoV3(
   recipient: Address,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
+  isUnwrapNative = true,
   includeSolvers?: E_Solver[],
   positionDetails?: PositionDetails,
   blockNumber?: bigint,
@@ -42,7 +43,7 @@ export async function getDecreaseLiquiditySingleSwapInfoV3(
     );
   }
 
-  return await decreaseLiquiditySingleV3(
+  return await decreaseLiquiditySingle(
     chainId,
     amm,
     publicClient,
@@ -51,6 +52,7 @@ export async function getDecreaseLiquiditySingleSwapInfoV3(
     zeroForOne,
     recipient,
     tokenPricesUsd,
+    isUnwrapNative,
     blockNumber,
     includeSolvers,
   );

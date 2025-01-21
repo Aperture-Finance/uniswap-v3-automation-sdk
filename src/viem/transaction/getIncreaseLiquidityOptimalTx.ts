@@ -103,7 +103,7 @@ export async function getIncreaseLiquidityOptimalTx(
 }
 
 // Same as getIncreaseLiquidityOptimalTx, but enables collecting feeAmount.
-export async function getIncreaseLiquidityOptimalV3Tx(
+export async function getIncreaseLiquidityOptimalV4Tx(
   increaseOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

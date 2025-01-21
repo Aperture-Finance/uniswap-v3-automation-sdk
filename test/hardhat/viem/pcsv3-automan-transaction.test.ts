@@ -36,7 +36,7 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfo,
+  getIncreaseLiquidityOptimalSwapInfoV4,
   getIncreaseLiquidityOptimalTx,
   getMintOptimalSwapInfo,
   getMintOptimalTx,
@@ -411,7 +411,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),

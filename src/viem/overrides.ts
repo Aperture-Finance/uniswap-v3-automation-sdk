@@ -90,8 +90,17 @@ export function getControllerOverrides(
   amm: AutomatedMarketMakerEnum,
   from: Address,
 ) {
+  const { apertureAutoman, apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
   return {
-    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
+    [apertureAutoman]: {
+      stateDiff: {
+        [computeIsControllerSlot(from)]: encodeAbiParameters(
+          parseAbiParameters('bool'),
+          [true],
+        ),
+      },
+    },
+    [apertureAutomanV4]: {
       stateDiff: {
         [computeIsControllerSlot(from)]: encodeAbiParameters(
           parseAbiParameters('bool'),
@@ -107,8 +116,19 @@ export function getAutomanWhitelistOverrides(
   amm: AutomatedMarketMakerEnum,
   routerToWhitelist: Address,
 ): StateOverrides {
+  const { apertureAutoman, apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
   return {
-    [getAMMInfo(chainId, amm)!.apertureAutoman]: {
+    [apertureAutoman]: {
+      stateDiff: {
+        [keccak256(
+          encodeAbiParameters(parseAbiParameters('address, bytes32'), [
+            routerToWhitelist,
+            encodeAbiParameters(parseAbiParameters('uint256'), [3n]),
+          ]),
+        )]: encodeAbiParameters(parseAbiParameters('bool'), [true]),
+      },
+    },
+    [apertureAutomanV4]: {
       stateDiff: {
         [keccak256(
           encodeAbiParameters(parseAbiParameters('address, bytes32'), [
