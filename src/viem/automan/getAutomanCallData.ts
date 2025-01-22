@@ -89,7 +89,38 @@ export function getAutomanV4IncreaseLiquidityOptimalCallData(
   });
 }
 
+// Still used by backend for Prescheduled Position Close
 export function getAutomanDecreaseLiquidityCalldata(
+  decreaseLiquidityParams: DecreaseLiquidityParams,
+  feeBips = BigInt(0),
+  permitInfo?: PermitInfo,
+): Hex {
+  if (permitInfo === undefined) {
+    return encodeFunctionData({
+      abi: Automan__factory.abi,
+      args: [
+        decreaseLiquidityParams,
+        feeBips,
+      ] as const,
+      functionName: 'decreaseLiquidity',
+    });
+  }
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
+  return encodeFunctionData({
+    abi: Automan__factory.abi,
+    args: [
+      decreaseLiquidityParams,
+      feeBips,
+      BigInt(permitInfo.deadline),
+      Number(v),
+      r,
+      s,
+    ] as const,
+    functionName: 'decreaseLiquidity',
+  });
+}
+
+export function getAutomanV4DecreaseLiquidityCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),

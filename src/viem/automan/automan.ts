@@ -31,7 +31,7 @@ import {
   tryRequestWithOverrides,
 } from '../overrides';
 import {
-  getAutomanDecreaseLiquidityCalldata,
+  getAutomanV4DecreaseLiquidityCalldata,
   getAutomanDecreaseLiquiditySingleCalldata,
   getAutomanIncreaseLiquidityOptimalCallData,
   getAutomanMintOptimalCalldata,
@@ -581,7 +581,7 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   from = getFromAddress(from);
-  const data = getAutomanDecreaseLiquidityCalldata(decreaseLiquidityParams);
+  const data = getAutomanV4DecreaseLiquidityCalldata(decreaseLiquidityParams);
   const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
 
   return tryRequestWithOverrides(
@@ -791,7 +791,7 @@ export async function simulateDecreaseLiquidity(
   blockNumber?: bigint,
   customDestContract?: Address,
 ): Promise<RemoveLiquidityReturnType> {
-  const data = getAutomanDecreaseLiquidityCalldata(
+  const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     token0FeeAmount,
     token1FeeAmount,
