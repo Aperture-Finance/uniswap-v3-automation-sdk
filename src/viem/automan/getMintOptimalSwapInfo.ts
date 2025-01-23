@@ -1,8 +1,11 @@
 import { ApertureSupportedChainId } from '@/index';
 import { E_Solver, mintOptimalV2, mintOptimalV3 } from '@/viem';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, PublicClient } from 'viem';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange

@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
@@ -13,6 +13,9 @@ import {
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
 import { SimulatedAmounts } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 // TODO: add unit test
 /**

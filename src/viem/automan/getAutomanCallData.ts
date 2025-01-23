@@ -5,7 +5,7 @@ import {
   ISlipStreamAutoman__factory,
   PermitInfo,
 } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Hex, encodeFunctionData, hexToSignature } from 'viem';
 
 import {
@@ -14,6 +14,9 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
 } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export function getAutomanMintOptimalCalldata(
   amm: AutomatedMarketMakerEnum,

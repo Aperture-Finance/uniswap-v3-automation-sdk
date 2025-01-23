@@ -1,12 +1,14 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { viem } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { getPublicClient } from '../public_client';
 import { PositionStateArray, getPositionsState } from './getPositionState';
 import { getTokenIds } from './getTokenIds';
 import { PositionDetails, getNPM } from './position';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Get the state and pool for all positions of the specified owner by deploying an ephemeral contract via `eth_call`.

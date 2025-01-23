@@ -26,3 +26,5 @@ coverage/
 dist
 test/artifacts.d.ts
 rsync.sh
+
+stats.html

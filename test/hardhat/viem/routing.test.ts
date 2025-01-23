@@ -2,7 +2,7 @@ import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { parseEther } from 'viem';
 
 import {
@@ -35,6 +35,9 @@ import {
   expect,
   getInfuraClient,
 } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 describe('Viem - Routing tests', function () {
   // rebalanceOptimal is deprecated now, use rebalanceOptimalV2 instead

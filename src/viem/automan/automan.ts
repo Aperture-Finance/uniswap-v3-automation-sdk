@@ -10,7 +10,7 @@ import {
   TICK_SPACINGS,
   nearestUsableTick,
 } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import {
   Address,
   GetContractReturnType,
@@ -52,6 +52,9 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
 } from './types';
+
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
+const { AutomatedMarketMakerEnum } = viem;
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,

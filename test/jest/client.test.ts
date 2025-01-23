@@ -1,4 +1,4 @@
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -13,6 +13,9 @@ import {
   GetStrategyDetailResponse,
   UpdatePositionPermitRequest,
 } from '../../src';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 describe('Automan client test', () => {
   const mock = new MockAdapter(axios);
