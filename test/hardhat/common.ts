@@ -1,5 +1,5 @@
 import '@nomicfoundation/hardhat-viem';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
@@ -8,6 +8,9 @@ import { TestClient, createPublicClient, http } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
 import { ApertureSupportedChainId } from '../../src';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 dotenvConfig();
 

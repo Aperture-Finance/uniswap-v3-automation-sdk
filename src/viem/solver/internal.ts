@@ -7,7 +7,7 @@ import {
 import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big from 'big.js';
 import {
   Address,
@@ -26,6 +26,9 @@ import {
 } from '../automan';
 import { SwapPath } from './types';
 import { SolverResult } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export const calcPriceImpact = (
   pool: Pool,

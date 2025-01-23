@@ -9,7 +9,7 @@ import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { Percent } from '@uniswap/sdk-core';
 import { AbiEvent } from 'abitype';
 import { ICommonNonfungiblePositionManager__factory } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import {
   Address,
   Hex,
@@ -29,6 +29,8 @@ import { RebalanceReturnType, ReinvestReturnType } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { CollectableTokenAmounts } from '../position';
 import { SimulatedAmounts } from './types';
+
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Filter logs by event name.

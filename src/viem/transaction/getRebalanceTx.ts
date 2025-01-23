@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { ADDRESS_ZERO, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
@@ -12,6 +12,9 @@ import {
 } from '../automan';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Generates an unsigned transaction that rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.

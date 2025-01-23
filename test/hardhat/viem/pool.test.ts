@@ -1,4 +1,4 @@
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import hre from 'hardhat';
 import { PublicClient, TestClient } from 'viem';
 
@@ -11,6 +11,9 @@ import {
   expect,
   resetFork,
 } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 describe('Viem - Pool tests', function () {
   let publicClient: PublicClient;

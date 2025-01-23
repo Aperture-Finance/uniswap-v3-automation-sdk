@@ -4,7 +4,7 @@
 import { FeeAmount, Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { config as dotenvConfig } from 'dotenv';
 import JSBI from 'jsbi';
 
@@ -16,6 +16,9 @@ import {
   getFeeReinvestRatio,
 } from '../../src/viem/automan/getFees';
 import { CollectableTokenAmounts } from '../../src/viem/position';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 dotenvConfig();
 

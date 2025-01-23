@@ -1,6 +1,6 @@
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import hre, { ethers } from 'hardhat';
 import {
   Address,
@@ -47,6 +47,9 @@ import {
   getReinvestTx,
 } from '../../../src/viem';
 import { expect, hardhatForkProvider, resetFork } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 // Tests for PCSV3Automan transactions on a forked BNB mainnet.
 describe('Viem - PCSV3Automan transaction tests', function () {

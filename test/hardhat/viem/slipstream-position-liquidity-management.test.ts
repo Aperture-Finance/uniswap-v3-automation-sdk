@@ -1,6 +1,6 @@
 import { Position, priceToClosestTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import hre, { ethers } from 'hardhat';
 import {
   GetContractReturnType,
@@ -36,6 +36,9 @@ import {
   viewCollectableTokenAmounts,
 } from '../../../src/viem';
 import { expect, resetFork } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 describe('SlipStream non-Automan liquidity management tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;

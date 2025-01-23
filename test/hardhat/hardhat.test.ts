@@ -10,7 +10,7 @@ import {
 import '@nomicfoundation/hardhat-viem';
 import { Fraction, Percent, Price, Token } from '@uniswap/sdk-core';
 import { CurrencyAmount } from '@uniswap/smart-order-router';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big from 'big.js';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -94,6 +94,9 @@ import {
   simulateRemoveLiquidity,
 } from '../../src/viem';
 import { UNIV3_AMM as amm, hardhatForkProvider } from './common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 dotenvConfig();
 

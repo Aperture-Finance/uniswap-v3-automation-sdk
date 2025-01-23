@@ -1,5 +1,5 @@
 import { Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { getEip1167Create2Address } from 'eip1167';
 import {
   Address,
@@ -18,6 +18,9 @@ const PCS_V3_POOL_INIT_CODE_HASH: Hex =
   '0x6ce8eb472fa82df5469c6ab6d485f17c3ad13c8cd7af59b3d4a8026c5ce0f7e2';
 const UNISWAP_V3_POOL_INIT_CODE_HASH: Hex =
   '0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Computes a pool address.

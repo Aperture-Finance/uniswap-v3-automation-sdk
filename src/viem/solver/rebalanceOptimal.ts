@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId, getLogger } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -31,6 +31,9 @@ import {
   getSwapRoute,
 } from './internal';
 import { SolverResult, SwapRoute } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Get the optimal amount of liquidity to rebalance for a given position.

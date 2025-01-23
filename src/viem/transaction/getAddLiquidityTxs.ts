@@ -18,7 +18,7 @@ import {
   Price,
   Token,
 } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import JSBI from 'jsbi';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
@@ -26,6 +26,9 @@ import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
 import { PositionDetails } from '../position';
 import { getTxToNonfungiblePositionManager } from './transaction';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Generates an unsigned transaction that creates a position for the specified limit order.
