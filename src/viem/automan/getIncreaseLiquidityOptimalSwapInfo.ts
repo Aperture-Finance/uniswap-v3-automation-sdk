@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
@@ -10,6 +10,9 @@ import {
   increaseLiquidityOptimalV3,
 } from '../solver';
 import { E_Solver } from '../solver';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange

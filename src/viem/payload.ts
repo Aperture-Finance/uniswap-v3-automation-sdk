@@ -7,8 +7,11 @@ import {
   getRawRelativePriceFromTokenValueProportion,
 } from '@/index';
 import { Price, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big, { BigSource } from 'big.js';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export function generateLimitOrderCloseRequestPayload(
   ownerAddr: string,

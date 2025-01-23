@@ -1,12 +1,15 @@
 // yarn test:jest test/jest/rebalance.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big from 'big.js';
 
 import { ActionTypeEnum, ApertureSupportedChainId } from '../../src/interfaces';
 import { normalizeTicks } from '../../src/rebalance';
 import { rangeWidthRatioToTicks } from '../../src/tick';
 import { getPool, getToken } from '../../src/viem';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 const ETHEREUM_MAINNET_ETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 const ETHEREUM_MAINNET_USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';

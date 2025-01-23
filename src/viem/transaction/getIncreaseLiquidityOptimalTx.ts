@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
@@ -11,6 +11,9 @@ import {
 import { getNativeCurrency } from '../currency';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Generates an unsigned transaction that increase the optimal amount of liquidity for the specified token amounts and position.

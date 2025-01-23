@@ -20,7 +20,7 @@ export * from './rebalance';
 export * from './tick';
 export * from './typechain-types';
 export * from './utils';
-export * as viem from './viem';
+export * as viem from './viem'; // Legacy export for backward compatibility
 export * as helper from './helper';
 export * from './uniswap-constants';
 export * from './ioc';
