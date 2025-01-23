@@ -9,10 +9,9 @@
   },
   "homepage": "https://aperture.finance/",
   "scripts": {
-    "build": "yarn clean && yarn build:types && yarn build:prod",
-    "build:prod": "webpack --config webpack.config.js",
-    "build:types": "tsc --emitDeclarationOnly && tsc-alias",
-    "build:dev": "webpack --config webpack.config.js --mode development",
+    "build": "yarn clean && tsup",
+    "build:watch": "tsup --watch",
+    "build:dev": "tsup --sourcemap",
     "clean": "rimraf dist",
     "test": "yarn test:jest && yarn test:hardhat",
     "test:jest": "jest",
@@ -22,7 +21,7 @@
     "prettier": "prettier -c ./",
     "graphql:generate:data": "graphql-codegen --config src/graphql.data.codegen.config.ts",
     "graphql:generate:thegraph": "graphql-codegen --config src/graphql.thegraph.codegen.config.ts",
-    "analyze": "webpack --config webpack.analyze.config.js"
+    "analyze": "tsup --metafile && esbuild-visualizer --metadata ./dist/metafile-*.json --open"
   },
   "repository": {
     "type": "git",
@@ -34,7 +33,17 @@
     "aperture"
   ],
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
   "files": [
     "dist",
     "LICENSE",
@@ -84,6 +93,7 @@
     "axios-mock-adapter": "^1.22.0",
     "chai": "^4.4.1",
     "chai-as-promised": "^7.1.1",
+    "esbuild-visualizer": "^0.7.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -96,6 +106,7 @@
     "ts-node": "10.9.2",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.3.5",
     "typescript": "5.7.2",
     "webpack": "^5.90.0",
     "webpack-bundle-analyzer": "^4.10.1",
