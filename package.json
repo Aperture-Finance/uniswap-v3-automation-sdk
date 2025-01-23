@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.15.0-bundle.0",
+  "version": "3.15.0-bundle.1",
   "description": "SDK for Aperture's CLMM automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
@@ -9,7 +9,7 @@
   },
   "homepage": "https://aperture.finance/",
   "scripts": {
-    "build": "yarn clean && tsup",
+    "build": "yarn clean && NODE_OPTIONS='--max-old-space-size=8192' tsup",
     "build:watch": "tsup --watch",
     "build:dev": "tsup --sourcemap",
     "clean": "rimraf dist",
@@ -41,6 +41,12 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./viem": {
+      "types": "./dist/viem.d.ts",
+      "import": "./dist/viem.mjs",
+      "require": "./dist/viem.js",
+      "default": "./dist/viem.js"
     }
   },
   "sideEffects": false,

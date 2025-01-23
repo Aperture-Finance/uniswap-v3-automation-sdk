@@ -1,7 +1,10 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    'index': 'src/index.ts',
+    'viem': 'src/viem/index.ts'
+  },
   format: ['cjs', 'esm'],
   dts: true,
   splitting: true,
@@ -22,7 +25,8 @@ export default defineConfig({
     'big.js',
     'bottleneck',
     'jsbi',
-    'lodash'
+    'lodash',
+    'viem'
   ],
   outDir: 'dist',
   target: 'node18',
@@ -31,5 +35,6 @@ export default defineConfig({
     options.pure = ['console.log', 'console.debug', 'console.info'];
     options.treeShaking = true;
     options.ignoreAnnotations = false;
+    options.chunkNames = 'chunks/[name]-[hash]';
   }
 });
