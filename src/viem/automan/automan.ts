@@ -54,6 +54,7 @@ import {
 } from './types';
 
 type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
+const { AutomatedMarketMakerEnum } = viem;
 
 export function getAutomanContract(
   chainId: ApertureSupportedChainId,
