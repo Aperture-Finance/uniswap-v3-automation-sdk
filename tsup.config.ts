@@ -7,11 +7,29 @@ export default defineConfig({
   splitting: true,
   clean: true,
   sourcemap: true,
-  treeshake: true,
-  minify: true,
+  treeshake: {
+    preset: 'recommended'
+  },
+  minify: 'terser',
+  minifyIdentifiers: true,
+  minifySyntax: true,
+  minifyWhitespace: true,
   keepNames: true,
-  external: ['ethers'],
+  external: [
+    'ethers',
+    '@0xsequence/multicall',
+    'axios',
+    'big.js',
+    'bottleneck',
+    'jsbi',
+    'lodash'
+  ],
   outDir: 'dist',
   target: 'node18',
   onSuccess: 'tsc --emitDeclarationOnly && tsc-alias',
+  esbuildOptions: (options) => {
+    options.pure = ['console.log', 'console.debug', 'console.info'];
+    options.treeShaking = true;
+    options.ignoreAnnotations = false;
+  }
 });
