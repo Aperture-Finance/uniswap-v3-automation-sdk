@@ -2,8 +2,8 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: {
-    'index': 'src/index.ts',
-    'viem': 'src/viem/index.ts'
+    index: 'src/index.ts',
+    viem: 'src/viem/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,
@@ -11,7 +11,7 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   treeshake: {
-    preset: 'recommended'
+    preset: 'recommended',
   },
   minify: 'terser',
   minifyIdentifiers: true,
@@ -26,7 +26,8 @@ export default defineConfig({
     'bottleneck',
     'jsbi',
     'lodash',
-    'viem'
+    'viem',
+    'aperture-lens',
   ],
   outDir: 'dist',
   target: 'node18',
@@ -36,5 +37,5 @@ export default defineConfig({
     options.treeShaking = true;
     options.ignoreAnnotations = false;
     options.chunkNames = 'chunks/[name]-[hash]';
-  }
+  },
 });
