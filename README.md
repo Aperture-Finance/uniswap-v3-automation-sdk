@@ -43,6 +43,29 @@ yarn
 
 3. Explore the examples and code samples provided in the repository to understand the SDK's functionalities and usage patterns.
 
+## Import Options
+
+The SDK supports multiple import methods for optimal bundle size:
+
+### Standard Import
+For using the complete SDK:
+```typescript
+import { ... } from '@aperture_finance/uniswap-v3-automation-sdk';
+```
+
+### Optimized Imports
+For better tree-shaking and smaller bundle size, you can import specific modules directly:
+
+```typescript
+// Import viem module directly (recommended for smaller bundles)
+import * as viem from '@aperture_finance/uniswap-v3-automation-sdk/viem';
+
+// Legacy import (includes in main bundle)
+import { viem } from '@aperture_finance/uniswap-v3-automation-sdk';
+```
+
+The direct import method is recommended for optimal bundle size as it allows better tree-shaking and code splitting.
+
 ## Build Process
 
 The SDK uses webpack for optimized builds with code splitting and TypeScript for type definitions.
