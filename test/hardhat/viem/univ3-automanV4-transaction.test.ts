@@ -106,7 +106,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();
-    await AutomanV4Contract.setSwapRouters([router.address], [true]);
+    await AutomanV4Contract.setAllowlistedRouters([router.address], [true]);
 
     // Set Automan address in CHAIN_ID_TO_INFO.
     getAMMInfo(chainId, amm)!.apertureAutomanV4 =
@@ -841,7 +841,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
     // Test balance of EOA.
     expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
-      4235245730634980085n,
+      4235189752462508733n,
     );
     expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(0n);
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
@@ -989,7 +989,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
     // Test balance of EOA.
     expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
-      -18450888815487240n,
+      -18493432237568736n,
     );
     expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(27827285n);
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
