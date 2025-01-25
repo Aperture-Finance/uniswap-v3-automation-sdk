@@ -1,7 +1,6 @@
 import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
-  Address,
   CallExecutionError,
   Hex,
   PublicClient,
@@ -180,10 +179,8 @@ export async function generateTypedDataForPermit(
   publicClient?: PublicClient,
   isLatestAutoman = false,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
-  const { apertureAutoman, apertureAutomanV4, nonfungiblePositionManager } = getAMMInfo(
-    chainId,
-    amm,
-  )!;
+  const { apertureAutoman, apertureAutomanV4, nonfungiblePositionManager } =
+    getAMMInfo(chainId, amm)!;
   const nonce = (
     await getNPM(chainId, amm, publicClient).read.positions([positionId])
   )[0];

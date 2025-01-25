@@ -12,13 +12,83 @@ import type {
 const _abi = [
   {
     inputs: [],
+    name: "InvalidRouter",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "MismatchETH",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotAllowlistedRouter",
     type: "error",
   },
   {
     inputs: [],
     name: "NotWETH9",
     type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "OwnableInvalidOwner",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "OwnableUnauthorizedAccount",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address[]",
+        name: "routers",
+        type: "address[]",
+      },
+      {
+        indexed: false,
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "SetAllowlistedRouters",
+    type: "event",
   },
   {
     inputs: [],
@@ -47,6 +117,25 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "isAllowListedRouter",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "npm",
     outputs: [
@@ -57,6 +146,57 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "routers",
+        type: "address[]",
+      },
+      {
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "setAllowlistedRouters",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

@@ -5,3 +5,5 @@ import type * as iAutomanSol from "./IAutoman.sol";
 export type { iAutomanSol };
 import type * as iImmutablesSol from "./IImmutables.sol";
 export type { iImmutablesSol };
+import type * as iSwapRouterSol from "./ISwapRouter.sol";
+export type { iSwapRouterSol };

@@ -46,7 +46,7 @@ async function main() {
   console.log(swapInfos);
   console.log('done with rebalance v1 data');
 
-  const swapInfosV3 = await getRebalanceSwapInfoV4(
+  const swapInfosV4 = await getRebalanceSwapInfoV4(
     chainId,
     amm,
     from,
@@ -59,8 +59,8 @@ async function main() {
     DEFAULT_SOLVERS,
     positionDetails,
   );
-  console.log(swapInfosV3);
-  console.log('done with rebalance v3 data');
+  console.log(swapInfosV4);
+  console.log('done with rebalanceV4 data');
 }
 
 main();

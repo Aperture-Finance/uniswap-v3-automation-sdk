@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getAMMInfo, PermitInfo } from '@/index';
+import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
@@ -71,7 +71,7 @@ export async function getDecreaseLiquiditySingleTx(
     token1FeeAmount,
     swapData,
     isUnwrapNative,
-    permitInfo
+    permitInfo,
   );
   return {
     to: getAMMInfo(chainId, amm)!.apertureAutomanV4,

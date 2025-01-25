@@ -31,13 +31,13 @@ import {
   tryRequestWithOverrides,
 } from '../overrides';
 import {
-  getAutomanV4DecreaseLiquidityCalldata,
   getAutomanDecreaseLiquiditySingleCalldata,
   getAutomanIncreaseLiquidityOptimalCallData,
   getAutomanMintOptimalCalldata,
   getAutomanRebalanceCalldata,
   getAutomanReinvestCalldata,
   getAutomanRemoveLiquidityCalldata,
+  getAutomanV4DecreaseLiquidityCalldata,
   getAutomanV4IncreaseLiquidityOptimalCallData,
   getAutomanV4MintOptimalCalldata,
   getAutomanV4RebalanceCalldata,
@@ -169,7 +169,7 @@ export async function simulateMintOptimal(
   });
 }
 
-export async function simulateMintOptimalV3(
+export async function simulateMintOptimalV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -181,7 +181,7 @@ export async function simulateMintOptimalV3(
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
   checkTicks(amm, mintParams);
-  const returnData = await requestMintOptimalV3(
+  const returnData = await requestMintOptimalV4(
     'eth_call',
     chainId,
     amm,
@@ -223,7 +223,7 @@ export async function estimateMintOptimalGas(
   );
 }
 
-export async function estimateMintOptimalV3Gas(
+export async function estimateMintOptimalV4Gas(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -235,7 +235,7 @@ export async function estimateMintOptimalV3Gas(
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
-    await requestMintOptimalV3(
+    await requestMintOptimalV4(
       'eth_estimateGas',
       chainId,
       amm,
@@ -295,7 +295,7 @@ export async function requestMintOptimal<M extends keyof RpcReturnType>(
   );
 }
 
-export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
+export async function requestMintOptimalV4<M extends keyof RpcReturnType>(
   method: M,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -388,7 +388,7 @@ export async function simulateIncreaseLiquidityOptimal(
   });
 }
 
-export async function simulateIncreaseLiquidityOptimalV3(
+export async function simulateIncreaseLiquidityOptimalV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -398,7 +398,7 @@ export async function simulateIncreaseLiquidityOptimalV3(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<IncreaseLiquidityReturnType> {
-  const returnData = await requestIncreaseLiquidityOptimalV3(
+  const returnData = await requestIncreaseLiquidityOptimalV4(
     'eth_call',
     chainId,
     amm,
@@ -441,7 +441,7 @@ export async function estimateIncreaseLiquidityOptimalGas(
   );
 }
 
-export async function estimateIncreaseLiquidityOptimalV3Gas(
+export async function estimateIncreaseLiquidityOptimalV4Gas(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -452,7 +452,7 @@ export async function estimateIncreaseLiquidityOptimalV3Gas(
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
-    await requestIncreaseLiquidityOptimalV3(
+    await requestIncreaseLiquidityOptimalV4(
       'eth_estimateGas',
       chainId,
       amm,
@@ -518,7 +518,7 @@ export async function requestIncreaseLiquidityOptimal<
   );
 }
 
-export async function requestIncreaseLiquidityOptimalV3<
+export async function requestIncreaseLiquidityOptimalV4<
   M extends keyof RpcReturnType,
 >(
   method: M,

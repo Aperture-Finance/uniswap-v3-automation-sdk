@@ -22,17 +22,17 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "InvalidSwapRouter",
+    name: "InvalidRouter",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotAllowlistedRouter",
     type: "error",
   },
   {
     inputs: [],
     name: "NotApproved",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NotWhitelistedRouter",
     type: "error",
   },
   {
@@ -167,7 +167,7 @@ const _abi = [
         type: "bool[]",
       },
     ],
-    name: "SwapRoutersSet",
+    name: "SetAllowlistedRouters",
     type: "event",
   },
   {
@@ -1379,6 +1379,24 @@ const _abi = [
     inputs: [
       {
         internalType: "address[]",
+        name: "routers",
+        type: "address[]",
+      },
+      {
+        internalType: "bool[]",
+        name: "statuses",
+        type: "bool[]",
+      },
+    ],
+    name: "setAllowlistedRouters",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
         name: "controllers",
         type: "address[]",
       },
@@ -1414,24 +1432,6 @@ const _abi = [
       },
     ],
     name: "setFeeConfig",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address[]",
-        name: "routers",
-        type: "address[]",
-      },
-      {
-        internalType: "bool[]",
-        name: "statuses",
-        type: "bool[]",
-      },
-    ],
-    name: "setSwapRouters",
     outputs: [],
     stateMutability: "payable",
     type: "function",

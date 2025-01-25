@@ -245,6 +245,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniV3Immutables__factory>;
     getContractFactory(
+      name: "ISwapRouterCommon",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISwapRouterCommon__factory>;
+    getContractFactory(
       name: "OptimalSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OptimalSwap__factory>;
@@ -567,6 +571,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniV3Immutables>;
+    getContractAt(
+      name: "ISwapRouterCommon",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ISwapRouterCommon>;
     getContractAt(
       name: "OptimalSwap",
       address: string,

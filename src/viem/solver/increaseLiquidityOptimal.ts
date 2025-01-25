@@ -9,8 +9,8 @@ import { DEFAULT_SOLVERS, E_Solver, SwapRoute, getSolver } from '.';
 import {
   FEE_ZAP_RATIO,
   IncreaseLiquidityParams,
-  estimateIncreaseLiquidityOptimalV3Gas,
-  simulateIncreaseLiquidityOptimalV3,
+  estimateIncreaseLiquidityOptimalV4Gas,
+  simulateIncreaseLiquidityOptimalV4,
 } from '../automan';
 import {
   buildOptimalSolutions,
@@ -87,7 +87,7 @@ export async function increaseLiquidityOptimalV4(
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateIncreaseLiquidityOptimalV3Gas(
+        estimateIncreaseLiquidityOptimalV4Gas(
           chainId,
           amm,
           publicClient,
@@ -136,7 +136,7 @@ export async function increaseLiquidityOptimalV4(
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
         [liquidity, amount0, amount1] =
-          await simulateIncreaseLiquidityOptimalV3(
+          await simulateIncreaseLiquidityOptimalV4(
             chainId,
             amm,
             publicClient,
@@ -167,6 +167,7 @@ export async function increaseLiquidityOptimalV4(
         .mul(FEE_ZAP_RATIO);
 
       getLogger().info('SDK.increaseLiquidityOptimalV4.fees ', {
+        solver,
         amm: amm,
         chainId: chainId,
         position: increaseOptions.tokenId,

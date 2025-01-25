@@ -98,10 +98,7 @@ export function getAutomanDecreaseLiquidityCalldata(
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: Automan__factory.abi,
-      args: [
-        decreaseLiquidityParams,
-        feeBips,
-      ] as const,
+      args: [decreaseLiquidityParams, feeBips] as const,
       functionName: 'decreaseLiquidity',
     });
   }

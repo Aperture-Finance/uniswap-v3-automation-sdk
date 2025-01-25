@@ -130,6 +130,8 @@ export type { IPCSV3Immutables } from "./src/interfaces/IImmutables.sol/IPCSV3Im
 export { IPCSV3Immutables__factory } from "./factories/src/interfaces/IImmutables.sol/IPCSV3Immutables__factory";
 export type { IUniV3Immutables } from "./src/interfaces/IImmutables.sol/IUniV3Immutables";
 export { IUniV3Immutables__factory } from "./factories/src/interfaces/IImmutables.sol/IUniV3Immutables__factory";
+export type { ISwapRouterCommon } from "./src/interfaces/ISwapRouter.sol/ISwapRouterCommon";
+export { ISwapRouterCommon__factory } from "./factories/src/interfaces/ISwapRouter.sol/ISwapRouterCommon__factory";
 export type { OptimalSwap } from "./src/libraries/OptimalSwap";
 export { OptimalSwap__factory } from "./factories/src/libraries/OptimalSwap__factory";
 export type { ISlipStreamCLFactory } from "./src/libraries/SlipStreamPoolAddress.sol/ISlipStreamCLFactory";

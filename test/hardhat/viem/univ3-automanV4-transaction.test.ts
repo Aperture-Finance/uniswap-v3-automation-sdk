@@ -48,7 +48,7 @@ import {
   getMintedPositionIdFromTxReceipt,
   getPool,
   getRebalanceSwapInfoV4,
-  getRebalanceV3Tx,
+  getRebalanceV4Tx,
   getReinvestV3Tx,
 } from '../../../src/viem';
 import {
@@ -240,7 +240,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceV3Tx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,
@@ -313,7 +313,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceV3Tx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,

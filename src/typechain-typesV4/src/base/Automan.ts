@@ -141,8 +141,8 @@ export interface AutomanInterface extends utils.Interface {
     "getOptimalSwap(address,int24,int24,uint256,uint256)": FunctionFragment;
     "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes,uint256,uint256)": FunctionFragment;
+    "isAllowListedRouter(address)": FunctionFragment;
     "isController(address)": FunctionFragment;
-    "isWhiteListedSwapRouter(address)": FunctionFragment;
     "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))": FunctionFragment;
     "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256)": FunctionFragment;
     "npm()": FunctionFragment;
@@ -152,9 +152,9 @@ export interface AutomanInterface extends utils.Interface {
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)": FunctionFragment;
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "setAllowlistedRouters(address[],bool[])": FunctionFragment;
     "setControllers(address[],bool[])": FunctionFragment;
     "setFeeConfig((address,uint96))": FunctionFragment;
-    "setSwapRouters(address[],bool[])": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
 
@@ -169,8 +169,8 @@ export interface AutomanInterface extends utils.Interface {
       | "getOptimalSwap"
       | "increaseLiquidity"
       | "increaseLiquidityOptimal"
+      | "isAllowListedRouter"
       | "isController"
-      | "isWhiteListedSwapRouter"
       | "mint"
       | "mintOptimal"
       | "npm"
@@ -180,9 +180,9 @@ export interface AutomanInterface extends utils.Interface {
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)"
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
       | "renounceOwnership"
+      | "setAllowlistedRouters"
       | "setControllers"
       | "setFeeConfig"
-      | "setSwapRouters"
       | "transferOwnership"
   ): FunctionFragment;
 
@@ -254,11 +254,11 @@ export interface AutomanInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "isController",
+    functionFragment: "isAllowListedRouter",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isWhiteListedSwapRouter",
+    functionFragment: "isController",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -327,16 +327,16 @@ export interface AutomanInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "setAllowlistedRouters",
+    values: [string[], boolean[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setControllers",
     values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeConfig",
     values: [IAutomanCommon.FeeConfigStruct]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setSwapRouters",
-    values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -374,11 +374,11 @@ export interface AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isController",
+    functionFragment: "isAllowListedRouter",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isWhiteListedSwapRouter",
+    functionFragment: "isController",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
@@ -409,15 +409,15 @@ export interface AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setAllowlistedRouters",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setControllers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "setFeeConfig",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setSwapRouters",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -435,7 +435,7 @@ export interface AutomanInterface extends utils.Interface {
     "Rebalance(uint256)": EventFragment;
     "Reinvest(uint256)": EventFragment;
     "RemoveLiquidity(uint256)": EventFragment;
-    "SwapRoutersSet(address[],bool[])": EventFragment;
+    "SetAllowlistedRouters(address[],bool[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "ControllersSet"): EventFragment;
@@ -447,7 +447,7 @@ export interface AutomanInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Rebalance"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Reinvest"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RemoveLiquidity"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SwapRoutersSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetAllowlistedRouters"): EventFragment;
 }
 
 export interface ControllersSetEventObject {
@@ -537,16 +537,17 @@ export type RemoveLiquidityEvent = TypedEvent<
 
 export type RemoveLiquidityEventFilter = TypedEventFilter<RemoveLiquidityEvent>;
 
-export interface SwapRoutersSetEventObject {
+export interface SetAllowlistedRoutersEventObject {
   routers: string[];
   statuses: boolean[];
 }
-export type SwapRoutersSetEvent = TypedEvent<
+export type SetAllowlistedRoutersEvent = TypedEvent<
   [string[], boolean[]],
-  SwapRoutersSetEventObject
+  SetAllowlistedRoutersEventObject
 >;
 
-export type SwapRoutersSetEventFilter = TypedEventFilter<SwapRoutersSetEvent>;
+export type SetAllowlistedRoutersEventFilter =
+  TypedEventFilter<SetAllowlistedRoutersEvent>;
 
 export interface Automan extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -656,12 +657,12 @@ export interface Automan extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    isController(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    isWhiteListedSwapRouter(
+    isAllowListedRouter(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    isController(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
@@ -726,6 +727,12 @@ export interface Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -734,12 +741,6 @@ export interface Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -830,12 +831,12 @@ export interface Automan extends BaseContract {
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-  isWhiteListedSwapRouter(
+  isAllowListedRouter(
     arg0: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
+
+  isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   mint(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
@@ -900,6 +901,12 @@ export interface Automan extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  setAllowlistedRouters(
+    routers: string[],
+    statuses: boolean[],
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   setControllers(
     controllers: string[],
     statuses: boolean[],
@@ -908,12 +915,6 @@ export interface Automan extends BaseContract {
 
   setFeeConfig(
     _feeConfig: IAutomanCommon.FeeConfigStruct,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  setSwapRouters(
-    routers: string[],
-    statuses: boolean[],
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1020,12 +1021,12 @@ export interface Automan extends BaseContract {
       }
     >;
 
-    isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-    isWhiteListedSwapRouter(
+    isAllowListedRouter(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
@@ -1128,6 +1129,12 @@ export interface Automan extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -1136,12 +1143,6 @@ export interface Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1207,11 +1208,14 @@ export interface Automan extends BaseContract {
     ): RemoveLiquidityEventFilter;
     RemoveLiquidity(tokenId?: BigNumberish | null): RemoveLiquidityEventFilter;
 
-    "SwapRoutersSet(address[],bool[])"(
+    "SetAllowlistedRouters(address[],bool[])"(
       routers?: null,
       statuses?: null
-    ): SwapRoutersSetEventFilter;
-    SwapRoutersSet(routers?: null, statuses?: null): SwapRoutersSetEventFilter;
+    ): SetAllowlistedRoutersEventFilter;
+    SetAllowlistedRouters(
+      routers?: null,
+      statuses?: null
+    ): SetAllowlistedRoutersEventFilter;
   };
 
   estimateGas: {
@@ -1285,12 +1289,12 @@ export interface Automan extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
-    isController(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    isWhiteListedSwapRouter(
+    isAllowListedRouter(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    isController(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     mint(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
@@ -1355,6 +1359,12 @@ export interface Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -1363,12 +1373,6 @@ export interface Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1449,12 +1453,12 @@ export interface Automan extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    isController(
+    isAllowListedRouter(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isWhiteListedSwapRouter(
+    isController(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1522,6 +1526,12 @@ export interface Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -1530,12 +1540,6 @@ export interface Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

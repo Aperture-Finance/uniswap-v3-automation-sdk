@@ -149,9 +149,9 @@ export interface IUniV3AutomanInterface extends utils.Interface {
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)": FunctionFragment;
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "setAllowlistedRouters(address[],bool[])": FunctionFragment;
     "setControllers(address[],bool[])": FunctionFragment;
     "setFeeConfig((address,uint96))": FunctionFragment;
-    "setSwapRouters(address[],bool[])": FunctionFragment;
     "uniswapV3SwapCallback(int256,int256,bytes)": FunctionFragment;
   };
 
@@ -174,9 +174,9 @@ export interface IUniV3AutomanInterface extends utils.Interface {
       | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)"
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
+      | "setAllowlistedRouters"
       | "setControllers"
       | "setFeeConfig"
-      | "setSwapRouters"
       | "uniswapV3SwapCallback"
   ): FunctionFragment;
 
@@ -312,16 +312,16 @@ export interface IUniV3AutomanInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "setAllowlistedRouters",
+    values: [string[], boolean[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setControllers",
     values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeConfig",
     values: [IAutomanCommon.FeeConfigStruct]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setSwapRouters",
-    values: [string[], boolean[]]
   ): string;
   encodeFunctionData(
     functionFragment: "uniswapV3SwapCallback",
@@ -385,15 +385,15 @@ export interface IUniV3AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setAllowlistedRouters",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setControllers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "setFeeConfig",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setSwapRouters",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -410,7 +410,7 @@ export interface IUniV3AutomanInterface extends utils.Interface {
     "Rebalance(uint256)": EventFragment;
     "Reinvest(uint256)": EventFragment;
     "RemoveLiquidity(uint256)": EventFragment;
-    "SwapRoutersSet(address[],bool[])": EventFragment;
+    "SetAllowlistedRouters(address[],bool[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "ControllersSet"): EventFragment;
@@ -421,7 +421,7 @@ export interface IUniV3AutomanInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Rebalance"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Reinvest"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RemoveLiquidity"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SwapRoutersSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetAllowlistedRouters"): EventFragment;
 }
 
 export interface ControllersSetEventObject {
@@ -499,16 +499,17 @@ export type RemoveLiquidityEvent = TypedEvent<
 
 export type RemoveLiquidityEventFilter = TypedEventFilter<RemoveLiquidityEvent>;
 
-export interface SwapRoutersSetEventObject {
+export interface SetAllowlistedRoutersEventObject {
   routers: string[];
   statuses: boolean[];
 }
-export type SwapRoutersSetEvent = TypedEvent<
+export type SetAllowlistedRoutersEvent = TypedEvent<
   [string[], boolean[]],
-  SwapRoutersSetEventObject
+  SetAllowlistedRoutersEventObject
 >;
 
-export type SwapRoutersSetEventFilter = TypedEventFilter<SwapRoutersSetEvent>;
+export type SetAllowlistedRoutersEventFilter =
+  TypedEventFilter<SetAllowlistedRoutersEvent>;
 
 export interface IUniV3Automan extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -676,6 +677,12 @@ export interface IUniV3Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -684,12 +691,6 @@ export interface IUniV3Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -840,6 +841,12 @@ export interface IUniV3Automan extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  setAllowlistedRouters(
+    routers: string[],
+    statuses: boolean[],
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   setControllers(
     controllers: string[],
     statuses: boolean[],
@@ -848,12 +855,6 @@ export interface IUniV3Automan extends BaseContract {
 
   setFeeConfig(
     _feeConfig: IAutomanCommon.FeeConfigStruct,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  setSwapRouters(
-    routers: string[],
-    statuses: boolean[],
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1060,6 +1061,12 @@ export interface IUniV3Automan extends BaseContract {
       }
     >;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -1068,12 +1075,6 @@ export interface IUniV3Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1132,11 +1133,14 @@ export interface IUniV3Automan extends BaseContract {
     ): RemoveLiquidityEventFilter;
     RemoveLiquidity(tokenId?: BigNumberish | null): RemoveLiquidityEventFilter;
 
-    "SwapRoutersSet(address[],bool[])"(
+    "SetAllowlistedRouters(address[],bool[])"(
       routers?: null,
       statuses?: null
-    ): SwapRoutersSetEventFilter;
-    SwapRoutersSet(routers?: null, statuses?: null): SwapRoutersSetEventFilter;
+    ): SetAllowlistedRoutersEventFilter;
+    SetAllowlistedRouters(
+      routers?: null,
+      statuses?: null
+    ): SetAllowlistedRoutersEventFilter;
   };
 
   estimateGas: {
@@ -1272,6 +1276,12 @@ export interface IUniV3Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -1280,12 +1290,6 @@ export interface IUniV3Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1430,6 +1434,12 @@ export interface IUniV3Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     setControllers(
       controllers: string[],
       statuses: boolean[],
@@ -1438,12 +1448,6 @@ export interface IUniV3Automan extends BaseContract {
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setSwapRouters(
-      routers: string[],
-      statuses: boolean[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

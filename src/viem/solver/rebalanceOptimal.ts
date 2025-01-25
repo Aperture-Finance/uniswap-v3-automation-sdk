@@ -566,7 +566,7 @@ export async function rebalanceOptimalV4(
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
-    getLogger().info('SDK.rebalanceOptimalV3.Fees', {
+    getLogger().info('SDK.rebalanceOptimalV4.Fees', {
       totalRebalanceFeeUsd: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
@@ -614,7 +614,7 @@ export async function rebalanceOptimalV4(
       ({ token0FeeAmount, token1FeeAmount, feeUSD } = await calcFeeAmount());
     }
   } catch (e) {
-    getLogger().error('SDK.rebalanceOptimalV3.calcFeeAmount.Error', {
+    getLogger().error('SDK.rebalanceOptimalV4.calcFeeAmount.Error', {
       error: JSON.stringify((e as Error).message),
       ...logdata,
     });

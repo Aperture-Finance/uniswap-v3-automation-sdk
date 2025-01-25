@@ -6,11 +6,18 @@ import type {
   BigNumber,
   BytesLike,
   CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -22,19 +29,97 @@ import type {
 export interface SwapRouterInterface extends utils.Interface {
   functions: {
     "WETH9()": FunctionFragment;
+    "isAllowListedRouter(address)": FunctionFragment;
     "npm()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "setAllowlistedRouters(address[],bool[])": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "WETH9" | "npm"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic:
+      | "WETH9"
+      | "isAllowListedRouter"
+      | "npm"
+      | "owner"
+      | "renounceOwnership"
+      | "setAllowlistedRouters"
+      | "transferOwnership"
+  ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "WETH9", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "isAllowListedRouter",
+    values: [string]
+  ): string;
   encodeFunctionData(functionFragment: "npm", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAllowlistedRouters",
+    values: [string[], boolean[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
+  ): string;
 
   decodeFunctionResult(functionFragment: "WETH9", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isAllowListedRouter",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "npm", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAllowlistedRouters",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
 
-  events: {};
+  events: {
+    "OwnershipTransferred(address,address)": EventFragment;
+    "SetAllowlistedRouters(address[],bool[])": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetAllowlistedRouters"): EventFragment;
 }
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface SetAllowlistedRoutersEventObject {
+  routers: string[];
+  statuses: boolean[];
+}
+export type SetAllowlistedRoutersEvent = TypedEvent<
+  [string[], boolean[]],
+  SetAllowlistedRoutersEventObject
+>;
+
+export type SetAllowlistedRoutersEventFilter =
+  TypedEventFilter<SetAllowlistedRoutersEvent>;
 
 export interface SwapRouter extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -65,30 +150,156 @@ export interface SwapRouter extends BaseContract {
   functions: {
     WETH9(overrides?: CallOverrides): Promise<[string]>;
 
+    isAllowListedRouter(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     npm(overrides?: CallOverrides): Promise<[string]>;
+
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
   };
 
   WETH9(overrides?: CallOverrides): Promise<string>;
 
+  isAllowListedRouter(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
   npm(overrides?: CallOverrides): Promise<string>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  renounceOwnership(
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  setAllowlistedRouters(
+    routers: string[],
+    statuses: boolean[],
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  transferOwnership(
+    newOwner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     WETH9(overrides?: CallOverrides): Promise<string>;
 
+    isAllowListedRouter(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
     npm(overrides?: CallOverrides): Promise<string>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+
+    "SetAllowlistedRouters(address[],bool[])"(
+      routers?: null,
+      statuses?: null
+    ): SetAllowlistedRoutersEventFilter;
+    SetAllowlistedRouters(
+      routers?: null,
+      statuses?: null
+    ): SetAllowlistedRoutersEventFilter;
+  };
 
   estimateGas: {
     WETH9(overrides?: CallOverrides): Promise<BigNumber>;
 
+    isAllowListedRouter(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     npm(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     WETH9(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    isAllowListedRouter(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     npm(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setAllowlistedRouters(
+      routers: string[],
+      statuses: boolean[],
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
   };
 }

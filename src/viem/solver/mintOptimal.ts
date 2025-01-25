@@ -15,8 +15,8 @@ import {
   FEE_ZAP_RATIO,
   SlipStreamMintParams,
   UniV3MintParams,
-  estimateMintOptimalV3Gas,
-  simulateMintOptimalV3,
+  estimateMintOptimalV4Gas,
+  simulateMintOptimalV4,
 } from '../automan';
 import { getPool } from '../pool';
 import {
@@ -144,7 +144,7 @@ export async function mintOptimalV4(
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateMintOptimalV3Gas(
+        estimateMintOptimalV4Gas(
           chainId,
           amm,
           publicClient,
@@ -191,7 +191,7 @@ export async function mintOptimalV4(
           zeroForOne,
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        [, liquidity, amount0, amount1] = await simulateMintOptimalV3(
+        [, liquidity, amount0, amount1] = await simulateMintOptimalV4(
           chainId,
           amm,
           publicClient,
