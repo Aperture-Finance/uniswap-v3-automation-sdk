@@ -179,23 +179,30 @@ export async function getTokenPriceListFromGeckoTerminalWithAddresses(
   tokens: string[],
   apiKey?: string,
 ): Promise<{ [address: string]: number | null }> {
-  const { gecko_terminal_platform_id } = getChainInfo(chainId);
-  if (gecko_terminal_platform_id === undefined) return {};
-  const addresses = tokens.toString();
-  const priceResponse: AxiosResponse = await axios.get(
-    `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/onchain/simple/networks/${gecko_terminal_platform_id}/token_price/${addresses}${apiKey ? `?x_cg_pro_api_key=${apiKey}` : ''}`,
-  );
-  const responseData = priceResponse.data.data.attributes.token_prices;
-  // Coingecko call example: https://{COINGECKO_URL}/onchain/simple/networks/eth/token_price/0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA,0xF433089366899D83a9f26A773D59ec7eCF30355e,0x04abEdA201850aC0124161F037Efd70c74ddC74C
-  return Object.keys(responseData).reduce(
-    (obj: { [address: string]: number | null }, address: string) => {
-      obj[address] = responseData[address]
-        ? Number(responseData[address])
-        : null;
-      return obj;
-    },
-    {},
-  );
+  if (tokens.length === 0) return {};
+
+  try {
+    const { gecko_terminal_platform_id } = getChainInfo(chainId);
+    if (gecko_terminal_platform_id === undefined) return {};
+    const addresses = tokens.toString();
+    const priceResponse: AxiosResponse = await axios.get(
+      `${apiKey ? COINGECKO_PRO_URL : COINGECKO_PROXY_URL}/onchain/simple/networks/${gecko_terminal_platform_id}/token_price/${addresses}${apiKey ? `?x_cg_pro_api_key=${apiKey}` : ''}`,
+    );
+    const responseData = priceResponse.data.data.attributes.token_prices;
+    // Coingecko call example: https://{COINGECKO_URL}/onchain/simple/networks/eth/token_price/0x15D4c048F83bd7e37d49eA4C83a07267Ec4203dA,0xF433089366899D83a9f26A773D59ec7eCF30355e,0x04abEdA201850aC0124161F037Efd70c74ddC74C
+    return Object.keys(responseData).reduce(
+      (obj: { [address: string]: number | null }, address: string) => {
+        obj[address] = responseData[address]
+          ? Number(responseData[address])
+          : null;
+        return obj;
+      },
+      {},
+    );
+  } catch (error) {
+    console.warn('Failed to fetch token price from Gecko Terminal', error);
+    return {};
+  }
 }
 
 /**
