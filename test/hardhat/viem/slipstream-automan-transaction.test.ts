@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/slipstream-automan-transaction.test.ts
 import { nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -20,12 +21,14 @@ import {
   ActionTypeEnum,
   ApertureSupportedChainId,
   ConditionTypeEnum,
+  ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
+  IOCKEY_LOGGER,
   SlipStreamAutoman,
   SlipStreamAutoman__factory,
   SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
-  getRpcEndpoint,
+  ioc,
 } from '../../../src';
 import {
   E_Solver,
@@ -66,11 +69,12 @@ describe('SlipStreamAutoman transaction tests', function () {
     chain: base,
     transport: http('https://base-rpc.publicnode.com'),
   });
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient, blockNumber, getRpcEndpoint(chainId));
+    await resetFork(testClient, blockNumber, chainId);
     await testClient.impersonateAccount({
       address: eoa,
     });

@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/hardhat.test.ts
 import {
   FeeAmount,
   Pool,
@@ -22,17 +23,15 @@ import {
   Address,
   PublicClient,
   TestClient,
-  createPublicClient,
   encodeAbiParameters,
   encodeFunctionData,
   getAddress,
   getContractAddress,
-  http,
   parseAbiParameters,
   walletActions,
   zeroAddress,
 } from 'viem';
-import { arbitrum, base, mainnet } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -96,7 +95,12 @@ import {
   simulateMintOptimal,
   simulateRemoveLiquidity,
 } from '../../src/viem';
-import { UNIV3_AMM as amm, hardhatForkProvider } from './common';
+import {
+  UNIV3_AMM as amm,
+  getApiClient,
+  hardhatForkProvider,
+  resetFork,
+} from './common';
 
 dotenvConfig();
 
@@ -112,32 +116,10 @@ const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 const eoa = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
 // A fixed epoch second value representing a moment in the year 2099.
 
-async function resetFork(testClient: TestClient, blockNumber = 19210000n) {
-  await testClient.reset({
-    blockNumber,
-    jsonRpcUrl: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-  });
-}
-
-const infuraMap = {
-  mainnet: mainnet,
-  'arbitrum-mainnet': arbitrum,
-  'base-mainnet': base,
-};
-
-function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
-  return createPublicClient({
-    chain: infuraMap[chain],
-    transport: http(
-      `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    ),
-  });
-}
-
 describe('Estimate gas tests', function () {
   async function estimateRebalanceGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
     const fee = FeeAmount.MEDIUM;
@@ -188,7 +170,7 @@ describe('Estimate gas tests', function () {
 
   async function estimateReinvestGasWithFrom(from: Address | undefined) {
     const blockNumber = 17975698n;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const amount0Desired = 100000n;
     const amount1Desired = 1000000000000000n;
     const gas = await estimateReinvestGas(
@@ -279,7 +261,7 @@ describe('State overrides tests', function () {
   });
 
   it('Test generateAccessList', async function () {
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const balanceOfData = encodeFunctionData({
       abi: IERC20__factory.abi,
       args: [eoa] as const,
@@ -299,7 +281,7 @@ describe('State overrides tests', function () {
   });
 
   it('Test getTokensOverrides', async function () {
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const amount0Desired = 1000000000000000000n;
     const amount1Desired = 100000000n;
     const { apertureAutoman } = getAMMInfo(chainId, UNIV3_AMM)!;
@@ -341,7 +323,7 @@ describe('State overrides tests', function () {
 
   it('Test simulateMintOptimal', async function () {
     const blockNumber = 17975698n;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
     const fee = FeeAmount.MEDIUM;
@@ -393,7 +375,7 @@ describe('State overrides tests', function () {
   it('Test simulateRemoveLiquidity', async function () {
     const blockNumber = 19142000n;
     const positionId = 655629n;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const position = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -420,7 +402,7 @@ describe('State overrides tests', function () {
   it('Test simulateIncreaseLiquidityOptimalV4', async function () {
     const blockNumber = 17975698n;
     const positionId = 4n;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient();
     const amount0Desired = 100000000n;
     const amount1Desired = 1000000000000000000n;
     const position = await getPosition(
@@ -941,10 +923,10 @@ describe('Viem - Automan transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const infuraClient = getInfuraClient();
+    const publicClient = getApiClient();
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, infuraClient),
-      getERC20Overrides(token1, from, to, amount1, infuraClient),
+      getERC20Overrides(token0, from, to, amount0, publicClient),
+      getERC20Overrides(token1, from, to, amount1, publicClient),
     ]);
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [

@@ -27,7 +27,6 @@ import {
   PCSV3Automan__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
-  getRpcEndpoint,
   ioc,
 } from '../../../src';
 import {
@@ -76,7 +75,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
 
-    await resetFork(testClient, blockNumber, getRpcEndpoint(chainId));
+    await resetFork(testClient, blockNumber, chainId);
     await testClient.impersonateAccount({
       address: eoa,
     });
