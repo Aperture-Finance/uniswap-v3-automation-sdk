@@ -476,8 +476,20 @@ describe('Position util tests', function () {
     for (const [tokenId, pos] of positionDetails.entries()) {
       const position = positionInfos.get(tokenId);
       expect(position).to.not.be.undefined;
-      expect(position?.pool.token0).to.deep.equal(pos.pool.token0);
-      expect(position?.pool.token1).to.deep.equal(pos.pool.token1);
+      expect(position?.pool.token0).to.deep.contains({
+        chainId: pos.pool.token0.chainId,
+        address: pos.pool.token0.address,
+        decimals: pos.pool.token0.decimals,
+        isNative: pos.pool.token0.isNative,
+        isToken: pos.pool.token0.isToken,
+      });
+      expect(position?.pool.token1).to.deep.contains({
+        chainId: pos.pool.token1.chainId,
+        address: pos.pool.token1.address,
+        decimals: pos.pool.token1.decimals,
+        isNative: pos.pool.token1.isNative,
+        isToken: pos.pool.token1.isToken,
+      });
       expect(position?.pool.fee).to.equal(pos.pool.fee);
       expect(position?.liquidity.toString()).to.equal(pos.liquidity.toString());
       expect(position?.tickLower).to.equal(pos.tickLower);

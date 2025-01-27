@@ -113,8 +113,20 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       publicClient,
     );
 
-    TOKEN0 = await getToken(TOKEN0_ADDRESS, chainId, publicClient);
-    TOKEN1 = await getToken(TOKEN1_ADDRESS, chainId, publicClient);
+    TOKEN0 = await getToken(
+      TOKEN0_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
+    TOKEN1 = await getToken(
+      TOKEN1_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
   });
 
   it('Collect fees', async function () {
