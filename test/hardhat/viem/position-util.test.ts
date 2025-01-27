@@ -39,7 +39,6 @@ import {
   getNPM,
   getPosition,
   getPositionAtPrice,
-  getPublicClient,
   getRebalancedPosition,
   getReinvestedPosition,
   getTokenSvg,
@@ -54,7 +53,7 @@ import {
   deadline,
   eoa,
   expect,
-  getInfuraClient,
+  getApiClient,
   resetFork,
 } from '../common';
 
@@ -410,9 +409,8 @@ describe('Position util tests', function () {
   });
 
   it('Test viewCollectableTokenAmounts', async function () {
-    const publicClient = getPublicClient(
+    const publicClient = getApiClient(
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
     );
     const positionId = 723522n;
     const blockNumber = 20064066n;
@@ -445,7 +443,9 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
+    const publicClient = getApiClient(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+    );
     // an address with 24 positions
     const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
 
@@ -486,7 +486,9 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions with large balances', async function () {
-    const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
+    const publicClient = getApiClient(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+    );
     // An address with 7000+ positions on mainnet.
     const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
     const positionDetails = await getAllPositions(
@@ -501,8 +503,9 @@ describe('Position util tests', function () {
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const { apertureAutoman } = getAMMInfo(chainId, UNIV3_AMM)!;
-    const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(
+      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
+    );
     const positionId = 761879n;
     const blockNumber = 119626480n;
     const npm = getNPM(chainId, UNIV3_AMM, publicClient);
@@ -519,10 +522,7 @@ describe('Position util tests', function () {
       publicClient,
       blockNumber,
     );
-    await testClient.reset({
-      blockNumber,
-      jsonRpcUrl,
-    });
+    await resetFork(testClient, blockNumber, chainId);
     await testClient.impersonateAccount({ address: owner });
     const walletClient = testClient.extend(walletActions);
     await getNPM(

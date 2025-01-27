@@ -51,7 +51,7 @@ import {
   chainId,
   eoa,
   expect,
-  getInfuraClient,
+  getApiClient,
   hardhatForkProvider,
   resetFork,
 } from '../common';
@@ -133,10 +133,10 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const infuraClient = getInfuraClient();
+    const publicClient = getApiClient();
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, infuraClient),
-      getERC20Overrides(token1, from, to, amount1, infuraClient),
+      getERC20Overrides(token0, from, to, amount0, publicClient),
+      getERC20Overrides(token1, from, to, amount1, publicClient),
     ]);
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
