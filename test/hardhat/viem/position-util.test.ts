@@ -444,7 +444,9 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions', async function () {
-    const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
+    const publicClient = getApiClient(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+    );
     // an address with 24 positions
     const address = '0x4bD047CA72fa05F0B89ad08FE5Ba5ccdC07DFFBF';
 
@@ -485,7 +487,9 @@ describe('Position util tests', function () {
   });
 
   it('Test getAllPositions with large balances', async function () {
-    const publicClient = getPublicClient(1, 'https://ethereum.publicnode.com');
+    const publicClient = getApiClient(
+      ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+    );
     // An address with 7000+ positions on mainnet.
     const address = '0x6dD91BdaB368282dc4Ea4f4beFc831b78a7C38C0';
     const positionDetails = await getAllPositions(
