@@ -13,7 +13,6 @@ import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
 import { SimulatedAmounts } from './types';
 
-// TODO: add unit test
 /**
  * Generates an unsigned transaction that mints the optimal amount of liquidity for the specified token amounts and price range.
  * Includes feeAmount and enables initilizing pool with sqrtPriceX96.

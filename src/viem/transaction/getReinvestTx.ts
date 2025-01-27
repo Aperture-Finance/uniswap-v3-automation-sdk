@@ -104,7 +104,7 @@ export async function getReinvestTx(
 
 // Same as getReinvestTx, but with feeAmounts instead of feeBips.
 // Do not use, but implemented to make it easier to migrate to future versions.
-export async function getReinvestV3Tx(
+export async function getReinvestV4Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
@@ -128,7 +128,7 @@ export async function getReinvestV3Tx(
 
   const { token0FeeAmount, token1FeeAmount } =
     getFeeReinvestFeeAmount(positionDetails);
-  getLogger().info('SDK.getReinvestV3Tx.Fees', {
+  getLogger().info('SDK.getReinvestV4Tx.Fees', {
     ownerAddress,
     amm,
     chainId,

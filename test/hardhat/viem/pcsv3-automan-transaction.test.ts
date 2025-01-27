@@ -38,8 +38,8 @@ import {
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfoV4,
   getIncreaseLiquidityOptimalTx,
-  getMintOptimalSwapInfo,
-  getMintOptimalTx,
+  getMintOptimalSwapInfoV4,
+  getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
   getRebalanceSwapInfo,
@@ -323,7 +323,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       pool.tickSpacing,
     );
     const { swapData, liquidity } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         amm,
         token0Amount,
@@ -333,11 +333,12 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         tickUpper,
         eoa,
         /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['3000', '60000'],
         publicClient,
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalTx(
+    const { tx: txRequest } = await getMintOptimalV4Tx(
       chainId,
       amm,
       token0Amount,

@@ -37,7 +37,9 @@ import { arbitrum, base, mainnet } from 'viem/chains';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
+  ConsoleLogger,
   IERC20__factory,
+  IOCKEY_LOGGER,
   MAX_PRICE,
   MIN_PRICE,
   Q192,
@@ -61,6 +63,7 @@ import {
   getTokenPriceListFromCoingeckoWithAddresses,
   getTokenPriceListFromGeckoTerminalWithAddresses,
   humanPriceToClosestTick,
+  ioc,
   normalizeTicks,
   priceToClosestUsableTick,
   priceToSqrtRatioX96,
@@ -78,7 +81,7 @@ import {
   generateAccessList,
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfoV4,
-  getMintOptimalSwapInfo,
+  getMintOptimalSwapInfoV4,
   getMintedPositionIdFromTxReceipt,
   getNPM,
   getPool,
@@ -89,7 +92,7 @@ import {
   getSlipStreamPools,
   getSlipStreamStakePositions,
   getToken,
-  simulateIncreaseLiquidityOptimal,
+  simulateIncreaseLiquidityOptimalV4,
   simulateMintOptimal,
   simulateRemoveLiquidity,
 } from '../../src/viem';
@@ -414,7 +417,7 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('3098315727923109118');
   });
 
-  it('Test simulateIncreaseLiquidityOptimal', async function () {
+  it('Test simulateIncreaseLiquidityOptimalV4', async function () {
     const blockNumber = 17975698n;
     const positionId = 4n;
     const publicClient = getInfuraClient();
@@ -436,7 +439,7 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
+    const [, amount0, amount1] = await simulateIncreaseLiquidityOptimalV4(
       chainId,
       UNIV3_AMM,
       publicClient,
@@ -877,6 +880,7 @@ describe('Viem - Automan transaction tests', function () {
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
 
   beforeEach(async function () {
+    ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient);
@@ -1080,7 +1084,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapRoute } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         UNIV3_AMM,
         hypotheticalPosition.amount0,
@@ -1089,7 +1093,8 @@ describe('Viem - Automan transaction tests', function () {
         tickLower,
         tickUpper,
         eoa,
-        0.5,
+        /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
       )
@@ -1135,7 +1140,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapPath, swapRoute } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         UNIV3_AMM,
         token0Amount,
@@ -1144,7 +1149,8 @@ describe('Viem - Automan transaction tests', function () {
         tickLower,
         tickUpper,
         eoa,
-        0.5,
+        /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
       )
@@ -1198,6 +1204,7 @@ describe('Viem - Automan transaction tests', function () {
         hypotheticalPosition.amount0,
         hypotheticalPosition.amount1,
         eoa as Address,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
         hypotheticalPosition,

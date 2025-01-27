@@ -49,7 +49,7 @@ import {
   getPool,
   getRebalanceSwapInfoV4,
   getRebalanceV4Tx,
-  getReinvestV3Tx,
+  getReinvestV4Tx,
 } from '../../../src/viem';
 import {
   WBTC_ADDRESS,
@@ -167,7 +167,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    const { tx: txRequest } = await getReinvestV3Tx(
+    const { tx: txRequest } = await getReinvestV4Tx(
       chainId,
       amm,
       eoa,
