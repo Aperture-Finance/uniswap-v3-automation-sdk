@@ -22,6 +22,7 @@ const DEFAULT_CHAIN_BATCH_SIZE = 1000;
 
 // rpc node may has different limit on content length
 const CHAIN_BATCH_SIZE: Partial<Record<ApertureSupportedChainId, number>> = {
+  [ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID]: 110,
   [ApertureSupportedChainId.POLYGON_MAINNET_CHAIN_ID]: 120,
 };
 
