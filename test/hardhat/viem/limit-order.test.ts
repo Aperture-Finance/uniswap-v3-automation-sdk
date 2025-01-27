@@ -50,8 +50,20 @@ describe('Viem - Limit order tests', function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
     await resetFork(testClient, 17188000n);
-    WBTC = await getToken(WBTC_ADDRESS, chainId, publicClient);
-    WETH = await getToken(WETH_ADDRESS, chainId, publicClient);
+    WBTC = await getToken(
+      WBTC_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
+    WETH = await getToken(
+      WETH_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
   });
 
   it('Selling WBTC for WETH', async function () {
