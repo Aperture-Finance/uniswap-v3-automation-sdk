@@ -78,8 +78,20 @@ export async function getPool(
     }
 
     const [tokenACanon, tokenBCanon, poolResults] = await Promise.all([
-      getToken(tokenAAddress, chainId, client, blockNumber),
-      getToken(tokenBAddress, chainId, client, blockNumber),
+      getToken(
+        tokenAAddress,
+        chainId,
+        client,
+        blockNumber,
+        /* showSymbolAndName= */ true,
+      ),
+      getToken(
+        tokenBAddress,
+        chainId,
+        client,
+        blockNumber,
+        /* showSymbolAndName= */ true,
+      ),
       client.multicall({
         contracts,
         blockNumber,
