@@ -92,7 +92,7 @@ import {
   getSlipStreamStakePositions,
   getToken,
   simulateIncreaseLiquidityOptimalV4,
-  simulateMintOptimal,
+  simulateMintOptimalV4,
   simulateRemoveLiquidity,
 } from '../../src/viem';
 import {
@@ -321,7 +321,7 @@ describe('State overrides tests', function () {
     });
   });
 
-  it('Test simulateMintOptimal', async function () {
+  it('Test simulateMintOptimalV4', async function () {
     const blockNumber = 17975698n;
     const publicClient = getApiClient();
     const token0 = WBTC_ADDRESS;
@@ -358,7 +358,7 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const [, liquidity, amount0, amount1] = await simulateMintOptimal(
+    const [, liquidity, amount0, amount1] = await simulateMintOptimalV4(
       chainId,
       UNIV3_AMM,
       publicClient,

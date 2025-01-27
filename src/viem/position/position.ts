@@ -369,22 +369,26 @@ export async function getBasicPositionInfo(
 export function viewCollectableTokenAmountsFromPositionStateStruct(
   chainId: ApertureSupportedChainId,
   positionState: PositionStateStruct,
+  token0: Token | undefined = undefined,
+  token1: Token | undefined = undefined,
 ): CollectableTokenAmounts {
   return {
     token0Amount: CurrencyAmount.fromRawAmount(
-      new Token(
-        chainId,
-        positionState.position.token0,
-        positionState.decimals0,
-      ),
+      token0 ??
+        new Token(
+          chainId,
+          positionState.position.token0,
+          positionState.decimals0,
+        ),
       positionState.position.tokensOwed0.toString(),
     ),
     token1Amount: CurrencyAmount.fromRawAmount(
-      new Token(
-        chainId,
-        positionState.position.token1,
-        positionState.decimals1,
-      ),
+      token1 ??
+        new Token(
+          chainId,
+          positionState.position.token1,
+          positionState.decimals1,
+        ),
       positionState.position.tokensOwed1.toString(),
     ),
   };
@@ -404,9 +408,27 @@ export async function viewCollectableTokenAmounts(
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
+  const [token0, token1] = await Promise.all([
+    getToken(
+      positionState.position.token0,
+      chainId,
+      publicClient,
+      blockNumber,
+      /* showSymbolAndName= */ true,
+    ),
+    getToken(
+      positionState.position.token1,
+      chainId,
+      publicClient,
+      blockNumber,
+      /* showSymbolAndName= */ true,
+    ),
+  ]);
   return viewCollectableTokenAmountsFromPositionStateStruct(
     chainId,
     positionState,
+    token0,
+    token1,
   );
 }
 
