@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/position-liquidity-management.test.ts
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import hre, { ethers } from 'hardhat';

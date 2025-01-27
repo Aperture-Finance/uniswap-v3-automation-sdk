@@ -33,14 +33,14 @@ import {
   WETH_ADDRESS,
   eoa,
   expect,
-  getInfuraClient,
+  getApiClient,
 } from '../common';
 
 describe('Viem - Routing tests', function () {
   // rebalanceOptimal is deprecated now, use rebalanceOptimalV2 instead
   it.skip('Test rebalanceOptimal', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(chainId);
     const tokenId = 726230n;
     const blockNumber = 119626480n;
     const { pool, position } = await PositionDetails.fromPositionId(
@@ -98,7 +98,7 @@ describe('Viem - Routing tests', function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient(chainId);
     const blockNumber = await publicClient.getBlockNumber();
     const { pool } = await PositionDetails.fromPositionId(
       chainId,
@@ -156,7 +156,7 @@ describe('Viem - Routing tests', function () {
 
   it('Test rebalanceOptimalV2 in arbitrum', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(chainId);
     const tokenId = 726230n;
     const blockNumber = await publicClient.getBlockNumber();
     const position = await PositionDetails.fromPositionId(
@@ -230,7 +230,7 @@ describe('Viem - Routing tests', function () {
 
   it('Test rebalanceOptimalV2 with invalid prices', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(chainId);
     const tokenId = 726230n;
     const blockNumber = await publicClient.getBlockNumber();
     const position = await PositionDetails.fromPositionId(
@@ -275,7 +275,7 @@ describe('Viem - Routing tests', function () {
   it('Test increaseLiquidityOptimal with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient(chainId);
     const blockNumber = 19866218n;
 
     const { position, pool } = await PositionDetails.fromPositionId(
@@ -336,7 +336,7 @@ describe('Viem - Routing tests', function () {
   it.skip('Test mintOptimal', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(chainId);
     const token0 = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f';
     const token1 = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1';
     const fee = FeeAmount.MEDIUM;
@@ -407,7 +407,7 @@ describe('Viem - Routing tests', function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient();
+    const publicClient = getApiClient(chainId);
     const blockNumber = await publicClient.getBlockNumber();
     const { pool } = await PositionDetails.fromPositionId(
       chainId,
@@ -480,7 +480,7 @@ describe('Viem - Routing tests', function () {
   it('Test mintOptimalV2 in arbitrum', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(chainId);
     const token0 = WBTC_ARBITRUM_ONE.address;
     const token1 =
       WRAPPED_NATIVE_CURRENCY[UniswapSupportedChainId.ARBITRUM_ONE]!.address;

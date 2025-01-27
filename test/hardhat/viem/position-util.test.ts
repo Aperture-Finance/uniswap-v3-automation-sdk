@@ -54,7 +54,7 @@ import {
   deadline,
   eoa,
   expect,
-  getInfuraClient,
+  getApiClient,
   resetFork,
 } from '../common';
 
@@ -410,9 +410,8 @@ describe('Position util tests', function () {
   });
 
   it('Test viewCollectableTokenAmounts', async function () {
-    const publicClient = getPublicClient(
+    const publicClient = getApiClient(
       ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
-      `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
     );
     const positionId = 723522n;
     const blockNumber = 20064066n;
@@ -501,8 +500,9 @@ describe('Position util tests', function () {
   it('Test getReinvestedPosition', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const { apertureAutoman } = getAMMInfo(chainId, UNIV3_AMM)!;
-    const jsonRpcUrl = `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`;
-    const publicClient = getInfuraClient('arbitrum-mainnet');
+    const publicClient = getApiClient(
+      ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID,
+    );
     const positionId = 761879n;
     const blockNumber = 119626480n;
     const npm = getNPM(chainId, UNIV3_AMM, publicClient);
@@ -519,10 +519,7 @@ describe('Position util tests', function () {
       publicClient,
       blockNumber,
     );
-    await testClient.reset({
-      blockNumber,
-      jsonRpcUrl,
-    });
+    await resetFork(testClient, blockNumber, chainId);
     await testClient.impersonateAccount({ address: owner });
     const walletClient = testClient.extend(walletActions);
     await getNPM(

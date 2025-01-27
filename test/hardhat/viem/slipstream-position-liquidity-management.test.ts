@@ -16,7 +16,6 @@ import {
   WETH__factory,
   alignPriceToClosestUsableTickWithTickSpacing,
   getAMMInfo,
-  getRpcEndpoint,
   parsePrice,
 } from '../../../src';
 import {
@@ -74,7 +73,7 @@ describe('SlipStream non-Automan liquidity management tests', function () {
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient, blockNumber, getRpcEndpoint(chainId));
+    await resetFork(testClient, blockNumber, chainId);
 
     const impersonatedWhaleSigner =
       await ethers.getImpersonatedSigner(WHALE_ADDRESS);

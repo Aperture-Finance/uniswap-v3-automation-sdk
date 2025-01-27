@@ -5,9 +5,12 @@ import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
 import { ethers } from 'hardhat';
 import { TestClient, createPublicClient, http } from 'viem';
-import { arbitrum, mainnet } from 'viem/chains';
 
-import { ApertureSupportedChainId } from '../../src';
+import {
+  ApertureSupportedChainId,
+  getChainInfo,
+  getRpcEndpoint,
+} from '../../src';
 
 dotenvConfig();
 
@@ -36,24 +39,22 @@ export const TEST_WALLET_PRIVATE_KEY =
 export async function resetFork(
   testClient: TestClient,
   blockNumber = 19210000n,
-  jsonRpcUrl = `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+  chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
 ) {
   await testClient.reset({
     blockNumber,
-    jsonRpcUrl,
+    jsonRpcUrl: getRpcEndpoint(chainId),
   });
 }
 
-const infuraMap = {
-  mainnet: mainnet,
-  'arbitrum-mainnet': arbitrum,
-};
-
-export function getInfuraClient(chain: keyof typeof infuraMap = 'mainnet') {
+export function getApiClient(
+  chainId: ApertureSupportedChainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID,
+) {
   return createPublicClient({
-    chain: infuraMap[chain],
-    transport: http(
-      `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    ),
+    batch: {
+      multicall: true,
+    },
+    chain: getChainInfo(chainId).chain,
+    transport: http(getRpcEndpoint(chainId)),
   });
 }
