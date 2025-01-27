@@ -117,14 +117,14 @@ describe('SlipStream non-Automan liquidity management tests', function () {
       TOKEN0_ADDRESS,
       chainId,
       publicClient,
-      blockNumber,
+      /* blockNumber= */ undefined,
       /* showSymbolAndName= */ true,
     );
     TOKEN1 = await getToken(
       TOKEN1_ADDRESS,
       chainId,
       publicClient,
-      blockNumber,
+      /* blockNumber= */ undefined,
       /* showSymbolAndName= */ true,
     );
   });
