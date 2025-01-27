@@ -103,8 +103,20 @@ describe('UniV3 non-Automan liquidity management tests', function () {
       publicClient,
     );
 
-    WBTC = await getToken(WBTC_ADDRESS, chainId, publicClient);
-    WETH = await getToken(WETH_ADDRESS, chainId, publicClient);
+    WBTC = await getToken(
+      WBTC_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
+    WETH = await getToken(
+      WETH_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
   });
 
   beforeEach(async function () {
