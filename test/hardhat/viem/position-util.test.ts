@@ -39,7 +39,6 @@ import {
   getNPM,
   getPosition,
   getPositionAtPrice,
-  getPublicClient,
   getRebalancedPosition,
   getReinvestedPosition,
   getTokenSvg,

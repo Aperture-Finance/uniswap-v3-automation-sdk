@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/hardhat.test.ts
 import {
   FeeAmount,
   Pool,
