@@ -29,6 +29,7 @@ import {
 } from 'viem';
 
 import { getAutomanReinvestCalldata } from '../automan';
+import { getToken } from '../currency';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from '../overrides';
 import { getPool, getPoolFromBasicPositionInfo } from '../pool';
 import { getPublicClient } from '../public_client';
@@ -224,7 +225,28 @@ export class PositionDetails implements BasicPositionInfo {
       publicClient ?? getPublicClient(chainId),
       blockNumber,
     );
-    return PositionDetails.fromPositionStateStruct(chainId, position);
+    const [token0, token1] = await Promise.all([
+      getToken(
+        position.position.token0,
+        chainId,
+        publicClient,
+        blockNumber,
+        /* showSymbolAndName= */ true,
+      ),
+      getToken(
+        position.position.token1,
+        chainId,
+        publicClient,
+        blockNumber,
+        /* showSymbolAndName= */ true,
+      ),
+    ]);
+    return PositionDetails.fromPositionStateStruct(
+      chainId,
+      position,
+      token0,
+      token1,
+    );
   }
 
   /**
@@ -252,13 +274,15 @@ export class PositionDetails implements BasicPositionInfo {
       decimals0,
       decimals1,
     }: PositionStateStruct,
+    token0: Token | undefined = undefined,
+    token1: Token | undefined = undefined,
   ): PositionDetails {
     return new PositionDetails(
       tokenId,
       owner,
       {
-        token0: new Token(chainId, position.token0, decimals0),
-        token1: new Token(chainId, position.token1, decimals1),
+        token0: token0 ?? new Token(chainId, position.token0, decimals0),
+        token1: token1 ?? new Token(chainId, position.token1, decimals1),
         fee: poolFee,
         tickSpacing: poolTickSpacing,
         liquidity: position.liquidity.toString(),
@@ -345,22 +369,26 @@ export async function getBasicPositionInfo(
 export function viewCollectableTokenAmountsFromPositionStateStruct(
   chainId: ApertureSupportedChainId,
   positionState: PositionStateStruct,
+  token0: Token | undefined = undefined,
+  token1: Token | undefined = undefined,
 ): CollectableTokenAmounts {
   return {
     token0Amount: CurrencyAmount.fromRawAmount(
-      new Token(
-        chainId,
-        positionState.position.token0,
-        positionState.decimals0,
-      ),
+      token0 ??
+        new Token(
+          chainId,
+          positionState.position.token0,
+          positionState.decimals0,
+        ),
       positionState.position.tokensOwed0.toString(),
     ),
     token1Amount: CurrencyAmount.fromRawAmount(
-      new Token(
-        chainId,
-        positionState.position.token1,
-        positionState.decimals1,
-      ),
+      token1 ??
+        new Token(
+          chainId,
+          positionState.position.token1,
+          positionState.decimals1,
+        ),
       positionState.position.tokensOwed1.toString(),
     ),
   };
@@ -380,9 +408,27 @@ export async function viewCollectableTokenAmounts(
     publicClient ?? getPublicClient(chainId),
     blockNumber,
   );
+  const [token0, token1] = await Promise.all([
+    getToken(
+      positionState.position.token0,
+      chainId,
+      publicClient,
+      blockNumber,
+      /* showSymbolAndName= */ true,
+    ),
+    getToken(
+      positionState.position.token1,
+      chainId,
+      publicClient,
+      blockNumber,
+      /* showSymbolAndName= */ true,
+    ),
+  ]);
   return viewCollectableTokenAmountsFromPositionStateStruct(
     chainId,
     positionState,
+    token0,
+    token1,
   );
 }
 
