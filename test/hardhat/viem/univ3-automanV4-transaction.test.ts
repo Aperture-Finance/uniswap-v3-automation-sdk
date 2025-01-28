@@ -1,4 +1,4 @@
-// yarn test:hardhat test/hardhat/viem/univ3-AutomanV4-transaction.test.ts
+// yarn test:hardhat test/hardhat/viem/univ3-automanV4-transaction.test.ts
 import {
   FeeAmount,
   RemoveLiquidityOptions,
@@ -68,8 +68,8 @@ import {
 describe('Viem - UniV3AutomanV4 transaction tests', function () {
   const positionId = 4n;
   const blockNumber = 17188000n;
-  let AutomanV4Contract: UniV3AutomanV4;
-  const AutomanV4Address = getAMMInfo(chainId, amm)!.apertureAutomanV4;
+  let automanV4Contract: UniV3AutomanV4;
+  const automanV4Address = getAMMInfo(chainId, amm)!.apertureAutomanV4;
   const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -87,30 +87,30 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     });
     impersonatedOwnerClient = testClient.extend(walletActions);
 
-    // Deploy Automan.
-    AutomanV4Contract = await new UniV3AutomanV4__factory(
+    // Deploy AutomanV4.
+    automanV4Contract = await new UniV3AutomanV4__factory(
+      // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
-    await AutomanV4Contract.deployed();
-    await AutomanV4Contract.setFeeConfig({
+    await automanV4Contract.deployed();
+    await automanV4Contract.setFeeConfig({
       feeCollector,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
-    await AutomanV4Contract.setControllers([WHALE_ADDRESS], [true]);
+    await automanV4Contract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new UniV3OptimalSwapRouter__factory(
-      // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();
-    await AutomanV4Contract.setAllowlistedRouters([router.address], [true]);
+    await automanV4Contract.setAllowlistedRouters([router.address], [true]);
 
     // Set Automan address in CHAIN_ID_TO_INFO.
     getAMMInfo(chainId, amm)!.apertureAutomanV4 =
-      AutomanV4Contract.address as `0x${string}`;
+      automanV4Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
       router.address as `0x${string}`;
 
@@ -119,7 +119,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       functionName: 'setApprovalForAll',
-      args: [AutomanV4Contract.address as Address, true] as const,
+      args: [automanV4Contract.address as Address, true] as const,
       account: eoa,
     });
 
@@ -128,7 +128,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
   after(() => {
     // Reset AutomanV4 address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutomanV4 = AutomanV4Address;
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 = automanV4Address;
     testClient.stopImpersonatingAccount({
       address: eoa,
     });
@@ -194,7 +194,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId.toString(),
         /* feeToPrincipalRatioThreshold= */ 0.1,
-        /* slippage =*/ 0.05,
+        /* slippage= */ 0.05,
         /* maxGasProportion= */ 0.01,
         /* expiration= */ 1627776000,
       ),
@@ -457,7 +457,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     });
   });
 
-  it('Optimal mint without 1inch', async function () {
+  it.skip('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,

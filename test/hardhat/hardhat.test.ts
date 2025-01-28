@@ -364,7 +364,9 @@ describe('State overrides tests', function () {
       publicClient,
       eoa,
       mintParams,
-      undefined,
+      /* swapData= */ undefined,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       blockNumber,
     );
     expect(liquidity.toString()).to.equal('716894157038546');

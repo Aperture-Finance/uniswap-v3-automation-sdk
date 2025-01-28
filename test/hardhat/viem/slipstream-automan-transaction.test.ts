@@ -36,10 +36,7 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfoV4,
-  getIncreaseLiquidityOptimalTx,
   getMintOptimalSwapInfoV4,
-  getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
   getRebalanceSwapInfo,
@@ -353,7 +350,8 @@ describe('SlipStreamAutoman transaction tests', function () {
     });
   });
 
-  it('Optimal mint without 1inch', async function () {
+  // Test deprecated and moved to slipstream-automanV4-transaction.test.ts.
+  it.skip('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       '0x4200000000000000000000000000000000000006', // WETH on Base mainnet,
       '0x940181a94A35A4569E4529A3CDfB74e38FD98631', // AERO on Base mainnet,
@@ -403,7 +401,7 @@ describe('SlipStreamAutoman transaction tests', function () {
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalV4Tx(
+    const { tx: txRequest } = await getMintOptimalTx(
       chainId,
       amm,
       token0Amount,
@@ -452,7 +450,8 @@ describe('SlipStreamAutoman transaction tests', function () {
     });
   });
 
-  it('Increase liquidity optimal without 1inch', async function () {
+  // Test deprecated and moved to slipstream-automanV4-transaction.test.ts.
+  it.skip('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -477,7 +476,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfoV4(
+      await getIncreaseLiquidityOptimalSwapInfo(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),

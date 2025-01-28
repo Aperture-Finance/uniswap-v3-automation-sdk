@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc --build && tsc-alias",
     "clean": "tsc --build --clean",
+    "compile": "tsc --build && tsc-alias",
     "test": "yarn test:jest && yarn test:hardhat",
     "test:jest": "jest",
     "test:hardhat": "npx hardhat test",

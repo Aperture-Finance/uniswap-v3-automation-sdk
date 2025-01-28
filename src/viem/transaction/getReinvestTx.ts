@@ -9,6 +9,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import {
+  IncreaseLiquidityParams,
   getAutomanReinvestCalldata,
   getAutomanV4ReinvestCalldata,
 } from '../automan';
@@ -140,13 +141,19 @@ export async function getReinvestV4Tx(
     token0FeeAmount,
     token1FeeAmount,
   });
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
+    tokenId: positionId,
+    amount0Desired: 0n, // Param value ignored by Automan.
+    amount1Desired: 0n, // Param value ignored by Automan.
+    amount0Min: 0n, // Setting this to zero for tx simulation.
+    amount1Min: 0n, // Setting this to zero for tx simulation.
+    deadline: deadlineEpochSeconds,
+  };
   const data = getAutomanV4ReinvestCalldata(
-    positionId,
-    deadlineEpochSeconds,
-    0n /*amount0Min*/, // Setting this to zero for tx simulation.
-    0n /*amount1Min*/, // Setting this to zero for tx simulation.
+    increaseLiquidityParams,
     token0FeeAmount,
     token1FeeAmount,
+    /* swapData= */ undefined,
     permitInfo,
   );
   const amounts = await getAmountsWithSlippage(
@@ -160,17 +167,19 @@ export async function getReinvestV4Tx(
     slippageTolerance,
     client,
   );
+  [increaseLiquidityParams.amount0Min, increaseLiquidityParams.amount1Min] = [
+    BigInt(amounts.amount0Min),
+    BigInt(amounts.amount1Min),
+  ];
   return {
     tx: {
       from: ownerAddress,
       to: apertureAutomanV4,
       data: getAutomanV4ReinvestCalldata(
-        positionId,
-        deadlineEpochSeconds,
-        BigInt(amounts.amount0Min),
-        BigInt(amounts.amount1Min),
+        increaseLiquidityParams,
         token0FeeAmount,
         token1FeeAmount,
+        /* swapData= */ undefined,
         permitInfo,
       ),
     },

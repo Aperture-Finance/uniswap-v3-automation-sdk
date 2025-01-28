@@ -433,7 +433,7 @@ export async function rebalanceOptimalV4(
     throw new Error('Invalid token prices.');
   }
 
-  const simulateAndGetOptimalSwapAmount = async (
+  const simulateAndGetOptimalSwapAmountV4 = async (
     token0FeeAmount: bigint,
     token1FeeAmount: bigint,
   ) => {
@@ -482,7 +482,7 @@ export async function rebalanceOptimalV4(
 
   const calcFeeAmount = async () => {
     const { poolAmountIn, zeroForOne, receive0, receive1 } =
-      await simulateAndGetOptimalSwapAmount(
+      await simulateAndGetOptimalSwapAmountV4(
         /* token0FeeAmount= */ 0n,
         /* token1FeeAmount= */ 0n,
       );
@@ -621,7 +621,7 @@ export async function rebalanceOptimalV4(
   }
 
   const { receive0, receive1, poolAmountIn, zeroForOne } =
-    await simulateAndGetOptimalSwapAmount(token0FeeAmount, token1FeeAmount);
+    await simulateAndGetOptimalSwapAmountV4(token0FeeAmount, token1FeeAmount);
 
   const mintParams: SlipStreamMintParams | UniV3MintParams =
     amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM

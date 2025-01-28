@@ -15,25 +15,6 @@ import {
   UniV3MintParams,
 } from './types';
 
-export function getAutomanMintOptimalCalldata(
-  amm: AutomatedMarketMakerEnum,
-  mintParams: UniV3MintParams | SlipStreamMintParams,
-  swapData: Hex = '0x',
-): Hex {
-  if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
-    return encodeFunctionData({
-      abi: ISlipStreamAutoman__factory.abi,
-      args: [mintParams as SlipStreamMintParams, swapData] as const,
-      functionName: 'mintOptimal',
-    });
-  }
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [mintParams as UniV3MintParams, swapData] as const,
-    functionName: 'mintOptimal',
-  });
-}
-
 export function getAutomanV4MintOptimalCalldata(
   amm: AutomatedMarketMakerEnum,
   mintParams: UniV3MintParams | SlipStreamMintParams,
@@ -62,17 +43,6 @@ export function getAutomanV4MintOptimalCalldata(
       token1FeeAmount,
     ] as const,
     functionName: 'mintOptimal',
-  });
-}
-
-export function getAutomanIncreaseLiquidityOptimalCallData(
-  increaseParams: IncreaseLiquidityParams,
-  swapData: Hex = '0x',
-): Hex {
-  return encodeFunctionData({
-    abi: Automan__factory.abi,
-    args: [increaseParams, swapData] as const,
-    functionName: 'increaseLiquidityOptimal',
   });
 }
 
@@ -371,27 +341,21 @@ export function getAutomanReinvestCalldata(
 }
 
 export function getAutomanV4ReinvestCalldata(
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
-  const params: IncreaseLiquidityParams = {
-    tokenId,
-    amount0Desired: BigInt(0), // Param value ignored by Automan.
-    amount1Desired: BigInt(0), // Param value ignored by Automan.
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: AutomanV4__factory.abi,
-      args: [params, token0FeeAmount, token1FeeAmount, swapData] as const,
+      args: [
+        increaseLiquidityParams,
+        token0FeeAmount,
+        token1FeeAmount,
+        swapData,
+      ] as const,
       functionName: 'reinvest',
     });
   }
@@ -399,7 +363,7 @@ export function getAutomanV4ReinvestCalldata(
   return encodeFunctionData({
     abi: AutomanV4__factory.abi,
     args: [
-      params,
+      increaseLiquidityParams,
       token0FeeAmount,
       token1FeeAmount,
       swapData,
