@@ -322,7 +322,8 @@ describe('State overrides tests', function () {
   });
 
   it('Test simulateMintOptimalV4', async function () {
-    const blockNumber = 17975698n;
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
     const publicClient = getApiClient();
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
@@ -369,9 +370,9 @@ describe('State overrides tests', function () {
       /* token1FeeAmount= */ 0n,
       blockNumber,
     );
-    expect(liquidity.toString()).to.equal('716894157038546');
-    expect(amount0.toString()).to.equal('51320357');
-    expect(amount1.toString()).to.equal('8736560293857784398');
+    expect(liquidity.toString()).to.equal('930120410912217');
+    expect(amount0.toString()).to.equal('52799510');
+    expect(amount1.toString()).to.equal('14303795769964736798');
   });
 
   it('Test simulateRemoveLiquidity', async function () {
@@ -402,7 +403,8 @@ describe('State overrides tests', function () {
   });
 
   it('Test simulateIncreaseLiquidityOptimalV4', async function () {
-    const blockNumber = 17975698n;
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
     const positionId = 4n;
     const publicClient = getApiClient();
     const amount0Desired = 100000000n;
@@ -433,8 +435,8 @@ describe('State overrides tests', function () {
       undefined,
       blockNumber,
     );
-    expect(amount0.toString()).to.equal('61259538');
-    expect(amount1.toString()).to.equal('7156958298534991565');
+    expect(amount0.toString()).to.equal('10317345');
+    expect(amount1.toString()).to.equal('26271362832753520405');
   });
 });
 
@@ -867,7 +869,9 @@ describe('Viem - Automan transaction tests', function () {
     ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
+    await resetFork(testClient, blockNumber);
 
     // Without this, Hardhat throws an InvalidInputError saying that WHALE_ADDRESS is an unknown account.
     // Likely a Hardhat bug.
@@ -1028,13 +1032,13 @@ describe('Viem - Automan transaction tests', function () {
       token0: existingPosition.pool.token0,
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
-      liquidity: '13324132541941',
+      liquidity: '12798820775744',
       tickLower: 240000,
       tickUpper: 300000,
     });
   });
 
-  it('Optimal mint no need swap', async function () {
+  it('mintOptimalV4 no need swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1087,7 +1091,7 @@ describe('Viem - Automan transaction tests', function () {
     expect(swapRoute?.length).to.equal(0);
   });
 
-  it('Optimal mint with swap', async function () {
+  it('mintOptimalV4 with swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1120,7 +1124,7 @@ describe('Viem - Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
+      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutomanV4,
     );
 
     const { swapPath, swapRoute } = (
