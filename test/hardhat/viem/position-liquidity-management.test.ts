@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/position-liquidity-management.test.ts
 import { FeeAmount, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import hre, { ethers } from 'hardhat';
@@ -102,8 +103,20 @@ describe('UniV3 non-Automan liquidity management tests', function () {
       publicClient,
     );
 
-    WBTC = await getToken(WBTC_ADDRESS, chainId, publicClient);
-    WETH = await getToken(WETH_ADDRESS, chainId, publicClient);
+    WBTC = await getToken(
+      WBTC_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
+    WETH = await getToken(
+      WETH_ADDRESS,
+      chainId,
+      publicClient,
+      /* blockNumber= */ undefined,
+      /* showSymbolAndName= */ true,
+    );
   });
 
   beforeEach(async function () {
