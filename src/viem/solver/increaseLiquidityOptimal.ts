@@ -530,6 +530,8 @@ export async function increaseLiquidityOptimalV3(
       ? position.pool.tickSpacing
       : position.pool.fee;
 
+  // Subtract fees from poolAmountIn before passing to solver
+  // to prevent ERC20 Error: transfer amount exceeds balance.
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
     chainId,
     amm,
@@ -543,6 +545,12 @@ export async function increaseLiquidityOptimalV3(
     increaseParams.amount1Desired,
     blockNumber,
   );
+  const swapFeeAmount = BigInt(
+    new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+  );
+  const swapAmountIn = poolAmountIn - swapFeeAmount;
+  const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
+  const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
 
   const estimateGas = async (swapData: Hex) => {
     try {
@@ -556,6 +564,8 @@ export async function increaseLiquidityOptimalV3(
           position,
           increaseParams,
           swapData,
+          token0FeeAmount,
+          token1FeeAmount,
           blockNumber,
         ),
       ]);
@@ -581,7 +591,7 @@ export async function increaseLiquidityOptimalV3(
     try {
       const slippage =
         Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
-      if (poolAmountIn > 0n) {
+      if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
@@ -592,7 +602,7 @@ export async function increaseLiquidityOptimalV3(
           tickLower,
           tickUpper,
           slippage,
-          poolAmountIn,
+          poolAmountIn: swapAmountIn,
           zeroForOne,
         }));
         [liquidity, amount0, amount1] =
@@ -604,27 +614,20 @@ export async function increaseLiquidityOptimalV3(
             position,
             increaseParams,
             swapData,
+            token0FeeAmount,
+            token1FeeAmount,
             blockNumber,
           );
         gasFeeEstimation = await estimateGas(swapData);
       }
 
-      const token0FeeAmount = zeroForOne
-        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
-        : 0n;
-      const token1FeeAmount = zeroForOne
-        ? 0n
-        : BigInt(
-            new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
-          );
       const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-      const decimals = zeroForOne
+      const tokenInDecimals = zeroForOne
         ? token0Amount.currency.decimals
         : token1Amount.currency.decimals;
-      const feeUSD = new Big(poolAmountIn.toString())
-        .div(10 ** decimals)
-        .mul(tokenInPrice)
-        .mul(FEE_ZAP_RATIO);
+      const feeUSD = new Big(swapFeeAmount.toString())
+        .div(10 ** tokenInDecimals)
+        .mul(tokenInPrice);
 
       getLogger().info('SDK.increaseLiquidityOptimalV3.fees ', {
         amm: amm,
@@ -638,7 +641,8 @@ export async function increaseLiquidityOptimalV3(
         amount0Desired: increaseParams.amount0Desired.toString(),
         amount1Desired: increaseParams.amount1Desired.toString(),
         zeroForOne,
-        poolAmountIn: poolAmountIn.toString(),
+        poolAmountIn: poolAmountIn.toString(), // before fees
+        swapAmountIn: swapAmountIn.toString(), // after fees
       });
 
       return {
