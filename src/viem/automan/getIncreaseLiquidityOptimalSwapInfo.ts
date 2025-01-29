@@ -88,7 +88,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV3(
     increaseOptions,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
-    recipient,
+    /* fromAddress= */ recipient,
     tokenPricesUsd,
     blockNumber,
     includeSolvers,
