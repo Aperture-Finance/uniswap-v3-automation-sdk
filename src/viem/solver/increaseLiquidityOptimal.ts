@@ -551,6 +551,29 @@ export async function increaseLiquidityOptimalV3(
   const swapAmountIn = poolAmountIn - swapFeeAmount;
   const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
   const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
+  const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+  const tokenInDecimals = zeroForOne
+    ? token0Amount.currency.decimals
+    : token1Amount.currency.decimals;
+  const feeUSD = new Big(swapFeeAmount.toString())
+    .div(10 ** tokenInDecimals)
+    .mul(tokenInPrice);
+
+  getLogger().info('SDK.increaseLiquidityOptimalV3.fees ', {
+    amm,
+    chainId,
+    nftId: increaseOptions.tokenId,
+    totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
+    token0PricesUsd: tokenPricesUsd[0],
+    token1PricesUsd: tokenPricesUsd[1],
+    token0FeeAmount: token0FeeAmount.toString(),
+    token1FeeAmount: token1FeeAmount.toString(),
+    amount0Desired: increaseParams.amount0Desired.toString(),
+    amount1Desired: increaseParams.amount1Desired.toString(),
+    zeroForOne,
+    poolAmountIn: poolAmountIn.toString(), // before fees
+    swapAmountIn: swapAmountIn.toString(), // after fees
+  });
 
   const estimateGas = async (swapData: Hex) => {
     try {
@@ -620,30 +643,6 @@ export async function increaseLiquidityOptimalV3(
           );
         gasFeeEstimation = await estimateGas(swapData);
       }
-
-      const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-      const tokenInDecimals = zeroForOne
-        ? token0Amount.currency.decimals
-        : token1Amount.currency.decimals;
-      const feeUSD = new Big(swapFeeAmount.toString())
-        .div(10 ** tokenInDecimals)
-        .mul(tokenInPrice);
-
-      getLogger().info('SDK.increaseLiquidityOptimalV3.fees ', {
-        amm: amm,
-        chainId: chainId,
-        position: increaseOptions.tokenId,
-        totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
-        token0PricesUsd: tokenPricesUsd[0],
-        token1PricesUsd: tokenPricesUsd[1],
-        token0FeeAmount: token0FeeAmount.toString(),
-        token1FeeAmount: token1FeeAmount.toString(),
-        amount0Desired: increaseParams.amount0Desired.toString(),
-        amount1Desired: increaseParams.amount1Desired.toString(),
-        zeroForOne,
-        poolAmountIn: poolAmountIn.toString(), // before fees
-        swapAmountIn: swapAmountIn.toString(), // after fees
-      });
 
       return {
         solver,

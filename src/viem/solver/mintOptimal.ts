@@ -700,16 +700,6 @@ export async function mintOptimalV3(
         gasFeeEstimation = await estimateGas(swapData);
       }
 
-      const pool = await getPool(
-        token0,
-        token1,
-        feeOrTickSpacing,
-        chainId,
-        amm,
-        publicClient,
-        blockNumber,
-      );
-
       return {
         solver,
         amount0,
@@ -724,7 +714,15 @@ export async function mintOptimalV3(
           swapRoute,
         ),
         priceImpact: calcPriceImpact(
-          pool,
+          await getPool(
+            token0,
+            token1,
+            feeOrTickSpacing,
+            chainId,
+            amm,
+            publicClient,
+            blockNumber,
+          ),
           mintParams.amount0Desired,
           mintParams.amount1Desired,
           amount0,
