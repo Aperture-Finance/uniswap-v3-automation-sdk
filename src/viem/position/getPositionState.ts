@@ -1,6 +1,5 @@
 import { ApertureSupportedChainId } from '@/index';
 import { EphemeralAllPositionsByOwner__factory, viem } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import {
   AbiStateMutability,
   ContractFunctionReturnType,
@@ -10,6 +9,9 @@ import {
 import { getPublicClient } from '../public_client';
 import { waitForMs } from './internal';
 import { getNPM } from './position';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export type PositionStateArray = ContractFunctionReturnType<
   typeof EphemeralAllPositionsByOwner__factory.abi,

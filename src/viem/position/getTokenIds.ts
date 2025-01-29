@@ -1,10 +1,13 @@
 import { ApertureSupportedChainId } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, PublicClient } from 'viem';
 
 import { getPublicClient } from '../public_client';
 import { waitForMs } from './internal';
 import { getNPM } from './position';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 const FETCH_TIMEOUT = 200;
 const BATCH_TOKEN_ID_SIZE = 2000;

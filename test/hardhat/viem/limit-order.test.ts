@@ -5,7 +5,7 @@ import {
   tickToPrice,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import hre, { ethers } from 'hardhat';
 import { PublicClient, TestClient } from 'viem';
 
@@ -39,6 +39,9 @@ import {
   eoa,
   expect,
 } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 describe('Viem - Limit order tests', function () {
   let WBTC: Token, WETH: Token;

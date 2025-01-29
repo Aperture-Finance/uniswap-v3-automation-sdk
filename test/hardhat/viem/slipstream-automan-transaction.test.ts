@@ -1,7 +1,7 @@
 // yarn test:hardhat test/hardhat/viem/slipstream-automan-transaction.test.ts
 import { nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { BigNumber } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre, { ethers } from 'hardhat';
@@ -47,6 +47,9 @@ import {
   getReinvestTx,
 } from '../../../src/viem';
 import { expect, hardhatForkProvider, resetFork } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 // TODO: Unify test cases for all AMMs (UniV3, PCSV3 and SlipStream).
 

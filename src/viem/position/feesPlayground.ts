@@ -1,10 +1,13 @@
 // ts-node src/viem/position/feesPlayground.ts
 import { ApertureSupportedChainId } from '@/interfaces';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { floor } from 'lodash';
 
 import { getPublicClient } from '../public_client';
 import { PositionDetails, viewCollectableTokenAmounts } from './position';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 async function main() {
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;

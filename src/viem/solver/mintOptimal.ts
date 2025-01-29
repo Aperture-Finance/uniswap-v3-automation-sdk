@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId, getAMMInfo, getLogger } from '@/index';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -38,6 +38,9 @@ import {
   getSwapPath,
   getSwapRoute,
 } from './internal';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.

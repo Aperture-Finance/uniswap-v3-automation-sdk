@@ -7,7 +7,7 @@ import {
 import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Token } from '@uniswap/sdk-core';
 import { ISlipStreamCLPool__factory } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import {
   Address,
   GetContractReturnType,
@@ -18,6 +18,9 @@ import {
 
 import { getBulkTokens, getToken } from '../currency';
 import { getPublicClient } from '../public_client';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Constructs a Uniswap SDK Pool object for an existing and initialized pool.

@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { NonfungiblePositionManager } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { PublicClient, TransactionRequest } from 'viem';
 
 import {
@@ -12,6 +12,9 @@ import {
   convertCollectableTokenAmountToExpectedCurrencyOwed,
   getTxToNonfungiblePositionManager,
 } from './transaction';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Generates an unsigned transaction that collects tokens from the specified position.

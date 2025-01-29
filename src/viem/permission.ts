@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import {
   CallExecutionError,
   Hex,
@@ -10,6 +10,9 @@ import {
 } from 'viem';
 
 import { getNPM } from './position';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export interface PositionApprovalStatus {
   hasAuthority: boolean;

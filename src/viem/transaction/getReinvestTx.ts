@@ -5,7 +5,7 @@ import {
   getLogger,
 } from '@/index';
 import { Percent } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { Address, PublicClient, TransactionRequest } from 'viem';
 
 import {
@@ -19,6 +19,9 @@ import {
 import { PositionDetails } from '../position';
 import { getAmountsWithSlippage } from './transaction';
 import { SimulatedAmounts } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.

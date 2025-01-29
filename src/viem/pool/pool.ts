@@ -16,7 +16,6 @@ import {
 } from '@aperture_finance/uniswap-v3-sdk';
 import { Price, Token } from '@uniswap/sdk-core';
 import { viem } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import axios from 'axios';
 import JSBI from 'jsbi';
 import { Address, PublicClient } from 'viem';
@@ -24,6 +23,9 @@ import { Address, PublicClient } from 'viem';
 import { BasicPositionInfo } from '../position';
 import { getPublicClient } from '../public_client';
 import { getPool } from './getPool';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Constructs a Uniswap SDK Pool object for the pool behind the specified position.

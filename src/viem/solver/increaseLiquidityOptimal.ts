@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, getAMMInfo, getLogger } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
 
@@ -36,6 +36,9 @@ import {
   getSwapRoute,
 } from './internal';
 import { SolverResult } from './types';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Get the optimal amount of liquidity to increase for a given pool and token amounts.

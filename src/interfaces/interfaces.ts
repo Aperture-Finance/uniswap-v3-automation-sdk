@@ -3,8 +3,11 @@ import {
   AUTOMATION_SLACK_IN_SECS,
 } from '@/constants';
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { z } from 'zod';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export enum ApertureSupportedChainId {
   // Mainnets that use ETH native currency.

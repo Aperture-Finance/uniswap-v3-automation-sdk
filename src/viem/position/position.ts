@@ -14,7 +14,6 @@ import {
   IUniswapV3NonfungiblePositionManager__factory,
   viem,
 } from 'aperture-lens';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import {
   AbiStateMutability,
@@ -33,6 +32,9 @@ import { getToken } from '../currency';
 import { getNPMApprovalOverrides, staticCallWithOverrides } from '../overrides';
 import { getPool, getPoolFromBasicPositionInfo } from '../pool';
 import { getPublicClient } from '../public_client';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 export interface BasicPositionInfo {
   token0: Token;

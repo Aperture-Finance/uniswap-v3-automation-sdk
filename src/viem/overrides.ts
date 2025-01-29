@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId, IERC20__factory, getAMMInfo } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import stringify from 'json-stable-stringify';
 import {
   AccessList,
@@ -18,6 +18,8 @@ import {
 
 import { getRequestCache } from './cached_request';
 
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 type StateOverrides = {
   [address: Address]: {
     balance?: Hex;

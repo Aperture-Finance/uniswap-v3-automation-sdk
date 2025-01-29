@@ -4,7 +4,7 @@ import {
   Position,
   RemoveLiquidityOptions,
 } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import { PublicClient, TransactionRequest } from 'viem';
 
 import { PositionDetails, viewCollectableTokenAmounts } from '../position';
@@ -12,6 +12,9 @@ import {
   convertCollectableTokenAmountToExpectedCurrencyOwed,
   getTxToNonfungiblePositionManager,
 } from './transaction';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 /**
  * Generates an unsigned transaction that removes partial or entire liquidity from the specified position and claim accrued fees.

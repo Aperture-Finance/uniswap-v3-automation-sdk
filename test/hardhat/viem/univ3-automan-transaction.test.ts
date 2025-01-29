@@ -1,6 +1,6 @@
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 import hre, { ethers } from 'hardhat';
 import JSBI from 'jsbi';
 import {
@@ -54,6 +54,9 @@ import {
   hardhatForkProvider,
   resetFork,
 } from '../common';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 // Tests for UniV3Automan transactions on a forked Ethereum mainnet.
 describe('Viem - UniV3Automan transaction tests', function () {

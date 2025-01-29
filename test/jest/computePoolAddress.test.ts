@@ -1,7 +1,10 @@
 import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { viem } from 'aperture-lens';
 
 import { ApertureSupportedChainId, computePoolAddress } from '../../src';
+
+const { AutomatedMarketMakerEnum } = viem;
+type AutomatedMarketMakerEnum = viem.AutomatedMarketMakerEnum;
 
 describe('Compute pool address test', () => {
   it('Should compute Uniswap V3 pool address', async () => {
