@@ -158,14 +158,20 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    const { tx: txRequest } = await getReinvestV3Tx(
+    const txRequest = await getReinvestV3Tx(
       chainId,
       amm,
       eoa,
-      positionId,
-      /* slippageTolerance= */ new Percent(1, 100),
-      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
-      publicClient,
+      /* increaseOptions= */ {
+        tokenId: positionId.toString(),
+        slippageTolerance: new Percent(1, 100),
+        deadline: Math.floor(Date.now() / 1000),
+      },
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
+      /* swapData= */ '0x',
+      /* amount0Min= */ 0n,
+      /* amount1Min= */ 0n,
     );
 
     await impersonatedOwnerClient.sendTransaction({
@@ -177,7 +183,7 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('38878988486731');
+    expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,

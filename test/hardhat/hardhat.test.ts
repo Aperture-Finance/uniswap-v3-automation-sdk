@@ -176,12 +176,16 @@ describe('Estimate gas tests', function () {
       publicClient,
       from,
       eoa,
-      4n,
-      BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
-      amount0Desired,
-      amount1Desired,
-      BigInt(0),
-      '0x',
+      /* increaseLiquidityParams= */ {
+        tokenId: 4n,
+        amount0Desired: 0n, // Not used in reinvest.
+        amount1Desired: 0n, // Not used in reinvest.
+        amount0Min: amount0Desired,
+        amount1Min: amount1Desired,
+        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      },
+      /* feeBips= */ 0n,
+      /* swapData= */ '0x',
       blockNumber,
     );
     return gas;

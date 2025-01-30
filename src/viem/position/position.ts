@@ -582,8 +582,8 @@ export async function getReinvestedPosition(
   const data = getAutomanReinvestCalldata(
     /* increaseLiquidityParams= */ {
       tokenId: positionId,
-      amount0Desired: 0n,
-      amount1Desired: 0n,
+      amount0Desired: 0n, // Not used in reinvest.
+      amount1Desired: 0n, // Not used in reinvest.
       amount0Min: 0n,
       amount1Min: 0n,
       deadline: BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.

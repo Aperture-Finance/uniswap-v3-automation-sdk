@@ -554,10 +554,14 @@ describe('Position util tests', function () {
         positionId,
         publicClient,
       );
-      const data = getAutomanReinvestCalldata(
-        positionId,
-        BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
-      );
+      const data = getAutomanReinvestCalldata({
+        tokenId: positionId,
+        amount0Desired: 0n, // Not used in reinvest.
+        amount1Desired: 0n, // Not used in reinvest.
+        amount0Min: 0n,
+        amount1Min: 0n,
+        deadline: BigInt(Math.round(new Date().getTime() / 1000 + 60 * 10)), // 10 minutes from now.
+      });
       await walletClient.sendTransaction({
         account: owner,
         chain: walletClient.chain,
