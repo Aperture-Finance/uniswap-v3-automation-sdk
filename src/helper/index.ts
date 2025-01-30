@@ -3,8 +3,6 @@ import { Provider, TransactionRequest } from '@ethersproject/providers';
 import { serialize } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
 
-export * from './liquidityAmounts';
-
 /**
  * For a given transaction request intended for an Optimism-like L2 chain, estimate the total gas cost including both the L1 and the L2 gas cost.
  * Modelled after https://github.com/ethereum-optimism/optimism/blob/da2e8c5723ebf0045bd4f60d0aaa20d46ffe9cd0/packages/sdk/src/l2-provider.ts#L133C44-L133C44

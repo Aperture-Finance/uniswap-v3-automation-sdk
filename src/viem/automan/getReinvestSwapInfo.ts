@@ -3,7 +3,7 @@ import {
   E_Solver,
   PositionDetails,
   SolverResult,
-  reinvest,
+  reinvestBackend,
   reinvestV3,
 } from '@/viem';
 import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
@@ -12,7 +12,7 @@ import { Address, PublicClient } from 'viem';
 
 /**
  * Calculates the SolverResults for reinvests on an existing position using Aperture's Automan contract.
- * Used for backend.
+ * Used for backend, so include gas fee reimbursement into feeBips then pass to solver.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
@@ -23,13 +23,14 @@ import { Address, PublicClient } from 'viem';
  * @param positionDetails Optional, the existing positionDetails
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getReinvestSwapInfo(
+export async function getReinvestSwapInfoBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   increaseOptions: IncreaseOptions,
   fromAddress: Address,
   tokenPricesUsd: [string, string],
+  nativeToUsd: string,
   includeSolvers?: E_Solver[],
   positionDetails?: PositionDetails,
   blockNumber?: bigint,
@@ -44,7 +45,7 @@ export async function getReinvestSwapInfo(
     );
   }
 
-  return reinvest(
+  return reinvestBackend(
     chainId,
     amm,
     publicClient,
@@ -52,6 +53,7 @@ export async function getReinvestSwapInfo(
     increaseOptions,
     fromAddress,
     tokenPricesUsd,
+    nativeToUsd,
     blockNumber,
     includeSolvers,
   );
