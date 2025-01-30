@@ -45,6 +45,24 @@ export type GetAutomanReturnTypes<
   args // to dedup function name
 >;
 
+export type GetAutomanV3ReturnTypes<
+  functionName extends AutomanActionName,
+  args extends ContractFunctionArgs<
+    typeof AutomanV3__factory.abi,
+    AbiStateMutability,
+    functionName
+  > = ContractFunctionArgs<
+    typeof AutomanV3__factory.abi,
+    AbiStateMutability,
+    functionName
+  >,
+> = ContractFunctionReturnType<
+  typeof AutomanV3__factory.abi,
+  AbiStateMutability,
+  functionName,
+  args // to dedup function name
+>;
+
 export type UniV3MintParams = GetAbiFunctionParamsTypes<
   typeof IUniswapV3NonfungiblePositionManager__factory.abi,
   'mint'
@@ -68,6 +86,10 @@ export type RebalanceReturnType = GetAutomanReturnTypes<
 export type ReinvestReturnType = GetAutomanReturnTypes<
   'reinvest',
   [IncreaseLiquidityParams, bigint, Hex]
+>;
+export type ReinvestV3ReturnType = GetAutomanV3ReturnTypes<
+  'reinvest',
+  [IncreaseLiquidityParams, bigint, bigint, Hex]
 >;
 
 export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;

@@ -36,7 +36,7 @@ import { SolverResult, SwapRoute } from './types';
  * Get the optimal amount of liquidity to rebalance for a given position.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
- * @param position Position details
+ * @param positionDetails Position details
  * @param newTickLower The new lower tick.
  * @param newTickUpper The new upper tick.
  * @param feeBips The fee Aperture charge for the transaction.
@@ -50,7 +50,7 @@ import { SolverResult, SwapRoute } from './types';
 export async function rebalanceOptimalV2(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  position: PositionDetails,
+  positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
   fromAddress: Address,
@@ -61,13 +61,13 @@ export async function rebalanceOptimalV2(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
-  const token0 = position.token0.address as Address;
-  const token1 = position.token1.address as Address;
+  const token0 = positionDetails.token0.address as Address;
+  const token1 = positionDetails.token1.address as Address;
 
   const logdata = {
     chainId,
     amm,
-    position: position.tokenId,
+    position: positionDetails.tokenId,
     newTickLower,
     newTickUpper,
     fromAddress,
@@ -85,8 +85,8 @@ export async function rebalanceOptimalV2(
       amm,
       publicClient,
       fromAddress,
-      position.owner,
-      BigInt(position.tokenId),
+      positionDetails.owner,
+      BigInt(positionDetails.tokenId),
       /*amount0Min =*/ undefined,
       /*amount1Min =*/ undefined,
       feeBips,
@@ -100,8 +100,8 @@ export async function rebalanceOptimalV2(
       token0,
       token1,
       amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-        ? position.tickSpacing
-        : position.fee,
+        ? positionDetails.tickSpacing
+        : positionDetails.fee,
       newTickLower,
       newTickUpper,
       receive0,
@@ -121,24 +121,20 @@ export async function rebalanceOptimalV2(
     const { poolAmountIn, zeroForOne, receive0, receive1 } =
       await simulateAndGetOptimalSwapAmount(/* feeBips= */ 0n);
     const collectableTokenInUsd = getTokensInUsd(
-      position.tokensOwed0,
-      position.tokensOwed1,
+      positionDetails.tokensOwed0,
+      positionDetails.tokensOwed1,
       tokenPricesUsd,
     );
     const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-
     const decimals = zeroForOne
-      ? position.pool.token0.decimals
-      : position.pool.token1.decimals;
-
+      ? positionDetails.pool.token0.decimals
+      : positionDetails.pool.token1.decimals;
     const token0Usd = new Big(receive0.toString())
       .mul(tokenPricesUsd[0])
-      .div(10 ** position.token0.decimals);
-
+      .div(10 ** positionDetails.token0.decimals);
     const token1Usd = new Big(receive1.toString())
       .mul(tokenPricesUsd[1])
-      .div(10 ** position.token1.decimals);
-
+      .div(10 ** positionDetails.token1.decimals);
     const positionUsd = token0Usd.add(token1Usd);
     if (positionUsd.eq(0)) {
       getLogger().error('Invalid position USD value', {
@@ -168,11 +164,11 @@ export async function rebalanceOptimalV2(
       ? new Big('0')
       : tokenInSwapFeeAmount;
     const token0ReinvestFeeAmount = new Big(
-      position.tokensOwed0.quotient.toString(),
-    ).mul(getFeeReinvestRatio(position.fee));
+      positionDetails.tokensOwed0.quotient.toString(),
+    ).mul(getFeeReinvestRatio(positionDetails.fee));
     const token1ReinvestFeeAmount = new Big(
-      position.tokensOwed1.quotient.toString(),
-    ).mul(getFeeReinvestRatio(position.fee));
+      positionDetails.tokensOwed1.quotient.toString(),
+    ).mul(getFeeReinvestRatio(positionDetails.fee));
     const rebalanceFlatFeePips = new Big(FEE_REBALANCE_USD)
       .div(positionUsd)
       .mul(MAX_FEE_PIPS)
@@ -194,8 +190,9 @@ export async function rebalanceOptimalV2(
       .div(10 ** decimals)
       .mul(tokenInPrice)
       .mul(FEE_REBALANCE_SWAP_RATIO)
-      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee)))
+      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(positionDetails.fee)))
       .add(FEE_REBALANCE_USD);
+    // positionUsd includes feesCollected and so does feeBips
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
@@ -212,7 +209,7 @@ export async function rebalanceOptimalV2(
       token0SwapFeeAmount: token0SwapFeeAmount.toString(),
       token1SwapFeeAmount: token1SwapFeeAmount.toString(),
       feeOnRebalanceReinvestUsd: collectableTokenInUsd
-        .mul(getFeeReinvestRatio(position.fee))
+        .mul(getFeeReinvestRatio(positionDetails.fee))
         .toString(),
       token0ReinvestFeeAmount: token0ReinvestFeeAmount.toString(),
       token1ReinvestFeeAmount: token1ReinvestFeeAmount.toString(),
@@ -259,7 +256,7 @@ export async function rebalanceOptimalV2(
       ? {
           token0,
           token1,
-          tickSpacing: position.tickSpacing,
+          tickSpacing: positionDetails.tickSpacing,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           amount0Desired: receive0,
@@ -273,7 +270,7 @@ export async function rebalanceOptimalV2(
       : {
           token0,
           token1,
-          fee: position.fee,
+          fee: positionDetails.fee,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           amount0Desired: receive0,
@@ -293,9 +290,9 @@ export async function rebalanceOptimalV2(
           amm,
           publicClient,
           fromAddress,
-          position.owner,
+          positionDetails.owner,
           mintParams,
-          BigInt(position.tokenId),
+          BigInt(positionDetails.tokenId),
           feeBips,
           swapData,
           blockNumber,
@@ -331,8 +328,8 @@ export async function rebalanceOptimalV2(
           token1,
           feeOrTickSpacing:
             amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-              ? position.tickSpacing
-              : position.fee,
+              ? positionDetails.tickSpacing
+              : positionDetails.fee,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           slippage,
@@ -344,9 +341,9 @@ export async function rebalanceOptimalV2(
           amm,
           publicClient,
           fromAddress,
-          position.owner,
+          positionDetails.owner,
           mintParams,
-          BigInt(position.tokenId),
+          BigInt(positionDetails.tokenId),
           feeBips,
           swapData,
           blockNumber,
@@ -365,7 +362,7 @@ export async function rebalanceOptimalV2(
         gasFeeEstimation,
         swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
         priceImpact: calcPriceImpact(
-          position.pool,
+          positionDetails.pool,
           receive0,
           receive1,
           amount0,
@@ -402,7 +399,7 @@ export async function rebalanceOptimalV2(
 export async function rebalanceOptimalV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  position: PositionDetails,
+  positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
   fromAddress: Address,
@@ -413,13 +410,13 @@ export async function rebalanceOptimalV3(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
-  const token0 = position.token0.address as Address;
-  const token1 = position.token1.address as Address;
+  const token0 = positionDetails.token0.address as Address;
+  const token1 = positionDetails.token1.address as Address;
 
   const logdata = {
     chainId,
     amm,
-    position: position.tokenId,
+    positionDetails: positionDetails.tokenId,
     newTickLower,
     newTickUpper,
     fromAddress,
@@ -440,8 +437,8 @@ export async function rebalanceOptimalV3(
       amm,
       publicClient,
       fromAddress,
-      position.owner,
-      BigInt(position.tokenId),
+      positionDetails.owner,
+      BigInt(positionDetails.tokenId),
       /*amount0Min =*/ undefined,
       /*amount1Min =*/ undefined,
       token0FeeAmount,
@@ -456,8 +453,8 @@ export async function rebalanceOptimalV3(
       token0,
       token1,
       amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-        ? position.tickSpacing
-        : position.fee,
+        ? positionDetails.tickSpacing
+        : positionDetails.fee,
       newTickLower,
       newTickUpper,
       receive0,
@@ -480,23 +477,23 @@ export async function rebalanceOptimalV3(
         /* token1FeeAmount= */ 0n,
       );
     const collectableTokenInUsd = getTokensInUsd(
-      position.tokensOwed0,
-      position.tokensOwed1,
+      positionDetails.tokensOwed0,
+      positionDetails.tokensOwed1,
       tokenPricesUsd,
     );
     const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
 
     const decimals = zeroForOne
-      ? position.pool.token0.decimals
-      : position.pool.token1.decimals;
+      ? positionDetails.pool.token0.decimals
+      : positionDetails.pool.token1.decimals;
 
     const token0Usd = new Big(receive0.toString())
       .mul(tokenPricesUsd[0])
-      .div(10 ** position.token0.decimals);
+      .div(10 ** positionDetails.token0.decimals);
 
     const token1Usd = new Big(receive1.toString())
       .mul(tokenPricesUsd[1])
-      .div(10 ** position.token1.decimals);
+      .div(10 ** positionDetails.token1.decimals);
 
     const positionUsd = token0Usd.add(token1Usd);
     if (positionUsd.eq(0)) {
@@ -528,11 +525,11 @@ export async function rebalanceOptimalV3(
       ? new Big('0')
       : tokenInSwapFeeAmount;
     const token0ReinvestFeeAmount = new Big(
-      position.tokensOwed0.quotient.toString(),
-    ).mul(getFeeReinvestRatio(position.fee));
+      positionDetails.tokensOwed0.quotient.toString(),
+    ).mul(getFeeReinvestRatio(positionDetails.fee));
     const token1ReinvestFeeAmount = new Big(
-      position.tokensOwed1.quotient.toString(),
-    ).mul(getFeeReinvestRatio(position.fee));
+      positionDetails.tokensOwed1.quotient.toString(),
+    ).mul(getFeeReinvestRatio(positionDetails.fee));
     const rebalanceFlatFeePips = new Big(FEE_REBALANCE_USD)
       .div(positionUsd)
       .mul(MAX_FEE_PIPS)
@@ -554,7 +551,7 @@ export async function rebalanceOptimalV3(
       .div(10 ** decimals)
       .mul(tokenInPrice)
       .mul(FEE_REBALANCE_SWAP_RATIO)
-      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(position.fee)))
+      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(positionDetails.fee)))
       .add(FEE_REBALANCE_USD);
     const feeBips = BigInt(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
@@ -572,7 +569,7 @@ export async function rebalanceOptimalV3(
       token0SwapFeeAmount: token0SwapFeeAmount.toString(),
       token1SwapFeeAmount: token1SwapFeeAmount.toString(),
       feeOnRebalanceReinvestUsd: collectableTokenInUsd
-        .mul(getFeeReinvestRatio(position.fee))
+        .mul(getFeeReinvestRatio(positionDetails.fee))
         .toString(),
       token0ReinvestFeeAmount: token0ReinvestFeeAmount.toString(),
       token1ReinvestFeeAmount: token1ReinvestFeeAmount.toString(),
@@ -621,7 +618,7 @@ export async function rebalanceOptimalV3(
       ? {
           token0,
           token1,
-          tickSpacing: position.tickSpacing,
+          tickSpacing: positionDetails.tickSpacing,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           amount0Desired: receive0,
@@ -635,7 +632,7 @@ export async function rebalanceOptimalV3(
       : {
           token0,
           token1,
-          fee: position.fee,
+          fee: positionDetails.fee,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           amount0Desired: receive0,
@@ -655,9 +652,9 @@ export async function rebalanceOptimalV3(
           amm,
           publicClient,
           fromAddress,
-          position.owner,
+          positionDetails.owner,
           mintParams,
-          BigInt(position.tokenId),
+          BigInt(positionDetails.tokenId),
           token0FeeAmount,
           token1FeeAmount,
           swapData,
@@ -694,8 +691,8 @@ export async function rebalanceOptimalV3(
           token1,
           feeOrTickSpacing:
             amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-              ? position.tickSpacing
-              : position.fee,
+              ? positionDetails.tickSpacing
+              : positionDetails.fee,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           slippage,
@@ -707,9 +704,9 @@ export async function rebalanceOptimalV3(
           amm,
           publicClient,
           fromAddress,
-          position.owner,
+          positionDetails.owner,
           mintParams,
-          BigInt(position.tokenId),
+          BigInt(positionDetails.tokenId),
           token0FeeAmount,
           token1FeeAmount,
           swapData,
@@ -735,7 +732,7 @@ export async function rebalanceOptimalV3(
           swapRoute,
         ),
         priceImpact: calcPriceImpact(
-          position.pool,
+          positionDetails.pool,
           receive0,
           receive1,
           amount0,

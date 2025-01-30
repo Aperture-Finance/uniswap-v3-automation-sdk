@@ -13,7 +13,7 @@ import { Address, PublicClient } from 'viem';
  * calculates the optimal swap information including swap path info, swap route and price impact for rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
- * @param ownerAddress Owner of the existing position.
+ * @param fromAddress The address to rebalance from.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
  * @param newPositionTickUpper The upper tick of the new position.
@@ -21,13 +21,13 @@ import { Address, PublicClient } from 'viem';
  * @param tokenPrices The prices of the two tokens in the pool.
  * @param publicClient Viem public client.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
- * @param position Optional, the existing position.
+ * @param positionDetails Optional, the existing positionDetails.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getRebalanceSwapInfo(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  ownerAddress: Address,
+  fromAddress: Address,
   existingPositionId: bigint,
   newPositionTickLower: number,
   newPositionTickUpper: number,
@@ -35,12 +35,12 @@ export async function getRebalanceSwapInfo(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  position?: PositionDetails,
+  positionDetails?: PositionDetails,
   blockNumber?: bigint,
   feesOn?: boolean,
 ): Promise<SolverResult[]> {
-  if (position === undefined) {
-    position = await PositionDetails.fromPositionId(
+  if (positionDetails === undefined) {
+    positionDetails = await PositionDetails.fromPositionId(
       chainId,
       amm,
       existingPositionId,
@@ -52,10 +52,10 @@ export async function getRebalanceSwapInfo(
   return rebalanceOptimalV2(
     chainId,
     amm,
-    position,
+    positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
-    ownerAddress,
+    fromAddress,
     slippageTolerance,
     tokenPricesUsd,
     publicClient,
@@ -70,7 +70,7 @@ export async function getRebalanceSwapInfo(
 export async function getRebalanceSwapInfoV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  ownerAddress: Address,
+  fromAddress: Address,
   existingPositionId: bigint,
   newPositionTickLower: number,
   newPositionTickUpper: number,
@@ -78,12 +78,12 @@ export async function getRebalanceSwapInfoV3(
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  position?: PositionDetails,
+  positionDetails?: PositionDetails,
   blockNumber?: bigint,
   feesOn?: boolean,
 ): Promise<SolverResult[]> {
-  if (position === undefined) {
-    position = await PositionDetails.fromPositionId(
+  if (positionDetails === undefined) {
+    positionDetails = await PositionDetails.fromPositionId(
       chainId,
       amm,
       existingPositionId,
@@ -95,10 +95,10 @@ export async function getRebalanceSwapInfoV3(
   return rebalanceOptimalV3(
     chainId,
     amm,
-    position,
+    positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
-    ownerAddress,
+    fromAddress,
     slippageTolerance,
     tokenPricesUsd,
     publicClient,
