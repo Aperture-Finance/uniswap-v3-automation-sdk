@@ -1021,9 +1021,9 @@ export async function simulateReinvest(
     blockNumber,
   );
   return decodeFunctionResult({
-    abi: AutomanV3__factory.abi,
+    abi: Automan__factory.abi,
     data,
-    functionName: 'rebalance',
+    functionName: 'reinvest',
   });
 }
 
@@ -1055,7 +1055,7 @@ export async function simulateReinvestV3(
   return decodeFunctionResult({
     abi: AutomanV3__factory.abi,
     data,
-    functionName: 'rebalance',
+    functionName: 'reinvest',
   });
 }
 

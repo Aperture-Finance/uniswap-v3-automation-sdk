@@ -3,6 +3,7 @@ import {
   GAS_LIMIT_L2_MULTIPLIER,
   getAMMInfo,
   getAmountsForLiquidity,
+  getChainInfo,
   getLogger,
 } from '@/index';
 import { IncreaseOptions, TickMath } from '@aperture_finance/uniswap-v3-sdk';
@@ -97,7 +98,7 @@ export async function reinvestBackend(
     ) + (zeroForOne ? 0n : swapFeeAmount);
   let swapAmountIn =
     poolAmountIn - (zeroForOne ? token0FeeAmount : token1FeeAmount);
-  const feeUSD = new Big(token0FeeAmount.toString())
+  let feeUSD = new Big(token0FeeAmount.toString())
     .div(10 ** token0.decimals)
     .mul(tokenPricesUsd[0])
     .add(
@@ -119,14 +120,16 @@ export async function reinvestBackend(
     .mul(tokenPricesUsd[1])
     .div(10 ** positionDetails.token1.decimals);
   const positionUsd = token0Usd.add(token1Usd);
-  const positionNative = positionUsd.div(nativeToUsd);
+  const positionRawNative = positionUsd
+    .mul(10 ** getChainInfo(chainId).wrappedNativeCurrency.decimals)
+    .div(nativeToUsd);
   const feeBips = BigInt(feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0));
 
   getLogger().info('SDK.reinvestBackend.round1.fees ', {
     amm,
     chainId,
     nftId: increaseOptions.tokenId,
-    totalReinvestFeeUsd: feeUSD.toString(),
+    reinvestFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     token0FeeAmount: token0FeeAmount.toString(),
@@ -137,14 +140,14 @@ export async function reinvestBackend(
     poolAmountIn: poolAmountIn.toString(), // before fees
     swapAmountIn: swapAmountIn.toString(), // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
-    positionNative: positionNative.toString(), // without feesCollected of the position
+    positionRawNative: positionRawNative.toString(), // without feesCollected of the position
     feeBips: feeBips.toString(),
   });
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
     try {
       if (
-        [
+        ![
           ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
           ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
           ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
@@ -236,7 +239,7 @@ export async function reinvestBackend(
           .mul(gasBoostMultiplier)
           .div(100)
           .mul(gasFeeEstimation.toString())
-          .div(positionNative)
+          .div(positionRawNative)
           .toFixed(0),
       );
       const totalFeePips = feeBips + gasDeductionPips;
@@ -254,6 +257,14 @@ export async function reinvestBackend(
       );
       swapAmountIn =
         poolAmountIn - (zeroForOne ? token0FeeAmount : token1FeeAmount);
+      feeUSD = new Big(token0FeeAmount.toString())
+        .div(10 ** token0.decimals)
+        .mul(tokenPricesUsd[0])
+        .add(
+          new Big(token1FeeAmount.toString())
+            .div(10 ** token1.decimals)
+            .mul(tokenPricesUsd[1]),
+        );
 
       getLogger().info('SDK.reinvestBackend.round2.fees ', {
         solver,
@@ -271,7 +282,9 @@ export async function reinvestBackend(
         poolAmountIn: poolAmountIn.toString(), // before fees
         swapAmountIn: swapAmountIn.toString(), // after fees (both apertureFees and gasReimbursementFees)
         positionUsd: positionUsd.toString(), // without feesCollected of the position
+        positionRawNative: positionRawNative.toFixed(0), // without feesCollected of the position
         feeBips: feeBips.toString(),
+        gasFeeEstimation: gasFeeEstimation.toString(),
         gasDeductionPips: gasDeductionPips.toString(),
         totalFeePips: totalFeePips.toString(),
       });
@@ -290,6 +303,21 @@ export async function reinvestBackend(
           poolAmountIn: swapAmountIn,
           zeroForOne,
         }));
+      } else {
+        swapData = '0x';
+        swapRoute = undefined;
+      }
+
+      // Check fees offline to save a simulation request.
+      if (token0FeeAmount > increaseLiquidityParams.amount0Desired) {
+        throw new Error(
+          `token0FeeAmount=${token0FeeAmount} > tokensOwed0=${increaseLiquidityParams.amount0Desired}`,
+        );
+      }
+      if (token1FeeAmount > increaseLiquidityParams.amount1Desired) {
+        throw new Error(
+          `token1FeeAmount=${token1FeeAmount} > tokensOwed1=${increaseLiquidityParams.amount1Desired}`,
+        );
       }
 
       [liquidity, amount0, amount1] = await simulateReinvest(
@@ -299,7 +327,7 @@ export async function reinvestBackend(
         fromAddress,
         positionDetails.owner,
         increaseLiquidityParams,
-        feeBips,
+        totalFeePips,
         swapData,
         blockNumber,
       );
