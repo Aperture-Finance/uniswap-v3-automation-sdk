@@ -687,7 +687,7 @@ export async function rebalanceBackend(
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
-        feeBips,
+        aptrFeeBips: feeBips,
         gasUnits,
         gasInRawNative,
         gasDeductionPips,
@@ -720,7 +720,7 @@ export async function rebalanceBackend(
         positionDetails.owner,
         mintParams,
         BigInt(positionDetails.tokenId),
-        feeBips,
+        totalFeePips,
         swapData,
         blockNumber,
       );
@@ -730,7 +730,7 @@ export async function rebalanceBackend(
         amount1,
         liquidity,
         swapData,
-        feeBips,
+        feeBips: totalFeePips,
         feeUSD: feeUSD.toString(),
         gasUnits,
         gasFeeEstimation: gasInRawNative,

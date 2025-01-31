@@ -271,7 +271,7 @@ export async function reinvestBackend(
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
-        feeBips,
+        aptrFeeBips: feeBips,
         gasUnits,
         gasInRawNative,
         gasDeductionPips,
