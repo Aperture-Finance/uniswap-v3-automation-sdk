@@ -144,6 +144,20 @@ export async function reinvestBackend(
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
     try {
+      const [gasPriceInWei, gasUnits] = await Promise.all([
+        publicClient.getGasPrice(),
+        estimateReinvestGas(
+          chainId,
+          amm,
+          publicClient,
+          fromAddress,
+          positionDetails.owner,
+          increaseLiquidityParams,
+          feeBips,
+          swapData,
+          blockNumber,
+        ),
+      ]);
       if (
         ![
           ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
@@ -151,21 +165,10 @@ export async function reinvestBackend(
           ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
         ].includes(chainId)
       ) {
-        const [gasPrice, gasAmount] = await Promise.all([
-          publicClient.getGasPrice(),
-          estimateReinvestGas(
-            chainId,
-            amm,
-            publicClient,
-            fromAddress,
-            positionDetails.owner,
-            increaseLiquidityParams,
-            feeBips,
-            swapData,
-            blockNumber,
-          ),
-        ]);
-        return gasPrice * gasAmount;
+        return {
+          gasUnits,
+          gasInRawNative: gasPriceInWei * gasUnits,
+        };
       }
       // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
       const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
@@ -185,17 +188,22 @@ export async function reinvestBackend(
       // Scale the estimated gas by 1.5 as L1 gas could be at most 50% higher than the estimated gas.
       // We apply the scaling factor to the L2 gas portion as well because I find the estimated gas price is often lower than the actual price.
       // See https://community.optimism.io/docs/developers/build/transaction-fees/#the-l1-data-fee.
-      return (
-        (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
-        100n
-      );
+      return {
+        gasUnits,
+        gasInRawNative:
+          (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
+          100n,
+      };
     } catch (e) {
       getLogger().error('SDK.reinvest.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
         increaseLiquidityParams,
       });
-      return 0n;
+      return {
+        gasUnits: 0n,
+        gasInRawNative: 0n,
+      };
     }
   };
 
@@ -205,7 +213,8 @@ export async function reinvestBackend(
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
-    let gasFeeEstimation: bigint = 0n;
+    let gasUnits: bigint = 0n;
+    let gasInRawNative: bigint = 0n;
 
     try {
       const slippage =
@@ -225,7 +234,7 @@ export async function reinvestBackend(
           zeroForOne,
         }));
       }
-      gasFeeEstimation = await estimateGasInRawNaive(swapData);
+      ({ gasUnits, gasInRawNative } = await estimateGasInRawNaive(swapData));
       // Ethereum L1: 25% gas deduction boost.
       // L2s and all other L1s: 50% gas deduction boost.
       const gasBoostMultiplier =
@@ -236,7 +245,7 @@ export async function reinvestBackend(
         new Big(MAX_FEE_PIPS)
           .mul(gasBoostMultiplier)
           .div(100)
-          .mul(gasFeeEstimation.toString())
+          .mul(gasInRawNative.toString())
           .div(positionRawNative)
           .toFixed(0),
       );
@@ -274,7 +283,8 @@ export async function reinvestBackend(
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
         feeBips,
-        gasFeeEstimation,
+        gasUnits,
+        gasInRawNative,
         gasDeductionPips,
         totalFeePips,
       });
@@ -335,7 +345,8 @@ export async function reinvestBackend(
         amount1: amount1OutAfterSlippage,
         liquidity,
         swapData,
-        gasFeeEstimation,
+        gasUnits,
+        gasFeeEstimation: gasInRawNative,
         swapRoute: getSwapRoute(
           token0.address as Address,
           token1.address as Address,
