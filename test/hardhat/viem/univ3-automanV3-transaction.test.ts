@@ -224,17 +224,14 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       await getRebalanceSwapInfoV3(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
-        /* slippageTolerance= */ 0.01,
+        /* slippage= */ 0.01,
         /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
         [E_Solver.SamePool],
-        existingPosition,
-        undefined,
-        false,
       )
     )[0];
     const { tx: txRequest } = await getRebalanceV3Tx(
@@ -297,17 +294,14 @@ describe('Viem - UniV3AutomanV3 transaction tests', function () {
       await getRebalanceSwapInfoV3(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
-        /* slippageTolerance= */ 0.01,
+        /* slippage= */ 0.01,
         /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
         [E_Solver.OneInch],
-        existingPosition,
-        undefined,
-        false,
       )
     )[0];
     const { tx: txRequest } = await getRebalanceV3Tx(
