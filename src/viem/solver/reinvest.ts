@@ -143,68 +143,57 @@ export async function reinvestBackend(
   });
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
-    try {
-      const [gasPriceInWei, gasUnits] = await Promise.all([
-        publicClient.getGasPrice(),
-        estimateReinvestGas(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          positionDetails.owner,
+    // Pass errors without (try-)catch, because failing to estimate gas will fail to reimburse relayer for gas.
+    const [gasPriceInWei, gasUnits] = await Promise.all([
+      publicClient.getGasPrice(),
+      estimateReinvestGas(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        positionDetails.owner,
+        increaseLiquidityParams,
+        feeBips,
+        swapData,
+        blockNumber,
+      ),
+    ]);
+    if (
+      ![
+        ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
+        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+        ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
+      ].includes(chainId)
+    ) {
+      return {
+        gasUnits,
+        gasInRawNative: gasPriceInWei * gasUnits,
+      };
+    }
+    // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
+    const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
+      {
+        from: fromAddress,
+        to: getAMMInfo(chainId, amm)!.apertureAutoman,
+        data: getAutomanReinvestCalldata(
           increaseLiquidityParams,
           feeBips,
           swapData,
-          blockNumber,
+          /* permitInfo= */ undefined,
         ),
-      ]);
-      if (
-        ![
-          ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
-          ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-          ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
-        ].includes(chainId)
-      ) {
-        return {
-          gasUnits,
-          gasInRawNative: gasPriceInWei * gasUnits,
-        };
-      }
-      // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
-      const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
-        {
-          from: fromAddress,
-          to: getAMMInfo(chainId, amm)!.apertureAutoman,
-          data: getAutomanReinvestCalldata(
-            increaseLiquidityParams,
-            feeBips,
-            swapData,
-            /* permitInfo= */ undefined,
-          ),
-        },
-        chainId,
-        publicClient,
-      );
-      // Scale the estimated gas by 1.5 as L1 gas could be at most 50% higher than the estimated gas.
-      // We apply the scaling factor to the L2 gas portion as well because I find the estimated gas price is often lower than the actual price.
-      // See https://community.optimism.io/docs/developers/build/transaction-fees/#the-l1-data-fee.
-      return {
-        gasUnits,
-        gasInRawNative:
-          (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
-          100n,
-      };
-    } catch (e) {
-      getLogger().error('SDK.reinvest.EstimateGas.Error', {
-        error: JSON.stringify((e as Error).message),
-        swapData,
-        increaseLiquidityParams,
-      });
-      return {
-        gasUnits: 0n,
-        gasInRawNative: 0n,
-      };
-    }
+      },
+      chainId,
+      publicClient,
+    );
+    // Scale the estimated gas by 1.5 as L1 gas could be at most 50% higher than the estimated gas.
+    // We apply the scaling factor to the L2 gas portion as well because I find the estimated gas price is often lower than the actual price.
+    // See https://community.optimism.io/docs/developers/build/transaction-fees/#the-l1-data-fee.
+    return {
+      gasUnits,
+      gasInRawNative:
+        (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
+        100n,
+    };
   };
 
   const solve = async (solver: E_Solver) => {
