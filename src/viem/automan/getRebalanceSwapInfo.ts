@@ -5,7 +5,7 @@ import {
   SolverResult,
   rebalanceBackend,
   rebalanceOptimalV2,
-  rebalanceOptimalV3,
+  rebalanceV3,
 } from '@/viem';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -89,7 +89,7 @@ export async function getRebalanceSwapInfoBackend(
   positionDetails: PositionDetails,
   newPositionTickLower: number,
   newPositionTickUpper: number,
-  slippageTolerance: number,
+  slippage: number,
   tokenPricesUsd: [string, string],
   nativeToUsd: string,
   includeSolvers?: E_Solver[],
@@ -103,7 +103,7 @@ export async function getRebalanceSwapInfoBackend(
     positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
-    slippageTolerance,
+    slippage,
     tokenPricesUsd,
     nativeToUsd,
     includeSolvers,
@@ -116,40 +116,27 @@ export async function getRebalanceSwapInfoBackend(
 export async function getRebalanceSwapInfoV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
   fromAddress: Address,
-  existingPositionId: bigint,
+  positionDetails: PositionDetails,
   newPositionTickLower: number,
   newPositionTickUpper: number,
-  slippageTolerance: number,
+  slippage: number,
   tokenPricesUsd: [string, string],
-  publicClient: PublicClient,
   includeSolvers?: E_Solver[],
-  positionDetails?: PositionDetails,
   blockNumber?: bigint,
-  feesOn?: boolean,
 ): Promise<SolverResult[]> {
-  if (positionDetails === undefined) {
-    positionDetails = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      existingPositionId,
-      publicClient,
-      blockNumber,
-    );
-  }
-
-  return rebalanceOptimalV3(
+  return rebalanceV3(
     chainId,
     amm,
+    publicClient,
+    fromAddress,
     positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
-    fromAddress,
-    slippageTolerance,
+    slippage,
     tokenPricesUsd,
-    publicClient,
-    blockNumber,
     includeSolvers,
-    feesOn,
+    blockNumber,
   );
 }

@@ -16,11 +16,12 @@ import { Address, PublicClient } from 'viem';
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
- * @param increaseOptions Options for increasing the position.
  * @param fromAddress The address to reinvest from.
+ * @param positionDetails The existing positionDetails
+ * @param increaseOptions Options for increasing the position.
  * @param tokenPricesUsd The prices of the two tokens in the pool.
+ * @param nativeToUsd The price of the native token in USD.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
- * @param positionDetails Optional, the existing positionDetails
  * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getReinvestSwapInfoBackend(
@@ -28,23 +29,13 @@ export async function getReinvestSwapInfoBackend(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   fromAddress: Address,
+  positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
   nativeToUsd: string,
   includeSolvers?: E_Solver[],
-  positionDetails?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
-  if (positionDetails === undefined) {
-    positionDetails = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      BigInt(increaseOptions.tokenId.toString()),
-      publicClient,
-      blockNumber,
-    );
-  }
-
   return reinvestBackend(
     chainId,
     amm,
@@ -65,22 +56,22 @@ export async function getReinvestSwapInfoBackend(
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
- * @param increaseOptions Options for increasing the position.
  * @param fromAddress The address to reinvest from.
+ * @param positionDetails The existing positionDetails
+ * @param increaseOptions Options for increasing the position.
  * @param tokenPricesUsd The prices of the two tokens in the pool.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
- * @param positionDetails Optional, the existing positionDetails
  * @param blockNumber Optional. The block number to simulate the call from.
  */
 export async function getReinvestSwapInfoV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  increaseOptions: IncreaseOptions,
   fromAddress: Address,
+  positionDetails: PositionDetails,
+  increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
   includeSolvers?: E_Solver[],
-  positionDetails?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (positionDetails === undefined) {
@@ -97,11 +88,11 @@ export async function getReinvestSwapInfoV3(
     chainId,
     amm,
     publicClient,
+    fromAddress,
     positionDetails,
     increaseOptions,
-    fromAddress,
     tokenPricesUsd,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }

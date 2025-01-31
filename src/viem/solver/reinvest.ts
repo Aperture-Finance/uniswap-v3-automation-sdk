@@ -2,11 +2,10 @@ import {
   ApertureSupportedChainId,
   GAS_LIMIT_L2_MULTIPLIER,
   getAMMInfo,
-  getAmountsForLiquidity,
   getChainInfo,
   getLogger,
 } from '@/index';
-import { IncreaseOptions, TickMath } from '@aperture_finance/uniswap-v3-sdk';
+import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
 import { Address, Hex, PublicClient } from 'viem';
@@ -48,15 +47,15 @@ export async function reinvestBackend(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
+  const tokenId = BigInt(increaseOptions.tokenId.toString());
   const increaseLiquidityParams: IncreaseLiquidityParams = {
-    tokenId: BigInt(increaseOptions.tokenId.toString()),
+    tokenId,
     amount0Desired: BigInt(positionDetails.tokensOwed0.quotient.toString()),
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
     amount0Min: 0n,
     amount1Min: 0n,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-
   const token0 = positionDetails.pool.token0;
   const token1 = positionDetails.pool.token1;
   const { tickLower, tickUpper } = positionDetails;
@@ -107,16 +106,14 @@ export async function reinvestBackend(
         .mul(tokenPricesUsd[1]),
     );
   // Get position without feesCollected because that's how automanV1 uses feePips.
-  const [token0Position, token1Position] = getAmountsForLiquidity(
-    /* sqrtRatioX96= */ Big(positionDetails.pool.sqrtRatioX96.toString()),
-    /* sqrtRatioAX96= */ Big(TickMath.getSqrtRatioAtTick(tickLower).toString()),
-    /* sqrtRatioBX96= */ Big(TickMath.getSqrtRatioAtTick(tickUpper).toString()),
-    /* liquidity= */ Big(positionDetails.liquidity),
-  );
-  const token0Usd = new Big(token0Position)
+  const [token0Position, token1Position] = [
+    new Big(positionDetails.position.amount0.quotient.toString()),
+    new Big(positionDetails.position.amount1.quotient.toString()),
+  ];
+  const token0Usd = token0Position
     .mul(tokenPricesUsd[0])
     .div(10 ** positionDetails.token0.decimals);
-  const token1Usd = new Big(token1Position)
+  const token1Usd = token1Position
     .mul(tokenPricesUsd[1])
     .div(10 ** positionDetails.token1.decimals);
   const positionUsd = token0Usd.add(token1Usd);
@@ -128,7 +125,7 @@ export async function reinvestBackend(
   getLogger().info('SDK.reinvestBackend.round1.fees ', {
     amm,
     chainId,
-    nftId: increaseOptions.tokenId,
+    tokenId,
     reinvestFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
@@ -245,13 +242,13 @@ export async function reinvestBackend(
       );
       const totalFeePips = feeBips + gasDeductionPips;
       token0FeeAmount = BigInt(
-        new Big(token0Position)
+        token0Position
           .mul(totalFeePips.toString())
           .div(MAX_FEE_PIPS)
           .toFixed(0),
       );
       token1FeeAmount = BigInt(
-        new Big(token1Position)
+        token1Position
           .mul(totalFeePips.toString())
           .div(MAX_FEE_PIPS)
           .toFixed(0),
@@ -271,7 +268,7 @@ export async function reinvestBackend(
         solver,
         amm,
         chainId,
-        nftId: increaseOptions.tokenId,
+        tokenId,
         totalReinvestFeeUsd: feeUSD.toString(),
         token0FeeAmount,
         token1FeeAmount,
@@ -387,22 +384,22 @@ export async function reinvestV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
+  fromAddress: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
-  fromAddress: Address,
   tokenPricesUsd: [string, string],
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
+  const tokenId = BigInt(increaseOptions.tokenId.toString());
   const increaseLiquidityParams: IncreaseLiquidityParams = {
-    tokenId: BigInt(increaseOptions.tokenId.toString()),
+    tokenId,
     amount0Desired: BigInt(positionDetails.tokensOwed0.quotient.toString()),
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
     amount0Min: 0n,
     amount1Min: 0n,
     deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
   };
-
   const token0 = positionDetails.pool.token0;
   const token1 = positionDetails.pool.token1;
   const { tickLower, tickUpper } = positionDetails;
@@ -456,17 +453,17 @@ export async function reinvestV3(
   getLogger().info('SDK.reinvestV3.fees ', {
     amm,
     chainId,
-    nftId: increaseOptions.tokenId,
+    tokenId,
     totalReinvestFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
-    amount0Desired: increaseLiquidityParams.amount0Desired.toString(),
-    amount1Desired: increaseLiquidityParams.amount1Desired.toString(),
+    token0FeeAmount,
+    token1FeeAmount,
+    amount0Desired: increaseLiquidityParams.amount0Desired,
+    amount1Desired: increaseLiquidityParams.amount1Desired,
     zeroForOne,
-    poolAmountIn: poolAmountIn.toString(), // before fees
-    swapAmountIn: swapAmountIn.toString(), // after fees
+    poolAmountIn, // before fees
+    swapAmountIn, // after fees
   });
 
   const estimateGas = async (swapData: Hex) => {

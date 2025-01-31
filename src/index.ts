@@ -15,7 +15,6 @@ export * from './automan_client';
 export * from './constants';
 export * from './chain';
 export * from './interfaces';
-export * from './liquidityAmounts';
 export * from './price';
 export * from './rebalance';
 export * from './tick';
