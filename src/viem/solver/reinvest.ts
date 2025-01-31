@@ -40,13 +40,13 @@ export async function reinvestBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
+  fromAddress: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
-  fromAddress: Address,
   tokenPricesUsd: [string, string],
   nativeToUsd: string, // Although SDK can compute using getTokenPriceFromCoingecko, extracting from backend cache is probably more efficient.
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
@@ -132,16 +132,17 @@ export async function reinvestBackend(
     reinvestFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
-    amount0Desired: increaseLiquidityParams.amount0Desired.toString(),
-    amount1Desired: increaseLiquidityParams.amount1Desired.toString(),
+    nativeToUsd,
+    token0FeeAmount,
+    token1FeeAmount,
+    amount0Desired: increaseLiquidityParams.amount0Desired,
+    amount1Desired: increaseLiquidityParams.amount1Desired,
     zeroForOne,
-    poolAmountIn: poolAmountIn.toString(), // before fees
-    swapAmountIn: swapAmountIn.toString(), // after apertureFees, but before gasReimbursementFees
+    poolAmountIn, // before fees
+    swapAmountIn, // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
     positionRawNative: positionRawNative.toString(), // without feesCollected of the position
-    feeBips: feeBips.toString(),
+    feeBips,
   });
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
@@ -205,8 +206,8 @@ export async function reinvestBackend(
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
     let liquidity: bigint = 0n;
-    let amount0: bigint = increaseLiquidityParams.amount0Desired;
-    let amount1: bigint = increaseLiquidityParams.amount1Desired;
+    let amount0: bigint = 0n;
+    let amount1: bigint = 0n;
     let gasFeeEstimation: bigint = 0n;
 
     try {
@@ -272,21 +273,13 @@ export async function reinvestBackend(
         chainId,
         nftId: increaseOptions.tokenId,
         totalReinvestFeeUsd: feeUSD.toString(),
-        token0PricesUsd: tokenPricesUsd[0],
-        token1PricesUsd: tokenPricesUsd[1],
-        token0FeeAmount: token0FeeAmount.toString(),
-        token1FeeAmount: token1FeeAmount.toString(),
-        amount0Desired: increaseLiquidityParams.amount0Desired.toString(),
-        amount1Desired: increaseLiquidityParams.amount1Desired.toString(),
-        zeroForOne,
-        poolAmountIn: poolAmountIn.toString(), // before fees
-        swapAmountIn: swapAmountIn.toString(), // after fees (both apertureFees and gasReimbursementFees)
-        positionUsd: positionUsd.toString(), // without feesCollected of the position
-        positionRawNative: positionRawNative.toFixed(0), // without feesCollected of the position
-        feeBips: feeBips.toString(),
-        gasFeeEstimation: gasFeeEstimation.toString(),
-        gasDeductionPips: gasDeductionPips.toString(),
-        totalFeePips: totalFeePips.toString(),
+        token0FeeAmount,
+        token1FeeAmount,
+        swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
+        feeBips,
+        gasFeeEstimation,
+        gasDeductionPips,
+        totalFeePips,
       });
 
       if (swapAmountIn > 0n) {
@@ -307,8 +300,7 @@ export async function reinvestBackend(
         swapData = '0x';
         swapRoute = undefined;
       }
-
-      // Check fees offline to save a simulation request.
+      // Check fees offline to save a simulation request, because AutomanV1 will otherwise revert.
       if (token0FeeAmount > increaseLiquidityParams.amount0Desired) {
         throw new Error(
           `token0FeeAmount=${token0FeeAmount} > tokensOwed0=${increaseLiquidityParams.amount0Desired}`,
@@ -319,7 +311,6 @@ export async function reinvestBackend(
           `token1FeeAmount=${token1FeeAmount} > tokensOwed1=${increaseLiquidityParams.amount1Desired}`,
         );
       }
-
       [liquidity, amount0, amount1] = await simulateReinvest(
         chainId,
         amm,
@@ -510,8 +501,8 @@ export async function reinvestV3(
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
     let liquidity: bigint = 0n;
-    let amount0: bigint = increaseLiquidityParams.amount0Desired;
-    let amount1: bigint = increaseLiquidityParams.amount1Desired;
+    let amount0: bigint = 0n;
+    let amount1: bigint = 0n;
     let gasFeeEstimation: bigint = 0n;
 
     try {

@@ -707,8 +707,8 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     mintParams,
     tokenId,
     feeBips,
-    /* permitInfo= */ undefined,
     swapData,
+    /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
   const overrides = {

@@ -172,8 +172,8 @@ export function getAutomanRebalanceCalldata(
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
   feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {
     if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {

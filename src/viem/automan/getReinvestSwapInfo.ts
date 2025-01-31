@@ -27,8 +27,8 @@ export async function getReinvestSwapInfoBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  increaseOptions: IncreaseOptions,
   fromAddress: Address,
+  increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
   nativeToUsd: string,
   includeSolvers?: E_Solver[],
@@ -49,13 +49,13 @@ export async function getReinvestSwapInfoBackend(
     chainId,
     amm,
     publicClient,
+    fromAddress,
     positionDetails,
     increaseOptions,
-    fromAddress,
     tokenPricesUsd,
     nativeToUsd,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }
 

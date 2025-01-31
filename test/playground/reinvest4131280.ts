@@ -39,8 +39,8 @@ async function main() {
     chainId,
     amm,
     client,
-    increaseOptions,
     from,
+    increaseOptions,
     /* tokenPricesUsd= */ ['105000', '3263'], // WBTC/WETH
     /* nativeToUsd= */ '3263',
     DEFAULT_SOLVERS,
