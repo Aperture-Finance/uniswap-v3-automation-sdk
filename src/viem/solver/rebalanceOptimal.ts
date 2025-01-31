@@ -649,7 +649,7 @@ export async function rebalanceBackend(
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           slippage,
-          poolAmountIn,
+          poolAmountIn: swapAmountIn,
           zeroForOne,
         }));
       }
@@ -991,7 +991,7 @@ export async function rebalanceV3(
           tickLower: newTickLower,
           tickUpper: newTickUpper,
           slippage,
-          poolAmountIn,
+          poolAmountIn: swapAmountIn,
           zeroForOne,
         }));
       }
