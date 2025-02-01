@@ -145,22 +145,22 @@ export async function decreaseLiquiditySingle(
           zeroForOne,
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        amountOut = await simulateDecreaseLiquiditySingle(
-          chainId,
-          amm,
-          publicClient,
-          from,
-          positionDetails.owner,
-          decreaseLiquidityParams,
-          zeroForOne,
-          token0FeeAmount,
-          token1FeeAmount,
-          swapData,
-          isUnwrapNative,
-          blockNumber,
-        );
-        gasFeeEstimation = await estimateGas(swapData);
       }
+      amountOut = await simulateDecreaseLiquiditySingle(
+        chainId,
+        amm,
+        publicClient,
+        from,
+        positionDetails.owner,
+        decreaseLiquidityParams,
+        zeroForOne,
+        token0FeeAmount,
+        token1FeeAmount,
+        swapData,
+        isUnwrapNative,
+        blockNumber,
+      );
+      gasFeeEstimation = await estimateGas(swapData);
 
       const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
       const decimals = zeroForOne ? token0.decimals : token1.decimals;

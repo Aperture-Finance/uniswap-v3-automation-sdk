@@ -62,7 +62,7 @@ export async function getDecreaseLiquiditySingleTx(
     liquidity: liquidityToDecrease,
     amount0Min,
     amount1Min,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
   const data = getAutomanDecreaseLiquiditySingleCalldata(
     decreaseLiquidityParams,
