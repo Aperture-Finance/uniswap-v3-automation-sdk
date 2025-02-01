@@ -69,6 +69,8 @@ export async function increaseLiquidityOptimalV4(
       ? position.pool.tickSpacing
       : position.pool.fee;
 
+  // Subtract fees from poolAmountIn before passing to solver
+  // to prevent ERC20 Error: transfer amount exceeds balance.
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV4(
     chainId,
     amm,
@@ -82,6 +84,35 @@ export async function increaseLiquidityOptimalV4(
     increaseParams.amount1Desired,
     blockNumber,
   );
+  const swapFeeAmount = BigInt(
+    new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+  );
+  const swapAmountIn = poolAmountIn - swapFeeAmount;
+  const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
+  const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
+  const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
+  const tokenInDecimals = zeroForOne
+    ? token0Amount.currency.decimals
+    : token1Amount.currency.decimals;
+  const feeUSD = new Big(swapFeeAmount.toString())
+    .div(10 ** tokenInDecimals)
+    .mul(tokenInPrice);
+
+  getLogger().info('SDK.increaseLiquidityOptimalV4.fees ', {
+    amm,
+    chainId,
+    nftId: increaseOptions.tokenId,
+    totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
+    token0PricesUsd: tokenPricesUsd[0],
+    token1PricesUsd: tokenPricesUsd[1],
+    token0FeeAmount: token0FeeAmount.toString(),
+    token1FeeAmount: token1FeeAmount.toString(),
+    amount0Desired: increaseParams.amount0Desired.toString(),
+    amount1Desired: increaseParams.amount1Desired.toString(),
+    zeroForOne,
+    poolAmountIn: poolAmountIn.toString(), // before fees
+    swapAmountIn: swapAmountIn.toString(), // after fees
+  });
 
   const estimateGas = async (swapData: Hex) => {
     try {
@@ -95,6 +126,8 @@ export async function increaseLiquidityOptimalV4(
           position,
           increaseParams,
           swapData,
+          token0FeeAmount,
+          token1FeeAmount,
           blockNumber,
         ),
       ]);
@@ -120,7 +153,7 @@ export async function increaseLiquidityOptimalV4(
     try {
       const slippage =
         Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
-      if (poolAmountIn > 0n) {
+      if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
@@ -131,56 +164,24 @@ export async function increaseLiquidityOptimalV4(
           tickLower,
           tickUpper,
           slippage,
-          poolAmountIn,
+          poolAmountIn: swapAmountIn,
           zeroForOne,
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        [liquidity, amount0, amount1] =
-          await simulateIncreaseLiquidityOptimalV4(
-            chainId,
-            amm,
-            publicClient,
-            fromAddress,
-            position,
-            increaseParams,
-            swapData,
-            blockNumber,
-          );
-        gasFeeEstimation = await estimateGas(swapData);
       }
-
-      const token0FeeAmount = zeroForOne
-        ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
-        : 0n;
-      const token1FeeAmount = zeroForOne
-        ? 0n
-        : BigInt(
-            new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
-          );
-      const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-      const decimals = zeroForOne
-        ? token0Amount.currency.decimals
-        : token1Amount.currency.decimals;
-      const feeUSD = new Big(poolAmountIn.toString())
-        .div(10 ** decimals)
-        .mul(tokenInPrice)
-        .mul(FEE_ZAP_RATIO);
-
-      getLogger().info('SDK.increaseLiquidityOptimalV4.fees ', {
-        solver,
-        amm: amm,
-        chainId: chainId,
-        position: increaseOptions.tokenId,
-        totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
-        token0PricesUsd: tokenPricesUsd[0],
-        token1PricesUsd: tokenPricesUsd[1],
-        token0FeeAmount: token0FeeAmount.toString(),
-        token1FeeAmount: token1FeeAmount.toString(),
-        amount0Desired: increaseParams.amount0Desired.toString(),
-        amount1Desired: increaseParams.amount1Desired.toString(),
-        zeroForOne,
-        poolAmountIn: poolAmountIn.toString(),
-      });
+      [liquidity, amount0, amount1] = await simulateIncreaseLiquidityOptimalV4(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        position,
+        increaseParams,
+        swapData,
+        token0FeeAmount,
+        token1FeeAmount,
+        blockNumber,
+      );
+      gasFeeEstimation = await estimateGas(swapData);
 
       return {
         solver,

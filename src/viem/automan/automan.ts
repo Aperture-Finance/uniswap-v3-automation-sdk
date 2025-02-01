@@ -273,6 +273,8 @@ export async function simulateIncreaseLiquidityOptimalV4(
   position: Position,
   increaseParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<IncreaseLiquidityReturnType> {
   const returnData = await requestIncreaseLiquidityOptimalV4(
@@ -284,6 +286,8 @@ export async function simulateIncreaseLiquidityOptimalV4(
     position,
     increaseParams,
     swapData,
+    token0FeeAmount,
+    token1FeeAmount,
     blockNumber,
   );
   return decodeFunctionResult({
@@ -301,6 +305,8 @@ export async function estimateIncreaseLiquidityOptimalV4Gas(
   position: Position,
   increaseParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
@@ -313,6 +319,8 @@ export async function estimateIncreaseLiquidityOptimalV4Gas(
       position,
       increaseParams,
       swapData,
+      token0FeeAmount,
+      token1FeeAmount,
       blockNumber,
     ),
   );
@@ -329,11 +337,15 @@ export async function requestIncreaseLiquidityOptimalV4<
   position: Position,
   increaseParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanV4IncreaseLiquidityOptimalCallData(
     increaseParams,
     swapData,
+    token0FeeAmount,
+    token1FeeAmount,
   );
   const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
 

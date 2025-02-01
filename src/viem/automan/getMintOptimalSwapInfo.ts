@@ -43,7 +43,7 @@ export async function getMintOptimalSwapInfoV4(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    recipient,
+    /* fromAddress= */ recipient,
     slippage,
     tokenPricesUsd,
     publicClient,

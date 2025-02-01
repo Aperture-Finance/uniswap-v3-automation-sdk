@@ -110,21 +110,19 @@ export async function mintOptimalV4(
     mintParams.amount1Desired,
     blockNumber,
   );
-
-  const token0FeeAmount = zeroForOne
-    ? BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0))
-    : 0n;
-  const token1FeeAmount = zeroForOne
-    ? 0n
-    : BigInt(new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0));
+  const swapFeeAmount = BigInt(
+    new Big(poolAmountIn.toString()).mul(FEE_ZAP_RATIO).toFixed(0),
+  );
+  const swapAmountIn = poolAmountIn - swapFeeAmount;
+  const token0FeeAmount = zeroForOne ? swapFeeAmount : 0n;
+  const token1FeeAmount = zeroForOne ? 0n : swapFeeAmount;
   const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-  const decimals = zeroForOne
+  const tokenInDecimals = zeroForOne
     ? token0Amount.currency.decimals
     : token1Amount.currency.decimals;
-  const feeUSD = new Big(poolAmountIn.toString())
-    .div(10 ** decimals)
-    .mul(tokenInPrice)
-    .mul(FEE_ZAP_RATIO);
+  const feeUSD = new Big(swapFeeAmount.toString())
+    .div(10 ** tokenInDecimals)
+    .mul(tokenInPrice);
 
   getLogger().info('SDK.mintOptimalV4.Fees ', {
     amm: amm,
@@ -137,7 +135,8 @@ export async function mintOptimalV4(
     amount0Desired: mintParams.amount0Desired.toString(),
     amount1Desired: mintParams.amount1Desired.toString(),
     zeroForOne,
-    poolAmountIn: poolAmountIn.toString(),
+    poolAmountIn: poolAmountIn.toString(), // before fees
+    swapAmountIn: swapAmountIn.toString(), // after fees
   });
 
   const estimateGas = async (swapData: Hex) => {
@@ -176,7 +175,7 @@ export async function mintOptimalV4(
     let gasFeeEstimation: bigint = 0n;
 
     try {
-      if (poolAmountIn > 0n) {
+      if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
@@ -187,7 +186,7 @@ export async function mintOptimalV4(
           tickLower,
           tickUpper,
           slippage,
-          poolAmountIn,
+          poolAmountIn: swapAmountIn,
           zeroForOne,
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
@@ -205,16 +204,6 @@ export async function mintOptimalV4(
         gasFeeEstimation = await estimateGas(swapData);
       }
 
-      const pool = await getPool(
-        token0,
-        token1,
-        feeOrTickSpacing,
-        chainId,
-        amm,
-        publicClient,
-        blockNumber,
-      );
-
       return {
         solver,
         amount0,
@@ -229,7 +218,15 @@ export async function mintOptimalV4(
           swapRoute,
         ),
         priceImpact: calcPriceImpact(
-          pool,
+          await getPool(
+            token0,
+            token1,
+            feeOrTickSpacing,
+            chainId,
+            amm,
+            publicClient,
+            blockNumber,
+          ),
           mintParams.amount0Desired,
           mintParams.amount1Desired,
           amount0,
