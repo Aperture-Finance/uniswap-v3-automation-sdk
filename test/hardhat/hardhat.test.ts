@@ -432,7 +432,9 @@ describe('State overrides tests', function () {
       eoa as Address,
       position,
       increaseParams,
-      undefined,
+      /* swapData= */ undefined,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       blockNumber,
     );
     expect(amount0.toString()).to.equal('10317345');
