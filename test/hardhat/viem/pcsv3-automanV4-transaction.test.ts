@@ -170,14 +170,20 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('17360687214921889114');
 
-    const { tx: txRequest } = await getReinvestV4Tx(
+    const txRequest = await getReinvestV4Tx(
       chainId,
       amm,
       eoa,
-      positionId,
-      /* slippageTolerance= */ new Percent(1, 100),
-      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
-      publicClient,
+      /* increaseOptions= */ {
+        tokenId: positionId.toString(),
+        slippageTolerance: new Percent(1, 100),
+        deadline: Math.floor(Date.now() / 1000),
+      },
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
+      /* swapData= */ '0x',
+      /* amount0Min= */ 0n,
+      /* amount1Min= */ 0n,
     );
 
     await impersonatedOwnerClient.sendTransaction({
@@ -231,17 +237,14 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       await getRebalanceSwapInfoV4(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
         /* slippageTolerance= */ 0.01,
         /* tokenPricesUsd= */ ['1', '700'], // BSC-USD / WBNB
-        publicClient,
         [E_Solver.SamePool],
-        existingPosition,
-        undefined,
-        false,
       )
     )[0];
     const { tx: txRequest } = await getRebalanceV4Tx(

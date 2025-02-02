@@ -7,3 +7,4 @@ export const AUTOMATION_EXPIRATION_IN_SECS = // For backend.
 export const AUTOMATION_SLACK_IN_SECS = Number(
   process.env.AUTOMATION_SLACK_IN_SECS || 1 * DAY_IN_SECS,
 );
+export const GAS_LIMIT_L2_MULTIPLIER = 150; // 150% of estimated gas limit.

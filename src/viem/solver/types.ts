@@ -71,4 +71,5 @@ export type SolverResult = {
   feeBips?: bigint;
   feeUSD?: string;
   gasFeeEstimation?: bigint;
+  gasUnits?: bigint; // Used for backend to populate tx.gasLimit.
 };

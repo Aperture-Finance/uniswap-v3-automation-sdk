@@ -10,6 +10,7 @@ export * from './increaseLiquidityOptimal';
 export * from './decreaseLiquiditySingle';
 export * from './mintOptimal';
 export * from './rebalanceOptimal';
+export * from './reinvest';
 export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {

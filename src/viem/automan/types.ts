@@ -30,6 +30,7 @@ export type AutomanV4ActionName =
   | 'decreaseLiquiditySingle'
   | 'reinvest'
   | 'rebalance';
+// removeLiquidity is deprecated in AutomanV4
 
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof Automan__factory.abi, T>;
@@ -95,6 +96,10 @@ export type RebalanceReturnType = GetAutomanReturnTypes<
 export type ReinvestReturnType = GetAutomanReturnTypes<
   'reinvest',
   [IncreaseLiquidityParams, bigint, Hex]
+>;
+export type ReinvestV4ReturnType = GetAutomanV4ReturnTypes<
+  'reinvest',
+  [IncreaseLiquidityParams, bigint, bigint, Hex]
 >;
 
 export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;

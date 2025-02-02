@@ -97,6 +97,8 @@ export async function mintOptimalV4(
           deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
         };
 
+  // Subtract fees from poolAmountIn before passing to solver
+  // to prevent ERC20 Error: transfer amount exceeds balance.
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV4(
     chainId,
     amm,
