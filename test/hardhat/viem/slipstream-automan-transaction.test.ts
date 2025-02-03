@@ -165,14 +165,19 @@ describe('SlipStreamAutoman transaction tests', function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    const { tx: txRequest } = await getReinvestTx(
+    const txRequest = await getReinvestTx(
       chainId,
       amm,
       eoa,
-      positionId,
-      /* slippageTolerance= */ new Percent(1, 100),
-      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
-      publicClient,
+      /* increaseOptions= */ {
+        tokenId: positionId.toString(),
+        slippageTolerance: new Percent(1, 100),
+        deadline: Math.floor(Date.now() / 1000),
+      },
+      /* feeBips= */ 0n,
+      /* swapData= */ '0x',
+      /* amount0Min= */ 0n,
+      /* amount1Min= */ 0n,
     );
 
     await impersonatedOwnerClient.sendTransaction({
@@ -184,7 +189,7 @@ describe('SlipStreamAutoman transaction tests', function () {
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('13589538797482293814');
-    expect(liquidityAfterReinvest.toString()).to.equal('14011759555397272426');
+    expect(liquidityAfterReinvest.toString()).to.equal('14018556727424907792');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,

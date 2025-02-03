@@ -48,6 +48,7 @@ import {
   IncreaseLiquidityReturnType,
   MintReturnType,
   RebalanceReturnType,
+  ReinvestV3ReturnType,
   RemoveLiquidityReturnType,
   SlipStreamMintParams,
   UniV3MintParams,
@@ -706,8 +707,8 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
     mintParams,
     tokenId,
     feeBips,
-    /* permitInfo= */ undefined,
     swapData,
+    /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
   const overrides = {
@@ -929,22 +930,16 @@ export async function requestReinvest<M extends keyof RpcReturnType>(
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   feeBips = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanReinvestCalldata(
-    tokenId,
-    deadline,
-    amount0Min,
-    amount1Min,
+    increaseLiquidityParams,
     feeBips,
-    /* permitInfo= */ undefined,
     swapData,
+    /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
   const overrides = {
@@ -971,24 +966,18 @@ export async function requestReinvestV3<M extends keyof RpcReturnType>(
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanV3ReinvestCalldata(
-    tokenId,
-    deadline,
-    amount0Min,
-    amount1Min,
+    increaseLiquidityParams,
     token0FeeAmount,
     token1FeeAmount,
-    /* permitInfo= */ undefined,
     swapData,
+    /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
   const overrides = {
@@ -1008,16 +997,75 @@ export async function requestReinvestV3<M extends keyof RpcReturnType>(
   );
 }
 
+export async function simulateReinvest(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  increaseLiquidityParams: IncreaseLiquidityParams,
+  feeBips = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RebalanceReturnType> {
+  const data = await requestReinvest(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    owner,
+    increaseLiquidityParams,
+    feeBips,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: Automan__factory.abi,
+    data,
+    functionName: 'reinvest',
+  });
+}
+
+export async function simulateReinvestV3(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  publicClient: PublicClient,
+  from: Address | undefined,
+  owner: Address,
+  increaseLiquidityParams: IncreaseLiquidityParams,
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  swapData: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<ReinvestV3ReturnType> {
+  const data = await requestReinvestV3(
+    'eth_call',
+    chainId,
+    amm,
+    publicClient,
+    from,
+    owner,
+    increaseLiquidityParams,
+    token0FeeAmount,
+    token1FeeAmount,
+    swapData,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: AutomanV3__factory.abi,
+    data,
+    functionName: 'reinvest',
+  });
+}
+
 export async function estimateReinvestGas(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   feeBips = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
@@ -1030,10 +1078,7 @@ export async function estimateReinvestGas(
       publicClient,
       from,
       owner,
-      tokenId,
-      deadline,
-      amount0Min,
-      amount1Min,
+      increaseLiquidityParams,
       feeBips,
       swapData,
       blockNumber,
@@ -1047,10 +1092,7 @@ export async function estimateReinvestV3Gas(
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
   swapData: Hex = '0x',
@@ -1064,10 +1106,7 @@ export async function estimateReinvestV3Gas(
       publicClient,
       from,
       owner,
-      tokenId,
-      deadline,
-      amount0Min,
-      amount1Min,
+      increaseLiquidityParams,
       token0FeeAmount,
       token1FeeAmount,
       swapData,

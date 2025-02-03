@@ -172,8 +172,8 @@ export function getAutomanRebalanceCalldata(
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
   feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {
     if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
@@ -303,26 +303,15 @@ export function getAutomanV3RebalanceCalldata(
 }
 
 export function getAutomanReinvestCalldata(
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   feeBips = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
-  const params: IncreaseLiquidityParams = {
-    tokenId,
-    amount0Desired: BigInt(0), // Param value ignored by Automan.
-    amount1Desired: BigInt(0), // Param value ignored by Automan.
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: Automan__factory.abi,
-      args: [params, feeBips, swapData] as const,
+      args: [increaseLiquidityParams, feeBips, swapData] as const,
       functionName: 'reinvest',
     });
   }
@@ -330,7 +319,7 @@ export function getAutomanReinvestCalldata(
   return encodeFunctionData({
     abi: Automan__factory.abi,
     args: [
-      params,
+      increaseLiquidityParams,
       feeBips,
       swapData,
       BigInt(permitInfo.deadline),
@@ -343,27 +332,21 @@ export function getAutomanReinvestCalldata(
 }
 
 export function getAutomanV3ReinvestCalldata(
-  tokenId: bigint,
-  deadline: bigint,
-  amount0Min = BigInt(0),
-  amount1Min = BigInt(0),
+  increaseLiquidityParams: IncreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
-  const params: IncreaseLiquidityParams = {
-    tokenId,
-    amount0Desired: BigInt(0), // Param value ignored by Automan.
-    amount1Desired: BigInt(0), // Param value ignored by Automan.
-    amount0Min,
-    amount1Min,
-    deadline,
-  };
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: AutomanV3__factory.abi,
-      args: [params, token0FeeAmount, token1FeeAmount, swapData] as const,
+      args: [
+        increaseLiquidityParams,
+        token0FeeAmount,
+        token1FeeAmount,
+        swapData,
+      ] as const,
       functionName: 'reinvest',
     });
   }
@@ -371,7 +354,7 @@ export function getAutomanV3ReinvestCalldata(
   return encodeFunctionData({
     abi: AutomanV3__factory.abi,
     args: [
-      params,
+      increaseLiquidityParams,
       token0FeeAmount,
       token1FeeAmount,
       swapData,

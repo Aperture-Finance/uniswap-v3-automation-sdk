@@ -9,6 +9,7 @@ export { get1InchQuote } from './get1InchSolver';
 export * from './increaseLiquidityOptimal';
 export * from './mintOptimal';
 export * from './rebalanceOptimal';
+export * from './reinvest';
 export * from './types';
 
 const defaultSwapInfo: SolvedSwapInfo = {

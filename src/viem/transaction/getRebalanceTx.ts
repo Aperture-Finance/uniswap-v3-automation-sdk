@@ -107,8 +107,8 @@ export async function getRebalanceTx(
         mintParams,
         existingPositionId,
         feeBips,
-        permitInfo,
         swapData,
+        permitInfo,
       ),
     },
     amounts: {
