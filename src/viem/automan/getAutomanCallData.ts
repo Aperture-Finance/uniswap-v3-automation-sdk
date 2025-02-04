@@ -236,8 +236,8 @@ export function getAutomanV4RebalanceCalldata(
   tokenId: bigint,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {
     if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {

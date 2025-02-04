@@ -192,19 +192,19 @@ export async function mintOptimalV4(
           zeroForOne,
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        [, liquidity, amount0, amount1] = await simulateMintOptimalV4(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          mintParams,
-          swapData,
-          token0FeeAmount,
-          token1FeeAmount,
-          blockNumber,
-        );
-        gasFeeEstimation = await estimateGas(swapData);
       }
+      [, liquidity, amount0, amount1] = await simulateMintOptimalV4(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        mintParams,
+        swapData,
+        token0FeeAmount,
+        token1FeeAmount,
+        blockNumber,
+      );
+      gasFeeEstimation = await estimateGas(swapData);
 
       return {
         solver,

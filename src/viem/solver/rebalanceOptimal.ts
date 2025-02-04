@@ -42,9 +42,7 @@ import { SolverResult, SwapRoute } from './types';
 
 /**
  * Get the optimal amount of liquidity to rebalance for a given position.
- * Used by both frontend and backend as of 2025 Jan.
- * Backend should migrate to rebalanceBackend.
- * Frontend can optionally migrate to rebalanceV4.
+ * Currently used for frontend, who can optionally be migrated to rebalanceV4.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
  * @param positionDetails Position details
@@ -348,20 +346,20 @@ export async function rebalanceOptimalV2(
           zeroForOne,
           isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
-        [, liquidity, amount0, amount1] = await simulateRebalance(
-          chainId,
-          amm,
-          publicClient,
-          fromAddress,
-          positionDetails.owner,
-          mintParams,
-          BigInt(positionDetails.tokenId),
-          feeBips,
-          swapData,
-          blockNumber,
-        );
-        gasFeeEstimation = await estimateGas(swapData);
       }
+      [, liquidity, amount0, amount1] = await simulateRebalance(
+        chainId,
+        amm,
+        publicClient,
+        fromAddress,
+        positionDetails.owner,
+        mintParams,
+        BigInt(positionDetails.tokenId),
+        feeBips,
+        swapData,
+        blockNumber,
+      );
+      gasFeeEstimation = await estimateGas(swapData);
 
       return {
         solver,
@@ -406,7 +404,7 @@ export async function rebalanceOptimalV2(
   return buildOptimalSolutions(solve, includeSolvers);
 }
 
-// Used for backend.
+// Used for backend with 2x solver calls for gas reimbursements.
 export async function rebalanceBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -547,21 +545,35 @@ export async function rebalanceBackend(
     feeBips: feeBips,
   });
 
-  const mintParams: SlipStreamMintParams | UniV3MintParams = {
-    token0: token0.address as Address,
-    token1: token1.address as Address,
-    ...(amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-      ? { tickSpacing: feeOrTickSpacing, sqrtPriceX96: 0n }
-      : { fee: feeOrTickSpacing }),
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: 0n, // Not used in Automan.
-    amount1Desired: 0n, // Not used in Automan.
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          tickSpacing: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // Not used in Automan.
+          amount1Desired: 0n, // Not used in Automan.
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          fee: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // Not used in Automan.
+          amount1Desired: 0n, // Not used in Automan.
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
     // Pass errors without (try-)catch, because failing to estimate gas will fail to reimburse relayer for gas.
@@ -713,6 +725,7 @@ export async function rebalanceBackend(
           zeroForOne,
         }));
       } else {
+        // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
         swapData = '0x';
         swapRoute = undefined;
       }
@@ -778,7 +791,7 @@ export async function rebalanceBackend(
 }
 
 // Same as rebalanceOptimalV2, but with feeAmounts instead of feeBips.
-// Do not use, but implemented to make it easier to migrate to future versions.
+// Frontend don't have to use, but implemented to make it easier to migrate to future versions.
 export async function rebalanceV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
@@ -919,21 +932,35 @@ export async function rebalanceV4(
     feeBips: feeBips,
   });
 
-  const mintParams: SlipStreamMintParams | UniV3MintParams = {
-    token0: token0.address as Address,
-    token1: token1.address as Address,
-    ...(amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-      ? { tickSpacing: feeOrTickSpacing, sqrtPriceX96: 0n }
-      : { fee: feeOrTickSpacing }),
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: 0n, // Not used in Automan.
-    amount1Desired: 0n, // Not used in Automan.
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          tickSpacing: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // Not used in Automan.
+          amount1Desired: 0n, // Not used in Automan.
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          fee: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // Not used in Automan.
+          amount1Desired: 0n, // Not used in Automan.
+          amount0Min: 0n, // Setting this to zero for tx simulation.
+          amount1Min: 0n, // Setting this to zero for tx simulation.
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+        };
 
   const estimateGas = async (swapData: Hex) => {
     try {

@@ -11,7 +11,8 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 /**
- * calculates the optimal swap information including swap path info, swap route and price impact for rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
+ * Calculates the optimal swap information including swap path info, swap route and price impact for rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
+ * Currently used for frontend, and can optionally be migrated to getRebalanceSwapInfoV4.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param fromAddress The address to rebalance from.
@@ -68,6 +69,7 @@ export async function getRebalanceSwapInfo(
 
 /**
  * Calculates the SolverResults for rebalances from an existing position into a new one with the specified price range using Aperture's Automan contract.
+ * Used for backend with 2x solver calls for gas reimbursements.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param fromAddress The address to rebalance from.
@@ -112,7 +114,7 @@ export async function getRebalanceSwapInfoBackend(
 }
 
 // Same as getRebalanceSwapInfo, except return the fees as token0FeeAmount and token1FeeAmount instead of feeBips
-// Do not use, but implemented to make it easier to migrate to future versions.
+// Frontend don't have to use, but implemented to make it easier to migrate to future versions.
 export async function getRebalanceSwapInfoV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,

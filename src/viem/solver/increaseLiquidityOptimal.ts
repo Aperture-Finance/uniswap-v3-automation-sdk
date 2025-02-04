@@ -45,8 +45,8 @@ export async function increaseLiquidityOptimalV4(
   token1Amount: CurrencyAmount<Token>,
   fromAddress: Address,
   tokenPricesUsd: [string, string],
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');

@@ -54,7 +54,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV4(
     token1Amount as CurrencyAmount<Token>,
     fromAddress,
     tokenPricesUsd,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }

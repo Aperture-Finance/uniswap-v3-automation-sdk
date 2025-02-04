@@ -154,7 +154,6 @@ export async function simulateMintOptimalV4(
   token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
-  checkTicks(amm, mintParams);
   const returnData = await requestMintOptimalV4(
     'eth_call',
     chainId,
@@ -690,8 +689,8 @@ export async function requestRebalanceV4<M extends keyof RpcReturnType>(
     tokenId,
     token0FeeAmount,
     token1FeeAmount,
-    /* permitInfo= */ undefined,
     swapData,
+    /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
   const overrides = {

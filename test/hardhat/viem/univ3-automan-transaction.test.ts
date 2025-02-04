@@ -64,7 +64,6 @@ describe('Viem - UniV3Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {

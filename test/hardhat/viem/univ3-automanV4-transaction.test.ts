@@ -74,7 +74,6 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
@@ -108,7 +107,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     await router.deployed();
     await automanV4Contract.setAllowlistedRouters([router.address], [true]);
 
-    // Set Automan address in CHAIN_ID_TO_INFO.
+    // Set AutomanV4 address in CHAIN_ID_TO_INFO.
     getAMMInfo(chainId, amm)!.apertureAutomanV4 =
       automanV4Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
@@ -259,7 +258,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -424,7 +423,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -614,7 +613,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({

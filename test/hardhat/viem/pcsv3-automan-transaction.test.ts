@@ -8,12 +8,14 @@ import {
   PublicClient,
   TestClient,
   WalletClient,
+  createPublicClient,
   encodeAbiParameters,
+  http,
   parseAbiParameters,
   parseEther,
   walletActions,
 } from 'viem';
-import { mainnet } from 'viem/chains';
+import { bsc, mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -34,23 +36,21 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfoV4,
+  getIncreaseLiquidityOptimalSwapInfo,
+  getIncreaseLiquidityOptimalTx,
+  getMintOptimalSwapInfo,
   getMintedPositionIdFromTxReceipt,
   getPool,
   getRebalanceSwapInfo,
   getRebalanceTx,
   getReinvestTx,
 } from '../../../src/viem';
-import {
-  expect,
-  getApiClient,
-  hardhatForkProvider,
-  resetFork,
-} from '../common';
+import { expect, hardhatForkProvider, resetFork } from '../common';
 
 // Tests for PCSV3Automan transactions on a forked BNB mainnet.
 describe('Viem - PCSV3Automan transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
+  const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336n;
   const blockNumber = 37287100n;
@@ -58,7 +58,6 @@ describe('Viem - PCSV3Automan transaction tests', function () {
 
   const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
   const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
-  const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
 
   let automanContract: PCSV3Automan;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
@@ -66,8 +65,11 @@ describe('Viem - PCSV3Automan transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
+  const nonForkClient = createPublicClient({
+    chain: bsc,
+    transport: http('https://bsc-rpc.publicnode.com'),
+  });
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
@@ -139,10 +141,9 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const publicClient = getApiClient(chainId);
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, publicClient),
-      getERC20Overrides(token1, from, to, amount1, publicClient),
+      getERC20Overrides(token0, from, to, amount0, nonForkClient),
+      getERC20Overrides(token1, from, to, amount1, nonForkClient),
     ]);
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
@@ -416,7 +417,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfoV4(
+      await getIncreaseLiquidityOptimalSwapInfo(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),

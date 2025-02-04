@@ -8,12 +8,14 @@ import {
   PublicClient,
   TestClient,
   WalletClient,
+  createPublicClient,
   encodeAbiParameters,
+  http,
   parseAbiParameters,
   parseEther,
   walletActions,
 } from 'viem';
-import { mainnet } from 'viem/chains';
+import { bsc, mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -44,16 +46,12 @@ import {
   getRebalanceV4Tx,
   getReinvestV4Tx,
 } from '../../../src/viem';
-import {
-  expect,
-  getApiClient,
-  hardhatForkProvider,
-  resetFork,
-} from '../common';
+import { expect, hardhatForkProvider, resetFork } from '../common';
 
 // Tests for PCSV3AutomanV4 transactions on a forked BNB mainnet.
 describe('Viem - PCSV3AutomanV4 transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
+  const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336n;
   const blockNumber = 37287100n;
@@ -61,7 +59,6 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
 
   const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
   const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
-  const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
 
   let automanV4Contract: PCSV3AutomanV4;
   const automanV4Address = getAMMInfo(chainId, amm)!.apertureAutomanV4;
@@ -69,8 +66,11 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
+  const nonForkClient = createPublicClient({
+    chain: bsc,
+    transport: http('https://bsc-rpc.publicnode.com'),
+  });
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
@@ -103,7 +103,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     await router.deployed();
     await automanV4Contract.setAllowlistedRouters([router.address], [true]);
 
-    // Set Automan address in CHAIN_ID_TO_INFO.
+    // Set AutomanV4 address in CHAIN_ID_TO_INFO.
     getAMMInfo(chainId, amm)!.apertureAutomanV4 =
       automanV4Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
@@ -127,7 +127,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
   });
 
   after(() => {
-    // Reset Automan address in CHAIN_ID_TO_INFO.
+    // Reset AutomanV4 address in CHAIN_ID_TO_INFO.
     getAMMInfo(chainId, amm)!.apertureAutomanV4 = automanV4Address;
     testClient.stopImpersonatingAccount({
       address: eoa,
@@ -142,10 +142,9 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const publicClient = getApiClient(chainId);
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, publicClient),
-      getERC20Overrides(token1, from, to, amount1, publicClient),
+      getERC20Overrides(token0, from, to, amount0, nonForkClient),
+      getERC20Overrides(token1, from, to, amount1, nonForkClient),
     ]);
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
@@ -163,8 +162,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     }
   }
 
-  // TODO: debug
-  it.skip('Reinvest', async function () {
+  it('Reinvest', async function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
@@ -195,7 +193,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     const liquidityAfterReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    expect(liquidityAfterReinvest.toString()).to.equal('17369281355624526199');
+    expect(liquidityAfterReinvest.toString()).to.equal('17369508569204326673');
 
     expect(
       generateAutoCompoundRequestPayload(
@@ -263,7 +261,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -295,8 +293,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     });
   });
 
-  // TODO: debug
-  it.skip('Optimal mint without 1inch', async function () {
+  it('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -319,7 +316,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const tickLower = nearestUsableTick(
       pool.tickCurrent - 1000,
@@ -360,7 +357,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -394,8 +391,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
     });
   });
 
-  // TODO: debug
-  it.skip('Increase liquidity optimal without 1inch', async function () {
+  it('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -417,7 +413,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
       await getIncreaseLiquidityOptimalSwapInfoV4(
@@ -454,7 +450,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({

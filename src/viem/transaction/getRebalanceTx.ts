@@ -198,8 +198,8 @@ export async function getRebalanceV4Tx(
         existingPositionId,
         token0FeeAmount,
         token1FeeAmount,
-        permitInfo,
         swapData,
+        permitInfo,
       ),
     },
     amounts: {
