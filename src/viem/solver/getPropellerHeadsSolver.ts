@@ -28,20 +28,32 @@ export const getPropellerHeadsSolver = (): ISolver => {
         slippage,
         poolAmountIn,
         zeroForOne,
+        isUseOptimalSwapRouter,
       } = props;
 
       if (chainId !== ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID) {
         throw new Error('Expected: Chain not supported');
       }
 
-      const ammInfo = getAMMInfo(chainId, amm)!;
+      const { optimalSwapRouter, apertureAutomanV4 } = getAMMInfo(
+        chainId,
+        amm,
+      )!;
+      const from =
+        isUseOptimalSwapRouter == null || isUseOptimalSwapRouter
+          ? optimalSwapRouter
+          : apertureAutomanV4;
+      if (!from) {
+        throw new Error('Expected: Chain or AMM not support');
+      }
+
       // get a quote from PH
       const res = await quote(
         blockChainMap[chainId]!,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
         poolAmountIn.toString(),
-        ammInfo.optimalSwapRouter!,
+        from,
         slippage,
       );
 
@@ -52,8 +64,7 @@ export const getPropellerHeadsSolver = (): ISolver => {
 
       return {
         swapData: encodeOptimalSwapData(
-          chainId,
-          amm,
+          from,
           token0,
           token1,
           feeOrTickSpacing,

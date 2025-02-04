@@ -58,10 +58,18 @@ export const getOkxSolver = (): ISolver => {
         slippage,
         poolAmountIn,
         zeroForOne,
+        isUseOptimalSwapRouter,
       } = props;
 
-      const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
-      if (!optimalSwapRouter) {
+      const { optimalSwapRouter, apertureAutomanV4 } = getAMMInfo(
+        chainId,
+        amm,
+      )!;
+      const from =
+        isUseOptimalSwapRouter == null || isUseOptimalSwapRouter
+          ? optimalSwapRouter
+          : apertureAutomanV4;
+      if (!from) {
         throw new Error('Expected: Chain or AMM not support');
       }
 
@@ -70,7 +78,7 @@ export const getOkxSolver = (): ISolver => {
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
         poolAmountIn.toString(),
-        optimalSwapRouter,
+        from,
         slippage,
       );
 
@@ -81,8 +89,7 @@ export const getOkxSolver = (): ISolver => {
       );
       return {
         swapData: encodeOptimalSwapData(
-          chainId,
-          amm,
+          from,
           token0,
           token1,
           feeOrTickSpacing,

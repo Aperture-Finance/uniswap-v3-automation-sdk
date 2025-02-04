@@ -16,11 +16,11 @@ import {
   IncreaseLiquidityParams,
   MAX_FEE_PIPS,
   estimateReinvestGas,
-  estimateReinvestV3Gas,
+  estimateReinvestV4Gas,
   getAutomanReinvestCalldata,
   getFeeReinvestRatio,
   simulateReinvest,
-  simulateReinvestV3,
+  simulateReinvestV4,
 } from '../automan';
 import { PositionDetails } from '../position';
 import { estimateTotalGasCostForOptimismLikeL2Tx } from '../public_client';
@@ -28,7 +28,7 @@ import {
   buildOptimalSolutions,
   calcPriceImpact,
   getOptimalSwapAmount,
-  getOptimalSwapAmountV3,
+  getOptimalSwapAmountV4,
   getSwapPath,
   getSwapRoute,
 } from './internal';
@@ -380,7 +380,7 @@ export async function reinvestBackend(
 }
 
 // Used for frontend.
-export async function reinvestV3(
+export async function reinvestV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -410,7 +410,7 @@ export async function reinvestV3(
 
   // Subtract fees from poolAmountIn before passing to solver
   // to prevent ERC20 Error: transfer amount exceeds balance.
-  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
+  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV4(
     chainId,
     amm,
     publicClient,
@@ -450,7 +450,7 @@ export async function reinvestV3(
         .mul(tokenPricesUsd[1]),
     );
 
-  getLogger().info('SDK.reinvestV3.fees ', {
+  getLogger().info('SDK.reinvestV4.fees ', {
     amm,
     chainId,
     tokenId,
@@ -470,7 +470,7 @@ export async function reinvestV3(
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateReinvestV3Gas(
+        estimateReinvestV4Gas(
           chainId,
           amm,
           publicClient,
@@ -483,9 +483,9 @@ export async function reinvestV3(
           blockNumber,
         ),
       ]);
-      return gasPrice * gasAmount;
+      return BigInt(gasPrice * gasAmount);
     } catch (e) {
-      getLogger().error('SDK.reinvestV3.EstimateGas.Error', {
+      getLogger().error('SDK.reinvestV4.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
         increaseLiquidityParams,
@@ -520,7 +520,7 @@ export async function reinvestV3(
           zeroForOne,
         }));
       }
-      [liquidity, amount0, amount1] = await simulateReinvestV3(
+      [liquidity, amount0, amount1] = await simulateReinvestV4(
         chainId,
         amm,
         publicClient,
@@ -577,12 +577,12 @@ export async function reinvestV3(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.reinvestV3.Error', {
+        getLogger().error('SDK.Solver.reinvestV4.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.reinvestV3.Warning', solver);
+        console.warn('SDK.Solver.reinvestV4.Warning', solver);
       }
       return null;
     }

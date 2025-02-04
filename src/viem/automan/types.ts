@@ -1,5 +1,5 @@
 import {
-  AutomanV3__factory,
+  AutomanV4__factory,
   Automan__factory,
   ICommonNonfungiblePositionManager__factory,
   ISlipStreamNonfungiblePositionManager__factory,
@@ -18,14 +18,24 @@ export type AutomanActionName =
   | 'mintOptimal'
   | 'increaseLiquidityOptimal'
   | 'decreaseLiquidity'
+  | 'decreaseLiquiditySingle'
   | 'reinvest'
   | 'rebalance'
   | 'removeLiquidity';
 
+export type AutomanV4ActionName =
+  | 'mintOptimal'
+  | 'increaseLiquidityOptimal'
+  | 'decreaseLiquidity'
+  | 'decreaseLiquiditySingle'
+  | 'reinvest'
+  | 'rebalance';
+// removeLiquidity is deprecated in AutomanV4
+
 export type GetAutomanParams<T extends AutomanActionName> =
   GetAbiFunctionParamsTypes<typeof Automan__factory.abi, T>;
-export type GetAutomanV3Params<T extends AutomanActionName> =
-  GetAbiFunctionParamsTypes<typeof AutomanV3__factory.abi, T>;
+export type GetAutomanV4Params<T extends AutomanV4ActionName> =
+  GetAbiFunctionParamsTypes<typeof AutomanV4__factory.abi, T>;
 
 export type GetAutomanReturnTypes<
   functionName extends AutomanActionName,
@@ -45,19 +55,19 @@ export type GetAutomanReturnTypes<
   args // to dedup function name
 >;
 
-export type GetAutomanV3ReturnTypes<
-  functionName extends AutomanActionName,
+export type GetAutomanV4ReturnTypes<
+  functionName extends AutomanV4ActionName,
   args extends ContractFunctionArgs<
-    typeof AutomanV3__factory.abi,
+    typeof AutomanV4__factory.abi,
     AbiStateMutability,
     functionName
   > = ContractFunctionArgs<
-    typeof AutomanV3__factory.abi,
+    typeof AutomanV4__factory.abi,
     AbiStateMutability,
     functionName
   >,
 > = ContractFunctionReturnType<
-  typeof AutomanV3__factory.abi,
+  typeof AutomanV4__factory.abi,
   AbiStateMutability,
   functionName,
   args // to dedup function name
@@ -87,7 +97,7 @@ export type ReinvestReturnType = GetAutomanReturnTypes<
   'reinvest',
   [IncreaseLiquidityParams, bigint, Hex]
 >;
-export type ReinvestV3ReturnType = GetAutomanV3ReturnTypes<
+export type ReinvestV4ReturnType = GetAutomanV4ReturnTypes<
   'reinvest',
   [IncreaseLiquidityParams, bigint, bigint, Hex]
 >;
@@ -106,3 +116,13 @@ export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof ICommonNonfungiblePositionManager__factory.abi,
   'decreaseLiquidity'
 >[0];
+
+export type DecreaseLiquidityReturnType = GetAutomanV4ReturnTypes<
+  'decreaseLiquidity',
+  [DecreaseLiquidityParams, bigint, bigint, boolean]
+>;
+
+export type DecreaseLiquiditySingleReturnType = GetAutomanV4ReturnTypes<
+  'decreaseLiquiditySingle',
+  [DecreaseLiquidityParams, boolean, bigint, bigint, Hex, boolean]
+>;

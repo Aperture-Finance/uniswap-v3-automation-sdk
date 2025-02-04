@@ -177,11 +177,10 @@ export async function generateTypedDataForPermit(
   positionId: bigint,
   deadlineEpochSeconds: bigint,
   publicClient?: PublicClient,
+  isLatestAutoman = false,
 ): Promise<TypedDataDefinition<typeof PermitTypes, 'Permit'>> {
-  const { apertureAutoman, nonfungiblePositionManager } = getAMMInfo(
-    chainId,
-    amm,
-  )!;
+  const { apertureAutoman, apertureAutomanV4, nonfungiblePositionManager } =
+    getAMMInfo(chainId, amm)!;
   const nonce = (
     await getNPM(chainId, amm, publicClient).read.positions([positionId])
   )[0];
@@ -204,7 +203,7 @@ export async function generateTypedDataForPermit(
     types: PermitTypes,
     primaryType: 'Permit',
     message: {
-      spender: apertureAutoman,
+      spender: isLatestAutoman ? apertureAutomanV4 : apertureAutoman,
       tokenId: positionId,
       nonce,
       deadline: deadlineEpochSeconds,
