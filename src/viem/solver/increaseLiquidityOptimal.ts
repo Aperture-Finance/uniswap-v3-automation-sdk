@@ -97,7 +97,8 @@ export async function increaseLiquidityOptimalV4(
   const feeUSD = new Big(swapFeeAmount.toString())
     .div(10 ** tokenInDecimals)
     .mul(tokenInPrice);
-
+  // No need to subtract fees from increaseParams.amount0Desired
+  // and increaseParams.amount1Desired because that's done in automan.
   getLogger().info('SDK.increaseLiquidityOptimalV4.fees ', {
     amm,
     chainId,
