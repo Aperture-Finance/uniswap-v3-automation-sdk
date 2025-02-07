@@ -162,7 +162,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
         apertureAutomanV4: getAddress(
-          '0x0000002F49225167dCF141e8A0b4AFb496bf7A84',
+          '0x00000054D9fBb1cEF6E7d3CD53df50977801C6f4',
         ),
       },
     },
@@ -361,7 +361,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
         apertureAutomanV4: getAddress(
-          '0x000000105B7EEe0Ccf21E0D25977Dc34797B6634',
+          '0x00000063e8cA29E95233D00DAF1A51588b9911c4',
         ),
       },
     },
