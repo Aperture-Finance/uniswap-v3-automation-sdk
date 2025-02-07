@@ -1,6 +1,7 @@
 # Hardhat typechain generated code
 typechain-types/
 typechain-typesV3/
+typechain-typesV4/
 typechain-typesMMVault/
 
 # Jest coverage report
