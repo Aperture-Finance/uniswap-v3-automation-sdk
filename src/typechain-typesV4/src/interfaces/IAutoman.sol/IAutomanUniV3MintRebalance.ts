@@ -69,6 +69,7 @@ export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
   functions: {
     "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))": FunctionFragment;
     "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256)": FunctionFragment;
+    "mintWithTokenIn((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)": FunctionFragment;
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
   };
@@ -77,6 +78,7 @@ export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "mint"
       | "mintOptimal"
+      | "mintWithTokenIn"
       | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"
       | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
   ): FunctionFragment;
@@ -92,6 +94,16 @@ export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
       BytesLike,
       BigNumberish,
       BigNumberish
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mintWithTokenIn",
+    values: [
+      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      string,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
@@ -122,6 +134,10 @@ export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mintOptimal",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "mintWithTokenIn",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -176,6 +192,15 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
@@ -209,6 +234,15 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
     swapData: BytesLike,
     token0FeeAmount: BigNumberish,
     token1FeeAmount: BigNumberish,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  mintWithTokenIn(
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+    tokenIn: string,
+    tokenInFeeAmount: BigNumberish,
+    swapData0: BytesLike,
+    swapData1: BytesLike,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -252,6 +286,22 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
+        tokenId: BigNumber;
+        liquidity: BigNumber;
+        amount0: BigNumber;
+        amount1: BigNumber;
+      }
+    >;
+
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -315,6 +365,15 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
@@ -349,6 +408,15 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

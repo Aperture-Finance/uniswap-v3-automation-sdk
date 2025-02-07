@@ -360,23 +360,23 @@ const _abi = [
         type: "tuple",
       },
       {
-        internalType: "bool",
-        name: "zeroForOne",
-        type: "bool",
+        internalType: "address",
+        name: "tokenOut",
+        type: "address",
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "tokenOutMin",
         type: "uint256",
       },
       {
         internalType: "bytes",
-        name: "swapData",
+        name: "swapData0",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "swapData1",
         type: "bytes",
       },
       {
@@ -385,11 +385,11 @@ const _abi = [
         type: "bool",
       },
     ],
-    name: "decreaseLiquiditySingle",
+    name: "decreaseLiquidityToTokenOut",
     outputs: [
       {
         internalType: "uint256",
-        name: "amount",
+        name: "tokenOutAmount",
         type: "uint256",
       },
     ],
@@ -432,23 +432,23 @@ const _abi = [
         type: "tuple",
       },
       {
-        internalType: "bool",
-        name: "zeroForOne",
-        type: "bool",
+        internalType: "address",
+        name: "tokenOut",
+        type: "address",
       },
       {
         internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
+        name: "tokenOutMin",
         type: "uint256",
       },
       {
         internalType: "bytes",
-        name: "swapData",
+        name: "swapData0",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "swapData1",
         type: "bytes",
       },
       {
@@ -477,11 +477,11 @@ const _abi = [
         type: "bytes32",
       },
     ],
-    name: "decreaseLiquiditySingle",
+    name: "decreaseLiquidityToTokenOut",
     outputs: [
       {
         internalType: "uint256",
-        name: "amount",
+        name: "tokenOutAmount",
         type: "uint256",
       },
     ],
@@ -661,6 +661,88 @@ const _abi = [
       },
     ],
     name: "increaseLiquidityOptimal",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "liquidity",
+        type: "uint128",
+      },
+      {
+        internalType: "uint256",
+        name: "amount0",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amount0Desired",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amount1Desired",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amount0Min",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amount1Min",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+        ],
+        internalType:
+          "struct ICommonNonfungiblePositionManager.IncreaseLiquidityParams",
+        name: "params",
+        type: "tuple",
+      },
+      {
+        internalType: "address",
+        name: "tokenIn",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenInFeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "swapData0",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "swapData1",
+        type: "bytes",
+      },
+    ],
+    name: "increaseLiquidityWithTokenIn",
     outputs: [
       {
         internalType: "uint128",
@@ -907,7 +989,7 @@ const _abi = [
     ],
     name: "setControllers",
     outputs: [],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -932,7 +1014,7 @@ const _abi = [
     ],
     name: "setFeeConfig",
     outputs: [],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;

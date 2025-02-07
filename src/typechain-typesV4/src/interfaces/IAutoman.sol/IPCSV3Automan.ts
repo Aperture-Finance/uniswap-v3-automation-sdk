@@ -135,15 +135,17 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
     "WETH9()": FunctionFragment;
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)": FunctionFragment;
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)": FunctionFragment;
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)": FunctionFragment;
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)": FunctionFragment;
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)": FunctionFragment;
     "deployer()": FunctionFragment;
     "getOptimalSwap(address,int24,int24,uint256,uint256)": FunctionFragment;
     "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes,uint256,uint256)": FunctionFragment;
+    "increaseLiquidityWithTokenIn((uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "isController(address)": FunctionFragment;
     "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))": FunctionFragment;
     "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256)": FunctionFragment;
+    "mintWithTokenIn((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "npm()": FunctionFragment;
     "pancakeV3SwapCallback(int256,int256,bytes)": FunctionFragment;
     "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)": FunctionFragment;
@@ -160,15 +162,17 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
       | "WETH9"
       | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"
       | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"
-      | "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)"
-      | "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)"
+      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"
+      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"
       | "deployer"
       | "getOptimalSwap"
       | "increaseLiquidity"
       | "increaseLiquidityOptimal"
+      | "increaseLiquidityWithTokenIn"
       | "isController"
       | "mint"
       | "mintOptimal"
+      | "mintWithTokenIn"
       | "npm"
       | "pancakeV3SwapCallback"
       | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,uint256,uint256,bytes)"
@@ -204,23 +208,23 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      boolean,
+      string,
       BigNumberish,
-      BigNumberish,
+      BytesLike,
       BytesLike,
       boolean
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      boolean,
+      string,
       BigNumberish,
-      BigNumberish,
+      BytesLike,
       BytesLike,
       boolean,
       BigNumberish,
@@ -248,6 +252,16 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "increaseLiquidityWithTokenIn",
+    values: [
+      ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      string,
+      BigNumberish,
+      BytesLike,
+      BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "isController",
     values: [string]
   ): string;
@@ -262,6 +276,16 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
       BytesLike,
       BigNumberish,
       BigNumberish
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mintWithTokenIn",
+    values: [
+      IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      string,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(functionFragment: "npm", values?: undefined): string;
@@ -338,11 +362,11 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "deployer", data: BytesLike): Result;
@@ -359,12 +383,20 @@ export interface IPCSV3AutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "increaseLiquidityWithTokenIn",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "isController",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mintOptimal",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "mintWithTokenIn",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "npm", data: BytesLike): Result;
@@ -560,22 +592,22 @@ export interface IPCSV3Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -615,6 +647,15 @@ export interface IPCSV3Automan extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    increaseLiquidityWithTokenIn(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     isController(
       addressToCheck: string,
       overrides?: CallOverrides
@@ -630,6 +671,15 @@ export interface IPCSV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -693,12 +743,12 @@ export interface IPCSV3Automan extends BaseContract {
     setControllers(
       controllers: string[],
       statuses: boolean[],
-      overrides?: PayableOverrides & { from?: string }
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
+      overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
 
@@ -724,22 +774,22 @@ export interface IPCSV3Automan extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)"(
+  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    zeroForOne: boolean,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    swapData: BytesLike,
+    tokenOut: string,
+    tokenOutMin: BigNumberish,
+    swapData0: BytesLike,
+    swapData1: BytesLike,
     isUnwrapNative: boolean,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    zeroForOne: boolean,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    swapData: BytesLike,
+    tokenOut: string,
+    tokenOutMin: BigNumberish,
+    swapData0: BytesLike,
+    swapData1: BytesLike,
     isUnwrapNative: boolean,
     permitDeadline: BigNumberish,
     v: BigNumberish,
@@ -779,6 +829,15 @@ export interface IPCSV3Automan extends BaseContract {
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  increaseLiquidityWithTokenIn(
+    params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+    tokenIn: string,
+    tokenInFeeAmount: BigNumberish,
+    swapData0: BytesLike,
+    swapData1: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   isController(
     addressToCheck: string,
     overrides?: CallOverrides
@@ -794,6 +853,15 @@ export interface IPCSV3Automan extends BaseContract {
     swapData: BytesLike,
     token0FeeAmount: BigNumberish,
     token1FeeAmount: BigNumberish,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  mintWithTokenIn(
+    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+    tokenIn: string,
+    tokenInFeeAmount: BigNumberish,
+    swapData0: BytesLike,
+    swapData1: BytesLike,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -857,12 +925,12 @@ export interface IPCSV3Automan extends BaseContract {
   setControllers(
     controllers: string[],
     statuses: boolean[],
-    overrides?: PayableOverrides & { from?: string }
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   setFeeConfig(
     _feeConfig: IAutomanCommon.FeeConfigStruct,
-    overrides?: PayableOverrides & { from?: string }
+    overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -892,22 +960,22 @@ export interface IPCSV3Automan extends BaseContract {
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -959,6 +1027,21 @@ export interface IPCSV3Automan extends BaseContract {
       }
     >;
 
+    increaseLiquidityWithTokenIn(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber] & {
+        liquidity: BigNumber;
+        amount0: BigNumber;
+        amount1: BigNumber;
+      }
+    >;
+
     isController(
       addressToCheck: string,
       overrides?: CallOverrides
@@ -981,6 +1064,22 @@ export interface IPCSV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
+        tokenId: BigNumber;
+        liquidity: BigNumber;
+        amount0: BigNumber;
+        amount1: BigNumber;
+      }
+    >;
+
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1166,22 +1265,22 @@ export interface IPCSV3Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -1214,6 +1313,15 @@ export interface IPCSV3Automan extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
+    increaseLiquidityWithTokenIn(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
     isController(
       addressToCheck: string,
       overrides?: CallOverrides
@@ -1229,6 +1337,15 @@ export interface IPCSV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1292,12 +1409,12 @@ export interface IPCSV3Automan extends BaseContract {
     setControllers(
       controllers: string[],
       statuses: boolean[],
-      overrides?: PayableOverrides & { from?: string }
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
+      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
@@ -1324,22 +1441,22 @@ export interface IPCSV3Automan extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "decreaseLiquiditySingle((uint256,uint128,uint256,uint256,uint256),bool,uint256,uint256,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      zeroForOne: boolean,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData: BytesLike,
+      tokenOut: string,
+      tokenOutMin: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       isUnwrapNative: boolean,
       permitDeadline: BigNumberish,
       v: BigNumberish,
@@ -1372,6 +1489,15 @@ export interface IPCSV3Automan extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
+    increaseLiquidityWithTokenIn(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     isController(
       addressToCheck: string,
       overrides?: CallOverrides
@@ -1387,6 +1513,15 @@ export interface IPCSV3Automan extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    mintWithTokenIn(
+      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1450,12 +1585,12 @@ export interface IPCSV3Automan extends BaseContract {
     setControllers(
       controllers: string[],
       statuses: boolean[],
-      overrides?: PayableOverrides & { from?: string }
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     setFeeConfig(
       _feeConfig: IAutomanCommon.FeeConfigStruct,
-      overrides?: PayableOverrides & { from?: string }
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }

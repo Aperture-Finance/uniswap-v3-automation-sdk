@@ -73,6 +73,7 @@ export interface IAutomanSlipStreamMintRebalanceInterface
   functions: {
     "mint((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160))": FunctionFragment;
     "mintOptimal((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),bytes,uint256,uint256)": FunctionFragment;
+    "mintWithTokenIn((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),address,uint256,bytes,bytes)": FunctionFragment;
     "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
     "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes)": FunctionFragment;
   };
@@ -81,6 +82,7 @@ export interface IAutomanSlipStreamMintRebalanceInterface
     nameOrSignatureOrTopic:
       | "mint"
       | "mintOptimal"
+      | "mintWithTokenIn"
       | "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
       | "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes)"
   ): FunctionFragment;
@@ -96,6 +98,16 @@ export interface IAutomanSlipStreamMintRebalanceInterface
       BytesLike,
       BigNumberish,
       BigNumberish
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mintWithTokenIn",
+    values: [
+      ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      string,
+      BigNumberish,
+      BytesLike,
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
@@ -126,6 +138,10 @@ export interface IAutomanSlipStreamMintRebalanceInterface
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mintOptimal",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "mintWithTokenIn",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -180,6 +196,15 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    mintWithTokenIn(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
@@ -213,6 +238,15 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
     swapData: BytesLike,
     token0FeeAmount: BigNumberish,
     token1FeeAmount: BigNumberish,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  mintWithTokenIn(
+    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    tokenIn: string,
+    tokenInFeeAmount: BigNumberish,
+    swapData0: BytesLike,
+    swapData1: BytesLike,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -256,6 +290,22 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
+        tokenId: BigNumber;
+        liquidity: BigNumber;
+        amount0: BigNumber;
+        amount1: BigNumber;
+      }
+    >;
+
+    mintWithTokenIn(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -319,6 +369,15 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
+    mintWithTokenIn(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
     "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
@@ -353,6 +412,15 @@ export interface IAutomanSlipStreamMintRebalance extends BaseContract {
       swapData: BytesLike,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    mintWithTokenIn(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
