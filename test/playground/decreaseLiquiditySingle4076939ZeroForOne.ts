@@ -12,8 +12,8 @@ import {
 import {
   DEFAULT_SOLVERS,
   PositionDetails,
-  getDecreaseLiquiditySingleSwapInfo,
-  getDecreaseLiquiditySingleTx,
+  getDecreaseLiquidityToTokenOutSwapInfo,
+  getDecreaseLiquidityToTokenOutTx,
   getPublicClient,
 } from '../../src/viem';
 
@@ -45,7 +45,7 @@ async function main() {
       recipient: from,
     },
   };
-  const swapInfos = await getDecreaseLiquiditySingleSwapInfo(
+  const swapInfos = await getDecreaseLiquidityToTokenOutSwapInfo(
     decreaseLiquidityOptions,
     chainId,
     amm,
@@ -66,7 +66,7 @@ async function main() {
       token0FeeAmount,
       token1FeeAmount,
     } = swapInfo;
-    const txRequest = await getDecreaseLiquiditySingleTx(
+    const txRequest = await getDecreaseLiquidityToTokenOutTx(
       decreaseLiquidityOptions,
       zeroForOne,
       from,

@@ -6,7 +6,7 @@ import {
   PermitInfo,
 } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Hex, encodeFunctionData, hexToSignature } from 'viem';
+import { Address, Hex, encodeFunctionData, hexToSignature } from 'viem';
 
 import {
   DecreaseLiquidityParams,
@@ -123,12 +123,12 @@ export function getAutomanV4DecreaseLiquidityCalldata(
   });
 }
 
-export function getAutomanDecreaseLiquiditySingleCalldata(
+export function getAutomanDecreaseLiquidityToTokenOutCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
-  zeroForOne: boolean,
-  token0FeeAmount: bigint,
-  token1FeeAmount: bigint,
-  swapData: Hex = '0x',
+  tokenOut: Address,
+  token0MinAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
   isUnwrapNative = true,
   permitInfo?: PermitInfo,
 ): Hex {
@@ -137,13 +137,13 @@ export function getAutomanDecreaseLiquiditySingleCalldata(
       abi: AutomanV4__factory.abi,
       args: [
         decreaseLiquidityParams,
-        zeroForOne,
-        token0FeeAmount,
-        token1FeeAmount,
-        swapData,
+        tokenOut,
+        token0MinAmount,
+        swapData0,
+        swapData1,
         isUnwrapNative,
       ] as const,
-      functionName: 'decreaseLiquiditySingle',
+      functionName: 'decreaseLiquidityToTokenOut',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
@@ -151,17 +151,17 @@ export function getAutomanDecreaseLiquiditySingleCalldata(
     abi: AutomanV4__factory.abi,
     args: [
       decreaseLiquidityParams,
-      zeroForOne,
-      token0FeeAmount,
-      token1FeeAmount,
-      swapData,
+      tokenOut,
+      token0MinAmount,
+      swapData0,
+      swapData1,
       isUnwrapNative,
       BigInt(permitInfo.deadline),
       Number(v),
       r,
       s,
     ] as const,
-    functionName: 'decreaseLiquiditySingle',
+    functionName: 'decreaseLiquidityToTokenOut',
   });
 }
 

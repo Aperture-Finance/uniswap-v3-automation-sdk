@@ -7,6 +7,7 @@ import {
 } from '@/index';
 import {
   AbiStateMutability,
+  Address,
   ContractFunctionArgs,
   ContractFunctionReturnType,
   Hex,
@@ -15,28 +16,15 @@ import {
 import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type AutomanActionName =
+  | 'mint'
   | 'mintOptimal'
+  | 'increaseLiquidity'
   | 'increaseLiquidityOptimal'
   | 'decreaseLiquidity'
   | 'decreaseLiquiditySingle'
   | 'reinvest'
   | 'rebalance'
   | 'removeLiquidity';
-
-export type AutomanV4ActionName =
-  | 'mintOptimal'
-  | 'increaseLiquidityOptimal'
-  | 'decreaseLiquidity'
-  | 'decreaseLiquiditySingle'
-  | 'reinvest'
-  | 'rebalance';
-// removeLiquidity is deprecated in AutomanV4
-
-export type GetAutomanParams<T extends AutomanActionName> =
-  GetAbiFunctionParamsTypes<typeof Automan__factory.abi, T>;
-export type GetAutomanV4Params<T extends AutomanV4ActionName> =
-  GetAbiFunctionParamsTypes<typeof AutomanV4__factory.abi, T>;
-
 export type GetAutomanReturnTypes<
   functionName extends AutomanActionName,
   args extends ContractFunctionArgs<
@@ -54,75 +42,62 @@ export type GetAutomanReturnTypes<
   functionName,
   args // to dedup function name
 >;
+// Helpers for AutomanV4 not implemented because
+// AutomanV1 often has the same params/return types.
 
-export type GetAutomanV4ReturnTypes<
-  functionName extends AutomanV4ActionName,
-  args extends ContractFunctionArgs<
-    typeof AutomanV4__factory.abi,
-    AbiStateMutability,
-    functionName
-  > = ContractFunctionArgs<
-    typeof AutomanV4__factory.abi,
-    AbiStateMutability,
-    functionName
-  >,
-> = ContractFunctionReturnType<
-  typeof AutomanV4__factory.abi,
-  AbiStateMutability,
-  functionName,
-  args // to dedup function name
->;
-
+/* Mint */
+// { token0:Address, token1:Address, fee:number, tickLower:number, tickUpper:number, amount0Desired:bigint, amount1Desired:bigint, amount0Min:bigint, amount1Min:bigint, recipient:Address, deadline:bigint }
 export type UniV3MintParams = GetAbiFunctionParamsTypes<
   typeof IUniswapV3NonfungiblePositionManager__factory.abi,
   'mint'
 >[0];
-
+// { token0:Address, token1:Address, tickSpacing:number, tickLower:number, tickUpper:number, amount0Desired:bigint, amount1Desired:bigint, amount0Min:bigint, amount1Min:bigint, recipient:Address, deadline:bigint, sqrtPriceX96:bigint }
 export type SlipStreamMintParams = GetAbiFunctionParamsTypes<
   typeof ISlipStreamNonfungiblePositionManager__factory.abi,
   'mint'
 >[0];
+// [bigint tokenId, bigint liquidity, bigint amount0, bigint amount1]
+export type MintReturnType = GetAutomanReturnTypes<'mint'>;
 
+/* IncreaseLiquidity */
+// { tokenId:bigint, amount0Desired:bigint, amount1Desired:bigint, amount0Min:bigint, amount1Min:bigint, deadline:bigint }
 export type IncreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof ICommonNonfungiblePositionManager__factory.abi,
   'increaseLiquidity'
 >[0];
+// [bigint liquidity, bigint amount0, bigint amount1]
+export type IncreaseLiquidityReturnType =
+  GetAutomanReturnTypes<'increaseLiquidity'>;
 
-export type RebalanceReturnType = GetAutomanReturnTypes<
-  'rebalance',
-  [UniV3MintParams, bigint, bigint, Hex]
->;
-
+/* Reinvest */
+// [bigint liquidity, bigint amount0, bigint amount1]
 export type ReinvestReturnType = GetAutomanReturnTypes<
   'reinvest',
   [IncreaseLiquidityParams, bigint, Hex]
 >;
-export type ReinvestV4ReturnType = GetAutomanV4ReturnTypes<
-  'reinvest',
-  [IncreaseLiquidityParams, bigint, bigint, Hex]
->;
 
-export type MintReturnType = GetAutomanReturnTypes<'mintOptimal'>;
-
-export type IncreaseLiquidityReturnType =
-  GetAutomanReturnTypes<'increaseLiquidityOptimal'>;
-
-export type RemoveLiquidityReturnType = GetAutomanReturnTypes<
-  'removeLiquidity',
-  [DecreaseLiquidityParams, bigint]
->;
-
+/* Decrease Liquidity */
+// { tokenId:bigint, liquidity:bigint, amount0Min:bigint, amount1Min:bigint, deadline:bigint }
 export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
   typeof ICommonNonfungiblePositionManager__factory.abi,
   'decreaseLiquidity'
 >[0];
-
-export type DecreaseLiquidityReturnType = GetAutomanV4ReturnTypes<
+// [ amount0:bigint, amount1:bigint ]
+export type DecreaseLiquidityReturnType = GetAutomanReturnTypes<
   'decreaseLiquidity',
-  [DecreaseLiquidityParams, bigint, bigint, boolean]
+  [DecreaseLiquidityParams, bigint]
+>;
+// [ tokenOutAmount:bigint ]
+export type DecreaseLiquidityToTokenOutReturnType = ContractFunctionReturnType<
+  typeof AutomanV4__factory.abi,
+  AbiStateMutability,
+  'decreaseLiquidityToTokenOut',
+  [DecreaseLiquidityParams, Address, bigint, Hex, Hex, boolean]
 >;
 
-export type DecreaseLiquiditySingleReturnType = GetAutomanV4ReturnTypes<
-  'decreaseLiquiditySingle',
-  [DecreaseLiquidityParams, boolean, bigint, bigint, Hex, boolean]
+/* Rebalance */
+// [ tokenId:bigint, liquidity:bigint, amount0:bigint, amount1:bigint ]
+export type RebalanceReturnType = GetAutomanReturnTypes<
+  'rebalance',
+  [UniV3MintParams, bigint, bigint, Hex]
 >;

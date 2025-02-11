@@ -31,7 +31,7 @@ import {
   tryRequestWithOverrides,
 } from '../overrides';
 import {
-  getAutomanDecreaseLiquiditySingleCalldata,
+  getAutomanDecreaseLiquidityToTokenOutCalldata,
   getAutomanRebalanceCalldata,
   getAutomanReinvestCalldata,
   getAutomanRemoveLiquidityCalldata,
@@ -44,13 +44,13 @@ import {
 import { getFromAddress } from './internal';
 import {
   DecreaseLiquidityParams,
-  DecreaseLiquiditySingleReturnType,
+  DecreaseLiquidityReturnType,
+  DecreaseLiquidityToTokenOutReturnType,
   IncreaseLiquidityParams,
   IncreaseLiquidityReturnType,
   MintReturnType,
   RebalanceReturnType,
-  ReinvestV4ReturnType,
-  RemoveLiquidityReturnType,
+  ReinvestReturnType,
   SlipStreamMintParams,
   UniV3MintParams,
 } from './types';
@@ -411,99 +411,99 @@ export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
   );
 }
 
-export async function simulateDecreaseLiquiditySingle(
-  chainId: ApertureSupportedChainId,
+export async function simulateDecreaseLiquidityToTokenOut(
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
-  zeroForOne: boolean,
-  token0FeeAmount: bigint,
-  token1FeeAmount: bigint,
-  swapData: Hex = '0x',
+  tokenOut: Address,
+  tokenOutMin: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
   isUnwrapNative = true,
   blockNumber?: bigint,
-): Promise<DecreaseLiquiditySingleReturnType> {
-  const returnData = await requestDecreaseLiquiditySingle(
+): Promise<DecreaseLiquidityToTokenOutReturnType> {
+  const returnData = await requestDecreaseLiquidityToTokenOut(
     'eth_call',
-    chainId,
     amm,
+    chainId,
     publicClient,
     from,
     owner,
     decreaseLiquidityParams,
-    zeroForOne,
-    token0FeeAmount,
-    token1FeeAmount,
-    swapData,
+    tokenOut,
+    tokenOutMin,
+    swapData0,
+    swapData1,
     isUnwrapNative,
     blockNumber,
   );
   return decodeFunctionResult({
     abi: AutomanV4__factory.abi,
     data: returnData,
-    functionName: 'decreaseLiquiditySingle',
+    functionName: 'decreaseLiquidityToTokenOut',
   });
 }
 
-export async function estimateDecreaseLiquiditySingleGas(
-  chainId: ApertureSupportedChainId,
+export async function estimateDecreaseLiquidityToTokenOutGas(
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
-  zeroForOne: boolean,
-  token0FeeAmount: bigint,
-  token1FeeAmount: bigint,
-  swapData: Hex = '0x',
+  tokenOut: Address,
+  tokenOutMin: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
   isUnwrapNative = true,
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
-    await requestDecreaseLiquiditySingle(
+    await requestDecreaseLiquidityToTokenOut(
       'eth_estimateGas',
-      chainId,
       amm,
+      chainId,
       publicClient,
       from,
       owner,
       decreaseLiquidityParams,
-      zeroForOne,
-      token0FeeAmount,
-      token1FeeAmount,
-      swapData,
+      tokenOut,
+      tokenOutMin,
+      swapData0,
+      swapData1,
       isUnwrapNative,
       blockNumber,
     ),
   );
 }
 
-export async function requestDecreaseLiquiditySingle<
+export async function requestDecreaseLiquidityToTokenOut<
   M extends keyof RpcReturnType,
 >(
   method: M,
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
-  zeroForOne: boolean,
-  token0FeeAmount: bigint,
-  token1FeeAmount: bigint,
-  swapData: Hex = '0x',
+  tokenOut: Address,
+  tokenOutMin: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
   isUnwrapNative = true,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   from = getFromAddress(from);
-  const data = getAutomanDecreaseLiquiditySingleCalldata(
+  const data = getAutomanDecreaseLiquidityToTokenOutCalldata(
     decreaseLiquidityParams,
-    zeroForOne,
-    token0FeeAmount,
-    token1FeeAmount,
-    swapData,
+    tokenOut,
+    tokenOutMin,
+    swapData0,
+    swapData1,
     isUnwrapNative,
   );
   const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
@@ -549,7 +549,7 @@ export async function simulateRemoveLiquidity(
   feeBips = BigInt(0),
   blockNumber?: bigint,
   customDestContract?: Address,
-): Promise<RemoveLiquidityReturnType> {
+): Promise<DecreaseLiquidityReturnType> {
   const data = getAutomanRemoveLiquidityCalldata(
     tokenId,
     BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
@@ -602,7 +602,7 @@ export async function simulateDecreaseLiquidity(
   isUnwrapNative = true,
   blockNumber?: bigint,
   customDestContract?: Address,
-): Promise<RemoveLiquidityReturnType> {
+): Promise<DecreaseLiquidityReturnType> {
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     token0FeeAmount,
@@ -947,7 +947,7 @@ export async function simulateReinvest(
   feeBips = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
-): Promise<RebalanceReturnType> {
+): Promise<ReinvestReturnType> {
   const data = await requestReinvest(
     'eth_call',
     chainId,
@@ -978,7 +978,7 @@ export async function simulateReinvestV4(
   token1FeeAmount = BigInt(0),
   swapData: Hex = '0x',
   blockNumber?: bigint,
-): Promise<ReinvestV4ReturnType> {
+): Promise<ReinvestReturnType> {
   const data = await requestReinvestV4(
     'eth_call',
     chainId,

@@ -4,12 +4,12 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
-import { SolverResult, decreaseLiquiditySingle } from '../solver';
+import { SolverResult, decreaseLiquidityToTokenOut } from '../solver';
 import { E_Solver } from '../solver';
 
 /**
  * calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
- * @param removeLiquidityOptions Decrease liquidity options.
+ * @param decreaseLiquidityOptions Decrease liquidity options.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
  * @param zeroForOne If true, collect in token1. If false, collect in token0.
@@ -20,40 +20,30 @@ import { E_Solver } from '../solver';
  * @param positionDetails Uniswap SDK PositionDetails for the specified position (optional); if undefined, one will be created.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getDecreaseLiquiditySingleSwapInfo(
-  removeLiquidityOptions: RemoveLiquidityOptions,
-  chainId: ApertureSupportedChainId,
+export async function getDecreaseLiquidityToTokenOutSwapInfo(
   amm: AutomatedMarketMakerEnum,
-  zeroForOne: boolean,
-  recipient: Address,
-  tokenPricesUsd: [string, string],
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
+  from: Address,
+  positionDetails: PositionDetails,
+  decreaseLiquidityOptions: RemoveLiquidityOptions, // RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
+  tokenOut: Address,
   isUnwrapNative = true,
+  tokenPricesUsd: [string, string],
   includeSolvers?: E_Solver[],
-  positionDetails?: PositionDetails,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
-  if (positionDetails === undefined) {
-    positionDetails = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      BigInt(removeLiquidityOptions.tokenId.toString()),
-      publicClient,
-      blockNumber,
-    );
-  }
-
-  return await decreaseLiquiditySingle(
-    chainId,
+  return await decreaseLiquidityToTokenOut(
     amm,
+    chainId,
     publicClient,
+    from,
     positionDetails,
-    removeLiquidityOptions,
-    zeroForOne,
-    recipient,
-    tokenPricesUsd,
+    decreaseLiquidityOptions,
+    tokenOut,
     isUnwrapNative,
-    blockNumber,
+    tokenPricesUsd,
     includeSolvers,
+    blockNumber,
   );
 }

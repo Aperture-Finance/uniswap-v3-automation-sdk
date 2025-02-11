@@ -206,8 +206,9 @@ export async function reinvestBackend(
     let gasInRawNative: bigint = 0n;
 
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+        Number(increaseOptions.slippageTolerance.numerator) /
+        Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
@@ -503,8 +504,9 @@ export async function reinvestV4(
     let gasFeeEstimation: bigint = 0n;
 
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+        Number(increaseOptions.slippageTolerance.numerator) /
+        Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
