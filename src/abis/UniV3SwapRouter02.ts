@@ -1,13 +1,9 @@
-export const swapRouter02Abi = [
+export const UniV3SwapRouter02Abi = [
   {
     inputs: [
       { internalType: 'address', name: '_factoryV2', type: 'address' },
       { internalType: 'address', name: 'factoryV3', type: 'address' },
-      {
-        internalType: 'address',
-        name: '_positionManager',
-        type: 'address',
-      },
+      { internalType: 'address', name: '_positionManager', type: 'address' },
       { internalType: 'address', name: '_WETH9', type: 'address' },
     ],
     stateMutability: 'nonpayable',
@@ -59,11 +55,7 @@ export const swapRouter02Abi = [
     inputs: [
       { internalType: 'bytes[]', name: 'paths', type: 'bytes[]' },
       { internalType: 'uint128[]', name: 'amounts', type: 'uint128[]' },
-      {
-        internalType: 'uint24',
-        name: 'maximumTickDivergence',
-        type: 'uint24',
-      },
+      { internalType: 'uint24', name: 'maximumTickDivergence', type: 'uint24' },
       { internalType: 'uint32', name: 'secondsAgo', type: 'uint32' },
     ],
     name: 'checkOracleSlippage',
@@ -74,11 +66,7 @@ export const swapRouter02Abi = [
   {
     inputs: [
       { internalType: 'bytes', name: 'path', type: 'bytes' },
-      {
-        internalType: 'uint24',
-        name: 'maximumTickDivergence',
-        type: 'uint24',
-      },
+      { internalType: 'uint24', name: 'maximumTickDivergence', type: 'uint24' },
       { internalType: 'uint32', name: 'secondsAgo', type: 'uint32' },
     ],
     name: 'checkOracleSlippage',
@@ -146,11 +134,7 @@ export const swapRouter02Abi = [
           { internalType: 'bytes', name: 'path', type: 'bytes' },
           { internalType: 'address', name: 'recipient', type: 'address' },
           { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-          {
-            internalType: 'uint256',
-            name: 'amountInMaximum',
-            type: 'uint256',
-          },
+          { internalType: 'uint256', name: 'amountInMaximum', type: 'uint256' },
         ],
         internalType: 'struct IV3SwapRouter.ExactOutputParams',
         name: 'params',
@@ -171,11 +155,7 @@ export const swapRouter02Abi = [
           { internalType: 'uint24', name: 'fee', type: 'uint24' },
           { internalType: 'address', name: 'recipient', type: 'address' },
           { internalType: 'uint256', name: 'amountOut', type: 'uint256' },
-          {
-            internalType: 'uint256',
-            name: 'amountInMaximum',
-            type: 'uint256',
-          },
+          { internalType: 'uint256', name: 'amountInMaximum', type: 'uint256' },
           {
             internalType: 'uint160',
             name: 'sqrtPriceLimitX96',
@@ -229,11 +209,7 @@ export const swapRouter02Abi = [
           { internalType: 'address', name: 'token0', type: 'address' },
           { internalType: 'address', name: 'token1', type: 'address' },
           { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
-          {
-            internalType: 'uint256',
-            name: 'amount0Min',
-            type: 'uint256',
-          },
+          { internalType: 'uint256', name: 'amount0Min', type: 'uint256' },
           { internalType: 'uint256', name: 'amount1Min', type: 'uint256' },
         ],
         internalType: 'struct IApproveAndCall.IncreaseLiquidityParams',
@@ -255,16 +231,8 @@ export const swapRouter02Abi = [
           { internalType: 'uint24', name: 'fee', type: 'uint24' },
           { internalType: 'int24', name: 'tickLower', type: 'int24' },
           { internalType: 'int24', name: 'tickUpper', type: 'int24' },
-          {
-            internalType: 'uint256',
-            name: 'amount0Min',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'amount1Min',
-            type: 'uint256',
-          },
+          { internalType: 'uint256', name: 'amount0Min', type: 'uint256' },
+          { internalType: 'uint256', name: 'amount1Min', type: 'uint256' },
           { internalType: 'address', name: 'recipient', type: 'address' },
         ],
         internalType: 'struct IApproveAndCall.MintParams',
@@ -279,11 +247,7 @@ export const swapRouter02Abi = [
   },
   {
     inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'previousBlockhash',
-        type: 'bytes32',
-      },
+      { internalType: 'bytes32', name: 'previousBlockhash', type: 'bytes32' },
       { internalType: 'bytes[]', name: 'data', type: 'bytes[]' },
     ],
     name: 'multicall',

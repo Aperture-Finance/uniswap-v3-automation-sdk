@@ -1,7 +1,7 @@
 // ts-node test/playground/solvers.ts
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
-import { ApertureSupportedChainId, getAMMInfo } from '../../src';
+import { ApertureSupportedChainId } from '../../src';
 import { get1InchQuote } from '../../src/viem/solver/get1InchSolver';
 import { buildRequest as build1InchRequest } from '../../src/viem/solver/get1InchSolver';
 import {
@@ -21,19 +21,65 @@ const amount = '9000000000000000000'; // '9000000000000000';
 const slippage = 0.03;
 
 async function testSamePoolSolver() {
-  const { swapRouter } = getAMMInfo(chainId, amm)!;
-  if (!swapRouter) {
-    throw new Error('Chain or AMM not supported');
-  }
   const toAmount = await getSamePoolToAmount(
+    amm,
     chainId,
     token0,
     token1,
     feeOrTickSpacing,
-    /* swapRouterAddress= */ swapRouter,
     /* amount= */ BigInt(amount),
   );
-  console.log(`SamePool toAmount=${toAmount}`);
+  console.log(`SamePoolSolver toAmount=${toAmount}`);
+}
+
+async function testSamePoolSolverPancakeSwap() {
+  const toAmount = await getSamePoolToAmount(
+    AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
+    chainId,
+    token0,
+    token1,
+    /* feeOrTickSpacing= */ 500,
+    /* amount= */ BigInt(amount),
+  );
+  console.log(`SamePoolSolverPancakeSwap toAmount=${toAmount}`);
+}
+
+async function testSamePoolSolverPancakeSwapDifferentFee() {
+  const toAmount = await getSamePoolToAmount(
+    AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
+    chainId,
+    '0x152649eA73beAb28c5b49B26eb48f7EAD6d4c898', // CAKE
+    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+    /* feeOrTickSpacing= */ 2500,
+    /* amount= */ BigInt(amount),
+  );
+  console.log(`SamePoolSolverPancakeSwapDifferentFee toAmount=${toAmount}`);
+}
+
+async function testSamePoolSolverSlipStream() {
+  const toAmount = await getSamePoolToAmount(
+    AutomatedMarketMakerEnum.enum.SLIPSTREAM,
+    ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    /* token0=WETH */ '0x4200000000000000000000000000000000000006',
+    /* token0=USDC */ '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+    /* feeOrTickSpacing= */ 100,
+    /* amount= */ BigInt(amount),
+  );
+  console.log(`SamePoolSolverSlipStream toAmount=${toAmount}`);
+}
+
+async function testSamePoolSolverSlipStreamDifferentTickSpacing() {
+  const toAmount = await getSamePoolToAmount(
+    AutomatedMarketMakerEnum.enum.SLIPSTREAM,
+    ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    /* token0=WETH */ '0x4200000000000000000000000000000000000006',
+    /* token0=USDC */ '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+    /* feeOrTickSpacing= */ 2000,
+    /* amount= */ BigInt(amount),
+  );
+  console.log(
+    `SamePoolSolverSlipStreamDifferentTickSpacing toAmount=${toAmount}`,
+  );
 }
 
 async function test1InchSolver() {
@@ -140,6 +186,10 @@ async function testOkxSwap() {
 
 async function main() {
   await testSamePoolSolver();
+  await testSamePoolSolverPancakeSwap();
+  await testSamePoolSolverPancakeSwapDifferentFee();
+  await testSamePoolSolverSlipStream();
+  await testSamePoolSolverSlipStreamDifferentTickSpacing();
   // Skip since no longer subscribing to 1Inch API.
   if (false) await test1InchSolver();
   await testOkxApprove();
