@@ -1,4 +1,5 @@
 export * from './automan';
+export * from './getDecreaseLiquidityToTokenOutSwapInfo';
 export * from './getIncreaseLiquidityOptimalSwapInfo';
 export * from './getFees';
 export * from './getMintOptimalSwapInfo';

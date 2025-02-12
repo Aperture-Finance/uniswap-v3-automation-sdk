@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/pcsv3-automan-transaction.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -38,7 +39,6 @@ import {
   getIncreaseLiquidityOptimalSwapInfo,
   getIncreaseLiquidityOptimalTx,
   getMintOptimalSwapInfo,
-  getMintOptimalTx,
   getMintedPositionIdFromTxReceipt,
   getPool,
   getRebalanceSwapInfo,
@@ -50,6 +50,7 @@ import { expect, hardhatForkProvider, resetFork } from '../common';
 // Tests for PCSV3Automan transactions on a forked BNB mainnet.
 describe('Viem - PCSV3Automan transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
+  const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
   const positionId = 528336n;
   const blockNumber = 37287100n;
@@ -57,14 +58,13 @@ describe('Viem - PCSV3Automan transaction tests', function () {
 
   const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
   const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
-  const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
 
   let automanContract: PCSV3Automan;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
   const nonForkClient = createPublicClient({
     chain: bsc,
@@ -91,7 +91,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     );
     await automanContract.deployed();
     await automanContract.setFeeConfig({
-      feeCollector: WHALE_ADDRESS,
+      feeCollector,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
@@ -238,7 +238,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
         /* slippageTolerance= */ 0.01,
-        /* tokenPricesUsd= */ ['60000', '3000'],
+        /* tokenPricesUsd= */ ['1', '700'], // BSC-USD / WBNB
         publicClient,
         [E_Solver.SamePool],
         existingPosition,
@@ -293,7 +293,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     });
   });
 
-  it('Optimal mint without 1inch', async function () {
+  // Test deprecated and moved to pcsv3-automanV4-transaction.test.ts.
+  it.skip('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -341,7 +342,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalTx(
+    const { tx: txRequest } = await getMintOptimal(
       chainId,
       amm,
       token0Amount,
@@ -390,7 +391,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     });
   });
 
-  it('Increase liquidity optimal without 1inch', async function () {
+  // Test deprecated and moved to pcsv3-automanV4-transaction.test.ts.
+  it.skip('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,

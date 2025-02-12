@@ -1,5 +1,9 @@
-// yarn test:hardhat test/hardhat/viem/univ3-automan-transaction.test.ts
-import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+// yarn test:hardhat test/hardhat/viem/univ3-automanV4-transaction.test.ts
+import {
+  FeeAmount,
+  RemoveLiquidityOptions,
+  nearestUsableTick,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import hre, { ethers } from 'hardhat';
@@ -10,6 +14,7 @@ import {
   TestClient,
   WalletClient,
   encodeAbiParameters,
+  getContract,
   parseAbiParameters,
   walletActions,
 } from 'viem';
@@ -20,9 +25,10 @@ import {
   ConditionTypeEnum,
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
+  IERC20__factory,
   IOCKEY_LOGGER,
-  UniV3Automan,
-  UniV3Automan__factory,
+  UniV3AutomanV4,
+  UniV3AutomanV4__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
   ioc,
@@ -32,14 +38,18 @@ import {
   PositionDetails,
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
+  getDecreaseLiquidityToTokenOutSwapInfo,
+  getDecreaseLiquidityToTokenOutTx,
   getERC20Overrides,
+  getIncreaseLiquidityOptimalSwapInfoV4,
+  getIncreaseLiquidityOptimalV4Tx,
   getMintOptimalSwapInfoV4,
   getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
-  getRebalanceSwapInfo,
-  getRebalanceTx,
-  getReinvestTx,
+  getRebalanceSwapInfoV4,
+  getRebalanceV4Tx,
+  getReinvestV4Tx,
 } from '../../../src/viem';
 import {
   WBTC_ADDRESS,
@@ -54,12 +64,12 @@ import {
   resetFork,
 } from '../common';
 
-// Tests for UniV3Automan transactions on a forked Ethereum mainnet.
-describe('Viem - UniV3Automan transaction tests', function () {
+// Tests for UniV3AutomanV4 transactions on a forked Ethereum mainnet.
+describe('Viem - UniV3AutomanV4 transaction tests', function () {
   const positionId = 4n;
   const blockNumber = 17188000n;
-  let automanContract: UniV3Automan;
-  const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+  let automanV4Contract: UniV3AutomanV4;
+  const automanV4Address = getAMMInfo(chainId, amm)!.apertureAutomanV4;
   const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -76,39 +86,39 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
     impersonatedOwnerClient = testClient.extend(walletActions);
 
-    // Deploy Automan.
-    automanContract = await new UniV3Automan__factory(
+    // Deploy AutomanV4.
+    automanV4Contract = await new UniV3AutomanV4__factory(
+      // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
-    await automanContract.deployed();
-    await automanContract.setFeeConfig({
+    await automanV4Contract.deployed();
+    await automanV4Contract.setFeeConfig({
       feeCollector,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
-    await automanContract.setControllers([WHALE_ADDRESS], [true]);
+    await automanV4Contract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new UniV3OptimalSwapRouter__factory(
-      // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();
-    await automanContract.setSwapRouters([router.address], [true]);
+    await automanV4Contract.setAllowlistedRouters([router.address], [true]);
 
-    // Set Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman =
-      automanContract.address as `0x${string}`;
+    // Set AutomanV4 address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 =
+      automanV4Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
       router.address as `0x${string}`;
 
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     const { request } = await publicClient.simulateContract({
       abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       functionName: 'setApprovalForAll',
-      args: [automanContract.address as Address, true] as const,
+      args: [automanV4Contract.address as Address, true] as const,
       account: eoa,
     });
 
@@ -116,8 +126,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
   });
 
   after(() => {
-    // Reset Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman = automanAddress;
+    // Reset AutomanV4 address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 = automanV4Address;
     testClient.stopImpersonatingAccount({
       address: eoa,
     });
@@ -156,7 +166,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    const txRequest = await getReinvestTx(
+    const txRequest = await getReinvestV4Tx(
       chainId,
       amm,
       eoa,
@@ -165,7 +175,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
         slippageTolerance: new Percent(1, 100),
         deadline: Math.floor(Date.now() / 1000),
       },
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       /* swapData= */ '0x',
       /* amount0Min= */ 0n,
       /* amount1Min= */ 0n,
@@ -187,9 +198,9 @@ describe('Viem - UniV3Automan transaction tests', function () {
         chainId,
         AutomatedMarketMakerEnum.enum.UNISWAP_V3,
         positionId.toString(),
-        /*feeToPrincipalRatioThreshold=*/ 0.1,
-        /*slippage=*/ 0.05,
-        /*maxGasProportion=*/ 0.01,
+        /* feeToPrincipalRatioThreshold= */ 0.1,
+        /* slippage= */ 0.05,
+        /* maxGasProportion= */ 0.01,
         /* expiration= */ 1627776000,
       ),
     ).to.deep.equal({
@@ -218,23 +229,20 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
-        /* slippageTolerance= */ 0.01,
+        /* slippage= */ 0.01,
         /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
         [E_Solver.SamePool],
-        existingPosition,
-        undefined,
-        false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,
@@ -246,10 +254,11 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -290,23 +299,20 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
-        /* slippageTolerance= */ 0.01,
+        /* slippage= */ 0.01,
         /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
         [E_Solver.OneInch],
-        existingPosition,
-        undefined,
-        false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,
@@ -318,7 +324,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
@@ -383,7 +390,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
       await getMintOptimalSwapInfoV4(
@@ -416,7 +423,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -449,7 +456,6 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
-  // Test deprecated and moved to univ3-automanV4-transaction.test.ts.
   it.skip('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
@@ -481,7 +487,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
       await getMintOptimalSwapInfoV4(
@@ -570,10 +576,10 @@ describe('Viem - UniV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -584,12 +590,13 @@ describe('Viem - UniV3Automan transaction tests', function () {
         token0Amount,
         token1Amount,
         eoa,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.OneInch],
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV4Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
@@ -606,7 +613,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -637,8 +644,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     ).to.equal(true);
   });
 
-  // Test deprecated and moved to univ3-automanV4-transaction.test.ts.
-  it.skip('Increase liquidity optimal without 1inch', async function () {
+  it('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -660,10 +666,10 @@ describe('Viem - UniV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -674,12 +680,13 @@ describe('Viem - UniV3Automan transaction tests', function () {
         token0Amount,
         token1Amount,
         eoa,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV4Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
@@ -720,5 +727,311 @@ describe('Viem - UniV3Automan transaction tests', function () {
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
     });
+  });
+
+  it('Decrease Liquidity Single zeroForOne', async function () {
+    const zeroForOne = true;
+    const isUnwrapNative = true;
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    const [pool, token0Contract, token1Contract] = [
+      existingPosition.pool,
+      getContract({
+        address: existingPosition.token0.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+      getContract({
+        address: existingPosition.token1.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+    ];
+    const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+      tokenId: Number(positionId),
+      liquidityPercentage: new Percent(49, 100),
+      slippageTolerance: new Percent(5, 1000),
+      deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      collectOptions: {
+        expectedCurrencyOwed0: existingPosition.tokensOwed0,
+        expectedCurrencyOwed1: existingPosition.tokensOwed1,
+        recipient: eoa,
+      },
+    };
+    const { liquidity, swapData, swapData1, token0FeeAmount, token1FeeAmount } =
+      (
+        await getDecreaseLiquidityToTokenOutSwapInfo(
+          amm,
+          chainId,
+          publicClient,
+          /* from= */ eoa,
+          /* positionDetails= */ existingPosition,
+          decreaseLiquidityOptions,
+          /* tokenOut= */ (zeroForOne
+            ? pool.token1.address
+            : pool.token0.address) as Address,
+          isUnwrapNative,
+          /* tokenPricesUsd= */ ['60000', '3000'],
+          /* includeSolvers= */ [E_Solver.SamePool],
+        )
+      )[0];
+    const txRequest = await getDecreaseLiquidityToTokenOutTx(
+      amm,
+      chainId,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      /* tokenOut= */ (zeroForOne
+        ? pool.token1.address
+        : pool.token0.address) as Address,
+      /* tokenOutMin= */ liquidity, // Liquidity mapped to tokenOutMin.
+      token0FeeAmount,
+      token1FeeAmount,
+      /* swapData0= */ swapData,
+      swapData1,
+      isUnwrapNative,
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+
+    // Log states before sending the transaction.
+    const [
+      eoaNativeBalanceBefore,
+      eoaToken0BalanceBefore,
+      eoaToken1BalanceBefore,
+      feeCollectorNativeBalanceBefore,
+      feeCollectorToken0BalanceBefore,
+      feeCollectorToken1BalanceBefore,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Send the transaction and wait for the receipt.
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    // Get states after the transaction.
+    const [
+      eoaNativeBalanceAfter,
+      eoaToken0BalanceAfter,
+      eoaToken1BalanceAfter,
+      feeCollectorNativeBalanceAfter,
+      feeCollectorToken0BalanceAfter,
+      feeCollectorToken1BalanceAfter,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Test balance of EOA.
+    expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
+      4229659664449473084n,
+    );
+    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(0n);
+    expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
+
+    // Test fees collected.
+    expect(token0FeeAmount).to.equal(40760n);
+    expect(token1FeeAmount).to.equal(4431110560193163n);
+    expect(
+      feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
+    ).to.equal(4431110560193163n);
+    expect(
+      feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
+    ).to.equal(40760n);
+    expect(
+      feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
+    ).to.equal(0n);
+
+    // Test new position.
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.LT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
+  });
+
+  it('Decrease Liquidity Single !zeroForOne', async function () {
+    const zeroForOne = false;
+    const isUnwrapNative = true;
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    const [pool, token0Contract, token1Contract] = [
+      existingPosition.pool,
+      getContract({
+        address: existingPosition.token0.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+      getContract({
+        address: existingPosition.token1.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+    ];
+    const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+      tokenId: Number(positionId),
+      liquidityPercentage: new Percent(49, 100),
+      slippageTolerance: new Percent(5, 1000),
+      deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      collectOptions: {
+        expectedCurrencyOwed0: existingPosition.tokensOwed0,
+        expectedCurrencyOwed1: existingPosition.tokensOwed1,
+        recipient: eoa,
+      },
+    };
+    const { liquidity, swapData, swapData1, token0FeeAmount, token1FeeAmount } =
+      (
+        await getDecreaseLiquidityToTokenOutSwapInfo(
+          amm,
+          chainId,
+          publicClient,
+          /* from= */ eoa,
+          /* positionDetails= */ existingPosition,
+          decreaseLiquidityOptions,
+          /* tokenOut= */ (zeroForOne
+            ? pool.token1.address
+            : pool.token0.address) as Address,
+          isUnwrapNative,
+          /* tokenPricesUsd= */ ['60000', '3000'],
+          /* includeSolvers= */ [E_Solver.SamePool],
+        )
+      )[0];
+    const txRequest = await getDecreaseLiquidityToTokenOutTx(
+      amm,
+      chainId,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      /* tokenOut= */ (zeroForOne
+        ? pool.token1.address
+        : pool.token0.address) as Address,
+      /* tokenOutMin= */ liquidity, // Liquidity mapped to tokenOutMin.
+      token0FeeAmount,
+      token1FeeAmount,
+      /* swapData0= */ swapData,
+      swapData1,
+      isUnwrapNative,
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+
+    // Log states before sending the transaction.
+    const [
+      eoaNativeBalanceBefore,
+      eoaToken0BalanceBefore,
+      eoaToken1BalanceBefore,
+      feeCollectorNativeBalanceBefore,
+      feeCollectorToken0BalanceBefore,
+      feeCollectorToken1BalanceBefore,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Send the transaction and wait for the receipt.
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    // Get states after the transaction.
+    const [
+      eoaNativeBalanceAfter,
+      eoaToken0BalanceAfter,
+      eoaToken1BalanceAfter,
+      feeCollectorNativeBalanceAfter,
+      feeCollectorToken0BalanceAfter,
+      feeCollectorToken1BalanceAfter,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Test balance of EOA.
+    expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
+      -19112177585800974n,
+    );
+    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(27786525n);
+    expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
+
+    // Test fees collected.
+    expect(token0FeeAmount).to.equal(40760n);
+    expect(token1FeeAmount).to.equal(4431110560193163n);
+    expect(
+      feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
+    ).to.equal(4431110560193163n);
+    expect(
+      feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
+    ).to.equal(40760n);
+    expect(
+      feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
+    ).to.equal(0n);
+
+    // Test new position.
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.LT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
   });
 });
