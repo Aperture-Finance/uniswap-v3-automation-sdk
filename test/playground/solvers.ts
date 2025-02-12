@@ -1,5 +1,7 @@
 // ts-node test/playground/solvers.ts
-import { ApertureSupportedChainId } from '../../src';
+import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+
+import { ApertureSupportedChainId, getAMMInfo } from '../../src';
 import { get1InchQuote } from '../../src/viem/solver/get1InchSolver';
 import { buildRequest as build1InchRequest } from '../../src/viem/solver/get1InchSolver';
 import {
@@ -7,11 +9,14 @@ import {
   getOkxQuote,
   getOkxSwap,
 } from '../../src/viem/solver/getOkxSolver';
+import { getSamePoolSwap } from '../../src/viem/solver/getSamePoolSolver';
 
+const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
 const userAddress = '0x8EB8a3b98659Cce290402893d0123abb75E3ab28';
 const token0 = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; // WETH, native
 const token1 = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC on chain1
+const feeOrTickSpacing = 3000;
 const amount = '9000000000000000000'; // '9000000000000000';
 const slippage = 0.03;
 
@@ -49,6 +54,23 @@ async function test1InchSolver() {
   console.log(
     `1Inch toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
   );
+}
+
+async function testSamePoolSolver() {
+  const { swapRouter } = getAMMInfo(chainId, amm)!;
+  if (!swapRouter) {
+    throw new Error('Chain or AMM not supported');
+  }
+  const toAmount = await getSamePoolSwap(
+    amm,
+    chainId,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    /* swapRouterAddress= */ swapRouter,
+    /* amount= */ BigInt(amount),
+  );
+  console.log(`SamePool toAmount=${toAmount}`);
 }
 
 async function testOkxApprove() {
@@ -118,10 +140,13 @@ async function testOkxSwap() {
 }
 
 async function main() {
-  await test1InchSolver();
+  await testSamePoolSolver();
+  // Skip since no longer subscribing to 1Inch API.
+  if (false) await test1InchSolver();
   await testOkxApprove();
   await testOkxQuote();
   await testOkxSwap();
+  process.exit(0);
 }
 
 main();

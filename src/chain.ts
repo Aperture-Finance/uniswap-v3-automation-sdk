@@ -79,6 +79,7 @@ export interface ChainInfo {
   maxGasCeiling: number;
   alchemyNetworkId?: AlchemyNetworkId;
   infura_network_id?: InfuraNetworkId;
+  // Occasionally needs to be updated when node stop supporting certain methods, such as eth_createAccessList.
   rpc_url: string;
   // gecko_terminal_platform_id is basically the chain name for gecko terminal api to look up price by address.
   gecko_terminal_platform_id?: string;
@@ -142,7 +143,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'eth',
     infura_network_id: '',
-    rpc_url: 'https://ethereum-rpc.publicnode.com',
+    rpc_url: 'https://eth.llamarpc.com',
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
