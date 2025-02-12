@@ -123,6 +123,8 @@ export async function decreaseLiquidityToTokenOut(
     }
   };
 
+  let solver0 = E_Solver.SamePool;
+  let solver1 = E_Solver.SamePool;
   let swapData: Hex = '0x';
   let swapData1: Hex = '0x';
   let swapRoute: SwapRoute | undefined = undefined;
@@ -147,30 +149,33 @@ export async function decreaseLiquidityToTokenOut(
           token1.address as Address,
           /* only sign matters */ token1SwapIn,
         ];
-
+  let token0SolverResults, token1SolverResults;
   if (token0.address === tokenOut) {
     tokenOutFromToken0 = token0SwapIn;
   } else if (token0SwapIn > 0n) {
-    const solverResults = await Promise.all(
-      includeSolvers.map((solver) => {
+    token0SolverResults = await Promise.all(
+      includeSolvers.map(async (solver) => {
         try {
-          // Although it's mintOptimal, it's the same swapData and swapRoute.
-          return getSolver(solver).mintOptimal({
-            amm,
-            chainId,
-            fromAddress: from,
-            token0: swap0Token0,
-            token1: swap0Token1,
-            feeOrTickSpacing,
-            tickLower: positionDetails.tickLower,
-            tickUpper: positionDetails.tickUpper,
-            // Only apply slippage check to tokenOut, done in automan instead of solver.
-            // Don't need slippage for a particular swap, because acceptable to swap less tokenA and more tokenB for tokenC.
-            slippage: 1,
-            poolAmountIn: token0SwapIn,
-            zeroForOne: token0.address < tokenOut,
-            isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
-          });
+          return {
+            solver,
+            // Although it's mintOptimal, it's the same swapData and swapRoute.
+            ...(await getSolver(solver).mintOptimal({
+              amm,
+              chainId,
+              fromAddress: from,
+              token0: swap0Token0,
+              token1: swap0Token1,
+              feeOrTickSpacing,
+              tickLower: positionDetails.tickLower,
+              tickUpper: positionDetails.tickUpper,
+              // Only apply slippage check to tokenOut, done in automan instead of solver.
+              // Don't need slippage for a particular swap, because acceptable to swap less tokenA and more tokenB for tokenC.
+              slippage: 1,
+              poolAmountIn: token0SwapIn,
+              zeroForOne: token0.address < tokenOut,
+              isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
+            })),
+          };
         } catch (e) {
           if (!(e as Error)?.message.startsWith('Expected')) {
             getLogger().error(
@@ -190,9 +195,10 @@ export async function decreaseLiquidityToTokenOut(
         }
       }),
     );
-    for (const solverResult of solverResults) {
+    for (const solverResult of token0SolverResults) {
       if (solverResult != null && solverResult.toAmount > tokenOutFromToken0) {
-        [tokenOutFromToken0, swapData, swapRoute] = [
+        [solver0, tokenOutFromToken0, swapData, swapRoute] = [
+          solverResult.solver,
           solverResult.toAmount,
           solverResult.swapData,
           solverResult.swapRoute,
@@ -203,26 +209,29 @@ export async function decreaseLiquidityToTokenOut(
   if (token1.address === tokenOut) {
     tokenOutFromToken1 = token1SwapIn;
   } else if (token1SwapIn > 0n) {
-    const solverResults = await Promise.all(
-      includeSolvers.map((solver) => {
+    token1SolverResults = await Promise.all(
+      includeSolvers.map(async (solver) => {
         try {
-          // Although it's mintOptimal, it's the same swapData and swapRoute.
-          return getSolver(solver).mintOptimal({
-            amm,
-            chainId,
-            fromAddress: from,
-            token0: swap1Token0,
-            token1: swap1Token1,
-            feeOrTickSpacing,
-            tickLower: positionDetails.tickLower,
-            tickUpper: positionDetails.tickUpper,
-            // Only apply slippage check to tokenOut, done in automan instead of solver.
-            // Don't need slippage for a particular swap, because acceptable to swap less tokenA and more tokenB for tokenC.
-            slippage: 1,
-            poolAmountIn: token1SwapIn,
-            zeroForOne: token1.address < tokenOut,
-            isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
-          });
+          return {
+            solver,
+            // Although it's mintOptimal, it's the same swapData and swapRoute.
+            ...(await getSolver(solver).mintOptimal({
+              amm,
+              chainId,
+              fromAddress: from,
+              token0: swap1Token0,
+              token1: swap1Token1,
+              feeOrTickSpacing,
+              tickLower: positionDetails.tickLower,
+              tickUpper: positionDetails.tickUpper,
+              // Only apply slippage check to tokenOut, done in automan instead of solver.
+              // Don't need slippage for a particular swap, because acceptable to swap less tokenA and more tokenB for tokenC.
+              slippage: 1,
+              poolAmountIn: token1SwapIn,
+              zeroForOne: token1.address < tokenOut,
+              isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
+            })),
+          };
         } catch (e) {
           if (!(e as Error)?.message.startsWith('Expected')) {
             getLogger().error(
@@ -242,9 +251,10 @@ export async function decreaseLiquidityToTokenOut(
         }
       }),
     );
-    for (const solverResult of solverResults) {
+    for (const solverResult of token1SolverResults) {
       if (solverResult != null && solverResult.toAmount > tokenOutFromToken1) {
-        [tokenOutFromToken1, swapData1, swapRoute1] = [
+        [solver1, tokenOutFromToken1, swapData1, swapRoute1] = [
+          solverResult.solver,
           solverResult.toAmount,
           solverResult.swapData,
           solverResult.swapRoute,
@@ -273,8 +283,10 @@ export async function decreaseLiquidityToTokenOut(
     );
   getLogger().info('SDK.decreaseLiquidityToTokenOut.fees ', {
     solvers: includeSolvers,
-    amm: amm,
-    chainId: chainId,
+    solver0,
+    solver1,
+    amm,
+    chainId,
     position: decreaseLiquidityOptions.tokenId,
     totalDecreaseLiquidityToTokenOutFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
@@ -291,11 +303,28 @@ export async function decreaseLiquidityToTokenOut(
     tokenOutFromToken0,
     token1SwapIn,
     tokenOutFromToken1,
+    token0SolverResults:
+      token0SolverResults == null
+        ? null
+        : token0SolverResults.map((result) =>
+            result == null
+              ? null
+              : { solver: result.solver, toAmount: result.toAmount },
+          ),
+    token1SolverResults:
+      token1SolverResults == null
+        ? null
+        : token1SolverResults.map((result) =>
+            result == null
+              ? null
+              : { solver: result.solver, toAmount: result.toAmount },
+          ),
   });
 
   return [
     {
-      solver: includeSolvers[0], // All solvers are already compared, return 1st solver because it's required.
+      solver: solver0,
+      solver1: solver1,
       amount0: token0SwapIn, // Not used
       amount1: token1SwapIn, // Not used
       liquidity: tokenOutAfterSlippage, // Required for SolverResult, used for tokenOutMin and can be used to compare solvers.

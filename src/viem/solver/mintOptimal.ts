@@ -127,8 +127,8 @@ export async function mintOptimalV4(
     .mul(tokenInPrice);
 
   getLogger().info('SDK.mintOptimalV4.Fees ', {
-    amm: amm,
-    chainId: chainId,
+    amm,
+    chainId,
     totalMintOptimalFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],

@@ -62,6 +62,7 @@ export type SwapPath = {
 
 export type SolverResult = {
   solver: E_Solver;
+  solver1?: E_Solver; // For zap to/from tokenC
   amount0: bigint;
   amount1: bigint;
   liquidity: bigint;

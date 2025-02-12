@@ -81,27 +81,7 @@ async function main() {
       isUnwrapNative,
     );
     console.log(
-      `solver=${solver}, liquidity: ${swapInfo.liquidity}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}, amount0=${amount0}, amount1=${amount1}, token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}, 
-      swapData0=${swapData}, swapData1=${swapData1},
-        positionDetails.amount0=${positionDetails.position.amount0.toFixed(0)}, 
-        positionDetails.amount0=${positionDetails.position.amount0.quotient}, 
-        positionDetails.amount0=${positionDetails.position.amount0.numerator}, 
-        positionDetails.amount0=${positionDetails.position.amount0.denominator}, 
-        positionDetails.amount1=${positionDetails.position.amount1.toFixed(0)}, 
-        positionDetails.amount1=${positionDetails.position.amount1.quotient}, 
-        positionDetails.amount1=${positionDetails.position.amount1.numerator}, 
-        positionDetails.amount1=${positionDetails.position.amount1.denominator}, 
-        positionDetails.amount0Owed=${positionDetails.tokensOwed0.toFixed(0)}, 
-        positionDetails.amount0Owed=${positionDetails.tokensOwed0.quotient}, 
-        positionDetails.amount0Owed=${positionDetails.tokensOwed0.numerator}, 
-        positionDetails.amount0Owed=${positionDetails.tokensOwed0.denominator}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.toFixed(0)}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.toFixed(5)}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.toSignificant()}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.toSignificant(5)}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.quotient}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.numerator}, 
-        positionDetails.amount1Owed=${positionDetails.tokensOwed1.denominator}, `,
+      `solver=${solver}, liquidity: ${swapInfo.liquidity}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}, amount0=${amount0}, amount1=${amount1}, token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}, swapData0=${swapData}, swapData1=${swapData1},`,
     );
   }
   process.exit(0);

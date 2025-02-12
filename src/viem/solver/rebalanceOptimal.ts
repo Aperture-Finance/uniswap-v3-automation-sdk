@@ -535,14 +535,14 @@ export async function rebalanceBackend(
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     nativeToUsd,
-    token0FeeAmount: token0FeeAmount,
-    token1FeeAmount: token1FeeAmount,
+    token0FeeAmount,
+    token1FeeAmount,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
     positionRawNative: positionRawNative.toString(), // without feesCollected of the position
-    feeBips: feeBips,
+    feeBips,
   });
 
   const mintParams: SlipStreamMintParams | UniV3MintParams =
@@ -923,13 +923,13 @@ export async function rebalanceV4(
     tokensOwed1: positionDetails.tokensOwed1.quotient.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount,
-    token1FeeAmount: token1FeeAmount,
+    token0FeeAmount,
+    token1FeeAmount,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
-    feeBips: feeBips,
+    feeBips,
   });
 
   const mintParams: SlipStreamMintParams | UniV3MintParams =
