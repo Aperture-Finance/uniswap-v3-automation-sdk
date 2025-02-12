@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
+import { Address, Hex, TransactionRequest } from 'viem';
 
 import {
   DecreaseLiquidityParams,
@@ -34,10 +34,10 @@ export async function getDecreaseLiquidityToTokenOutTx(
   decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   tokenOut: Address,
   tokenOutMin: bigint,
-  token0FeeAmount: bigint,
-  token1FeeAmount: bigint,
-  swapData0: Hex,
-  swapData1: Hex,
+  token0FeeAmount: bigint = 0n,
+  token1FeeAmount: bigint = 0n,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
   isUnwrapNative = true,
   permitInfo?: PermitInfo,
 ): Promise<TransactionRequest> {

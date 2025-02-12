@@ -82,7 +82,7 @@ export async function getIncreaseLiquidityOptimalV4Tx(
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: BigInt(amount0.toString()),
     amount1Min: BigInt(amount1.toString()),
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const data = getAutomanV4IncreaseLiquidityOptimalCallData(

@@ -80,7 +80,7 @@ export async function mintOptimalV4(
           amount0Min: 0n,
           amount1Min: 0n,
           recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -94,7 +94,7 @@ export async function mintOptimalV4(
           amount0Min: 0n,
           amount1Min: 0n,
           recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   // Subtract fees from poolAmountIn before passing to solver

@@ -58,7 +58,7 @@ export async function increaseLiquidityOptimalV4(
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: 0n,
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const token0 = position.pool.token0.address as Address;

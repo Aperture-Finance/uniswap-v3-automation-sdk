@@ -552,7 +552,7 @@ export async function simulateRemoveLiquidity(
 ): Promise<DecreaseLiquidityReturnType> {
   const data = getAutomanRemoveLiquidityCalldata(
     tokenId,
-    BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+    /* deadline= */ BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
     amount0Min,
     amount1Min,
     feeBips,

@@ -273,7 +273,7 @@ export async function rebalanceOptimalV2(
           amount0Min: 0n, // Setting this to zero for tx simulation.
           amount1Min: 0n, // Setting this to zero for tx simulation.
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -287,7 +287,7 @@ export async function rebalanceOptimalV2(
           amount0Min: 0n, // Setting this to zero for tx simulation.
           amount1Min: 0n, // Setting this to zero for tx simulation.
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   const estimateGas = async (swapData: Hex) => {
@@ -558,7 +558,7 @@ export async function rebalanceBackend(
           amount0Min: 0n, // Setting this to zero for tx simulation.
           amount1Min: 0n, // Setting this to zero for tx simulation.
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -572,7 +572,7 @@ export async function rebalanceBackend(
           amount0Min: 0n, // Setting this to zero for tx simulation.
           amount1Min: 0n, // Setting this to zero for tx simulation.
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
@@ -838,7 +838,7 @@ export async function rebalanceV4(
       liquidity: BigInt(positionDetails.liquidity),
       amount0Min: 0n,
       amount1Min: 0n,
-      deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+      deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
     },
     /* token0FeeAmount= */ 0n,
     /* token1FeeAmount= */ 0n,
@@ -945,7 +945,7 @@ export async function rebalanceV4(
           amount0Min: 0n, // Setting this to zero for tx simulation.
           amount1Min: 0n, // Setting this to zero for tx simulation.
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -959,7 +959,7 @@ export async function rebalanceV4(
           amount0Min: 0n, // Setting this to zero for tx simulation.
           amount1Min: 0n, // Setting this to zero for tx simulation.
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   const estimateGas = async (swapData: Hex) => {
