@@ -209,6 +209,31 @@ export async function getERC20Overrides(
   };
 }
 
+// Converts StateOverrides to stateOverride.
+// publicClient.request() uses former; publicClient.simulateContract() uses latter.
+export function getStateOverride(stateOverrides: StateOverrides): {
+  stateOverride: { address: Address; stateDiff: { slot: Hex; value: Hex }[] }[];
+} {
+  const stateOverride: {
+    address: Address;
+    stateDiff: { slot: Hex; value: Hex }[];
+  }[] = [];
+  for (const [address, stateDiff] of Object.entries(stateOverrides)) {
+    const stateDiffs: { slot: Hex; value: Hex }[] = [];
+    for (const [slot, value] of Object.entries(stateDiff.stateDiff || {})) {
+      stateDiffs.push({
+        slot: slot as Hex,
+        value: value as Hex,
+      });
+    }
+    stateOverride.push({
+      address: address as Address,
+      stateDiff: stateDiffs,
+    });
+  }
+  return { stateOverride };
+}
+
 export type AccessListReturnType = {
   accessList: AccessList;
   gasUsed: string;
