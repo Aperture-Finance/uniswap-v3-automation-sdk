@@ -9,7 +9,7 @@ import {
   getOkxQuote,
   getOkxSwap,
 } from '../../src/viem/solver/getOkxSolver';
-import { getSamePoolSwap } from '../../src/viem/solver/getSamePoolSolver';
+import { getSamePoolToAmount } from '../../src/viem/solver/getSamePoolSolver';
 
 const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
 const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
@@ -19,6 +19,22 @@ const token1 = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC on chain1
 const feeOrTickSpacing = 3000;
 const amount = '9000000000000000000'; // '9000000000000000';
 const slippage = 0.03;
+
+async function testSamePoolSolver() {
+  const { swapRouter } = getAMMInfo(chainId, amm)!;
+  if (!swapRouter) {
+    throw new Error('Chain or AMM not supported');
+  }
+  const toAmount = await getSamePoolToAmount(
+    chainId,
+    token0,
+    token1,
+    feeOrTickSpacing,
+    /* swapRouterAddress= */ swapRouter,
+    /* amount= */ BigInt(amount),
+  );
+  console.log(`SamePool toAmount=${toAmount}`);
+}
 
 async function test1InchSolver() {
   const swapParams = {
@@ -54,23 +70,6 @@ async function test1InchSolver() {
   console.log(
     `1Inch toAmount=${toAmount}, tx=${JSON.stringify(tx)}, protocols=${protocols}`,
   );
-}
-
-async function testSamePoolSolver() {
-  const { swapRouter } = getAMMInfo(chainId, amm)!;
-  if (!swapRouter) {
-    throw new Error('Chain or AMM not supported');
-  }
-  const toAmount = await getSamePoolSwap(
-    amm,
-    chainId,
-    token0,
-    token1,
-    feeOrTickSpacing,
-    /* swapRouterAddress= */ swapRouter,
-    /* amount= */ BigInt(amount),
-  );
-  console.log(`SamePool toAmount=${toAmount}`);
 }
 
 async function testOkxApprove() {

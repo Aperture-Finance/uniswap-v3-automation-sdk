@@ -1,6 +1,5 @@
 import { swapRouter02Abi } from '@/abis/SwapRouter02';
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address } from 'viem';
 
 import { getERC20Overrides, getStateOverride } from '../overrides';
@@ -19,51 +18,52 @@ export const getSamePoolSolver = (): ISolver => {
         poolAmountIn,
         zeroForOne,
       } = props;
-      const { swapRouter } = getAMMInfo(chainId, amm)!;
-      if (!swapRouter) {
-        throw new Error('Chain or AMM not supported');
+      // Default toAmount to 0 in case no other solvers are available.
+      let toAmount: bigint = 0n;
+      try {
+        const { swapRouter } = getAMMInfo(chainId, amm)!;
+        toAmount = await getSamePoolToAmount(
+          chainId,
+          /* tokenIn= */ zeroForOne ? token0 : token1,
+          /* tokenOut= */ zeroForOne ? token1 : token0,
+          feeOrTickSpacing,
+          /* swapRouterAddress= */ swapRouter!,
+          poolAmountIn,
+        );
+      } catch {
+        // Catch all errors. Don't throw errors since SamePool is the fallback.
       }
       return {
-        toAmount: BigInt(
-          await getSamePoolSwap(
-            amm,
-            chainId,
-            /* tokenIn= */ zeroForOne ? token0 : token1,
-            /* tokenOut= */ zeroForOne ? token1 : token0,
-            feeOrTickSpacing,
-            /* swapRouterAddress= */ swapRouter,
-            poolAmountIn,
-          ),
-        ),
+        toAmount,
         swapData: '0x',
       };
     },
   };
 };
 
-export async function getSamePoolSwap(
-  amm: AutomatedMarketMakerEnum,
+export async function getSamePoolToAmount(
   chainId: ApertureSupportedChainId,
   tokenIn: Address,
   tokenOut: Address,
   feeOrTickSpacing: number,
   swapRouter: Address,
   amountIn: bigint,
-): Promise<string> {
-  if (amountIn === 0n) {
+): Promise<bigint> {
+  if (amountIn <= 0n) {
     throw new Error('amountIn should greater than 0');
   }
   const publicClient = getPublicClient(chainId);
   const tokenInOverrides = await getERC20Overrides(
     /* token= */ tokenIn,
+    // Spender doesn't matter to get a SamePool quote.
     /* from= */ swapRouter,
     /* to= */ swapRouter,
     /* amount= */ BigInt(amountIn),
     publicClient,
   );
-  return (
+  return BigInt(
     (
-      await getPublicClient(chainId).simulateContract({
+      await publicClient.simulateContract({
         abi: swapRouter02Abi,
         address: swapRouter,
         functionName: 'exactInputSingle',
@@ -82,6 +82,6 @@ export async function getSamePoolSwap(
         ...getStateOverride(tokenInOverrides),
         account: swapRouter,
       })
-    ).result ?? '0' // Default to 0 as a fallback, in case no other solvers are available.
+    ).result ?? '0',
   );
 }
