@@ -63,6 +63,10 @@ export const getPropellerHeadsSolver = (): ISolver => {
       }
 
       return {
+        toAmount: solutions[0].orders.reduce(
+          (acc, order) => acc + BigInt(order.executed_buy_amount),
+          BigInt(0),
+        ),
         swapData: encodeOptimalSwapData(
           from,
           token0,

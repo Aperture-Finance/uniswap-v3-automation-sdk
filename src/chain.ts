@@ -57,8 +57,8 @@ export interface AmmInfo {
   poolImplementation?: Address; // Only applicable to SLIPSTREAM.
   poolDeployer?: Address; // Only applicable to PANCAKESWAP_V3.
   nonfungiblePositionManager: Address;
-  // This is SwapRouter02 for UNISWAP_V3 and SmartRouter for PANCAKESWAP_V3, undefined for SLIPSTREAM.
-  swapRouter?: Address;
+  // This is SwapRouter02 for UNISWAP_V3, SmartRouter for PANCAKESWAP_V3, SwapRouter for SLIPSTREAM.
+  swapRouter: Address;
   // Aperture's optimal swap router. Only populated for chains with an aggregator service like 1inch.
   optimalSwapRouter?: Address;
   // Aperture's Automan contract address.
@@ -79,6 +79,7 @@ export interface ChainInfo {
   maxGasCeiling: number;
   alchemyNetworkId?: AlchemyNetworkId;
   infura_network_id?: InfuraNetworkId;
+  // Occasionally needs to be updated when node stop supporting certain methods, such as eth_createAccessList.
   rpc_url: string;
   // gecko_terminal_platform_id is basically the chain name for gecko terminal api to look up price by address.
   gecko_terminal_platform_id?: string;
@@ -142,7 +143,7 @@ const CHAIN_ID_TO_INFO: {
     coinGeckoNativeCurrencySymbol: 'eth',
     alchemyNetworkId: 'eth',
     infura_network_id: '',
-    rpc_url: 'https://ethereum-rpc.publicnode.com',
+    rpc_url: 'https://eth.llamarpc.com',
     maxGasCeiling: 0.5,
     routingApiInfo: UNISWAP_OFFICIAL_ROUTING_API_INFO,
   },
@@ -239,6 +240,7 @@ const CHAIN_ID_TO_INFO: {
       },
       [AutomatedMarketMakerEnum.enum.SLIPSTREAM]: {
         // https://velodrome.finance/security#contracts
+        // More specifically: https://github.com/velodrome-finance/slipstream#deployment
         factory: getAddress('0xCc0bDDB707055e04e497aB22a59c2aF4391cd12F'),
         poolImplementation: getAddress(
           '0xc28aD28853A547556780BEBF7847628501A3bCbb',
@@ -246,6 +248,7 @@ const CHAIN_ID_TO_INFO: {
         nonfungiblePositionManager: getAddress(
           '0x416b433906b1B72FA758e166e239c43d68dC6F29',
         ),
+        swapRouter: getAddress('0x0792a633F0c19c351081CF4B211F68F79bCc9676'),
         optimalSwapRouter: getAddress(
           '0x920eE1aDa5C16E82BB0d7876a174407D63C8ec09',
         ),
@@ -354,6 +357,7 @@ const CHAIN_ID_TO_INFO: {
         nonfungiblePositionManager: getAddress(
           '0x827922686190790b37229fd06084350E74485b72',
         ),
+        swapRouter: getAddress('0xBE6D8f0d05cC4be24d5167a3eF062215bE6D18a5'),
         optimalSwapRouter: getAddress(
           '0x0000004bb8983d4E004A8fe998155f1e8ed89989',
         ),

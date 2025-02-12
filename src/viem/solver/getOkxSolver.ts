@@ -70,10 +70,10 @@ export const getOkxSolver = (): ISolver => {
           ? optimalSwapRouter
           : apertureAutomanV4;
       if (!from) {
-        throw new Error('Expected: Chain or AMM not support');
+        throw new Error('Chain or AMM not supported');
       }
 
-      const { tx, protocols } = await getOkxSwap(
+      const { toAmount, tx, protocols } = await getOkxSwap(
         chainId,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
@@ -88,6 +88,7 @@ export const getOkxSolver = (): ISolver => {
         poolAmountIn.toString(),
       );
       return {
+        toAmount: BigInt(toAmount),
         swapData: encodeOptimalSwapData(
           from,
           token0,

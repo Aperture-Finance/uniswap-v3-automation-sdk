@@ -66,10 +66,10 @@ export const get1InchSolver = (): ISolver => {
           ? optimalSwapRouter
           : apertureAutomanV4;
       if (!from) {
-        throw new Error('Expected: Chain or AMM not support');
+        throw new Error('Chain or AMM not supported');
       }
 
-      const { tx, protocols } = await get1InchQuote(
+      const { toAmount, tx, protocols } = await get1InchQuote(
         chainId,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
@@ -81,6 +81,7 @@ export const get1InchSolver = (): ISolver => {
 
       const approveTarget = await get1InchApproveTarget(chainId);
       return {
+        toAmount: BigInt(toAmount),
         swapData: encodeOptimalSwapData(
           from,
           token0,

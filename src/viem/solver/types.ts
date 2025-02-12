@@ -12,6 +12,7 @@ type SelectedProtocol = {
 export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
 
 export interface SolvedSwapInfo {
+  toAmount: bigint;
   swapData: Hex;
   swapRoute?: SwapRoute;
 }
