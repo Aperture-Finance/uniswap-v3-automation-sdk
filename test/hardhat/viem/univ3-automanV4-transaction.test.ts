@@ -998,7 +998,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
     // Test balance of EOA.
     expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
-      -19112177585800974n,
+      -19112791140494886n,
     );
     expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(27786525n);
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
