@@ -6,7 +6,7 @@ import { Address, Hex, TransactionRequest } from 'viem';
 import {
   IncreaseLiquidityParams,
   getAutomanReinvestCalldata,
-  getAutomanV3ReinvestCalldata,
+  getAutomanV4ReinvestCalldata,
 } from '../automan';
 
 /**
@@ -14,9 +14,11 @@ import {
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param ownerAddress Owner of the specified position.
- * @param slippageTolerance How much the reinvested amount of either token0 or token1 is allowed to change unfavorably.
- * @param deadlineEpochSeconds Timestamp when the tx expires (in seconds since epoch).
- * @param client Public client.
+ * @param increaseOptions Increase liquidity options.
+ * @param feeBips The Aperture fee for the transaction.
+ * @param swapData The swap data if using a router.
+ * @param amount0Min The minimum amount of token0 reinvested.
+ * @param amount1Min The minimum amount of token1 reinvested.
  * @param permitInfo Optional. If Automan doesn't already have authority over the existing position, this should be populated with a valid owner-signed permit info.
  * @returns The generated transaction request and expected amounts.
  */
@@ -53,7 +55,7 @@ export async function getReinvestTx(
 
 // Same as getReinvestTx, but with feeAmounts instead of feeBips.
 // Don't have to use, but implemented to make it easier to migrate to future versions.
-export async function getReinvestV3Tx(
+export async function getReinvestV4Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
@@ -75,8 +77,8 @@ export async function getReinvestV3Tx(
   };
   return {
     from: ownerAddress,
-    to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
-    data: getAutomanV3ReinvestCalldata(
+    to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+    data: getAutomanV4ReinvestCalldata(
       increaseLiquidityParams,
       token0FeeAmount,
       token1FeeAmount,

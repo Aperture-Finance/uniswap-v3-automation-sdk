@@ -1,29 +1,32 @@
-// yarn test:hardhat test/hardhat/viem/univ3-automan-transaction.test.ts
-import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
+// yarn test:hardhat test/hardhat/viem/slipstream-automanV4-transaction.test.ts
+import { nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { BigNumber } from 'ethers';
+import { defaultAbiCoder } from 'ethers/lib/utils';
 import hre, { ethers } from 'hardhat';
-import JSBI from 'jsbi';
 import {
   Address,
   PublicClient,
   TestClient,
   WalletClient,
-  encodeAbiParameters,
-  parseAbiParameters,
+  createPublicClient,
+  http,
+  parseEther,
   walletActions,
 } from 'viem';
-import { mainnet } from 'viem/chains';
+import { base, mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
+  ApertureSupportedChainId,
   ConditionTypeEnum,
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
   IOCKEY_LOGGER,
-  UniV3Automan,
-  UniV3Automan__factory,
-  UniV3OptimalSwapRouter__factory,
+  SlipStreamAutomanV4,
+  SlipStreamAutomanV4__factory,
+  SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
   ioc,
 } from '../../../src';
@@ -33,91 +36,99 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
+  getIncreaseLiquidityOptimalSwapInfoV4,
+  getIncreaseLiquidityOptimalV4Tx,
   getMintOptimalSwapInfoV4,
   getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
-  getRebalanceSwapInfo,
-  getRebalanceTx,
-  getReinvestTx,
+  getRebalanceSwapInfoV4,
+  getRebalanceV4Tx,
+  getReinvestV4Tx,
 } from '../../../src/viem';
-import {
-  WBTC_ADDRESS,
-  WETH_ADDRESS,
-  WHALE_ADDRESS,
-  UNIV3_AMM as amm,
-  chainId,
-  eoa,
-  expect,
-  getApiClient,
-  hardhatForkProvider,
-  resetFork,
-} from '../common';
+import { expect, hardhatForkProvider, resetFork } from '../common';
 
-// Tests for UniV3Automan transactions on a forked Ethereum mainnet.
-describe('Viem - UniV3Automan transaction tests', function () {
-  const positionId = 4n;
-  const blockNumber = 17188000n;
-  let automanContract: UniV3Automan;
-  const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+// TODO: Unify test cases for all AMMs (UniV3, PCSV3 and SlipStream).
+
+// Tests for SlipStreamAutomanV4 transactions on a forked Base mainnet.
+describe('SlipStreamAutomanV4 transaction tests', function () {
+  const amm = AutomatedMarketMakerEnum.enum.SLIPSTREAM;
+  const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
+  const blockNumber = 17839113n;
+  const positionId = 13465n;
+  // Owner of position id `positionId` as of `blockNumber`.
+  const eoa = '0xeF1Ce5fddd0a1cb903b49608F6e1A37199DCf2a6';
+  // A Binance hot wallet address that holds a large amount of ETH and USDC on Base mainnet.
+  const WHALE_ADDRESS = '0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A';
+  let automanV4Contract: SlipStreamAutomanV4;
+  const automanV4Address = getAMMInfo(chainId, amm)!.apertureAutomanV4;
   const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
+  const nonForkClient = createPublicClient({
+    chain: base,
+    transport: http('https://base-rpc.publicnode.com'),
+  });
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-
-    await resetFork(testClient, blockNumber);
+    await resetFork(testClient, blockNumber, chainId);
     await testClient.impersonateAccount({
       address: eoa,
     });
     impersonatedOwnerClient = testClient.extend(walletActions);
 
-    // Deploy Automan.
-    automanContract = await new UniV3Automan__factory(
-      await ethers.getImpersonatedSigner(WHALE_ADDRESS),
+    // Deploy AutomanV4.
+    const impersonatedWhaleSigner =
+      await ethers.getImpersonatedSigner(WHALE_ADDRESS);
+    automanV4Contract = await new SlipStreamAutomanV4__factory(
+      impersonatedWhaleSigner,
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
-    await automanContract.deployed();
-    await automanContract.setFeeConfig({
+    await automanV4Contract.deployed();
+    await automanV4Contract.setFeeConfig({
       feeCollector,
       // Set the max fee deduction to 50%.
-      feeLimitPips: BigInt('500000000000000000'),
+      feeLimitPips: BigNumber.from('500000000000000000'),
     });
-    await automanContract.setControllers([WHALE_ADDRESS], [true]);
-    const router = await new UniV3OptimalSwapRouter__factory(
+    await automanV4Contract.setControllers([WHALE_ADDRESS], [true]);
+    const router = await new SlipStreamOptimalSwapRouter__factory(
       // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();
-    await automanContract.setSwapRouters([router.address], [true]);
+    await automanV4Contract.setAllowlistedRouters([router.address], [true]);
 
-    // Set Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman =
-      automanContract.address as `0x${string}`;
+    // Set AutomanV4 address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 =
+      automanV4Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
       router.address as `0x${string}`;
 
-    // Owner of position id 4 sets Automan as operator.
+    // `eoa` sets AutomanV4 as operator.
     const { request } = await publicClient.simulateContract({
       abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       functionName: 'setApprovalForAll',
-      args: [automanContract.address as Address, true] as const,
+      args: [automanV4Contract.address as Address, true] as const,
       account: eoa,
     });
 
+    await impersonatedWhaleSigner.sendTransaction({
+      to: eoa,
+      value: parseEther('1'),
+    });
     await impersonatedOwnerClient.writeContract(request);
   });
 
   after(() => {
-    // Reset Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman = automanAddress;
+    // Reset AutomanV4 address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 = automanV4Address;
     testClient.stopImpersonatingAccount({
       address: eoa,
     });
@@ -131,23 +142,22 @@ describe('Viem - UniV3Automan transaction tests', function () {
     from: Address,
     to: Address,
   ) {
-    const publicClient = getApiClient();
     const [token0Overrides, token1Overrides] = await Promise.all([
-      getERC20Overrides(token0, from, to, amount0, publicClient),
-      getERC20Overrides(token1, from, to, amount1, publicClient),
+      getERC20Overrides(token0, from, to, amount0, nonForkClient),
+      getERC20Overrides(token1, from, to, amount1, nonForkClient),
     ]);
     for (const slot of Object.keys(token0Overrides[token0].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
         token0,
         slot,
-        encodeAbiParameters(parseAbiParameters('uint256'), [amount0]),
+        defaultAbiCoder.encode(['uint256'], [amount0]),
       ]);
     }
     for (const slot of Object.keys(token1Overrides[token1].stateDiff!)) {
       await hardhatForkProvider.send('hardhat_setStorageAt', [
         token1,
         slot,
-        encodeAbiParameters(parseAbiParameters('uint256'), [amount1]),
+        defaultAbiCoder.encode(['uint256'], [amount1]),
       ]);
     }
   }
@@ -156,7 +166,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     const liquidityBeforeReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    const txRequest = await getReinvestTx(
+    const txRequest = await getReinvestV4Tx(
       chainId,
       amm,
       eoa,
@@ -165,7 +175,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
         slippageTolerance: new Percent(1, 100),
         deadline: Math.floor(Date.now() / 1000),
       },
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       /* swapData= */ '0x',
       /* amount0Min= */ 0n,
       /* amount1Min= */ 0n,
@@ -179,17 +190,17 @@ describe('Viem - UniV3Automan transaction tests', function () {
     const liquidityAfterReinvest = (
       await getBasicPositionInfo(chainId, amm, positionId, publicClient)
     ).liquidity!;
-    expect(liquidityBeforeReinvest.toString()).to.equal('34399999543676');
-    expect(liquidityAfterReinvest.toString()).to.equal('39910987438794');
+    expect(liquidityBeforeReinvest.toString()).to.equal('13589538797482293814');
+    expect(liquidityAfterReinvest.toString()).to.equal('14018556727424907792');
     expect(
       generateAutoCompoundRequestPayload(
         eoa,
         chainId,
-        AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+        AutomatedMarketMakerEnum.enum.SLIPSTREAM,
         positionId.toString(),
-        /*feeToPrincipalRatioThreshold=*/ 0.1,
-        /*slippage=*/ 0.05,
-        /*maxGasProportion=*/ 0.01,
+        /* feeToPrincipalRatioThreshold= */ 0.1,
+        /* slippage= */ 0.05,
+        /* maxGasProportion= */ 0.01,
         /* expiration= */ 1627776000,
       ),
     ).to.deep.equal({
@@ -198,8 +209,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
         slippage: 0.05,
         type: ActionTypeEnum.enum.Reinvest,
       },
-      chainId: 1,
-      amm: AutomatedMarketMakerEnum.enum.UNISWAP_V3,
+      chainId,
+      amm: AutomatedMarketMakerEnum.enum.SLIPSTREAM,
       condition: {
         feeToPrincipalRatioThreshold: 0.1,
         type: ConditionTypeEnum.enum.AccruedFees,
@@ -218,45 +229,42 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
-        /* newPositionTickLower= */ 240000,
-        /* newPositionTickUpper= */ 300000,
+        existingPosition,
+        /* newPositionTickLower= */ 78600,
+        /* newPositionTickUpper= */ 79400,
         /* slippageTolerance= */ 0.01,
         /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
-        [E_Solver.SamePool],
-        existingPosition,
-        undefined,
-        false,
+        /* includeSolvers= */ [E_Solver.SamePool],
+        /* blockNumber= */ undefined,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,
       positionId,
-      /* newPositionTickLower= */ 240000,
-      /* newPositionTickUpper= */ 300000,
+      /* newPositionTickLower= */ 78600,
+      /* newPositionTickUpper= */ 79400,
       /* slippageTolerance= */ new Percent(1, 100),
       /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token0FeeAmount= */ 0n,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
       to: txRequest.to,
       data: txRequest.data,
       account: txRequest.from,
-      // from: txRequest.from,
       chain: walletClient.chain,
     });
     const txReceipt = await publicClient.getTransactionReceipt({
@@ -275,13 +283,14 @@ describe('Viem - UniV3Automan transaction tests', function () {
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
       tickSpacing: existingPosition.pool.tickSpacing,
-      liquidity: '13291498909567',
-      tickLower: 240000,
-      tickUpper: 300000,
+      liquidity: '7008927949436597297',
+      tickLower: 78600,
+      tickUpper: 79400,
     });
   });
 
-  // This test is failing at head: https://github.com/Aperture-Finance/uniswap-v3-automation-sdk/actions/runs/10949023407/job/30401353793?pr=342
+  // This test is flaky due to mismatch between the forked state and the most recent live network state which 1inch API operates on.
+  // TODO: Make this test stable and enable it for all AMMs.
   it.skip('Rebalance with 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
@@ -290,23 +299,21 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
         /* slippageTolerance= */ 0.01,
         /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
         [E_Solver.OneInch],
-        existingPosition,
-        undefined,
-        false,
+        /* blockNumber= */ undefined,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,
@@ -318,7 +325,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token0FeeAmount= */ 0n,
       existingPosition.position,
     );
     await testClient.impersonateAccount({ address: eoa });
@@ -350,13 +358,11 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
-  // TODO: Make this stable and enable for all AMMs.
-  // Unit test with 1inch is known to be unstable, skip it for now.
-  it.skip('Optimal mint with 1inch', async function () {
+  it('Optimal mint without 1inch', async function () {
     const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
+      '0x4200000000000000000000000000000000000006', // WETH on Base mainnet,
+      '0x940181a94A35A4569E4529A3CDfB74e38FD98631', // AERO on Base mainnet,
+      /* feeOrTickSpacing= */ 200,
       chainId,
       amm,
       publicClient,
@@ -369,9 +375,10 @@ describe('Viem - UniV3Automan transaction tests', function () {
       pool.tickCurrent + 1000,
       pool.tickSpacing,
     );
+    // 1 WETH and 1 AERO.
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
-      '1000000000',
+      '1000000000000000000',
     );
     const token1Amount = CurrencyAmount.fromRawAmount(
       pool.token1,
@@ -383,7 +390,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
       await getMintOptimalSwapInfoV4(
@@ -391,110 +398,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
         amm,
         token0Amount,
         token1Amount,
-        pool.fee,
+        pool.tickSpacing,
         tickLower,
         tickUpper,
         eoa,
         /* slippage= */ 0.5,
-        /* tokenPricesUsd= */ ['60000', '3000'],
-        publicClient,
-        [E_Solver.OneInch],
-      )
-    )[0];
-    const { tx: txRequest } = await getMintOptimalV4Tx(
-      chainId,
-      amm,
-      token0Amount,
-      token1Amount,
-      pool.fee,
-      tickLower,
-      tickUpper,
-      eoa,
-      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
-      /* slippage= */ 0.5,
-      publicClient,
-      swapData,
-      liquidity,
-    );
-    // Owner of position id 4 sets Automan as operator.
-    await testClient.impersonateAccount({ address: eoa });
-    const walletClient = testClient.extend(walletActions);
-    const txHash = await walletClient.sendTransaction({
-      to: txRequest.to,
-      data: txRequest.data,
-      account: txRequest.from,
-      chain: walletClient.chain,
-    });
-    const txReceipt = await publicClient.getTransactionReceipt({
-      hash: txHash,
-    });
-    const newPositionId = getMintedPositionIdFromTxReceipt(
-      chainId,
-      amm,
-      txReceipt,
-      eoa,
-    )!;
-    const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
-      newPositionId,
-      publicClient,
-    );
-    expect(newPosition).to.deep.contains({
-      token0: pool.token0,
-      token1: pool.token1,
-      fee: pool.fee,
-      tickLower,
-      tickUpper,
-    });
-  });
-
-  // Test deprecated and moved to univ3-automanV4-transaction.test.ts.
-  it.skip('Optimal mint without 1inch', async function () {
-    const pool = await getPool(
-      WBTC_ADDRESS,
-      WETH_ADDRESS,
-      FeeAmount.MEDIUM,
-      chainId,
-      amm,
-      publicClient,
-    );
-    const tickLower = nearestUsableTick(
-      pool.tickCurrent - 1000,
-      pool.tickSpacing,
-    );
-    const tickUpper = nearestUsableTick(
-      pool.tickCurrent + 1000,
-      pool.tickSpacing,
-    );
-    const token0Amount = CurrencyAmount.fromRawAmount(
-      pool.token0,
-      '1000000000',
-    );
-    const token1Amount = CurrencyAmount.fromRawAmount(
-      pool.token1,
-      '1000000000000000000',
-    );
-    await dealERC20(
-      pool.token0.address as Address,
-      pool.token1.address as Address,
-      BigInt(token0Amount.quotient.toString()),
-      BigInt(token1Amount.quotient.toString()),
-      eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
-    );
-    const { swapData, liquidity } = (
-      await getMintOptimalSwapInfoV4(
-        chainId,
-        amm,
-        token0Amount,
-        token1Amount,
-        pool.fee,
-        tickLower,
-        tickUpper,
-        eoa,
-        /* slippage= */ 0.5,
-        /* tokenPricesUsd= */ ['60000', '3000'],
+        /* tokenPricesUsd= */ ['3000', '1'],
         publicClient,
         [E_Solver.SamePool],
       )
@@ -504,7 +413,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       amm,
       token0Amount,
       token1Amount,
-      pool.fee,
+      pool.tickSpacing,
       tickLower,
       tickUpper,
       eoa,
@@ -541,14 +450,14 @@ describe('Viem - UniV3Automan transaction tests', function () {
       token0: pool.token0,
       token1: pool.token1,
       fee: pool.fee,
+      tickSpacing: pool.tickSpacing,
       tickLower,
       tickUpper,
+      liquidity: '645125816475133179687',
     });
   });
 
-  // TODO: Make this stable and enable for all AMMs.
-  // Unit test with 1inch is known to be unstable, skip it for now.
-  it.skip('Increase liquidity optimal with 1inch', async function () {
+  it('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -558,7 +467,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     const pool = existingPosition.pool;
     const token0Amount = CurrencyAmount.fromRawAmount(
       pool.token0,
-      '1000000000',
+      '1000000000000000000',
     );
     const token1Amount = CurrencyAmount.fromRawAmount(
       pool.token1,
@@ -570,10 +479,10 @@ describe('Viem - UniV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -584,102 +493,13 @@ describe('Viem - UniV3Automan transaction tests', function () {
         token0Amount,
         token1Amount,
         eoa,
-        publicClient,
-        [E_Solver.OneInch],
-        existingPosition.position,
-      )
-    )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
-      {
-        tokenId: Number(positionId),
-        slippageTolerance: new Percent(50, 100),
-        deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-      },
-      chainId,
-      amm,
-      token0Amount,
-      token1Amount,
-      eoa,
-      publicClient,
-      swapData,
-      liquidity,
-      existingPosition.position,
-    );
-
-    // Owner of position id 4 sets Automan as operator.
-    await testClient.impersonateAccount({ address: eoa });
-    const walletClient = testClient.extend(walletActions);
-    const txHash = await walletClient.sendTransaction({
-      to: txRequest.to,
-      data: txRequest.data,
-      account: txRequest.from,
-      // from: txRequest.from,
-      chain: walletClient.chain,
-    });
-    await publicClient.getTransactionReceipt({
-      hash: txHash,
-    });
-    const newPosition = await getBasicPositionInfo(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-    );
-    expect(newPosition).to.deep.contains({
-      token0: pool.token0,
-      token1: pool.token1,
-      fee: pool.fee,
-      tickLower: existingPosition.tickLower,
-      tickUpper: existingPosition.tickUpper,
-    });
-    expect(
-      JSBI.GT(newPosition.liquidity!, existingPosition.liquidity!),
-    ).to.equal(true);
-  });
-
-  // Test deprecated and moved to univ3-automanV4-transaction.test.ts.
-  it.skip('Increase liquidity optimal without 1inch', async function () {
-    const existingPosition = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      positionId,
-      publicClient,
-    );
-    const pool = existingPosition.pool;
-    const token0Amount = CurrencyAmount.fromRawAmount(
-      pool.token0,
-      '1000000000',
-    );
-    const token1Amount = CurrencyAmount.fromRawAmount(
-      pool.token1,
-      '1000000000000000000',
-    );
-    await dealERC20(
-      pool.token0.address as Address,
-      pool.token1.address as Address,
-      BigInt(token0Amount.quotient.toString()),
-      BigInt(token1Amount.quotient.toString()),
-      eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
-    );
-    const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
-        {
-          tokenId: Number(positionId),
-          slippageTolerance: new Percent(5, 1000),
-          deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-        },
-        chainId,
-        amm,
-        token0Amount,
-        token1Amount,
-        eoa,
+        /* tokenPricesUsd= */ ['3000', '1'], // WETH/AERO
         publicClient,
         [E_Solver.SamePool],
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV4Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
@@ -713,12 +533,15 @@ describe('Viem - UniV3Automan transaction tests', function () {
       positionId,
       publicClient,
     );
-    expect(newPosition).to.deep.contains({
+    expect(existingPosition.liquidity).to.equal('13589538797482293814');
+    expect(newPosition).to.deep.equal({
       token0: pool.token0,
       token1: pool.token1,
       fee: pool.fee,
+      tickSpacing: pool.tickSpacing,
       tickLower: existingPosition.tickLower,
       tickUpper: existingPosition.tickUpper,
+      liquidity: '3825661781316041551568',
     });
   });
 });
