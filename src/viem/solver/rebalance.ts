@@ -49,7 +49,7 @@ import { SolverResult, SwapRoute } from './types';
  * @param newTickLower The new lower tick.
  * @param newTickUpper The new upper tick.
  * @param feeBips The Aperture fee for the transaction.
- * @param fromAddress The address to rebalance from.
+ * @param from The address to rebalance from.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param blockNumber Optional. The block number to use for the simulation.
@@ -62,7 +62,7 @@ export async function rebalanceOptimalV2(
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
@@ -79,7 +79,7 @@ export async function rebalanceOptimalV2(
     nftId: positionDetails.tokenId,
     newTickLower,
     newTickUpper,
-    fromAddress,
+    from,
     slippage,
     tokenPricesUsd,
   };
@@ -93,7 +93,7 @@ export async function rebalanceOptimalV2(
       chainId,
       amm,
       publicClient,
-      fromAddress,
+      from,
       positionDetails.owner,
       BigInt(positionDetails.tokenId),
       /*amount0Min =*/ undefined,
@@ -206,7 +206,7 @@ export async function rebalanceOptimalV2(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
     getLogger().info('SDK.rebalanceOptimalV2.Fees', {
-      totalRebalanceFeeUsd: feeUSD.toString(),
+      feeUSD: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
       feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
@@ -298,7 +298,7 @@ export async function rebalanceOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           mintParams,
           BigInt(positionDetails.tokenId),
@@ -332,7 +332,7 @@ export async function rebalanceOptimalV2(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing:
@@ -351,7 +351,7 @@ export async function rebalanceOptimalV2(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
         BigInt(positionDetails.tokenId),
@@ -395,7 +395,10 @@ export async function rebalanceOptimalV2(
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.rebalanceOptimalV2.Warning', solver);
+        getLogger().warn('SDK.Solver.rebalanceOptimalV2.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }
@@ -409,7 +412,7 @@ export async function rebalanceBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
@@ -433,7 +436,7 @@ export async function rebalanceBackend(
   const logdata = {
     chainId,
     amm,
-    fromAddress,
+    from,
     nftId,
     newTickLower,
     newTickUpper,
@@ -445,7 +448,7 @@ export async function rebalanceBackend(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails.owner,
     nftId,
     /* amount0Min= */ undefined,
@@ -526,7 +529,7 @@ export async function rebalanceBackend(
 
   getLogger().info('SDK.rebalanceBackend.round1.fees ', {
     ...logdata,
-    rebalanceFeeUsd: feeUSD.toString(),
+    feeUSD: feeUSD.toString(),
     swapFeesUsd: swapFeesUsd.toString(),
     reinvestFeeUSD: reinvestFeeUSD.toString(),
     flatFeeUsd,
@@ -583,7 +586,7 @@ export async function rebalanceBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
         nftId,
@@ -607,7 +610,7 @@ export async function rebalanceBackend(
     // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
     const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
       {
-        from: fromAddress,
+        from,
         to: getAMMInfo(chainId, amm)!.apertureAutoman,
         data: getAutomanRebalanceCalldata(
           amm,
@@ -646,7 +649,7 @@ export async function rebalanceBackend(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -699,7 +702,7 @@ export async function rebalanceBackend(
       getLogger().info('SDK.rebalanceBackend.round2.fees ', {
         solver,
         ...logdata,
-        totalRebalanceFeeUsd: feeUSD.toString(),
+        feeUSD: feeUSD.toString(),
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
@@ -714,7 +717,7 @@ export async function rebalanceBackend(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -733,7 +736,7 @@ export async function rebalanceBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
         nftId,
@@ -781,7 +784,10 @@ export async function rebalanceBackend(
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.rebalanceBackend.Warning', solver);
+        getLogger().warn('SDK.Solver.rebalanceBackend.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }
@@ -796,7 +802,7 @@ export async function rebalanceV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
@@ -822,7 +828,7 @@ export async function rebalanceV4(
     nftId,
     newTickLower,
     newTickUpper,
-    fromAddress,
+    from,
     slippage,
     tokenPricesUsd,
   };
@@ -831,7 +837,7 @@ export async function rebalanceV4(
     amm,
     chainId,
     publicClient,
-    fromAddress,
+    from,
     positionDetails.owner,
     /* decreaseLiquidityParams= */ {
       tokenId: nftId,
@@ -915,7 +921,7 @@ export async function rebalanceV4(
 
   getLogger().info('SDK.rebalanceV4.Fees', {
     ...logdata,
-    rebalanceFeeUsd: feeUSD.toString(),
+    feeUSD: feeUSD.toString(),
     swapFeesUsd: swapFeesUsd.toString(),
     reinvestFeeUSD: reinvestFeeUSD.toString(),
     flatFeeUsd,
@@ -970,7 +976,7 @@ export async function rebalanceV4(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           mintParams,
           nftId,
@@ -1005,7 +1011,7 @@ export async function rebalanceV4(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing:
@@ -1024,7 +1030,7 @@ export async function rebalanceV4(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
         nftId,
@@ -1075,7 +1081,10 @@ export async function rebalanceV4(
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.rebalanceV4.Warning', solver);
+        getLogger().warn('SDK.Solver.rebalanceV4.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }

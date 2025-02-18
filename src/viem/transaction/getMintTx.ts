@@ -1,5 +1,5 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
-import { Position } from '@aperture_finance/uniswap-v3-sdk';
+import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
@@ -7,6 +7,7 @@ import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
+  getAutomanMintFromTokenInCalldata,
   getAutomanV4MintOptimalCalldata,
 } from '../automan';
 import { getNativeCurrency } from '../currency';
@@ -126,13 +127,96 @@ export async function getMintOptimalV4Tx(
   return {
     tx: {
       to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+      from: recipient,
       data,
       value,
-      from: recipient,
     },
     amounts: {
       amount0Min: amount0.toString(),
       amount1Min: amount1.toString(),
     },
+  };
+}
+
+export async function getMintFromTokenInTx(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  recipient: Address,
+  pool: Pool,
+  tickLower: number,
+  tickUpper: number,
+  tokenIn: Token,
+  tokenInAmountToSwapToToken0: bigint,
+  tokenInAmountToSwapToToken1: bigint,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex,
+  swapData1: Hex,
+  liquidity: bigint,
+  slippage: number,
+  deadline: bigint,
+) {
+  let value: bigint | undefined;
+  if (tokenIn.isNative) {
+    const tokenInAmount = CurrencyAmount.fromRawAmount(
+      getNativeCurrency(chainId).wrapped,
+      (
+        tokenInAmountToSwapToToken0 +
+        tokenInAmountToSwapToToken1 +
+        tokenInFeeAmount
+      ).toString(),
+    );
+    value = BigInt(tokenInAmount.quotient.toString());
+  }
+  const position = new Position({
+    pool,
+    liquidity: liquidity.toString(),
+    tickLower,
+    tickUpper,
+  });
+  const { amount0, amount1 } = position.mintAmountsWithSlippage(
+    new Percent(Math.floor(slippage * 1e6), 1e6),
+  );
+  // amountsDesired used as amount of tokenIn to swap for token0 and token1 due to stack too deep compiler error.
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: pool.token0.address as Address,
+          token1: pool.token1.address as Address,
+          tickSpacing: pool.tickSpacing,
+          tickLower,
+          tickUpper,
+          amount0Desired: tokenInAmountToSwapToToken0,
+          amount1Desired: tokenInAmountToSwapToToken1,
+          amount0Min: BigInt(amount0.toString()),
+          amount1Min: BigInt(amount1.toString()),
+          recipient,
+          deadline,
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: pool.token0.address as Address,
+          token1: pool.token1.address as Address,
+          fee: pool.fee,
+          tickLower,
+          tickUpper,
+          amount0Desired: tokenInAmountToSwapToToken0,
+          amount1Desired: tokenInAmountToSwapToToken1,
+          amount0Min: BigInt(amount0.toString()),
+          amount1Min: BigInt(amount1.toString()),
+          recipient,
+          deadline,
+        };
+  const data = getAutomanMintFromTokenInCalldata(
+    mintParams,
+    tokenIn.address as Address,
+    tokenInFeeAmount,
+    swapData0,
+    swapData1,
+  );
+  return {
+    to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+    from: recipient,
+    data,
+    value,
   };
 }

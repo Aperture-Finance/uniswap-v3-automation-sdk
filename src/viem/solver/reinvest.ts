@@ -39,7 +39,7 @@ export async function reinvestBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
@@ -126,7 +126,7 @@ export async function reinvestBackend(
     amm,
     chainId,
     tokenId,
-    reinvestFeeUsd: feeUSD.toString(),
+    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     nativeToUsd,
@@ -150,7 +150,7 @@ export async function reinvestBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         increaseLiquidityParams,
         feeBips,
@@ -173,7 +173,7 @@ export async function reinvestBackend(
     // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
     const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
       {
-        from: fromAddress,
+        from,
         to: getAMMInfo(chainId, amm)!.apertureAutoman,
         data: getAutomanReinvestCalldata(
           increaseLiquidityParams,
@@ -213,7 +213,7 @@ export async function reinvestBackend(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -268,7 +268,7 @@ export async function reinvestBackend(
         amm,
         chainId,
         tokenId,
-        totalReinvestFeeUsd: feeUSD.toString(),
+        feeUSD: feeUSD.toString(),
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
@@ -283,7 +283,7 @@ export async function reinvestBackend(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -312,7 +312,7 @@ export async function reinvestBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         increaseLiquidityParams,
         totalFeePips,
@@ -371,7 +371,10 @@ export async function reinvestBackend(
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.reinvest.Warning', solver);
+        getLogger().warn('SDK.Solver.reinvest.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }
@@ -385,7 +388,7 @@ export async function reinvestV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
@@ -455,7 +458,7 @@ export async function reinvestV4(
     amm,
     chainId,
     tokenId,
-    totalReinvestFeeUsd: feeUSD.toString(),
+    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     token0FeeAmount,
@@ -475,7 +478,7 @@ export async function reinvestV4(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           increaseLiquidityParams,
           token0FeeAmount,
@@ -511,7 +514,7 @@ export async function reinvestV4(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -526,7 +529,7 @@ export async function reinvestV4(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         increaseLiquidityParams,
         token0FeeAmount,
@@ -584,7 +587,10 @@ export async function reinvestV4(
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.reinvestV4.Warning', solver);
+        getLogger().warn('SDK.Solver.reinvestV4.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }

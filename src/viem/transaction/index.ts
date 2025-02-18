@@ -3,7 +3,7 @@ export * from './getCollectTx';
 export * from './getDecreaseLiquidityToTokenOutTx';
 export * from './getIncreaseLiquidityOptimalTx';
 export * from './getMMVaultTx';
-export * from './getMintOptimalTx';
+export * from './getMintTx';
 export * from './getRebalanceTx';
 export * from './getReinvestTx';
 export * from './getRemoveLiquidityTx';

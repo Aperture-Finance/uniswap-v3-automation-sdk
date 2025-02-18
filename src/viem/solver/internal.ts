@@ -12,11 +12,12 @@ import Big from 'big.js';
 import {
   Address,
   GetContractReturnType,
+  Hex,
   PublicClient,
   WalletClient,
 } from 'viem';
 
-import { E_Solver, SwapRoute } from '.';
+import { E_Solver, SwapRoute, getSolver } from '.';
 import { getPool } from '..';
 import {
   SlipStreamMintParams,
@@ -24,7 +25,7 @@ import {
   getAutomanContract,
   getAutomanV4Contract,
 } from '../automan';
-import { SwapPath } from './types';
+import { DEFAULT_SOLVERS, SwapPath } from './types';
 import { SolverResult } from './types';
 
 export const calcPriceImpact = (
@@ -317,4 +318,102 @@ export function getFeeOrTickSpacingFromMintParams(
     return (mintParams as SlipStreamMintParams).tickSpacing;
   }
   return (mintParams as UniV3MintParams).fee;
+}
+
+export async function solveExactInput(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  from: Address,
+  tokenIn: Address,
+  tokenOut: Address,
+  feeOrTickSpacing: number,
+  amountIn: bigint,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+) {
+  let [solver, tokenOutAmount, swapData, swapRoute]: [
+    E_Solver,
+    bigint,
+    Hex,
+    SwapRoute | undefined,
+  ] = [E_Solver.SamePool, 0n, '0x' as Hex, undefined];
+  if (tokenIn === tokenOut || amountIn <= 0n) {
+    return {
+      solver,
+      tokenOutAmount: amountIn,
+      swapData,
+      swapRoute,
+      solverResults: [],
+    };
+  }
+  const [token0, token1, zeroForOne] =
+    tokenIn < tokenOut ? [tokenIn, tokenOut, true] : [tokenOut, tokenIn, false];
+  const solverResults = await Promise.all(
+    includeSolvers.map(async (solver) => {
+      try {
+        return {
+          solver,
+          // Although it's mintOptimal, it's the same swapData and swapRoute.
+          ...(await getSolver(solver).mintOptimal({
+            amm,
+            chainId,
+            from,
+            token0,
+            token1,
+            feeOrTickSpacing,
+            tickLower: 0, // Not used in _routerSwapFromTokenInToTokenOut.
+            tickUpper: 0, // Not used in _routerSwapFromTokenInToTokenOut.
+            // This is just to get a quote, then calculate mintAmounts with slippage.
+            // Slippage check done in automan instead of solver.
+            slippage: 1,
+            poolAmountIn: amountIn,
+            zeroForOne,
+            isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
+          })),
+        };
+      } catch (e) {
+        if (!(e as Error)?.message.startsWith('Expected')) {
+          getLogger().error(
+            `SDK.Solver.solveExactInput.tokenIn=${tokenIn}.tokenOut=${tokenOut}.Error`,
+            {
+              solver,
+              error: JSON.stringify((e as Error).message),
+            },
+          );
+        } else {
+          getLogger().warn(
+            `SDK.Solver.solveExactInput.tokenIn=${tokenIn}.tokenOut=${tokenOut}.Warn`,
+            {
+              solver,
+              warn: JSON.stringify((e as Error).message),
+            },
+          );
+        }
+        return null;
+      }
+    }),
+  );
+  for (const solverResult of solverResults) {
+    if (solverResult != null && solverResult.toAmount > tokenOutAmount) {
+      [solver, tokenOutAmount, swapData, swapRoute] = [
+        solverResult.solver,
+        solverResult.toAmount,
+        solverResult.swapData,
+        solverResult.swapRoute,
+      ];
+    }
+  }
+  return {
+    solver,
+    tokenOutAmount,
+    swapData,
+    swapRoute,
+    solverResults:
+      solverResults == null
+        ? null
+        : solverResults.map((result) =>
+            result == null
+              ? null
+              : { solver: result.solver, toAmount: result.toAmount },
+          ),
+  };
 }

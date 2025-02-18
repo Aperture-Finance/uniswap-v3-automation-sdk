@@ -9,13 +9,14 @@ import { increaseLiquidityOptimalV4 } from '../solver';
 import { E_Solver } from '../solver';
 
 /**
- * Calculates the optimal swap information including swap path info, swap route and price impact for adding liquidity in a decentralized exchange
+ * Calculates the optimal swap information including swap path info,
+ * swap route, and price impact for adding liquidity in a decentralized exchange.
  * @param increaseOptions Increase liquidity options.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fromAddress The address to increase liquidity from.
+ * @param from The address to increase liquidity from.
  * @param tokenPricesUsd The token prices in USD.
  * @param publicClient Viem public client.
  * @param includeSolvers Optional. The solvers to include.
@@ -28,7 +29,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV4(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  fromAddress: Address,
+  from: Address,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
@@ -52,7 +53,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV4(
     increaseOptions,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
-    fromAddress,
+    from,
     tokenPricesUsd,
     includeSolvers,
     blockNumber,

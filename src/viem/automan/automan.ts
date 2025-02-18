@@ -32,15 +32,17 @@ import {
 } from '../overrides';
 import {
   getAutomanDecreaseLiquidityToTokenOutCalldata,
+  getAutomanIncreaseLiquidityFromTokenInCalldata,
+  getAutomanMintFromTokenInCalldata,
   getAutomanRebalanceCalldata,
   getAutomanReinvestCalldata,
   getAutomanRemoveLiquidityCalldata,
   getAutomanV4DecreaseLiquidityCalldata,
-  getAutomanV4IncreaseLiquidityOptimalCallData,
+  getAutomanV4IncreaseLiquidityOptimalCalldata,
   getAutomanV4MintOptimalCalldata,
   getAutomanV4RebalanceCalldata,
   getAutomanV4ReinvestCalldata,
-} from './getAutomanCallData';
+} from './getAutomanCalldata';
 import { getFromAddress } from './internal';
 import {
   DecreaseLiquidityParams,
@@ -253,6 +255,110 @@ export async function requestMintOptimalV4<M extends keyof RpcReturnType>(
   );
 }
 
+export async function requestMintFromTokenIn<M extends keyof RpcReturnType>(
+  method: M,
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenIn: Address,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanMintFromTokenInCalldata(
+    mintParams,
+    tokenIn,
+    tokenInFeeAmount,
+    swapData0,
+    swapData1,
+  );
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
+  const tokenInOverrides = await getERC20Overrides(
+    tokenIn,
+    from,
+    apertureAutomanV4,
+    mintParams.amount0Desired + mintParams.amount1Desired + tokenInFeeAmount,
+    publicClient,
+  );
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutomanV4,
+      data,
+    },
+    publicClient,
+    {
+      ...tokenInOverrides,
+    },
+    blockNumber,
+  );
+}
+
+export async function simulateMintFromTokenIn(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenIn: Address,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<MintReturnType> {
+  const returnData = await requestMintFromTokenIn(
+    'eth_call',
+    amm,
+    chainId,
+    publicClient,
+    from,
+    mintParams,
+    tokenIn,
+    tokenInFeeAmount,
+    swapData0,
+    swapData1,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: AutomanV4__factory.abi,
+    data: returnData,
+    functionName: 'mintWithTokenIn', // TODO: Rename
+  });
+}
+
+export async function estimateMintFromTokenInGas(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenIn: Address,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestMintFromTokenIn(
+      'eth_estimateGas',
+      amm,
+      chainId,
+      publicClient,
+      from,
+      mintParams,
+      tokenIn,
+      tokenInFeeAmount,
+      swapData0,
+      swapData1,
+      blockNumber,
+    ),
+  );
+}
+
 /**
  * Simulate a `increaseLiquidityOptimal` call by overriding the balances and allowances of the tokens involved.
  * @param chainId The chain ID.
@@ -341,7 +447,7 @@ export async function requestIncreaseLiquidityOptimalV4<
   token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  const data = getAutomanV4IncreaseLiquidityOptimalCallData(
+  const data = getAutomanV4IncreaseLiquidityOptimalCalldata(
     increaseParams,
     swapData,
     token0FeeAmount,
@@ -379,6 +485,114 @@ export async function requestIncreaseLiquidityOptimalV4<
       ...token1Overrides,
     },
     blockNumber,
+  );
+}
+
+export async function requestIncreaseLiquidityFromTokenIn<
+  M extends keyof RpcReturnType,
+>(
+  method: M,
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  increaseParams: IncreaseLiquidityParams,
+  tokenIn: Address,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<RpcReturnType[M]> {
+  const data = getAutomanIncreaseLiquidityFromTokenInCalldata(
+    increaseParams,
+    tokenIn,
+    tokenInFeeAmount,
+    swapData0,
+    swapData1,
+  );
+  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
+  const tokenInOverrides = await getERC20Overrides(
+    tokenIn,
+    from,
+    apertureAutomanV4,
+    increaseParams.amount0Desired +
+      increaseParams.amount1Desired +
+      tokenInFeeAmount,
+    publicClient,
+  );
+  return tryRequestWithOverrides(
+    method,
+    {
+      from,
+      to: apertureAutomanV4,
+      data,
+    },
+    publicClient,
+    {
+      ...tokenInOverrides,
+    },
+    blockNumber,
+  );
+}
+
+export async function simulateIncreaseLiquidityFromTokenIn(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  increaseParams: IncreaseLiquidityParams,
+  tokenIn: Address,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<IncreaseLiquidityReturnType> {
+  const returnData = await requestIncreaseLiquidityFromTokenIn(
+    'eth_call',
+    amm,
+    chainId,
+    publicClient,
+    from,
+    increaseParams,
+    tokenIn,
+    tokenInFeeAmount,
+    swapData0,
+    swapData1,
+    blockNumber,
+  );
+  return decodeFunctionResult({
+    abi: AutomanV4__factory.abi,
+    data: returnData,
+    functionName: 'increaseLiquidityWithTokenIn', // TODO: Rename
+  });
+}
+
+export async function estimateIncreaseLiquidityFromTokenInGas(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  increaseParams: IncreaseLiquidityParams,
+  tokenIn: Address,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+  blockNumber?: bigint,
+): Promise<bigint> {
+  return hexToBigInt(
+    await requestIncreaseLiquidityFromTokenIn(
+      'eth_estimateGas',
+      amm,
+      chainId,
+      publicClient,
+      from,
+      increaseParams,
+      tokenIn,
+      tokenInFeeAmount,
+      swapData0,
+      swapData1,
+      blockNumber,
+    ),
   );
 }
 

@@ -20,7 +20,7 @@ export interface SolvedSwapInfo {
 export interface SolveMintOptimalProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
-  fromAddress: Address;
+  from: Address;
   token0: Address;
   token1: Address;
   feeOrTickSpacing: number;

@@ -4,7 +4,7 @@ import { Currency, CurrencyAmount } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import { getAutomanV4IncreaseLiquidityOptimalCallData } from '../automan';
+import { getAutomanV4IncreaseLiquidityOptimalCalldata } from '../automan';
 import { getNativeCurrency } from '../currency';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
@@ -85,7 +85,7 @@ export async function getIncreaseLiquidityOptimalV4Tx(
     deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
-  const data = getAutomanV4IncreaseLiquidityOptimalCallData(
+  const data = getAutomanV4IncreaseLiquidityOptimalCalldata(
     increaseParams,
     swapData,
     token0FeeAmount,

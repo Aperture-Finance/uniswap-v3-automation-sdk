@@ -11,11 +11,13 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 /**
- * Calculates the optimal swap information including swap path info, swap route and price impact for rebalances an existing position into a new one with the specified price range using Aperture's Automan contract.
+ * Calculates the optimal swap information including swap path info,
+ * swap route, and price impact for rebalances an existing position
+ * into a new one with the specified price range using Aperture's Automan contract.
  * Currently used for frontend, and can optionally be migrated to getRebalanceSwapInfoV4.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
- * @param fromAddress The address to rebalance from.
+ * @param from The address to rebalance from.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
  * @param newPositionTickUpper The upper tick of the new position.
@@ -29,7 +31,7 @@ import { Address, PublicClient } from 'viem';
 export async function getRebalanceSwapInfo(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  fromAddress: Address,
+  from: Address,
   existingPositionId: bigint,
   newPositionTickLower: number,
   newPositionTickUpper: number,
@@ -57,7 +59,7 @@ export async function getRebalanceSwapInfo(
     positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
-    fromAddress,
+    from,
     slippageTolerance,
     tokenPricesUsd,
     publicClient,
@@ -68,11 +70,12 @@ export async function getRebalanceSwapInfo(
 }
 
 /**
- * Calculates the SolverResults for rebalances from an existing position into a new one with the specified price range using Aperture's Automan contract.
+ * Calculates the SolverResults for rebalances from an existing position
+ * into a new one with the specified price range using Aperture's Automan contract.
  * Used for backend with 2x solver calls for gas reimbursements.
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
- * @param fromAddress The address to rebalance from.
+ * @param from The address to rebalance from.
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
  * @param newPositionTickUpper The upper tick of the new position.
@@ -87,7 +90,7 @@ export async function getRebalanceSwapInfoBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   newPositionTickLower: number,
   newPositionTickUpper: number,
@@ -101,7 +104,7 @@ export async function getRebalanceSwapInfoBackend(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
@@ -119,7 +122,7 @@ export async function getRebalanceSwapInfoV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   newPositionTickLower: number,
   newPositionTickUpper: number,
@@ -132,7 +135,7 @@ export async function getRebalanceSwapInfoV4(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails,
     newPositionTickLower,
     newPositionTickUpper,

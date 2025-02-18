@@ -46,7 +46,27 @@ export function getAutomanV4MintOptimalCalldata(
   });
 }
 
-export function getAutomanV4IncreaseLiquidityOptimalCallData(
+export function getAutomanMintFromTokenInCalldata(
+  mintParams: UniV3MintParams | SlipStreamMintParams,
+  tokenIn: Address,
+  tokenInFeeAmount = BigInt(0),
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+): Hex {
+  return encodeFunctionData({
+    abi: AutomanV4__factory.abi,
+    args: [
+      mintParams as UniV3MintParams,
+      tokenIn,
+      tokenInFeeAmount,
+      swapData0,
+      swapData1,
+    ] as const,
+    functionName: 'mintWithTokenIn', // TODO: Rename to mintFromTokenIn
+  });
+}
+
+export function getAutomanV4IncreaseLiquidityOptimalCalldata(
   increaseParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
@@ -56,6 +76,26 @@ export function getAutomanV4IncreaseLiquidityOptimalCallData(
     abi: AutomanV4__factory.abi,
     args: [increaseParams, swapData, token0FeeAmount, token1FeeAmount] as const,
     functionName: 'increaseLiquidityOptimal',
+  });
+}
+
+export function getAutomanIncreaseLiquidityFromTokenInCalldata(
+  increaseParams: IncreaseLiquidityParams,
+  tokenIn: Address,
+  tokenInFeeAmount = BigInt(0),
+  swapData0: Hex = '0x',
+  swapData1: Hex = '0x',
+): Hex {
+  return encodeFunctionData({
+    abi: AutomanV4__factory.abi,
+    args: [
+      increaseParams,
+      tokenIn,
+      tokenInFeeAmount,
+      swapData0,
+      swapData1,
+    ] as const,
+    functionName: 'increaseLiquidityWithTokenIn', // TODO: Rename to increaseLiquidityFromTokenIn
   });
 }
 

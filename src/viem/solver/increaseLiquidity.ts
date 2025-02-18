@@ -30,7 +30,7 @@ import { SolverResult } from './types';
  * @param increaseOptions Increase liquidity options.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fromAddress The address to increase liquidity from.
+ * @param from The address to increase liquidity from.
  * @param tokenPricesUsd The token prices in USD.
  * @param blockNumber Optional. The block number to simulate the call from.
  * @param includeSolvers Optional. The solvers to include.
@@ -43,7 +43,7 @@ export async function increaseLiquidityOptimalV4(
   increaseOptions: IncreaseOptions,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
-  fromAddress: Address,
+  from: Address,
   tokenPricesUsd: [string, string],
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
@@ -103,7 +103,7 @@ export async function increaseLiquidityOptimalV4(
     amm,
     chainId,
     nftId: increaseOptions.tokenId,
-    totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
+    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     token0FeeAmount: token0FeeAmount.toString(),
@@ -123,7 +123,7 @@ export async function increaseLiquidityOptimalV4(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           position,
           increaseParams,
           swapData,
@@ -159,7 +159,7 @@ export async function increaseLiquidityOptimalV4(
         ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing,
@@ -175,7 +175,7 @@ export async function increaseLiquidityOptimalV4(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         position,
         increaseParams,
         swapData,
@@ -225,7 +225,10 @@ export async function increaseLiquidityOptimalV4(
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.increaseLiquidityOptimalV4.Warning', solver);
+        getLogger().warn('SDK.Solver.increaseLiquidityOptimalV4.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }

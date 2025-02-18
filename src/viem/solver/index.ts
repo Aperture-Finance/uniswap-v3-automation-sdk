@@ -7,10 +7,10 @@ import { E_Solver, ISolver } from './types';
 export { getOkxQuote, getOkxSwap } from './getOkxSolver'; // TODO: remove when complete refactor
 export { get1InchQuote } from './get1InchSolver';
 
-export * from './increaseLiquidityOptimal';
-export * from './decreaseLiquidityToTokenOut';
-export * from './mintOptimal';
-export * from './rebalanceOptimal';
+export * from './decreaseLiquidity';
+export * from './increaseLiquidity';
+export * from './mint';
+export * from './rebalance';
 export * from './reinvest';
 export * from './types';
 
