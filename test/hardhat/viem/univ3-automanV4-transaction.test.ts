@@ -762,7 +762,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         recipient: eoa,
       },
     };
-    const { liquidity, swapData, swapData1, token0FeeAmount, token1FeeAmount } =
+    const { swapData, swapData1, token0FeeAmount, token1FeeAmount } =
       await getDecreaseLiquidityToTokenOutSwapInfo(
         amm,
         chainId,
@@ -912,7 +912,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         recipient: eoa,
       },
     };
-    const { liquidity, swapData, swapData1, token0FeeAmount, token1FeeAmount } =
+    const { swapData, swapData1, token0FeeAmount, token1FeeAmount } =
       await getDecreaseLiquidityToTokenOutSwapInfo(
         amm,
         chainId,
