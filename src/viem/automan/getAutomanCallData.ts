@@ -62,7 +62,7 @@ export function getAutomanMintFromTokenInCalldata(
       swapData0,
       swapData1,
     ] as const,
-    functionName: 'mintWithTokenIn', // TODO: Rename to mintFromTokenIn
+    functionName: 'mintFromTokenIn',
   });
 }
 
@@ -95,7 +95,7 @@ export function getAutomanIncreaseLiquidityFromTokenInCalldata(
       swapData0,
       swapData1,
     ] as const,
-    functionName: 'increaseLiquidityWithTokenIn', // TODO: Rename to increaseLiquidityFromTokenIn
+    functionName: 'increaseLiquidityFromTokenIn',
   });
 }
 
@@ -166,7 +166,8 @@ export function getAutomanV4DecreaseLiquidityCalldata(
 export function getAutomanDecreaseLiquidityToTokenOutCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   tokenOut: Address,
-  token0MinAmount: bigint,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData0: Hex = '0x',
   swapData1: Hex = '0x',
   isUnwrapNative = true,
@@ -178,7 +179,8 @@ export function getAutomanDecreaseLiquidityToTokenOutCalldata(
       args: [
         decreaseLiquidityParams,
         tokenOut,
-        token0MinAmount,
+        token0FeeAmount,
+        token1FeeAmount,
         swapData0,
         swapData1,
         isUnwrapNative,
@@ -192,14 +194,12 @@ export function getAutomanDecreaseLiquidityToTokenOutCalldata(
     args: [
       decreaseLiquidityParams,
       tokenOut,
-      token0MinAmount,
+      token0FeeAmount,
+      token1FeeAmount,
       swapData0,
       swapData1,
       isUnwrapNative,
-      BigInt(permitInfo.deadline),
-      Number(v),
-      r,
-      s,
+      { deadline: BigInt(permitInfo.deadline), v: Number(v), r, s },
     ] as const,
     functionName: 'decreaseLiquidityToTokenOut',
   });

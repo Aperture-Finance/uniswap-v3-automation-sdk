@@ -326,7 +326,7 @@ export async function simulateMintFromTokenIn(
   return decodeFunctionResult({
     abi: AutomanV4__factory.abi,
     data: returnData,
-    functionName: 'mintWithTokenIn', // TODO: Rename
+    functionName: 'mintFromTokenIn',
   });
 }
 
@@ -563,7 +563,7 @@ export async function simulateIncreaseLiquidityFromTokenIn(
   return decodeFunctionResult({
     abi: AutomanV4__factory.abi,
     data: returnData,
-    functionName: 'increaseLiquidityWithTokenIn', // TODO: Rename
+    functionName: 'increaseLiquidityFromTokenIn',
   });
 }
 
@@ -633,7 +633,8 @@ export async function simulateDecreaseLiquidityToTokenOut(
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   tokenOut: Address,
-  tokenOutMin: bigint,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData0: Hex = '0x',
   swapData1: Hex = '0x',
   isUnwrapNative = true,
@@ -648,7 +649,8 @@ export async function simulateDecreaseLiquidityToTokenOut(
     owner,
     decreaseLiquidityParams,
     tokenOut,
-    tokenOutMin,
+    token0FeeAmount,
+    token1FeeAmount,
     swapData0,
     swapData1,
     isUnwrapNative,
@@ -669,7 +671,8 @@ export async function estimateDecreaseLiquidityToTokenOutGas(
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   tokenOut: Address,
-  tokenOutMin: bigint,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData0: Hex = '0x',
   swapData1: Hex = '0x',
   isUnwrapNative = true,
@@ -685,7 +688,8 @@ export async function estimateDecreaseLiquidityToTokenOutGas(
       owner,
       decreaseLiquidityParams,
       tokenOut,
-      tokenOutMin,
+      token0FeeAmount,
+      token1FeeAmount,
       swapData0,
       swapData1,
       isUnwrapNative,
@@ -705,7 +709,8 @@ export async function requestDecreaseLiquidityToTokenOut<
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   tokenOut: Address,
-  tokenOutMin: bigint,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
   swapData0: Hex = '0x',
   swapData1: Hex = '0x',
   isUnwrapNative = true,
@@ -715,7 +720,8 @@ export async function requestDecreaseLiquidityToTokenOut<
   const data = getAutomanDecreaseLiquidityToTokenOutCalldata(
     decreaseLiquidityParams,
     tokenOut,
-    tokenOutMin,
+    token0FeeAmount,
+    token1FeeAmount,
     swapData0,
     swapData1,
     isUnwrapNative,

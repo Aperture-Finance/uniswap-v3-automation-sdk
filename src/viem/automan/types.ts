@@ -92,7 +92,7 @@ export type DecreaseLiquidityToTokenOutReturnType = ContractFunctionReturnType<
   typeof AutomanV4__factory.abi,
   AbiStateMutability,
   'decreaseLiquidityToTokenOut',
-  [DecreaseLiquidityParams, Address, bigint, Hex, Hex, boolean]
+  [DecreaseLiquidityParams, Address, bigint, bigint, Hex, Hex, boolean]
 >;
 
 /* Rebalance */

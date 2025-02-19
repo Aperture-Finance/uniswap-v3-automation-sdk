@@ -42,8 +42,7 @@ export async function decreaseLiquidityToTokenOut(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
-  // Use BigInt math for precision. liquidityToDecrease is not the liquidity from SolverResult, which is only used for comparing swapData.
-  const liquidityToDecrease =
+  const liquidity =
     (BigInt(positionDetails.liquidity.toString()) *
       BigInt(
         decreaseLiquidityOptions.liquidityPercentage.numerator.toString(),
@@ -51,8 +50,8 @@ export async function decreaseLiquidityToTokenOut(
     BigInt(decreaseLiquidityOptions.liquidityPercentage.denominator.toString());
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
-    liquidity: liquidityToDecrease,
-    amount0Min: 0n,
+    liquidity,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
     deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
@@ -95,12 +94,12 @@ export async function decreaseLiquidityToTokenOut(
       )
       .toFixed(0),
   );
-  // amountMins are used as feeAmounts due to stack too deep compiler error.
-  decreaseLiquidityParams.amount0Min = token0FeeAmount;
-  decreaseLiquidityParams.amount1Min = token1FeeAmount;
   const token0SwapIn = positionInitialAmount0 - token0FeeAmount;
   const token1SwapIn = positionInitialAmount1 - token1FeeAmount;
 
+  const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+    Number(decreaseLiquidityOptions.slippageTolerance.numerator) /
+    Number(decreaseLiquidityOptions.slippageTolerance.denominator);
   const [token0SolverResult, token1SolverResult] = await Promise.all([
     solveExactInput(
       amm,
@@ -110,7 +109,7 @@ export async function decreaseLiquidityToTokenOut(
       tokenOut,
       feeOrTickSpacing,
       token0SwapIn,
-      /* slippage= */ 1, // Don't restrict slippage for the swap. Slippage check done in automan instead of solver.
+      slippage,
       includeSolvers,
     ),
     solveExactInput(
@@ -121,7 +120,7 @@ export async function decreaseLiquidityToTokenOut(
       tokenOut,
       feeOrTickSpacing,
       token1SwapIn,
-      /* slippage= */ 1, // Don't restrict slippage for the swap. Slippage check done in automan instead of solver.
+      slippage,
       includeSolvers,
     ),
   ]);
@@ -135,11 +134,6 @@ export async function decreaseLiquidityToTokenOut(
   ];
   const tokenOutAmount =
     token0SolverResult.tokenOutAmount + token1SolverResult.tokenOutAmount;
-  const tokenOutSlippage =
-    (tokenOutAmount *
-      BigInt(decreaseLiquidityOptions.slippageTolerance.numerator.toString())) /
-    BigInt(decreaseLiquidityOptions.slippageTolerance.denominator.toString());
-  const tokenOutAfterSlippage = tokenOutAmount - tokenOutSlippage;
   const feeUSD = Big(token0FeeAmount.toString())
     .div(10 ** token0.decimals)
     .mul(tokenPricesUsd[0])
@@ -164,8 +158,7 @@ export async function decreaseLiquidityToTokenOut(
     token1FeeAmount,
     tokenOut,
     tokenOutAmount,
-    tokenOutAfterSlippage,
-    liquidityToDecrease,
+    liquidity,
     token0SwapIn,
     tokenOutFromToken0: token0SolverResult.tokenOutAmount,
     token1SwapIn,
@@ -174,11 +167,7 @@ export async function decreaseLiquidityToTokenOut(
     token1SolverResults: token1SolverResult.solverResults,
   });
 
-  const estimateGas = async (
-    tokenOutMin: bigint,
-    swapData0: Hex,
-    swapData1: Hex,
-  ) => {
+  const estimateGas = async (swapData0: Hex, swapData1: Hex) => {
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
@@ -190,7 +179,8 @@ export async function decreaseLiquidityToTokenOut(
           positionDetails.owner,
           decreaseLiquidityParams,
           tokenOut,
-          tokenOutMin,
+          token0FeeAmount,
+          token1FeeAmount,
           swapData0,
           swapData1,
           isUnwrapNative,
@@ -208,11 +198,7 @@ export async function decreaseLiquidityToTokenOut(
       return 0n;
     }
   };
-  const gasFeeEstimation = await estimateGas(
-    tokenOutAfterSlippage,
-    swapData,
-    swapData1,
-  );
+  const gasFeeEstimation = await estimateGas(swapData, swapData1);
 
   const [swap0Token0, swap0Token1, swap0deltaAmount0] =
     token0.address < tokenOut
@@ -232,10 +218,12 @@ export async function decreaseLiquidityToTokenOut(
         ];
   return {
     solver,
-    solver1: solver1,
-    amount0: token0SwapIn, // Not used
-    amount1: token1SwapIn, // Not used
-    liquidity: tokenOutAfterSlippage, // Required for SolverResult, used for tokenOutMin and can be used to compare solvers.
+    solver1,
+    // The sum of amounts is the expected tokenOutAmount.
+    amount0: token0SolverResult.tokenOutAmount,
+    amount1: token1SolverResult.tokenOutAmount,
+    // Use liquidity for compute decremental position, then mintAmountsWithSlippage() for decreaseLiquidityParams' amountsMin in automan.
+    liquidity,
     swapData,
     swapData1,
     gasFeeEstimation,

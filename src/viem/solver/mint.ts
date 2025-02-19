@@ -82,7 +82,7 @@ export async function mintOptimalV4(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: from,
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
@@ -96,7 +96,7 @@ export async function mintOptimalV4(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: from,
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),

@@ -270,8 +270,8 @@ export async function rebalanceOptimalV2(
           tickUpper: newTickUpper,
           amount0Desired: receive0,
           amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
@@ -284,8 +284,8 @@ export async function rebalanceOptimalV2(
           tickUpper: newTickUpper,
           amount0Desired: receive0,
           amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
@@ -558,8 +558,8 @@ export async function rebalanceBackend(
           tickUpper: newTickUpper,
           amount0Desired: 0n, // Not used in Automan.
           amount1Desired: 0n, // Not used in Automan.
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
@@ -572,8 +572,8 @@ export async function rebalanceBackend(
           tickUpper: newTickUpper,
           amount0Desired: 0n, // Not used in Automan.
           amount1Desired: 0n, // Not used in Automan.
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
@@ -948,8 +948,8 @@ export async function rebalanceV4(
           tickUpper: newTickUpper,
           amount0Desired: 0n, // Not used in Automan.
           amount1Desired: 0n, // Not used in Automan.
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
@@ -962,8 +962,8 @@ export async function rebalanceV4(
           tickUpper: newTickUpper,
           amount0Desired: 0n, // Not used in Automan.
           amount1Desired: 0n, // Not used in Automan.
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };

@@ -64,7 +64,7 @@ export async function increaseLiquidityOptimalV4(
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
     deadline: BigInt(increaseOptions.deadline.toString()),
   };

@@ -763,22 +763,20 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       },
     };
     const { liquidity, swapData, swapData1, token0FeeAmount, token1FeeAmount } =
-      (
-        await getDecreaseLiquidityToTokenOutSwapInfo(
-          amm,
-          chainId,
-          publicClient,
-          /* from= */ eoa,
-          /* positionDetails= */ existingPosition,
-          decreaseLiquidityOptions,
-          /* tokenOut= */ (zeroForOne
-            ? pool.token1.address
-            : pool.token0.address) as Address,
-          isUnwrapNative,
-          /* tokenPricesUsd= */ ['60000', '3000'],
-          /* includeSolvers= */ [E_Solver.SamePool],
-        )
-      )[0];
+      await getDecreaseLiquidityToTokenOutSwapInfo(
+        amm,
+        chainId,
+        publicClient,
+        /* from= */ eoa,
+        /* positionDetails= */ existingPosition,
+        decreaseLiquidityOptions,
+        /* tokenOut= */ (zeroForOne
+          ? pool.token1.address
+          : pool.token0.address) as Address,
+        isUnwrapNative,
+        /* tokenPricesUsd= */ ['60000', '3000'],
+        /* includeSolvers= */ [E_Solver.SamePool],
+      );
     const txRequest = await getDecreaseLiquidityToTokenOutTx(
       amm,
       chainId,
@@ -788,7 +786,6 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* tokenOut= */ (zeroForOne
         ? pool.token1.address
         : pool.token0.address) as Address,
-      /* tokenOutMin= */ liquidity, // Liquidity mapped to tokenOutMin.
       token0FeeAmount,
       token1FeeAmount,
       /* swapData0= */ swapData,
@@ -845,20 +842,20 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
     // Test balance of EOA.
     expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
-      4229659664449473084n,
+      4202582473224252172n,
     );
     expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(0n);
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
 
     // Test fees collected.
-    expect(token0FeeAmount).to.equal(40760n);
-    expect(token1FeeAmount).to.equal(4431110560193163n);
+    expect(token0FeeAmount).to.equal(145713n);
+    expect(token1FeeAmount).to.equal(15488978327258885n);
     expect(
       feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
-    ).to.equal(4431110560193163n);
+    ).to.equal(15488978327258885n);
     expect(
       feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
-    ).to.equal(40760n);
+    ).to.equal(145713n);
     expect(
       feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
     ).to.equal(0n);
@@ -916,22 +913,20 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       },
     };
     const { liquidity, swapData, swapData1, token0FeeAmount, token1FeeAmount } =
-      (
-        await getDecreaseLiquidityToTokenOutSwapInfo(
-          amm,
-          chainId,
-          publicClient,
-          /* from= */ eoa,
-          /* positionDetails= */ existingPosition,
-          decreaseLiquidityOptions,
-          /* tokenOut= */ (zeroForOne
-            ? pool.token1.address
-            : pool.token0.address) as Address,
-          isUnwrapNative,
-          /* tokenPricesUsd= */ ['60000', '3000'],
-          /* includeSolvers= */ [E_Solver.SamePool],
-        )
-      )[0];
+      await getDecreaseLiquidityToTokenOutSwapInfo(
+        amm,
+        chainId,
+        publicClient,
+        /* from= */ eoa,
+        /* positionDetails= */ existingPosition,
+        decreaseLiquidityOptions,
+        /* tokenOut= */ (zeroForOne
+          ? pool.token1.address
+          : pool.token0.address) as Address,
+        isUnwrapNative,
+        /* tokenPricesUsd= */ ['60000', '3000'],
+        /* includeSolvers= */ [E_Solver.SamePool],
+      );
     const txRequest = await getDecreaseLiquidityToTokenOutTx(
       amm,
       chainId,
@@ -941,7 +936,6 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* tokenOut= */ (zeroForOne
         ? pool.token1.address
         : pool.token0.address) as Address,
-      /* tokenOutMin= */ liquidity, // Liquidity mapped to tokenOutMin.
       token0FeeAmount,
       token1FeeAmount,
       /* swapData0= */ swapData,
@@ -998,20 +992,20 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
     // Test balance of EOA.
     expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
-      -19112791140494886n,
+      -19128112885273326n,
     );
-    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(27786525n);
+    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(27621381n);
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
 
     // Test fees collected.
-    expect(token0FeeAmount).to.equal(40760n);
-    expect(token1FeeAmount).to.equal(4431110560193163n);
+    expect(token0FeeAmount).to.equal(104953n);
+    expect(token1FeeAmount).to.equal(19920088887452048n);
     expect(
       feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
-    ).to.equal(4431110560193163n);
+    ).to.equal(19920088887452048n);
     expect(
       feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
-    ).to.equal(40760n);
+    ).to.equal(104953n);
     expect(
       feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
     ).to.equal(0n);

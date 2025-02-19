@@ -1,5 +1,8 @@
 import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
-import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
+import {
+  Position,
+  RemoveLiquidityOptions,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, TransactionRequest } from 'viem';
 
@@ -33,7 +36,6 @@ export async function getDecreaseLiquidityToTokenOutTx(
   positionDetails: PositionDetails,
   decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   tokenOut: Address,
-  tokenOutMin: bigint,
   token0FeeAmount: bigint = 0n,
   token1FeeAmount: bigint = 0n,
   swapData0: Hex = '0x',
@@ -42,24 +44,33 @@ export async function getDecreaseLiquidityToTokenOutTx(
   permitInfo?: PermitInfo,
 ): Promise<TransactionRequest> {
   // Use BigInt math for precision. liquidityToDecrease is not the liquidity from SolverResult, which is only used for comparing swapData.
-  const liquidityToDecrease =
+  const liquidity =
     (BigInt(positionDetails.liquidity.toString()) *
       BigInt(
         decreaseLiquidityOptions.liquidityPercentage.numerator.toString(),
       )) /
     BigInt(decreaseLiquidityOptions.liquidityPercentage.denominator.toString());
+  const decrementalPosition = new Position({
+    pool: positionDetails.pool,
+    liquidity: liquidity.toString(),
+    tickLower: positionDetails.tickLower,
+    tickUpper: positionDetails.tickUpper,
+  });
+  const { amount0, amount1 } = decrementalPosition.mintAmountsWithSlippage(
+    decreaseLiquidityOptions.slippageTolerance,
+  );
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
-    liquidity: liquidityToDecrease,
-    // amountMins are used as feeAmounts due to stack too deep compiler error.
-    amount0Min: token0FeeAmount,
-    amount1Min: token1FeeAmount,
+    liquidity,
+    amount0Min: BigInt(amount0.toString()),
+    amount1Min: BigInt(amount1.toString()),
     deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
   const data = getAutomanDecreaseLiquidityToTokenOutCalldata(
     decreaseLiquidityParams,
     tokenOut,
-    tokenOutMin,
+    token0FeeAmount,
+    token1FeeAmount,
     swapData0,
     swapData1,
     isUnwrapNative,
