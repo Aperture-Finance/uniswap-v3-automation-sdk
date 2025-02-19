@@ -34,7 +34,7 @@ export async function getDecreaseLiquidityToTokenOutSwapInfo(
   tokenPricesUsd: [string, string],
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
-): Promise<SolverResult[]> {
+): Promise<SolverResult> {
   return await decreaseLiquidityToTokenOut(
     amm,
     chainId,

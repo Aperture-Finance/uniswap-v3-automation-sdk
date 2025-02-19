@@ -41,9 +41,7 @@ export async function decreaseLiquidityToTokenOut(
   tokenPricesUsd: [string, string],
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
-  // Even though at most 1 result (which will be optimal), return an array for symmetry with other solver functions.
-): Promise<SolverResult[]> {
-  if (includeSolvers.length === 0) return [];
+): Promise<SolverResult> {
   // Use BigInt math for precision. liquidityToDecrease is not the liquidity from SolverResult, which is only used for comparing swapData.
   const liquidityToDecrease =
     (BigInt(positionDetails.liquidity.toString()) *
@@ -56,7 +54,7 @@ export async function decreaseLiquidityToTokenOut(
     liquidity: liquidityToDecrease,
     amount0Min: 0n,
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+    deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
   const [token0, token1] = [positionDetails.token0, positionDetails.token1];
   const feeOrTickSpacing =
@@ -112,6 +110,7 @@ export async function decreaseLiquidityToTokenOut(
       tokenOut,
       feeOrTickSpacing,
       token0SwapIn,
+      /* slippage= */ 1, // Don't restrict slippage for the swap. Slippage check done in automan instead of solver.
       includeSolvers,
     ),
     solveExactInput(
@@ -122,6 +121,7 @@ export async function decreaseLiquidityToTokenOut(
       tokenOut,
       feeOrTickSpacing,
       token1SwapIn,
+      /* slippage= */ 1, // Don't restrict slippage for the swap. Slippage check done in automan instead of solver.
       includeSolvers,
     ),
   ]);
@@ -220,7 +220,7 @@ export async function decreaseLiquidityToTokenOut(
       : [
           tokenOut,
           token0.address as Address,
-          token0SwapIn, // incorrect, but correct sign, which is only thing that matters
+          token0SwapIn, // inaccurate, but correct sign, which is only thing that matters
         ];
   const [swap1Token0, swap1Token1, swap1deltaAmount0] =
     token1.address < tokenOut
@@ -228,33 +228,31 @@ export async function decreaseLiquidityToTokenOut(
       : [
           tokenOut,
           token1.address as Address,
-          token1SwapIn, // incorrect, but correct sign, which is only thing that matters
+          token1SwapIn, // inaccurate, but correct sign, which is only thing that matters
         ];
-  return [
-    {
-      solver,
-      solver1: solver1,
-      amount0: token0SwapIn, // Not used
-      amount1: token1SwapIn, // Not used
-      liquidity: tokenOutAfterSlippage, // Required for SolverResult, used for tokenOutMin and can be used to compare solvers.
-      swapData,
-      swapData1,
-      gasFeeEstimation,
-      swapRoute: getSwapRoute(
-        /* token0= */ swap0Token0,
-        /* token1= */ swap0Token1,
-        /* deltaAmount0= */ swap0deltaAmount0, // Actual amount doesn't matter, just whether it's positive or negative.
-        swapRoute,
-      ),
-      swapRoute1: getSwapRoute(
-        /* token0= */ swap1Token0,
-        /* token1= */ swap1Token1,
-        /* deltaAmount0= */ swap1deltaAmount0, // Actual amount doesn't matter, just whether it's positive or negative.
-        swapRoute1,
-      ),
-      feeUSD: feeUSD.toFixed(),
-      token0FeeAmount,
-      token1FeeAmount,
-    } as SolverResult,
-  ];
+  return {
+    solver,
+    solver1: solver1,
+    amount0: token0SwapIn, // Not used
+    amount1: token1SwapIn, // Not used
+    liquidity: tokenOutAfterSlippage, // Required for SolverResult, used for tokenOutMin and can be used to compare solvers.
+    swapData,
+    swapData1,
+    gasFeeEstimation,
+    swapRoute: getSwapRoute(
+      /* token0= */ swap0Token0,
+      /* token1= */ swap0Token1,
+      /* deltaAmount0= */ swap0deltaAmount0,
+      swapRoute,
+    ),
+    swapRoute1: getSwapRoute(
+      /* token0= */ swap1Token0,
+      /* token1= */ swap1Token1,
+      /* deltaAmount0= */ swap1deltaAmount0,
+      swapRoute1,
+    ),
+    feeUSD: feeUSD.toFixed(),
+    token0FeeAmount,
+    token1FeeAmount,
+  } as SolverResult;
 }

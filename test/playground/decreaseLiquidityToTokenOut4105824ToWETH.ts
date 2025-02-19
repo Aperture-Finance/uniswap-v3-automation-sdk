@@ -43,7 +43,7 @@ async function main() {
       recipient: from,
     },
   };
-  const swapInfos = await getDecreaseLiquidityToTokenOutSwapInfo(
+  const swapInfo = await getDecreaseLiquidityToTokenOutSwapInfo(
     amm,
     chainId,
     publicClient,
@@ -55,35 +55,34 @@ async function main() {
     /* tokenPricesUsd= */ ['1', '1'],
     DEFAULT_SOLVERS,
   );
-  for (const swapInfo of swapInfos) {
-    const {
-      solver,
-      amount0,
-      amount1,
-      liquidity,
-      swapData,
-      swapData1,
-      token0FeeAmount,
-      token1FeeAmount,
-    } = swapInfo;
-    const txRequest = await getDecreaseLiquidityToTokenOutTx(
-      amm,
-      chainId,
-      from,
-      positionDetails,
-      decreaseLiquidityOptions,
-      tokenOut,
-      /* tokenOutMin= */ liquidity,
-      /* token0FeeAmount= */ token0FeeAmount!,
-      /* token1FeeAmount= */ token1FeeAmount!,
-      /* swapData0= */ swapData,
-      swapData1!,
-      isUnwrapNative,
-    );
-    console.log(
-      `solver=${solver}, liquidity: ${swapInfo.liquidity}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}, amount0=${amount0}, amount1=${amount1}, token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}, swapData0=${swapData}, swapData1=${swapData1},`,
-    );
-  }
+  const {
+    solver,
+    solver1,
+    amount0,
+    amount1,
+    liquidity,
+    swapData,
+    swapData1,
+    token0FeeAmount,
+    token1FeeAmount,
+  } = swapInfo;
+  const txRequest = await getDecreaseLiquidityToTokenOutTx(
+    amm,
+    chainId,
+    from,
+    positionDetails,
+    decreaseLiquidityOptions,
+    tokenOut,
+    /* tokenOutMin= */ liquidity,
+    /* token0FeeAmount= */ token0FeeAmount!,
+    /* token1FeeAmount= */ token1FeeAmount!,
+    /* swapData0= */ swapData,
+    swapData1!,
+    isUnwrapNative,
+  );
+  console.log(
+    `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}, amount0=${amount0}, amount1=${amount1}, token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}, swapData0=${swapData}, swapData1=${swapData1},`,
+  );
   process.exit(0);
 }
 

@@ -54,7 +54,7 @@ export async function reinvestBackend(
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
     amount0Min: 0n,
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+    deadline: BigInt(increaseOptions.deadline.toString()),
   };
   const token0 = positionDetails.pool.token0;
   const token1 = positionDetails.pool.token1;
@@ -402,7 +402,7 @@ export async function reinvestV4(
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
     amount0Min: 0n,
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+    deadline: BigInt(increaseOptions.deadline.toString()),
   };
   const token0 = positionDetails.pool.token0;
   const token1 = positionDetails.pool.token1;

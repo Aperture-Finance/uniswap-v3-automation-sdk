@@ -328,6 +328,7 @@ export async function solveExactInput(
   tokenOut: Address,
   feeOrTickSpacing: number,
   amountIn: bigint,
+  slippage: number,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ) {
   let [solver, tokenOutAmount, swapData, swapRoute]: [
@@ -362,9 +363,7 @@ export async function solveExactInput(
             feeOrTickSpacing,
             tickLower: 0, // Not used in _routerSwapFromTokenInToTokenOut.
             tickUpper: 0, // Not used in _routerSwapFromTokenInToTokenOut.
-            // This is just to get a quote, then calculate mintAmounts with slippage.
-            // Slippage check done in automan instead of solver.
-            slippage: 1,
+            slippage,
             poolAmountIn: amountIn,
             zeroForOne,
             isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.

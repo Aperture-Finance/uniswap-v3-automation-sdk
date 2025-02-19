@@ -68,7 +68,7 @@ export async function getMintFromTokenInSwapInfo(
   tokenInPriceUsd: string,
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
-): Promise<SolverResult[]> {
+): Promise<SolverResult> {
   return mintFromTokenIn(
     amm,
     chainId,

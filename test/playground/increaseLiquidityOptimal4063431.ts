@@ -58,6 +58,7 @@ async function main() {
   for (const swapInfo of swapInfos) {
     const {
       solver,
+      solver1,
       swapData,
       amount0,
       amount1,
@@ -86,7 +87,7 @@ async function main() {
       /* token1FeeAmount= */ token1FeeAmount,
     );
     console.log(
-      `solver=${solver}, liquidity: ${swapInfo.liquidity}, txRequest=${JSON.stringify(txRequest)}`,
+      `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, txRequest=${JSON.stringify(txRequest)}`,
     );
   }
   process.exit(0);

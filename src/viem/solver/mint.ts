@@ -286,7 +286,7 @@ export async function mintFromTokenIn(
   tokenInPriceUsd: string,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
-): Promise<SolverResult[]> {
+): Promise<SolverResult> {
   const [token0, token1] = [pool.token0, pool.token1];
   const feeOrTickSpacing =
     amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
@@ -301,22 +301,24 @@ export async function mintFromTokenIn(
     Big(TickMath.getSqrtRatioAtTick(tickUpper).toString()),
     /* liquidity= */ FixedPoint96.Q96, // arbitary large enough to reduce rounding errors to compute ratio
   );
-  const toSwapRatio =
-    amount0ForLiquidity === '0'
-      ? Big(0)
-      : amount1ForLiquidity === '0'
-        ? Big(1)
-        : Big(amount0ForLiquidity)
-            .mul(pool.token0Price.asFraction.numerator.toString())
-            .div(
-              Big(amount1ForLiquidity).mul(
-                pool.token0Price.asFraction.denominator.toString(),
-              ),
-            );
-  let tokenInAmountToSwapToToken0 = BigInt(
-    toSwapRatio.mul(tokenInAmount.toString()).toFixed(0),
+  const t0Price = pool.token0Price.asFraction;
+  const ratioToSwapToToken1 =
+    // Check divide by 0.
+    amount0ForLiquidity === '0' || t0Price.numerator.toString() === '0'
+      ? Big(1)
+      : amount1ForLiquidity === '0' || t0Price.denominator.toString() === '0'
+        ? Big(0)
+        : // ratioToSwapToToken1 = b / (aInTermsOfB + b)
+          Big(amount1ForLiquidity).div(
+            Big(amount0ForLiquidity)
+              .mul(t0Price.numerator.toString())
+              .div(t0Price.denominator.toString())
+              .add(amount1ForLiquidity),
+          );
+  let tokenInAmountToSwapToToken1 = BigInt(
+    ratioToSwapToToken1.mul(tokenInAmount.toString()).toFixed(0),
   );
-  let tokenInAmountToSwapToToken1 = tokenInAmount - tokenInAmountToSwapToToken0;
+  let tokenInAmountToSwapToToken0 = tokenInAmount - tokenInAmountToSwapToToken1;
   const token2ToToken0FeeAmount = BigInt(
     Big(
       (token0.address === tokenIn.address
@@ -349,6 +351,7 @@ export async function mintFromTokenIn(
       /* tokenOut= */ token0.address as Address,
       feeOrTickSpacing,
       tokenInAmountToSwapToToken0,
+      slippage,
       includeSolvers,
     ),
     solveExactInput(
@@ -359,6 +362,7 @@ export async function mintFromTokenIn(
       /* tokenOut= */ token1.address as Address,
       feeOrTickSpacing,
       tokenInAmountToSwapToToken1,
+      slippage,
       includeSolvers,
     ),
   ]);
@@ -370,16 +374,6 @@ export async function mintFromTokenIn(
     token1SolverResult.swapData,
     token1SolverResult.swapRoute,
   ];
-  const amount0Desired = token0SolverResult.tokenOutAmount;
-  const amount1Desired = token1SolverResult.tokenOutAmount;
-  const token0Slippage = BigInt(
-    Big(amount0Desired.toString()).mul(slippage).toFixed(0),
-  );
-  const token1Slippage = BigInt(
-    Big(amount1Desired.toString()).mul(slippage).toFixed(0),
-  );
-  const amount0Min = amount0Desired - token0Slippage;
-  const amount1Min = amount1Desired - token1Slippage;
   const feeUSD = Big(
     (token2ToToken0FeeAmount + token2ToToken1FeeAmount).toString(),
   )
@@ -392,19 +386,17 @@ export async function mintFromTokenIn(
     amm,
     chainId,
     feeUSD: feeUSD.toString(),
-    toSwapRatio: toSwapRatio.toString(),
+    toSwapRratioToSwapToToken1atio: ratioToSwapToToken1.toString(),
     // Token0 Swap
     token2ToToken0FeeAmount,
     tokenInAmountToSwapToToken0,
     token0SolverResults: token0SolverResult.solverResults,
-    token0FromTokenIn: amount0Desired,
-    amount0Min,
+    token0FromTokenIn: token0SolverResult.tokenOutAmount,
     // Token1 Swap
     token2ToToken1FeeAmount,
     tokenInAmountToSwapToToken1,
     token1SolverResults: token1SolverResult.solverResults,
-    token1FromTokenIn: amount1Desired,
-    amount1Min,
+    token1FromTokenIn: token1SolverResult.tokenOutAmount,
   });
   // amountsDesired = The amount of tokenIn to swap due to stack too deep compiler error.
   const mintParams: SlipStreamMintParams | UniV3MintParams =
@@ -417,8 +409,8 @@ export async function mintFromTokenIn(
           tickUpper,
           amount0Desired: tokenInAmountToSwapToToken0,
           amount1Desired: tokenInAmountToSwapToToken1,
-          amount0Min,
-          amount1Min,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: from,
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
@@ -431,7 +423,7 @@ export async function mintFromTokenIn(
           tickUpper,
           amount0Desired: tokenInAmountToSwapToToken0,
           amount1Desired: tokenInAmountToSwapToToken1,
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: from,
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
@@ -481,37 +473,37 @@ export async function mintFromTokenIn(
 
   const [swap0Token0, swap0Token1, swap0deltaAmount0] =
     token0.address < tokenIn.address
-      ? [token0.address, tokenIn.address, amount0Desired]
+      ? [token0.address, tokenIn.address, token0SolverResult.tokenOutAmount]
       : [tokenIn.address, token0.address, -tokenInAmountToSwapToToken0];
   const [swap1Token0, swap1Token1, swap1deltaAmount0] =
     token1.address < tokenIn.address
-      ? [token1.address, tokenIn.address, amount1Desired]
+      ? [token1.address, tokenIn.address, token1SolverResult.tokenOutAmount]
       : [tokenIn.address, token1.address, -tokenInAmountToSwapToToken1];
-  return [
-    {
-      solver,
-      solver1: solver1,
-      amount0: tokenInAmountToSwapToToken0,
-      amount1: tokenInAmountToSwapToToken1,
-      liquidity,
-      swapData,
-      swapData1,
-      gasFeeEstimation,
-      swapRoute: getSwapRoute(
-        /* token0= */ swap0Token0 as Address,
-        /* token1= */ swap0Token1 as Address,
-        /* deltaAmount0= */ swap0deltaAmount0, // Actual amount doesn't matter, just whether it's positive or negative.
-        swapRoute,
-      ),
-      swapRoute1: getSwapRoute(
-        /* token0= */ swap1Token0 as Address,
-        /* token1= */ swap1Token1 as Address,
-        /* deltaAmount0= */ swap1deltaAmount0, // Actual amount doesn't matter, just whether it's positive or negative.
-        swapRoute1,
-      ),
-      feeUSD: feeUSD.toFixed(),
-      token0FeeAmount: token2ToToken0FeeAmount,
-      token1FeeAmount: token2ToToken1FeeAmount,
-    } as SolverResult,
-  ];
+  return {
+    solver,
+    solver1: solver1,
+    // Use amounts for mintParams' amountsDesired in automan.
+    amount0: tokenInAmountToSwapToToken0,
+    amount1: tokenInAmountToSwapToToken1,
+    // Use liquidity for compute minted position, then mintAmountsWithSlippage() for mintParams' amountsMin in automan.
+    liquidity,
+    swapData,
+    swapData1,
+    gasFeeEstimation,
+    swapRoute: getSwapRoute(
+      /* token0= */ swap0Token0 as Address,
+      /* token1= */ swap0Token1 as Address,
+      /* deltaAmount0= */ swap0deltaAmount0,
+      swapRoute,
+    ),
+    swapRoute1: getSwapRoute(
+      /* token0= */ swap1Token0 as Address,
+      /* token1= */ swap1Token1 as Address,
+      /* deltaAmount0= */ swap1deltaAmount0,
+      swapRoute1,
+    ),
+    feeUSD: feeUSD.toFixed(),
+    token0FeeAmount: token2ToToken0FeeAmount,
+    token1FeeAmount: token2ToToken1FeeAmount,
+  } as SolverResult;
 }

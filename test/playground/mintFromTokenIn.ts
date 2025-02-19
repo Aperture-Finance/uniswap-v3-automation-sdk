@@ -54,6 +54,7 @@ async function main() {
   for (const swapInfo of swapInfos) {
     const {
       solver,
+      solver1,
       swapData,
       swapData1,
       amount0,
@@ -62,25 +63,28 @@ async function main() {
       token1FeeAmount,
       liquidity,
     } = swapInfo;
-    const txRequest = await getMintFromTokenInTx(
-      amm,
-      chainId,
-      /* recipient= */ from,
-      pool,
-      tickLower,
-      tickUpper,
-      tokenIn,
-      /* tokenInAmountToSwapToToken0= */ amount0,
-      /* tokenInAmountToSwapToToken1= */ amount1,
-      /* tokenInFeeAmount= */ (token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n),
-      /* swapData0= */ swapData,
-      swapData1 ?? '0x',
-      liquidity,
-      slippage,
-      /* deadline= */ BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
-    );
+    const txRequest = (
+      await getMintFromTokenInTx(
+        amm,
+        chainId,
+        /* recipient= */ from,
+        pool,
+        tickLower,
+        tickUpper,
+        tokenIn,
+        /* tokenInAmountToSwapToToken0= */ amount0,
+        /* tokenInAmountToSwapToToken1= */ amount1,
+        /* tokenInFeeAmount= */ (token0FeeAmount ?? 0n) +
+          (token1FeeAmount ?? 0n),
+        /* swapData0= */ swapData,
+        swapData1 ?? '0x',
+        liquidity,
+        slippage,
+        /* deadline= */ BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
+      )
+    ).tx;
     console.log(
-      `solver=${solver}, liquidity: ${swapInfo.liquidity}, txRequest=${JSON.stringify(txRequest)}`,
+      `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, txRequest=${JSON.stringify(txRequest)}`,
     );
   }
   process.exit(0);

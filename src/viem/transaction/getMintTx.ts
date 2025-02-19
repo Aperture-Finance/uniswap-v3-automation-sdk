@@ -154,7 +154,10 @@ export async function getMintFromTokenInTx(
   liquidity: bigint,
   slippage: number,
   deadline: bigint,
-) {
+): Promise<{
+  tx: TransactionRequest;
+  amounts: SimulatedAmounts;
+}> {
   let value: bigint | undefined;
   if (tokenIn.isNative) {
     const tokenInAmount = CurrencyAmount.fromRawAmount(
@@ -214,9 +217,15 @@ export async function getMintFromTokenInTx(
     swapData1,
   );
   return {
-    to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
-    from: recipient,
-    data,
-    value,
+    tx: {
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+      from: recipient,
+      data,
+      value,
+    },
+    amounts: {
+      amount0Min: amount0.toString(),
+      amount1Min: amount1.toString(),
+    },
   };
 }

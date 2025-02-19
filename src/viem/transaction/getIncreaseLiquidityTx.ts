@@ -1,10 +1,13 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core';
+import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
-import { getAutomanV4IncreaseLiquidityOptimalCalldata } from '../automan';
+import {
+  getAutomanIncreaseLiquidityFromTokenInCalldata,
+  getAutomanV4IncreaseLiquidityOptimalCalldata,
+} from '../automan';
 import { getNativeCurrency } from '../currency';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
@@ -52,18 +55,20 @@ export async function getIncreaseLiquidityOptimalV4Tx(
   }
 
   let value: bigint | undefined;
-  if (token0Amount.currency.isNative) {
-    token0Amount = CurrencyAmount.fromRawAmount(
-      getNativeCurrency(chainId).wrapped,
-      token0Amount.quotient,
-    );
-    value = BigInt(token0Amount.quotient.toString());
-  } else if (token1Amount.currency.isNative) {
-    token1Amount = CurrencyAmount.fromRawAmount(
-      getNativeCurrency(chainId).wrapped,
-      token1Amount.quotient,
-    );
-    value = BigInt(token1Amount.quotient.toString());
+  if (increaseOptions.useNative) {
+    if (token0Amount.currency.isNative) {
+      token0Amount = CurrencyAmount.fromRawAmount(
+        getNativeCurrency(chainId).wrapped,
+        token0Amount.quotient,
+      );
+      value = BigInt(token0Amount.quotient.toString());
+    } else if (token1Amount.currency.isNative) {
+      token1Amount = CurrencyAmount.fromRawAmount(
+        getNativeCurrency(chainId).wrapped,
+        token1Amount.quotient,
+      );
+      value = BigInt(token1Amount.quotient.toString());
+    }
   }
 
   // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
@@ -82,7 +87,7 @@ export async function getIncreaseLiquidityOptimalV4Tx(
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: BigInt(amount0.toString()),
     amount1Min: BigInt(amount1.toString()),
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+    deadline: BigInt(increaseOptions.deadline.toString()),
   };
 
   const data = getAutomanV4IncreaseLiquidityOptimalCalldata(
@@ -98,6 +103,74 @@ export async function getIncreaseLiquidityOptimalV4Tx(
       data,
       value,
       from,
+    },
+    amounts: {
+      amount0Min: amount0.toString(),
+      amount1Min: amount1.toString(),
+    },
+  };
+}
+
+export async function getIncreaseLiquidityFromTokenInTx(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  from: Address,
+  increaseOptions: IncreaseOptions,
+  position: Position,
+  tokenIn: Token,
+  tokenInAmountToSwapToToken0: bigint,
+  tokenInAmountToSwapToToken1: bigint,
+  tokenInFeeAmount: bigint,
+  swapData0: Hex,
+  swapData1: Hex,
+  liquidity: bigint,
+): Promise<{
+  tx: TransactionRequest;
+  amounts: SimulatedAmounts;
+}> {
+  let value: bigint | undefined;
+  if (increaseOptions.useNative && tokenIn.isNative) {
+    const tokenInAmount = CurrencyAmount.fromRawAmount(
+      getNativeCurrency(chainId).wrapped,
+      (
+        tokenInAmountToSwapToToken0 +
+        tokenInAmountToSwapToToken1 +
+        tokenInFeeAmount
+      ).toString(),
+    );
+    value = BigInt(tokenInAmount.quotient.toString());
+  }
+  // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
+  const incrementalPosition = new Position({
+    pool: position.pool,
+    liquidity: liquidity.toString(),
+    tickLower: position.tickLower,
+    tickUpper: position.tickUpper,
+  });
+  const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
+    increaseOptions.slippageTolerance,
+  );
+  const increaseParams = {
+    tokenId: BigInt(increaseOptions.tokenId.toString()),
+    amount0Desired: tokenInAmountToSwapToToken0,
+    amount1Desired: tokenInAmountToSwapToToken1,
+    amount0Min: BigInt(amount0.toString()),
+    amount1Min: BigInt(amount1.toString()),
+    deadline: BigInt(increaseOptions.deadline.toString()),
+  };
+  const data = getAutomanIncreaseLiquidityFromTokenInCalldata(
+    increaseParams,
+    tokenIn.address as Address,
+    tokenInFeeAmount,
+    swapData0,
+    swapData1,
+  );
+  return {
+    tx: {
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+      from,
+      data,
+      value,
     },
     amounts: {
       amount0Min: amount0.toString(),

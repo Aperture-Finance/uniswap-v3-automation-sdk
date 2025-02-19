@@ -1,5 +1,10 @@
 import { ApertureSupportedChainId, getLogger } from '@/index';
-import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
+import { FixedPoint96, getAmountsForLiquidity } from '@/liquidity';
+import {
+  IncreaseOptions,
+  Position,
+  TickMath,
+} from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
@@ -9,7 +14,9 @@ import { DEFAULT_SOLVERS, E_Solver, SwapRoute, getSolver } from '.';
 import {
   FEE_ZAP_RATIO,
   IncreaseLiquidityParams,
+  estimateIncreaseLiquidityFromTokenInGas,
   estimateIncreaseLiquidityOptimalV4Gas,
+  simulateIncreaseLiquidityFromTokenIn,
   simulateIncreaseLiquidityOptimalV4,
 } from '../automan';
 import {
@@ -18,6 +25,7 @@ import {
   getOptimalSwapAmountV4,
   getSwapPath,
   getSwapRoute,
+  solveExactInput,
 } from './internal';
 import { SolverResult } from './types';
 
@@ -58,7 +66,7 @@ export async function increaseLiquidityOptimalV4(
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: 0n,
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+    deadline: BigInt(increaseOptions.deadline.toString()),
   };
 
   const token0 = position.pool.token0.address as Address;
@@ -235,4 +243,221 @@ export async function increaseLiquidityOptimalV4(
   };
 
   return buildOptimalSolutions(solve, includeSolvers);
+}
+
+export async function increaseLiquidityFromTokenIn(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  increaseOptions: IncreaseOptions,
+  position: Position,
+  tokenIn: Token,
+  tokenInAmount: bigint,
+  tokenInPriceUsd: string,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
+): Promise<SolverResult> {
+  const pool = position.pool;
+  const [token0, token1] = [pool.token0, pool.token1];
+  const feeOrTickSpacing =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? pool.tickSpacing
+      : pool.fee;
+  if (!blockNumber) {
+    blockNumber = await publicClient.getBlockNumber();
+  }
+  const [amount0ForLiquidity, amount1ForLiquidity] = getAmountsForLiquidity(
+    Big(pool.sqrtRatioX96.toString()),
+    Big(TickMath.getSqrtRatioAtTick(position.tickLower).toString()),
+    Big(TickMath.getSqrtRatioAtTick(position.tickUpper).toString()),
+    /* liquidity= */ FixedPoint96.Q96, // arbitary large enough to reduce rounding errors to compute ratio
+  );
+  const t0Price = pool.token0Price.asFraction;
+  const ratioToSwapToToken1 =
+    // Check divide by 0.
+    amount0ForLiquidity === '0' || t0Price.numerator.toString() === '0'
+      ? Big(1)
+      : amount1ForLiquidity === '0' || t0Price.denominator.toString() === '0'
+        ? Big(0)
+        : // ratioToSwapToToken1 = b / (aInTermsOfB + b)
+          Big(amount1ForLiquidity).div(
+            Big(amount0ForLiquidity)
+              .mul(t0Price.numerator.toString())
+              .div(t0Price.denominator.toString())
+              .add(amount1ForLiquidity),
+          );
+  let tokenInAmountToSwapToToken1 = BigInt(
+    ratioToSwapToToken1.mul(tokenInAmount.toString()).toFixed(0),
+  );
+  let tokenInAmountToSwapToToken0 = tokenInAmount - tokenInAmountToSwapToToken1;
+  const token2ToToken0FeeAmount = BigInt(
+    Big(
+      (token0.address === tokenIn.address
+        ? 0n
+        : tokenInAmountToSwapToToken0
+      ).toString(),
+    )
+      .mul(FEE_ZAP_RATIO)
+      .toFixed(0),
+  );
+  const token2ToToken1FeeAmount = BigInt(
+    Big(
+      (token1.address === tokenIn.address
+        ? 0n
+        : tokenInAmountToSwapToToken1
+      ).toString(),
+    )
+      .mul(FEE_ZAP_RATIO)
+      .toFixed(0),
+  );
+  tokenInAmountToSwapToToken0 -= token2ToToken0FeeAmount;
+  tokenInAmountToSwapToToken1 -= token2ToToken1FeeAmount;
+
+  const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+    Number(increaseOptions.slippageTolerance.numerator) /
+    Number(increaseOptions.slippageTolerance.denominator);
+  const [token0SolverResult, token1SolverResult] = await Promise.all([
+    solveExactInput(
+      amm,
+      chainId,
+      from,
+      /* tokenIn= */ tokenIn.address as Address,
+      /* tokenOut= */ token0.address as Address,
+      feeOrTickSpacing,
+      tokenInAmountToSwapToToken0,
+      slippage,
+      includeSolvers,
+    ),
+    solveExactInput(
+      amm,
+      chainId,
+      from,
+      /* tokenIn= */ tokenIn.address as Address,
+      /* tokenOut= */ token1.address as Address,
+      feeOrTickSpacing,
+      tokenInAmountToSwapToToken1,
+      slippage,
+      includeSolvers,
+    ),
+  ]);
+  const [solver, swapData, swapRoute, solver1, swapData1, swapRoute1] = [
+    token0SolverResult.solver,
+    token0SolverResult.swapData,
+    token0SolverResult.swapRoute,
+    token1SolverResult.solver,
+    token1SolverResult.swapData,
+    token1SolverResult.swapRoute,
+  ];
+  const feeUSD = Big(
+    (token2ToToken0FeeAmount + token2ToToken1FeeAmount).toString(),
+  )
+    .mul(tokenInPriceUsd)
+    .div(10 ** tokenIn.decimals);
+  getLogger().info('SDK.increaseLiquidityFromTokenIn.fees ', {
+    solvers: includeSolvers,
+    solver0: solver,
+    solver1,
+    amm,
+    chainId,
+    feeUSD: feeUSD.toString(),
+    ratioToSwapToToken1: ratioToSwapToToken1.toString(),
+    // Token0 Swap
+    token2ToToken0FeeAmount,
+    tokenInAmountToSwapToToken0,
+    token0SolverResults: token0SolverResult.solverResults,
+    token0FromTokenIn: token0SolverResult.tokenOutAmount,
+    // Token1 Swap
+    token2ToToken1FeeAmount,
+    tokenInAmountToSwapToToken1,
+    token1SolverResults: token1SolverResult.solverResults,
+    token1FromTokenIn: token1SolverResult.tokenOutAmount,
+  });
+  // amountsDesired = The amount of tokenIn to swap due to stack too deep compiler error.
+  const increaseParams: IncreaseLiquidityParams = {
+    tokenId: BigInt(increaseOptions.tokenId.toString()),
+    amount0Desired: tokenInAmountToSwapToToken0,
+    amount1Desired: tokenInAmountToSwapToToken1,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
+    amount1Min: 0n,
+    deadline: BigInt(increaseOptions.deadline.toString()),
+  };
+  const [liquidity] = await simulateIncreaseLiquidityFromTokenIn(
+    amm,
+    chainId,
+    publicClient,
+    from,
+    increaseParams,
+    tokenIn.address as Address,
+    /* tokenInFeeAmount= */ token2ToToken0FeeAmount + token2ToToken1FeeAmount,
+    /* swapData0= */ swapData,
+    swapData1,
+    blockNumber,
+  );
+  const estimateGas = async (swapData0: Hex, swapData1: Hex) => {
+    try {
+      const [gasPrice, gasAmount] = await Promise.all([
+        publicClient.getGasPrice(),
+        estimateIncreaseLiquidityFromTokenInGas(
+          amm,
+          chainId,
+          publicClient,
+          from,
+          increaseParams,
+          /* tokenIn= */ tokenIn.address as Address,
+          /* tokenInFeeAmount= */ token2ToToken0FeeAmount +
+            token2ToToken1FeeAmount,
+          swapData0,
+          swapData1,
+          blockNumber,
+        ),
+      ]);
+      return gasPrice * gasAmount;
+    } catch (e) {
+      getLogger().error('SDK.increaseLiquidityFromTokenIn.EstimateGas.Error', {
+        error: JSON.stringify((e as Error).message),
+        increaseParams,
+        swapData0,
+        swapData1,
+      });
+      return 0n;
+    }
+  };
+  const gasFeeEstimation = await estimateGas(swapData, swapData1);
+
+  const [swap0Token0, swap0Token1, swap0deltaAmount0] =
+    token0.address < tokenIn.address
+      ? [token0.address, tokenIn.address, token0SolverResult.tokenOutAmount]
+      : [tokenIn.address, token0.address, -tokenInAmountToSwapToToken0];
+  const [swap1Token0, swap1Token1, swap1deltaAmount0] =
+    token1.address < tokenIn.address
+      ? [token1.address, tokenIn.address, token1SolverResult.tokenOutAmount]
+      : [tokenIn.address, token1.address, -tokenInAmountToSwapToToken1];
+  return {
+    solver,
+    solver1: solver1,
+    // Use amounts for increaseLiquidityParams' amountsDesired in automan.
+    amount0: tokenInAmountToSwapToToken0,
+    amount1: tokenInAmountToSwapToToken1,
+    // Use liquidity for compute incremental position, then mintAmountsWithSlippage() for increaseLiquidityParams' amountsMin in automan.
+    liquidity,
+    swapData,
+    swapData1,
+    gasFeeEstimation,
+    swapRoute: getSwapRoute(
+      /* token0= */ swap0Token0 as Address,
+      /* token1= */ swap0Token1 as Address,
+      /* deltaAmount0= */ swap0deltaAmount0,
+      swapRoute,
+    ),
+    swapRoute1: getSwapRoute(
+      /* token0= */ swap1Token0 as Address,
+      /* token1= */ swap1Token1 as Address,
+      /* deltaAmount0= */ swap1deltaAmount0,
+      swapRoute1,
+    ),
+    feeUSD: feeUSD.toFixed(),
+    token0FeeAmount: token2ToToken0FeeAmount,
+    token1FeeAmount: token2ToToken1FeeAmount,
+  } as SolverResult;
 }
