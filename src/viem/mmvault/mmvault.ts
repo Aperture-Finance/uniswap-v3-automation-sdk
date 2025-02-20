@@ -13,7 +13,7 @@ import {
 } from 'viem';
 
 import { RpcReturnType, tryRequestWithOverrides } from '../overrides';
-import { getMMVaultRebalanceCalldata } from './getMMVaultCallData';
+import { getMMVaultRebalanceCalldata } from './getMMVaultCalldata';
 import { MMVaultRebalanceParams, MMVaultRebalanceReturnType } from './types';
 
 export function getMMVaultContract(

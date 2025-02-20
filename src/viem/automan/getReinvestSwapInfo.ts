@@ -4,7 +4,7 @@ import {
   PositionDetails,
   SolverResult,
   reinvestBackend,
-  reinvestV3,
+  reinvestV4,
 } from '@/viem';
 import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -16,7 +16,7 @@ import { Address, PublicClient } from 'viem';
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
- * @param fromAddress The address to reinvest from.
+ * @param from The address to reinvest from.
  * @param positionDetails The existing positionDetails
  * @param increaseOptions Options for increasing the position.
  * @param tokenPricesUsd The prices of the two tokens in the pool.
@@ -28,7 +28,7 @@ export async function getReinvestSwapInfoBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
@@ -40,7 +40,7 @@ export async function getReinvestSwapInfoBackend(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails,
     increaseOptions,
     tokenPricesUsd,
@@ -56,18 +56,18 @@ export async function getReinvestSwapInfoBackend(
  * @param chainId Chain id.
  * @param amm Automated Market Maker.
  * @param publicClient Viem public client.
- * @param fromAddress The address to reinvest from.
+ * @param from The address to reinvest from.
  * @param positionDetails The existing positionDetails
  * @param increaseOptions Options for increasing the position.
  * @param tokenPricesUsd The prices of the two tokens in the pool.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getReinvestSwapInfoV3(
+export async function getReinvestSwapInfoV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
@@ -84,11 +84,11 @@ export async function getReinvestSwapInfoV3(
     );
   }
 
-  return reinvestV3(
+  return reinvestV4(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails,
     increaseOptions,
     tokenPricesUsd,

@@ -76,6 +76,32 @@ export declare namespace ICommonNonfungiblePositionManager {
   };
 }
 
+export declare namespace IAutomanCommon {
+  export type PermitStruct = {
+    deadline: BigNumberish;
+    v: BigNumberish;
+    r: BytesLike;
+    s: BytesLike;
+  };
+
+  export type PermitStructOutput = [BigNumber, number, string, string] & {
+    deadline: BigNumber;
+    v: number;
+    r: string;
+    s: string;
+  };
+
+  export type FeeConfigStruct = {
+    feeCollector: string;
+    feeLimitPips: BigNumberish;
+  };
+
+  export type FeeConfigStructOutput = [string, BigNumber] & {
+    feeCollector: string;
+    feeLimitPips: BigNumber;
+  };
+}
+
 export declare namespace ISlipStreamNonfungiblePositionManager {
   export type MintParamsStruct = {
     token0: string;
@@ -121,36 +147,24 @@ export declare namespace ISlipStreamNonfungiblePositionManager {
   };
 }
 
-export declare namespace IAutomanCommon {
-  export type FeeConfigStruct = {
-    feeCollector: string;
-    feeLimitPips: BigNumberish;
-  };
-
-  export type FeeConfigStructOutput = [string, BigNumber] & {
-    feeCollector: string;
-    feeLimitPips: BigNumber;
-  };
-}
-
 export interface SlipStreamAutomanInterface extends utils.Interface {
   functions: {
     "WETH9()": FunctionFragment;
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)": FunctionFragment;
     "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)": FunctionFragment;
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)": FunctionFragment;
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)": FunctionFragment;
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))": FunctionFragment;
     "factory()": FunctionFragment;
     "feeConfig()": FunctionFragment;
     "getOptimalSwap(address,int24,int24,uint256,uint256)": FunctionFragment;
     "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
+    "increaseLiquidityFromTokenIn((uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes,uint256,uint256)": FunctionFragment;
-    "increaseLiquidityWithTokenIn((uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "isAllowListedRouter(address)": FunctionFragment;
     "isController(address)": FunctionFragment;
     "mint((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160))": FunctionFragment;
+    "mintFromTokenIn((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),address,uint256,bytes,bytes)": FunctionFragment;
     "mintOptimal((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),bytes,uint256,uint256)": FunctionFragment;
-    "mintWithTokenIn((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),address,uint256,bytes,bytes)": FunctionFragment;
     "npm()": FunctionFragment;
     "owner()": FunctionFragment;
     "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
@@ -170,19 +184,19 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
       | "WETH9"
       | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"
       | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"
-      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"
-      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"
+      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"
+      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"
       | "factory"
       | "feeConfig"
       | "getOptimalSwap"
       | "increaseLiquidity"
+      | "increaseLiquidityFromTokenIn"
       | "increaseLiquidityOptimal"
-      | "increaseLiquidityWithTokenIn"
       | "isAllowListedRouter"
       | "isController"
       | "mint"
+      | "mintFromTokenIn"
       | "mintOptimal"
-      | "mintWithTokenIn"
       | "npm"
       | "owner"
       | "rebalance((address,address,int24,int24,int24,uint256,uint256,uint256,uint256,address,uint256,uint160),uint256,uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
@@ -221,10 +235,11 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       string,
+      BigNumberish,
       BigNumberish,
       BytesLike,
       BytesLike,
@@ -232,18 +247,16 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       string,
       BigNumberish,
+      BigNumberish,
       BytesLike,
       BytesLike,
       boolean,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike
+      IAutomanCommon.PermitStruct
     ]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
@@ -257,22 +270,22 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
     values: [ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct]
   ): string;
   encodeFunctionData(
-    functionFragment: "increaseLiquidityOptimal",
-    values: [
-      ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      BytesLike,
-      BigNumberish,
-      BigNumberish
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "increaseLiquidityWithTokenIn",
+    functionFragment: "increaseLiquidityFromTokenIn",
     values: [
       ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       string,
       BigNumberish,
       BytesLike,
       BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "increaseLiquidityOptimal",
+    values: [
+      ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      BytesLike,
+      BigNumberish,
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(
@@ -288,22 +301,22 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
     values: [ISlipStreamNonfungiblePositionManager.MintParamsStruct]
   ): string;
   encodeFunctionData(
-    functionFragment: "mintOptimal",
-    values: [
-      ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-      BytesLike,
-      BigNumberish,
-      BigNumberish
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "mintWithTokenIn",
+    functionFragment: "mintFromTokenIn",
     values: [
       ISlipStreamNonfungiblePositionManager.MintParamsStruct,
       string,
       BigNumberish,
       BytesLike,
       BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mintOptimal",
+    values: [
+      ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      BytesLike,
+      BigNumberish,
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(functionFragment: "npm", values?: undefined): string;
@@ -389,11 +402,11 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
@@ -407,11 +420,11 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "increaseLiquidityOptimal",
+    functionFragment: "increaseLiquidityFromTokenIn",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "increaseLiquidityWithTokenIn",
+    functionFragment: "increaseLiquidityOptimal",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -424,11 +437,11 @@ export interface SlipStreamAutomanInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "mintOptimal",
+    functionFragment: "mintFromTokenIn",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "mintWithTokenIn",
+    functionFragment: "mintOptimal",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "npm", data: BytesLike): Result;
@@ -647,27 +660,26 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -700,20 +712,20 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    increaseLiquidityOptimal(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    increaseLiquidityWithTokenIn(
+    increaseLiquidityFromTokenIn(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       tokenIn: string,
       tokenInFeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    increaseLiquidityOptimal(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -729,20 +741,20 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    mintWithTokenIn(
+    mintFromTokenIn(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
       tokenInFeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    mintOptimal(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -848,27 +860,26 @@ export interface SlipStreamAutoman extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
+  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
     tokenOut: string,
-    tokenOutMin: BigNumberish,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
     swapData0: BytesLike,
     swapData1: BytesLike,
     isUnwrapNative: boolean,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
     tokenOut: string,
-    tokenOutMin: BigNumberish,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
     swapData0: BytesLike,
     swapData1: BytesLike,
     isUnwrapNative: boolean,
-    permitDeadline: BigNumberish,
-    v: BigNumberish,
-    r: BytesLike,
-    s: BytesLike,
+    permit: IAutomanCommon.PermitStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -901,20 +912,20 @@ export interface SlipStreamAutoman extends BaseContract {
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  increaseLiquidityOptimal(
-    params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-    swapData: BytesLike,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  increaseLiquidityWithTokenIn(
+  increaseLiquidityFromTokenIn(
     params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
     tokenIn: string,
     tokenInFeeAmount: BigNumberish,
     swapData0: BytesLike,
     swapData1: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  increaseLiquidityOptimal(
+    params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+    swapData: BytesLike,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -930,20 +941,20 @@ export interface SlipStreamAutoman extends BaseContract {
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  mintOptimal(
-    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-    swapData: BytesLike,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  mintWithTokenIn(
+  mintFromTokenIn(
     params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
     tokenIn: string,
     tokenInFeeAmount: BigNumberish,
     swapData0: BytesLike,
     swapData1: BytesLike,
+    overrides?: PayableOverrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  mintOptimal(
+    params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+    swapData: BytesLike,
+    token0FeeAmount: BigNumberish,
+    token1FeeAmount: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1053,27 +1064,26 @@ export interface SlipStreamAutoman extends BaseContract {
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1112,11 +1122,12 @@ export interface SlipStreamAutoman extends BaseContract {
       }
     >;
 
-    increaseLiquidityOptimal(
+    increaseLiquidityFromTokenIn(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -1126,12 +1137,11 @@ export interface SlipStreamAutoman extends BaseContract {
       }
     >;
 
-    increaseLiquidityWithTokenIn(
+    increaseLiquidityOptimal(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      tokenIn: string,
-      tokenInFeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -1160,11 +1170,12 @@ export interface SlipStreamAutoman extends BaseContract {
       }
     >;
 
-    mintOptimal(
+    mintFromTokenIn(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
+      tokenIn: string,
+      tokenInFeeAmount: BigNumberish,
+      swapData0: BytesLike,
+      swapData1: BytesLike,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1175,12 +1186,11 @@ export interface SlipStreamAutoman extends BaseContract {
       }
     >;
 
-    mintWithTokenIn(
+    mintOptimal(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-      tokenIn: string,
-      tokenInFeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1384,27 +1394,26 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1426,20 +1435,20 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
-    increaseLiquidityOptimal(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    increaseLiquidityWithTokenIn(
+    increaseLiquidityFromTokenIn(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       tokenIn: string,
       tokenInFeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    increaseLiquidityOptimal(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1455,20 +1464,20 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
-    mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    mintWithTokenIn(
+    mintFromTokenIn(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
       tokenInFeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    mintOptimal(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1575,27 +1584,26 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,bytes,bytes,bool,uint256,uint8,bytes32,bytes32)"(
+    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
       tokenOut: string,
-      tokenOutMin: BigNumberish,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
       isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1617,20 +1625,20 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    increaseLiquidityOptimal(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    increaseLiquidityWithTokenIn(
+    increaseLiquidityFromTokenIn(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       tokenIn: string,
       tokenInFeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    increaseLiquidityOptimal(
+      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1649,20 +1657,20 @@ export interface SlipStreamAutoman extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    mintOptimal(
-      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
-      swapData: BytesLike,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    mintWithTokenIn(
+    mintFromTokenIn(
       params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
       tokenInFeeAmount: BigNumberish,
       swapData0: BytesLike,
       swapData1: BytesLike,
+      overrides?: PayableOverrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    mintOptimal(
+      params: ISlipStreamNonfungiblePositionManager.MintParamsStruct,
+      swapData: BytesLike,
+      token0FeeAmount: BigNumberish,
+      token1FeeAmount: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

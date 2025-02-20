@@ -1,11 +1,13 @@
 import { ApertureSupportedChainId } from '@/index';
-import { E_Solver, mintOptimalV2, mintOptimalV3 } from '@/viem';
+import { E_Solver, SolverResult, mintFromTokenIn, mintOptimalV4 } from '@/viem';
+import { Pool } from '@aperture_finance/uniswap-v3-sdk';
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 /**
- * calculates the optimal swap information including swap path info, swap route and price impact for minting liquidity in a decentralized exchange
+ * Calculates the optimal swap information including swap path info,
+ * swap route, and price impact for minting liquidity in a decentralized exchange.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
@@ -15,10 +17,12 @@ import { Address, PublicClient } from 'viem';
  * @param tickUpper The upper tick of the range.
  * @param recipient The recipient address.
  * @param slippage The slippage tolerance.
+ * @param tokenPricesUsd The token prices in USD.
  * @param publicClient Viem public client.
+ * @param includeSolvers Optional. The solvers to include.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getMintOptimalSwapInfo(
+export async function getMintOptimalSwapInfoV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
@@ -26,13 +30,14 @@ export async function getMintOptimalSwapInfo(
   feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
+  tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
-) {
-  return mintOptimalV2(
+): Promise<SolverResult[]> {
+  return mintOptimalV4(
     chainId,
     amm,
     token0Amount as CurrencyAmount<Token>,
@@ -40,42 +45,43 @@ export async function getMintOptimalSwapInfo(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    fromAddress,
+    from,
     slippage,
+    tokenPricesUsd,
     publicClient,
     blockNumber,
     includeSolvers,
   );
 }
 
-export async function getMintOptimalSwapInfoV3(
-  chainId: ApertureSupportedChainId,
+export async function getMintFromTokenInSwapInfo(
   amm: AutomatedMarketMakerEnum,
-  token0Amount: CurrencyAmount<Currency>,
-  token1Amount: CurrencyAmount<Currency>,
-  feeOrTickSpacing: number,
+  chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
+  from: Address,
+  pool: Pool,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  tokenIn: Token,
+  tokenInAmount: bigint,
   slippage: number,
-  tokenPricesUsd: [string, string],
-  publicClient: PublicClient,
+  tokenInPriceUsd: string,
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
-) {
-  return mintOptimalV3(
-    chainId,
+): Promise<SolverResult> {
+  return mintFromTokenIn(
     amm,
-    token0Amount as CurrencyAmount<Token>,
-    token1Amount as CurrencyAmount<Token>,
-    feeOrTickSpacing,
+    chainId,
+    publicClient,
+    from,
+    pool,
     tickLower,
     tickUpper,
-    fromAddress,
+    tokenIn,
+    tokenInAmount,
     slippage,
-    tokenPricesUsd,
-    publicClient,
-    blockNumber,
+    tokenInPriceUsd,
     includeSolvers,
+    blockNumber,
   );
 }

@@ -20,7 +20,7 @@ export interface SolvedSwapInfo {
 export interface SolveMintOptimalProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
-  fromAddress: Address;
+  from: Address;
   token0: Address;
   token1: Address;
   feeOrTickSpacing: number;
@@ -29,6 +29,9 @@ export interface SolveMintOptimalProps {
   slippage: number; // 0.01 = 1%
   poolAmountIn: bigint;
   zeroForOne: boolean;
+  // optional and assume true by default as implemented in automanV1,
+  // but set to false in automanV4+ (optimalSwapRouter is merged into automanV4).
+  isUseOptimalSwapRouter?: boolean;
 }
 
 export interface ISolver {
@@ -59,17 +62,22 @@ export type SwapPath = {
 
 export type SolverResult = {
   solver: E_Solver;
+  solver1?: E_Solver; // For zap to/from tokenC
   amount0: bigint;
   amount1: bigint;
   liquidity: bigint;
-  swapData: Address;
+  swapData: Hex;
+  swapData1?: Hex; // For zap to/from tokenC
   swapRoute?: SwapRoute;
+  swapRoute1?: SwapRoute; // For zap to/from tokenC
   swapPath?: SwapPath;
+  swapPath1?: SwapPath; // For zap to/from tokenC
   priceImpact?: Big;
+  priceImpact1?: Big;
   token0FeeAmount?: bigint;
   token1FeeAmount?: bigint;
   feeBips?: bigint;
   feeUSD?: string;
   gasFeeEstimation?: bigint;
-  gasUnits?: bigint; // Used for backend to populate tx.gasLimit.
+  gasUnits?: bigint; // For backend to populate tx.gasLimit.
 };

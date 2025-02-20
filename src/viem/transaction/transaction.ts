@@ -189,15 +189,15 @@ export function convertCollectableTokenAmountToExpectedCurrencyOwed(
 
 export function getTxToNonfungiblePositionManager(
   AmmInfo: AmmInfo,
-  data: string,
+  data: Hex,
   value?: string,
-  from?: string,
+  from?: Address,
 ): TransactionRequest {
   from = from ?? '0x';
   return {
-    from: from as Address,
+    from,
     to: AmmInfo.nonfungiblePositionManager,
-    data: data as Hex,
+    data,
     ...(value && {
       value: hexToBigInt(value as Hex),
     }),
