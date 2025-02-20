@@ -408,39 +408,78 @@ const _abi = [
         type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
       },
       {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
+        internalType: "bool",
+        name: "isCollect",
+        type: "bool",
       },
       {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
+        components: [
+          {
+            internalType: "uint256",
+            name: "token0FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "token1FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData0",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData1",
+            type: "bytes",
+          },
+          {
+            internalType: "bool",
+            name: "isUnwrapNative",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IAutomanCommon.CollectConfig",
+        name: "collectConfig",
+        type: "tuple",
       },
       {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
+        components: [
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint8",
+            name: "v",
+            type: "uint8",
+          },
+          {
+            internalType: "bytes32",
+            name: "r",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "s",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IAutomanCommon.Permit",
+        name: "permit",
+        type: "tuple",
       },
     ],
     name: "rebalance",
@@ -544,19 +583,51 @@ const _abi = [
         type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
+      },
+      {
+        internalType: "bool",
+        name: "isCollect",
+        type: "bool",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "token0FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "token1FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData0",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData1",
+            type: "bytes",
+          },
+          {
+            internalType: "bool",
+            name: "isUnwrapNative",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IAutomanCommon.CollectConfig",
+        name: "collectConfig",
+        type: "tuple",
       },
     ],
     name: "rebalance",

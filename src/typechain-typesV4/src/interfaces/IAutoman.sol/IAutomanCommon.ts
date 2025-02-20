@@ -77,6 +77,31 @@ export declare namespace ICommonNonfungiblePositionManager {
 }
 
 export declare namespace IAutomanCommon {
+  export type CollectConfigStruct = {
+    token0FeeAmount: BigNumberish;
+    token1FeeAmount: BigNumberish;
+    tokenOut: string;
+    swapData0: BytesLike;
+    swapData1: BytesLike;
+    isUnwrapNative: boolean;
+  };
+
+  export type CollectConfigStructOutput = [
+    BigNumber,
+    BigNumber,
+    string,
+    string,
+    string,
+    boolean
+  ] & {
+    token0FeeAmount: BigNumber;
+    token1FeeAmount: BigNumber;
+    tokenOut: string;
+    swapData0: string;
+    swapData1: string;
+    isUnwrapNative: boolean;
+  };
+
   export type PermitStruct = {
     deadline: BigNumberish;
     v: BigNumberish;
@@ -104,17 +129,15 @@ export declare namespace IAutomanCommon {
 
 export interface IAutomanCommonInterface extends utils.Interface {
   functions: {
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)": FunctionFragment;
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)": FunctionFragment;
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)": FunctionFragment;
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))": FunctionFragment;
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))": FunctionFragment;
     "getOptimalSwap(address,int24,int24,uint256,uint256)": FunctionFragment;
     "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
     "increaseLiquidityFromTokenIn((uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes,uint256,uint256)": FunctionFragment;
     "isController(address)": FunctionFragment;
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)": FunctionFragment;
-    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))": FunctionFragment;
     "setAllowlistedRouters(address[],bool[])": FunctionFragment;
     "setControllers(address[],bool[])": FunctionFragment;
     "setFeeConfig((address,uint96))": FunctionFragment;
@@ -122,67 +145,33 @@ export interface IAutomanCommonInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"
-      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"
-      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"
-      | "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"
+      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
+      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"
       | "getOptimalSwap"
       | "increaseLiquidity"
       | "increaseLiquidityFromTokenIn"
       | "increaseLiquidityOptimal"
       | "isController"
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)"
-      | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"
+      | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"
       | "setAllowlistedRouters"
       | "setControllers"
       | "setFeeConfig"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      BigNumberish,
-      BigNumberish,
-      boolean
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)",
-    values: [
-      ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      BigNumberish,
-      BigNumberish,
-      boolean,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)",
-    values: [
-      ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      string,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike,
-      boolean
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))",
-    values: [
-      ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      string,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike,
-      boolean,
+      IAutomanCommon.CollectConfigStruct,
       IAutomanCommon.PermitStruct
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))",
+    values: [
+      ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      IAutomanCommon.CollectConfigStruct
     ]
   ): string;
   encodeFunctionData(
@@ -226,16 +215,13 @@ export interface IAutomanCommonInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))",
     values: [
       ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       BigNumberish,
       BigNumberish,
       BytesLike,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike
+      IAutomanCommon.PermitStruct
     ]
   ): string;
   encodeFunctionData(
@@ -252,19 +238,11 @@ export interface IAutomanCommonInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -292,7 +270,7 @@ export interface IAutomanCommonInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)",
+    functionFragment: "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -445,46 +423,16 @@ export interface IAutomanCommon extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       permit: IAutomanCommon.PermitStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -539,15 +487,12 @@ export interface IAutomanCommon extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
       swapData: BytesLike,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -569,46 +514,16 @@ export interface IAutomanCommon extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"(
+  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    isUnwrapNative: boolean,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"(
-    params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    isUnwrapNative: boolean,
-    permitDeadline: BigNumberish,
-    v: BigNumberish,
-    r: BytesLike,
-    s: BytesLike,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
-    params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    tokenOut: string,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    swapData0: BytesLike,
-    swapData1: BytesLike,
-    isUnwrapNative: boolean,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
-    params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    tokenOut: string,
-    token0FeeAmount: BigNumberish,
-    token1FeeAmount: BigNumberish,
-    swapData0: BytesLike,
-    swapData1: BytesLike,
-    isUnwrapNative: boolean,
+    collectConfig: IAutomanCommon.CollectConfigStruct,
     permit: IAutomanCommon.PermitStruct,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+    params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+    collectConfig: IAutomanCommon.CollectConfigStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -663,15 +578,12 @@ export interface IAutomanCommon extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+  "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"(
     params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
     token0FeeAmount: BigNumberish,
     token1FeeAmount: BigNumberish,
     swapData: BytesLike,
-    permitDeadline: BigNumberish,
-    v: BigNumberish,
-    r: BytesLike,
-    s: BytesLike,
+    permit: IAutomanCommon.PermitStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -693,52 +605,22 @@ export interface IAutomanCommon extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
-    >;
-
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
-    >;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<
+      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
+    >;
+
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
+    >;
 
     getOptimalSwap(
       pool: string,
@@ -815,15 +697,12 @@ export interface IAutomanCommon extends BaseContract {
       }
     >;
 
-    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
       swapData: BytesLike,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber] & {
@@ -909,46 +788,16 @@ export interface IAutomanCommon extends BaseContract {
   };
 
   estimateGas: {
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       permit: IAutomanCommon.PermitStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -996,15 +845,12 @@ export interface IAutomanCommon extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
       swapData: BytesLike,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1027,46 +873,16 @@ export interface IAutomanCommon extends BaseContract {
   };
 
   populateTransaction: {
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool)"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),uint256,uint256,bool,uint256,uint8,bytes32,bytes32)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      isUnwrapNative: boolean,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool)"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    "decreaseLiquidityToTokenOut((uint256,uint128,uint256,uint256,uint256),address,uint256,uint256,bytes,bytes,bool,(uint256,uint8,bytes32,bytes32))"(
-      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      tokenOut: string,
-      token0FeeAmount: BigNumberish,
-      token1FeeAmount: BigNumberish,
-      swapData0: BytesLike,
-      swapData1: BytesLike,
-      isUnwrapNative: boolean,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       permit: IAutomanCommon.PermitStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+      params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
+      collectConfig: IAutomanCommon.CollectConfigStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1114,15 +930,12 @@ export interface IAutomanCommon extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,uint256,uint8,bytes32,bytes32)"(
+    "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       token0FeeAmount: BigNumberish,
       token1FeeAmount: BigNumberish,
       swapData: BytesLike,
-      permitDeadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

@@ -206,265 +206,41 @@ const _abi = [
         type: "tuple",
       },
       {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isUnwrapNative",
-        type: "bool",
-      },
-    ],
-    name: "decreaseLiquidity",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "amount0",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount1",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         components: [
           {
             internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint128",
-            name: "liquidity",
-            type: "uint128",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Min",
+            name: "token0FeeAmount",
             type: "uint256",
           },
           {
             internalType: "uint256",
-            name: "amount1Min",
+            name: "token1FeeAmount",
             type: "uint256",
           },
           {
-            internalType: "uint256",
-            name: "deadline",
-            type: "uint256",
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData0",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData1",
+            type: "bytes",
+          },
+          {
+            internalType: "bool",
+            name: "isUnwrapNative",
+            type: "bool",
           },
         ],
-        internalType:
-          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
-        name: "params",
+        internalType: "struct IAutomanCommon.CollectConfig",
+        name: "collectConfig",
         type: "tuple",
-      },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isUnwrapNative",
-        type: "bool",
-      },
-      {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
-      },
-    ],
-    name: "decreaseLiquidity",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "amount0",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount1",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint128",
-            name: "liquidity",
-            type: "uint128",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "deadline",
-            type: "uint256",
-          },
-        ],
-        internalType:
-          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
-        name: "params",
-        type: "tuple",
-      },
-      {
-        internalType: "address",
-        name: "tokenOut",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "swapData0",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "swapData1",
-        type: "bytes",
-      },
-      {
-        internalType: "bool",
-        name: "isUnwrapNative",
-        type: "bool",
-      },
-    ],
-    name: "decreaseLiquidityToTokenOut",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "tokenOutAmount",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint128",
-            name: "liquidity",
-            type: "uint128",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "deadline",
-            type: "uint256",
-          },
-        ],
-        internalType:
-          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
-        name: "params",
-        type: "tuple",
-      },
-      {
-        internalType: "address",
-        name: "tokenOut",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "swapData0",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "swapData1",
-        type: "bytes",
-      },
-      {
-        internalType: "bool",
-        name: "isUnwrapNative",
-        type: "bool",
       },
       {
         components: [
@@ -494,11 +270,105 @@ const _abi = [
         type: "tuple",
       },
     ],
-    name: "decreaseLiquidityToTokenOut",
+    name: "decreaseLiquidity",
     outputs: [
       {
         internalType: "uint256",
-        name: "tokenOutAmount",
+        name: "amount0",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint128",
+            name: "liquidity",
+            type: "uint128",
+          },
+          {
+            internalType: "uint256",
+            name: "amount0Min",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "amount1Min",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+        ],
+        internalType:
+          "struct ICommonNonfungiblePositionManager.DecreaseLiquidityParams",
+        name: "params",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "token0FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "token1FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData0",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData1",
+            type: "bytes",
+          },
+          {
+            internalType: "bool",
+            name: "isUnwrapNative",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IAutomanCommon.CollectConfig",
+        name: "collectConfig",
+        type: "tuple",
+      },
+    ],
+    name: "decreaseLiquidity",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "amount0",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "amount1",
         type: "uint256",
       },
     ],
@@ -932,24 +802,31 @@ const _abi = [
         type: "bytes",
       },
       {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
+        components: [
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint8",
+            name: "v",
+            type: "uint8",
+          },
+          {
+            internalType: "bytes32",
+            name: "r",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "s",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IAutomanCommon.Permit",
+        name: "permit",
+        type: "tuple",
       },
     ],
     name: "reinvest",
