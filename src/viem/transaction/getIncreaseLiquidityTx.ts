@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { IncreaseOptions, Position } from '@aperture_finance/uniswap-v3-sdk';
-import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core';
+import { Currency, CurrencyAmount } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
@@ -55,20 +55,18 @@ export async function getIncreaseLiquidityOptimalV4Tx(
   }
 
   let value: bigint | undefined;
-  if (increaseOptions.useNative) {
-    if (token0Amount.currency.isNative) {
-      token0Amount = CurrencyAmount.fromRawAmount(
-        getNativeCurrency(chainId).wrapped,
-        token0Amount.quotient,
-      );
-      value = BigInt(token0Amount.quotient.toString());
-    } else if (token1Amount.currency.isNative) {
-      token1Amount = CurrencyAmount.fromRawAmount(
-        getNativeCurrency(chainId).wrapped,
-        token1Amount.quotient,
-      );
-      value = BigInt(token1Amount.quotient.toString());
-    }
+  if (token0Amount.currency.isNative) {
+    token0Amount = CurrencyAmount.fromRawAmount(
+      getNativeCurrency(chainId).wrapped,
+      token0Amount.quotient,
+    );
+    value = BigInt(token0Amount.quotient.toString());
+  } else if (token1Amount.currency.isNative) {
+    token1Amount = CurrencyAmount.fromRawAmount(
+      getNativeCurrency(chainId).wrapped,
+      token1Amount.quotient,
+    );
+    value = BigInt(token1Amount.quotient.toString());
   }
 
   // Same as `position` except that the liquidity field represents the amount of liquidity to add to the existing `position`.
@@ -117,7 +115,7 @@ export async function getIncreaseLiquidityFromTokenInTx(
   from: Address,
   increaseOptions: IncreaseOptions,
   position: Position,
-  tokenIn: Token,
+  tokenIn: Currency, // Currency can be NativeCurrency | Token, which determines whether to use native or wrapped currency.
   tokenInAmountToSwapToToken0: bigint,
   tokenInAmountToSwapToToken1: bigint,
   tokenInFeeAmount: bigint,
@@ -129,7 +127,7 @@ export async function getIncreaseLiquidityFromTokenInTx(
   amounts: SimulatedAmounts;
 }> {
   let value: bigint | undefined;
-  if (increaseOptions.useNative && tokenIn.isNative) {
+  if (tokenIn.isNative) {
     const tokenInAmount = CurrencyAmount.fromRawAmount(
       getNativeCurrency(chainId).wrapped,
       (
@@ -160,7 +158,9 @@ export async function getIncreaseLiquidityFromTokenInTx(
   };
   const data = getAutomanIncreaseLiquidityFromTokenInCalldata(
     increaseParams,
-    tokenIn.address as Address,
+    /* tokenIn= */ (tokenIn.isNative
+      ? getNativeCurrency(chainId).wrapped.address
+      : tokenIn.address) as Address,
     tokenInFeeAmount,
     swapData0,
     swapData1,
