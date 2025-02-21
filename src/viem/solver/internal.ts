@@ -361,8 +361,8 @@ export async function solveExactInput(
             token0,
             token1,
             feeOrTickSpacing,
-            tickLower: 0, // Not used in _routerSwapFromTokenInToTokenOut.
-            tickUpper: 0, // Not used in _routerSwapFromTokenInToTokenOut.
+            tickLower: 0, // Not used in _routerSwapFromTokenInV4.
+            tickUpper: 0, // Not used in _routerSwapFromTokenInV4.
             slippage,
             poolAmountIn: amountIn,
             zeroForOne,

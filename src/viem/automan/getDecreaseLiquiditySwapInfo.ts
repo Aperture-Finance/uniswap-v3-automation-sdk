@@ -4,7 +4,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
 
 import { PositionDetails } from '../position';
-import { SolverResult, decreaseLiquidityToTokenOut } from '../solver';
+import { SolverResult, decreaseLiquidityV4 } from '../solver';
 import { E_Solver } from '../solver';
 
 /**
@@ -22,7 +22,7 @@ import { E_Solver } from '../solver';
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getDecreaseLiquidityToTokenOutSwapInfo(
+export async function getDecreaseLiquidityV4SwapInfo(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
@@ -35,7 +35,7 @@ export async function getDecreaseLiquidityToTokenOutSwapInfo(
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
 ): Promise<SolverResult> {
-  return await decreaseLiquidityToTokenOut(
+  return await decreaseLiquidityV4(
     amm,
     chainId,
     publicClient,

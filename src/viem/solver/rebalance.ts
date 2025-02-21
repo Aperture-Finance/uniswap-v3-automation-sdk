@@ -16,7 +16,7 @@ import {
   estimateRebalanceGas,
   estimateRebalanceV4Gas,
   getAutomanRebalanceCalldata,
-  simulateDecreaseLiquidity,
+  simulateDecreaseLiquidityV4,
   simulateRebalance,
   simulateRebalanceV4,
   simulateRemoveLiquidity,
@@ -833,7 +833,7 @@ export async function rebalanceV4(
     tokenPricesUsd,
   };
 
-  const [receive0, receive1] = await simulateDecreaseLiquidity(
+  const [receive0, receive1] = await simulateDecreaseLiquidityV4(
     amm,
     chainId,
     publicClient,

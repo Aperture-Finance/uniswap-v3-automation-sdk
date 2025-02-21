@@ -1,6 +1,7 @@
-// ts-node test/playground/decreaseLiquiditySingle4063431OneForZero.ts
-import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
-import { Percent } from '@uniswap/sdk-core';
+// ts-node test/playground/increaseLiquidityOptimal.ts
+// tested: https://dashboard.tenderly.co/xorcutor/project/simulator/ce91de5a-ffeb-4d4f-bee2-ed5879eb9fda
+import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
+import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
 import {
@@ -12,8 +13,8 @@ import {
 import {
   DEFAULT_SOLVERS,
   PositionDetails,
-  getDecreaseLiquidityToTokenOutSwapInfo,
-  getDecreaseLiquidityToTokenOutTx,
+  getIncreaseLiquidityOptimalSwapInfoV4,
+  getIncreaseLiquidityOptimalV4Tx,
   getPublicClient,
 } from '../../src/viem';
 
@@ -23,9 +24,7 @@ async function main() {
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const client = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
-  const tokenId = 4063431;
-  const zeroForOne = false;
-  const isUnwrapNative = true;
+  const tokenId = 4228806;
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
     amm,
@@ -34,54 +33,58 @@ async function main() {
   );
   // token0 = weth = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
   // token1 = usdc = 0xaf88d065e77c8cc2239327c5edb3a432268e5831
-  const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+  const increaseOptions: IncreaseOptions = {
     tokenId,
-    liquidityPercentage: new Percent(10, 100), // position is $3.33 100%WETH. token0=weth, token1=usdc.. should take out $0.33 eth=.33/3116*1e18 token0amount = 1.06e14, $0.07 usdc
     slippageTolerance: new Percent(5, 1000),
     deadline: Math.floor(Date.now() / 1000 + 60 * 30),
-    collectOptions: {
-      expectedCurrencyOwed0: positionDetails.tokensOwed0,
-      expectedCurrencyOwed1: positionDetails.tokensOwed1,
-      recipient: from,
-    },
   };
-  const swapInfos = await getDecreaseLiquidityToTokenOutSwapInfo(
-    decreaseLiquidityOptions,
+  const token0Amount = CurrencyAmount.fromRawAmount(
+    positionDetails.token0,
+    '100000000000000',
+  );
+  const token1Amount = CurrencyAmount.fromRawAmount(
+    positionDetails.token1,
+    '0',
+  );
+  const swapInfos = await getIncreaseLiquidityOptimalSwapInfoV4(
+    increaseOptions,
     chainId,
     amm,
-    zeroForOne,
+    token0Amount,
+    token1Amount,
     from,
-    /* tokenPricesUsd= */ ['3225', '1'],
+    /* tokenPricesUsd= */ ['3100', '1'],
     client,
-    isUnwrapNative,
     DEFAULT_SOLVERS,
-    positionDetails,
+    positionDetails.position,
   );
   for (const swapInfo of swapInfos) {
     const {
       solver,
+      solver1,
       swapData,
       amount0,
       amount1,
       token0FeeAmount,
       token1FeeAmount,
+      liquidity,
     } = swapInfo;
-    const txRequest = await getDecreaseLiquidityToTokenOutTx(
-      decreaseLiquidityOptions,
-      zeroForOne,
-      from,
+    const txRequest = await getIncreaseLiquidityOptimalV4Tx(
+      increaseOptions,
       chainId,
       amm,
+      token0Amount,
+      token1Amount,
+      from,
       client,
       swapData,
-      positionDetails,
-      /* amount0Min= */ amount0,
-      /* amount1Min= */ amount1,
+      liquidity,
+      positionDetails.position,
       /* token0FeeAmount= */ token0FeeAmount,
       /* token1FeeAmount= */ token1FeeAmount,
     );
     console.log(
-      `solver=${solver}, liquidity: ${swapInfo.liquidity}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
+      `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount1=${amount1}, txRequest=${JSON.stringify(txRequest)}`,
     );
   }
   process.exit(0);

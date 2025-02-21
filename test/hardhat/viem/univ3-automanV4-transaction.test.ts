@@ -38,8 +38,8 @@ import {
   PositionDetails,
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
-  getDecreaseLiquidityToTokenOutSwapInfo,
-  getDecreaseLiquidityToTokenOutTx,
+  getDecreaseLiquidityV4SwapInfo,
+  getDecreaseLiquidityV4Tx,
   getERC20Overrides,
   getIncreaseLiquidityOptimalSwapInfoV4,
   getIncreaseLiquidityOptimalV4Tx,
@@ -763,7 +763,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       },
     };
     const { swapData, swapData1, token0FeeAmount, token1FeeAmount } =
-      await getDecreaseLiquidityToTokenOutSwapInfo(
+      await getDecreaseLiquidityV4SwapInfo(
         amm,
         chainId,
         publicClient,
@@ -777,7 +777,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         /* tokenPricesUsd= */ ['60000', '3000'],
         /* includeSolvers= */ [E_Solver.SamePool],
       );
-    const txRequest = await getDecreaseLiquidityToTokenOutTx(
+    const txRequest = await getDecreaseLiquidityV4Tx(
       amm,
       chainId,
       /* from= */ eoa,
@@ -913,7 +913,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       },
     };
     const { swapData, swapData1, token0FeeAmount, token1FeeAmount } =
-      await getDecreaseLiquidityToTokenOutSwapInfo(
+      await getDecreaseLiquidityV4SwapInfo(
         amm,
         chainId,
         publicClient,
@@ -927,7 +927,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
         /* tokenPricesUsd= */ ['60000', '3000'],
         /* includeSolvers= */ [E_Solver.SamePool],
       );
-    const txRequest = await getDecreaseLiquidityToTokenOutTx(
+    const txRequest = await getDecreaseLiquidityV4Tx(
       amm,
       chainId,
       /* from= */ eoa,

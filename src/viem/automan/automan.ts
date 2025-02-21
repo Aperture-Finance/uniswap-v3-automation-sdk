@@ -31,7 +31,6 @@ import {
   tryRequestWithOverrides,
 } from '../overrides';
 import {
-  getAutomanDecreaseLiquidityToTokenOutCalldata,
   getAutomanIncreaseLiquidityFromTokenInCalldata,
   getAutomanMintFromTokenInCalldata,
   getAutomanRebalanceCalldata,
@@ -47,7 +46,6 @@ import { getFromAddress } from './internal';
 import {
   DecreaseLiquidityParams,
   DecreaseLiquidityReturnType,
-  DecreaseLiquidityToTokenOutReturnType,
   IncreaseLiquidityParams,
   IncreaseLiquidityReturnType,
   MintReturnType,
@@ -596,74 +594,7 @@ export async function estimateIncreaseLiquidityFromTokenInGas(
   );
 }
 
-export async function requestDecreaseLiquidity<M extends keyof RpcReturnType>(
-  method: M,
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  publicClient: PublicClient,
-  from: Address | undefined,
-  owner: Address,
-  decreaseLiquidityParams: DecreaseLiquidityParams,
-  blockNumber?: bigint,
-): Promise<RpcReturnType[M]> {
-  from = getFromAddress(from);
-  const data = getAutomanV4DecreaseLiquidityCalldata(decreaseLiquidityParams);
-  const { apertureAutomanV4 } = getAMMInfo(chainId, amm)!;
-
-  return tryRequestWithOverrides(
-    method,
-    {
-      from,
-      to: apertureAutomanV4,
-      data,
-    },
-    publicClient,
-    {
-      ...getNPMApprovalOverrides(chainId, amm, owner),
-    },
-    blockNumber,
-  );
-}
-
-export async function simulateDecreaseLiquidityToTokenOut(
-  amm: AutomatedMarketMakerEnum,
-  chainId: ApertureSupportedChainId,
-  publicClient: PublicClient,
-  from: Address,
-  owner: Address,
-  decreaseLiquidityParams: DecreaseLiquidityParams,
-  tokenOut: Address,
-  token0FeeAmount: bigint,
-  token1FeeAmount: bigint,
-  swapData0: Hex = '0x',
-  swapData1: Hex = '0x',
-  isUnwrapNative = true,
-  blockNumber?: bigint,
-): Promise<DecreaseLiquidityToTokenOutReturnType> {
-  const returnData = await requestDecreaseLiquidityToTokenOut(
-    'eth_call',
-    amm,
-    chainId,
-    publicClient,
-    from,
-    owner,
-    decreaseLiquidityParams,
-    tokenOut,
-    token0FeeAmount,
-    token1FeeAmount,
-    swapData0,
-    swapData1,
-    isUnwrapNative,
-    blockNumber,
-  );
-  return decodeFunctionResult({
-    abi: AutomanV4__factory.abi,
-    data: returnData,
-    functionName: 'decreaseLiquidityToTokenOut',
-  });
-}
-
-export async function estimateDecreaseLiquidityToTokenOutGas(
+export async function estimateDecreaseLiquidityV4Gas(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
@@ -679,7 +610,7 @@ export async function estimateDecreaseLiquidityToTokenOutGas(
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
-    await requestDecreaseLiquidityToTokenOut(
+    await requestDecreaseLiquidityV4(
       'eth_estimateGas',
       amm,
       chainId,
@@ -698,9 +629,7 @@ export async function estimateDecreaseLiquidityToTokenOutGas(
   );
 }
 
-export async function requestDecreaseLiquidityToTokenOut<
-  M extends keyof RpcReturnType,
->(
+export async function requestDecreaseLiquidityV4<M extends keyof RpcReturnType>(
   method: M,
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
@@ -717,7 +646,7 @@ export async function requestDecreaseLiquidityToTokenOut<
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   from = getFromAddress(from);
-  const data = getAutomanDecreaseLiquidityToTokenOutCalldata(
+  const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     tokenOut,
     token0FeeAmount,
@@ -810,7 +739,7 @@ export async function simulateRemoveLiquidity(
  * @param token1FeeAmount The amount of token1 to send to feeCollector.
  * @param blockNumber Optional block number to query.
  */
-export async function simulateDecreaseLiquidity(
+export async function simulateDecreaseLiquidityV4(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
@@ -825,8 +754,11 @@ export async function simulateDecreaseLiquidity(
 ): Promise<DecreaseLiquidityReturnType> {
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
+    /* tokenOut= */ '0x0000000000000000000000000000000000000000',
     token0FeeAmount,
     token1FeeAmount,
+    /* swapData0= */ '0x',
+    /* swapData1= */ '0x',
     isUnwrapNative,
   );
   const destContract =

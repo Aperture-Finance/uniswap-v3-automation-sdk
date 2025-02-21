@@ -1,4 +1,6 @@
-// ts-node test/playground/decreaseLiquiditySingle4105824.ts
+// ts-node test/playground/decreaseLiquidityV4.ts
+// tested isUnwrapNative: https://dashboard.tenderly.co/xorcutor/project/simulator/f9c04b72-9030-43c2-8b4e-9c9271511080
+// tested !isUnwrapNative: https://dashboard.tenderly.co/xorcutor/project/simulator/f25d0336-f779-45bc-bc3a-9a7a3fb91f36
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -12,8 +14,8 @@ import {
 import {
   DEFAULT_SOLVERS,
   PositionDetails,
-  getDecreaseLiquidityToTokenOutSwapInfo,
-  getDecreaseLiquidityToTokenOutTx,
+  getDecreaseLiquidityV4SwapInfo,
+  getDecreaseLiquidityV4Tx,
   getPublicClient,
 } from '../../src/viem';
 
@@ -24,7 +26,7 @@ async function main() {
   const client = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
   const tokenId = 4105824;
-  const zeroForOne = true;
+  const tokenOut = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
   const isUnwrapNative = true;
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
@@ -32,8 +34,6 @@ async function main() {
     BigInt(tokenId),
     client,
   );
-  // token0 = weth = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
-  // token1 = usdc = 0xaf88d065e77c8cc2239327c5edb3a432268e5831
   const decreaseLiquidityOptions: RemoveLiquidityOptions = {
     tokenId,
     liquidityPercentage: new Percent(10, 100), // position is $3.33 100%WETH. token0=weth, token1=usdc.. should take out $0.33 eth=.33/3116*1e18 token0amount = 1.06e14, $0.07 usdc
@@ -45,45 +45,44 @@ async function main() {
       recipient: from,
     },
   };
-  const swapInfos = await getDecreaseLiquidityToTokenOutSwapInfo(
-    decreaseLiquidityOptions,
-    chainId,
+  const swapInfo = await getDecreaseLiquidityV4SwapInfo(
     amm,
-    zeroForOne,
-    from,
-    /* tokenPricesUsd= */ ['1', '1'],
+    chainId,
     client,
-    isUnwrapNative,
-    DEFAULT_SOLVERS,
+    from,
     positionDetails,
+    decreaseLiquidityOptions,
+    tokenOut,
+    isUnwrapNative,
+    /* tokenPricesUsd= */ ['1', '1'],
+    DEFAULT_SOLVERS,
   );
-  for (const swapInfo of swapInfos) {
-    const {
-      solver,
-      swapData,
-      amount0,
-      amount1,
-      token0FeeAmount,
-      token1FeeAmount,
-    } = swapInfo;
-    const txRequest = await getDecreaseLiquidityToTokenOutTx(
-      decreaseLiquidityOptions,
-      zeroForOne,
-      from,
-      chainId,
-      amm,
-      client,
-      swapData,
-      positionDetails,
-      /* amount0Min= */ amount0,
-      /* amount1Min= */ amount1,
-      /* token0FeeAmount= */ token0FeeAmount,
-      /* token1FeeAmount= */ token1FeeAmount,
-    );
-    console.log(
-      `solver=${solver}, liquidity: ${swapInfo.liquidity}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
-    );
-  }
+  const {
+    solver,
+    solver1,
+    swapData,
+    swapData1,
+    amount0,
+    amount1,
+    token0FeeAmount,
+    token1FeeAmount,
+  } = swapInfo;
+  const txRequest = await getDecreaseLiquidityV4Tx(
+    amm,
+    chainId,
+    from,
+    positionDetails,
+    decreaseLiquidityOptions,
+    tokenOut,
+    token0FeeAmount,
+    token1FeeAmount,
+    /* swapData1= */ swapData,
+    swapData1,
+    isUnwrapNative,
+  );
+  console.log(
+    `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount1=${amount1}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
+  );
   process.exit(0);
 }
 

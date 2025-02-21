@@ -8,7 +8,7 @@ import { Address, Hex, TransactionRequest } from 'viem';
 
 import {
   DecreaseLiquidityParams,
-  getAutomanDecreaseLiquidityToTokenOutCalldata,
+  getAutomanV4DecreaseLiquidityCalldata,
 } from '../automan';
 import { PositionDetails } from '../position';
 
@@ -29,7 +29,7 @@ import { PositionDetails } from '../position';
  * @param blockNumber Optional. The block number to simulate the call from.
  * @returns The unsigned tx.
  */
-export async function getDecreaseLiquidityToTokenOutTx(
+export async function getDecreaseLiquidityV4Tx(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
   from: Address,
@@ -66,7 +66,7 @@ export async function getDecreaseLiquidityToTokenOutTx(
     amount1Min: BigInt(amount1.toString()),
     deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
-  const data = getAutomanDecreaseLiquidityToTokenOutCalldata(
+  const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     tokenOut,
     token0FeeAmount,

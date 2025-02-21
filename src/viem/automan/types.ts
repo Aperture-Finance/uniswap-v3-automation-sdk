@@ -7,7 +7,6 @@ import {
 } from '@/index';
 import {
   AbiStateMutability,
-  Address,
   ContractFunctionArgs,
   ContractFunctionReturnType,
   Hex,
@@ -44,6 +43,19 @@ export type GetAutomanReturnTypes<
 >;
 // Helpers for AutomanV4 not implemented because
 // AutomanV1 often has the same params/return types.
+
+/* IAutomanCommon */
+export type CollectConfigParams = GetAbiFunctionParamsTypes<
+  typeof AutomanV4__factory.abi,
+  'decreaseLiquidity'
+>[1];
+export type PermitParams = Exclude<
+  GetAbiFunctionParamsTypes<
+    typeof AutomanV4__factory.abi,
+    'decreaseLiquidity'
+  >[2],
+  undefined
+>;
 
 /* Mint */
 // { token0:Address, token1:Address, fee:number, tickLower:number, tickUpper:number, amount0Desired:bigint, amount1Desired:bigint, amount0Min:bigint, amount1Min:bigint, recipient:Address, deadline:bigint }
@@ -86,13 +98,6 @@ export type DecreaseLiquidityParams = GetAbiFunctionParamsTypes<
 export type DecreaseLiquidityReturnType = GetAutomanReturnTypes<
   'decreaseLiquidity',
   [DecreaseLiquidityParams, bigint]
->;
-// [ tokenOutAmount:bigint ]
-export type DecreaseLiquidityToTokenOutReturnType = ContractFunctionReturnType<
-  typeof AutomanV4__factory.abi,
-  AbiStateMutability,
-  'decreaseLiquidityToTokenOut',
-  [DecreaseLiquidityParams, Address, bigint, bigint, Hex, Hex, boolean]
 >;
 
 /* Rebalance */

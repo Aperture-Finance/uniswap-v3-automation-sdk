@@ -22,7 +22,7 @@ async function main() {
   const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
-  const tokenId = 4076939;
+  const tokenId = 4105824;
   const client = getPublicClient(chainId);
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
@@ -40,11 +40,11 @@ async function main() {
     amm,
     client,
     from,
+    positionDetails,
     increaseOptions,
-    /* tokenPricesUsd= */ ['0.001', '1'], // AIRDROP/USDT
+    /* tokenPricesUsd= */ ['1', '1'], // USDC/DAI
     /* nativeToUsd= */ '3000',
     DEFAULT_SOLVERS,
-    positionDetails,
   );
   for (const swapInfo of swapInfos) {
     const { solver, swapData, amount0, amount1, feeBips, liquidity } = swapInfo;
@@ -62,6 +62,7 @@ async function main() {
       `solver=${solver}, liquidity: ${liquidity}, txRequest=${JSON.stringify(txRequest)}`,
     );
   }
+  process.exit(0);
 }
 
 main();

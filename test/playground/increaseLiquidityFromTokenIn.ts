@@ -1,5 +1,7 @@
-// ts-node test/playground/mintFromTokenInWBTC.ts
-import { FeeAmount } from '@aperture_finance/uniswap-v3-sdk';
+// ts-node test/playground/increaseLiquidityFromTokenIn.ts
+// tested: https://dashboard.tenderly.co/xorcutor/project/simulator/0cce6839-021b-4fbe-a612-65932630c63c
+import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
+import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 
 import {
@@ -9,9 +11,9 @@ import {
   ioc,
 } from '../../src';
 import {
-  getMintFromTokenInSwapInfo,
-  getMintFromTokenInTx,
-  getPool,
+  getIncreaseLiquidityFromTokenInSwapInfo,
+  getIncreaseLiquidityFromTokenInTx,
+  getPosition,
   getPublicClient,
   getToken,
 } from '../../src/viem';
@@ -22,35 +24,27 @@ async function main() {
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const publicClient = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
-  const token0Address = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'; // weth
-  const token1Address = '0xaf88d065e77c8cc2239327c5edb3a432268e5831'; // usdc
+  const tokenId = 4228806;
   const tokenInAddress = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f'; // wbtc
   const tokenInAmount = 4181n; // about $4 worth of wbtc
-  const [tokenIn, pool] = await Promise.all([
+  const increaseOptions: IncreaseOptions = {
+    tokenId,
+    slippageTolerance: new Percent(5, 1000),
+    deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+  };
+  const [tokenIn, position] = await Promise.all([
     getToken(tokenInAddress, chainId, publicClient),
-    getPool(
-      token0Address,
-      token1Address,
-      FeeAmount.LOW,
-      chainId,
-      amm,
-      publicClient,
-    ),
+    getPosition(chainId, amm, BigInt(tokenId), publicClient),
   ]);
-  const [tickLower, tickUpper] = [-198370, -196950];
-  const slippage = 0.005; // 0.5%
-  const deadline = BigInt(Math.floor(Date.now() / 1000 + 60 * 30));
-  const swapInfo = await getMintFromTokenInSwapInfo(
+  const swapInfo = await getIncreaseLiquidityFromTokenInSwapInfo(
     amm,
     chainId,
     publicClient,
     from,
-    pool,
-    tickLower,
-    tickUpper,
+    increaseOptions,
+    position,
     tokenIn,
     tokenInAmount,
-    slippage,
     /* tokenInPriceUsd= */ '95000',
   );
   const {
@@ -65,13 +59,12 @@ async function main() {
     liquidity,
   } = swapInfo;
   const txRequest = (
-    await getMintFromTokenInTx(
+    await getIncreaseLiquidityFromTokenInTx(
       amm,
       chainId,
-      /* recipient= */ from,
-      pool,
-      tickLower,
-      tickUpper,
+      from,
+      increaseOptions,
+      position,
       tokenIn,
       /* tokenInAmountToSwapToToken0= */ amount0,
       /* tokenInAmountToSwapToToken1= */ amount1,
@@ -79,12 +72,10 @@ async function main() {
       /* swapData0= */ swapData,
       swapData1 ?? '0x',
       liquidity,
-      slippage,
-      deadline,
     )
   ).tx;
   console.log(
-    `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount0=${amount1}, deadline=${deadline}, tokenInFeeAmount=${(token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n)}, swapData=${swapData}, swapData1=${swapData1}, txRequest=${JSON.stringify(txRequest)}`,
+    `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount0=${amount1}, tokenInFeeAmount=${(token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n)}, swapData=${swapData}, swapData1=${swapData1}, txRequest=${JSON.stringify(txRequest)}`,
   );
   process.exit(0);
 }

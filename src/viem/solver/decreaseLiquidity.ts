@@ -8,9 +8,9 @@ import { DEFAULT_SOLVERS, E_Solver } from '.';
 import {
   DecreaseLiquidityParams,
   FEE_ZAP_RATIO,
-  estimateDecreaseLiquidityToTokenOutGas,
+  estimateDecreaseLiquidityV4Gas,
   getFeeReinvestRatio,
-  simulateDecreaseLiquidity,
+  simulateDecreaseLiquidityV4,
 } from '../automan';
 import { PositionDetails } from '../position';
 import { getSwapRoute, solveExactInput } from './internal';
@@ -29,7 +29,7 @@ import { SolverResult } from './types';
  * @param blockNumber Optional. The block number to simulate the call from.
  * @param includeSolvers Optional. The solvers to include.
  */
-export async function decreaseLiquidityToTokenOut(
+export async function decreaseLiquidityV4(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
@@ -61,7 +61,7 @@ export async function decreaseLiquidityToTokenOut(
       ? positionDetails.pool.tickSpacing
       : positionDetails.pool.fee;
   const [positionInitialAmount0, positionInitialAmount1] =
-    await simulateDecreaseLiquidity(
+    await simulateDecreaseLiquidityV4(
       amm,
       chainId,
       publicClient,
@@ -142,7 +142,7 @@ export async function decreaseLiquidityToTokenOut(
         .div(10 ** token1.decimals)
         .mul(tokenPricesUsd[1]),
     );
-  getLogger().info('SDK.decreaseLiquidityToTokenOut.fees ', {
+  getLogger().info('SDK.decreaseLiquidityV4.fees ', {
     solvers: includeSolvers,
     solver0: solver,
     solver1,
@@ -171,7 +171,7 @@ export async function decreaseLiquidityToTokenOut(
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateDecreaseLiquidityToTokenOutGas(
+        estimateDecreaseLiquidityV4Gas(
           amm,
           chainId,
           publicClient,
@@ -189,7 +189,7 @@ export async function decreaseLiquidityToTokenOut(
       ]);
       return gasPrice * gasAmount;
     } catch (e) {
-      getLogger().error('SDK.decreaseLiquidityToTokenOut.EstimateGas.Error', {
+      getLogger().error('SDK.decreaseLiquidityV4.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         decreaseLiquidityParams,
         swapData0,

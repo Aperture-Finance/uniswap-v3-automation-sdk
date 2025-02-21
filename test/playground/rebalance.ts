@@ -22,6 +22,8 @@ async function main() {
   const client = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
   const tokenId = 4063431;
+  const tickLower = -196410;
+  const tickUpper = -194400;
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
     amm,
@@ -35,10 +37,10 @@ async function main() {
     amm,
     from,
     BigInt(tokenId),
-    -196410,
-    -194400,
-    0.005,
-    ['3225', '1'],
+    tickLower,
+    tickUpper,
+    /* slippageTolerance= */ 0.005,
+    /* tokenPricesUsd= */ ['3225', '1'],
     client,
     DEFAULT_SOLVERS,
     positionDetails,
@@ -49,18 +51,18 @@ async function main() {
   const swapInfosV4 = await getRebalanceSwapInfoV4(
     chainId,
     amm,
-    from,
-    BigInt(tokenId),
-    -196410,
-    -194400,
-    0.005,
-    ['3225', '1'],
     client,
-    DEFAULT_SOLVERS,
+    from,
     positionDetails,
+    tickLower,
+    tickUpper,
+    /* slippageTolerance= */ 0.005,
+    /* tokenPricesUsd= */ ['3225', '1'],
+    DEFAULT_SOLVERS,
   );
   console.log(swapInfosV4);
   console.log('done with rebalanceV4 data');
+  process.exit(0);
 }
 
 main();
