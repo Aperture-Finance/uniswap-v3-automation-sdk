@@ -74,9 +74,6 @@ export async function decreaseLiquidityV4(
       blockNumber,
     );
   // There's reinvest fees (fees on the position's collectedFees) and swap fees.
-  console.log(
-    `tommzhao positionDetails.tokensOwed0.numerator.toString()=${positionDetails.tokensOwed0.numerator.toString()}, getFeeReinvestRatio(feeOrTickSpacing)=${getFeeReinvestRatio(feeOrTickSpacing)}, decrementalPositionInitialAmount0.toString()=${decrementalPositionInitialAmount0.toString()}, FEE_ZAP_RATIO=${FEE_ZAP_RATIO}`,
-  );
   const token0FeeAmount = BigInt(
     Big(positionDetails.tokensOwed0.numerator.toString())
       .mul(getFeeReinvestRatio(feeOrTickSpacing))

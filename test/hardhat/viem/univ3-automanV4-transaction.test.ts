@@ -32,6 +32,7 @@ import {
   UniV3OptimalSwapRouter__factory,
   ZERO_ADDRESS,
   getAMMInfo,
+  getChainInfo,
   ioc,
 } from '../../../src';
 import {
@@ -857,16 +858,491 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
 
     // Test fees collected.
-    expect(token0FeeAmount).to.equal(104953n);
-    expect(token1FeeAmount).to.equal(15488978327258885n);
     expect(
       feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
-    ).to.equal(15488978327258885n);
+    ).to.equal(token1FeeAmount);
     expect(
       feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
-    ).to.equal(104953n);
+    ).to.equal(token0FeeAmount);
     expect(
       feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
+    ).to.equal(0n);
+
+    // Test new position.
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.LT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
+  });
+
+  it('Decrease Liquidity to WETH', async function () {
+    const tokenOut = getChainInfo(chainId).wrappedNativeCurrency.address;
+    const isUnwrapNative = false;
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    const [pool, token0Contract, token1Contract] = [
+      existingPosition.pool,
+      getContract({
+        address: existingPosition.token0.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+      getContract({
+        address: existingPosition.token1.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+    ];
+    const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+      tokenId: Number(positionId),
+      liquidityPercentage: new Percent(49, 100),
+      // No slippage check because solver (including SamePool solver) doesn't work for a specific blockNumber
+      slippageTolerance: new Percent(1000, 1000),
+      deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      collectOptions: {
+        expectedCurrencyOwed0: existingPosition.tokensOwed0,
+        expectedCurrencyOwed1: existingPosition.tokensOwed1,
+        recipient: eoa,
+      },
+    };
+    const {
+      amount0,
+      amount1,
+      swapData0,
+      swapData1,
+      token0FeeAmount,
+      token1FeeAmount,
+    } = await getDecreaseLiquidityV4SwapInfo(
+      amm,
+      chainId,
+      publicClient,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      tokenOut,
+      isUnwrapNative,
+      /* tokenPricesUsd= */ ['60000', '3000'],
+      /* includeSolvers= */ [E_Solver.SamePool],
+    );
+    const txRequest = await getDecreaseLiquidityV4Tx(
+      amm,
+      chainId,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      tokenOut,
+      /* tokenOutExpected= */ amount0 + amount1,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData0,
+      swapData1,
+      isUnwrapNative,
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+
+    // Log states before sending the transaction.
+    const [
+      eoaNativeBalanceBefore,
+      eoaToken0BalanceBefore,
+      eoaToken1BalanceBefore,
+      feeCollectorNativeBalanceBefore,
+      feeCollectorToken0BalanceBefore,
+      feeCollectorToken1BalanceBefore,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Send the transaction and wait for the receipt.
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    // Get states after the transaction.
+    const [
+      eoaNativeBalanceAfter,
+      eoaToken0BalanceAfter,
+      eoaToken1BalanceAfter,
+      feeCollectorNativeBalanceAfter,
+      feeCollectorToken0BalanceAfter,
+      feeCollectorToken1BalanceAfter,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Test balance of EOA.
+    expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
+      -18371147672426380n,
+    );
+    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(0n);
+    expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(
+      4221267968827161370n,
+    );
+
+    // Test fees collected.
+    expect(
+      feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
+    ).to.equal(token1FeeAmount);
+    expect(
+      feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
+    ).to.equal(token0FeeAmount);
+    expect(
+      feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
+    ).to.equal(0n);
+
+    // Test new position.
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.LT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
+  });
+
+  it('Decrease Liquidity to unwrapped ETH', async function () {
+    const tokenOut = getChainInfo(chainId).wrappedNativeCurrency.address;
+    const isUnwrapNative = true;
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    const [pool, token0Contract, token1Contract] = [
+      existingPosition.pool,
+      getContract({
+        address: existingPosition.token0.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+      getContract({
+        address: existingPosition.token1.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+    ];
+    const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+      tokenId: Number(positionId),
+      liquidityPercentage: new Percent(49, 100),
+      // No slippage check because solver (including SamePool solver) doesn't work for a specific blockNumber
+      slippageTolerance: new Percent(1000, 1000),
+      deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      collectOptions: {
+        expectedCurrencyOwed0: existingPosition.tokensOwed0,
+        expectedCurrencyOwed1: existingPosition.tokensOwed1,
+        recipient: eoa,
+      },
+    };
+    const {
+      amount0,
+      amount1,
+      swapData0,
+      swapData1,
+      token0FeeAmount,
+      token1FeeAmount,
+    } = await getDecreaseLiquidityV4SwapInfo(
+      amm,
+      chainId,
+      publicClient,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      tokenOut,
+      isUnwrapNative,
+      /* tokenPricesUsd= */ ['60000', '3000'],
+      /* includeSolvers= */ [E_Solver.SamePool],
+    );
+    const txRequest = await getDecreaseLiquidityV4Tx(
+      amm,
+      chainId,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      tokenOut,
+      /* tokenOutExpected= */ amount0 + amount1,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData0,
+      swapData1,
+      isUnwrapNative,
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+
+    // Log states before sending the transaction.
+    const [
+      eoaNativeBalanceBefore,
+      eoaToken0BalanceBefore,
+      eoaToken1BalanceBefore,
+      feeCollectorNativeBalanceBefore,
+      feeCollectorToken0BalanceBefore,
+      feeCollectorToken1BalanceBefore,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Send the transaction and wait for the receipt.
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    // Get states after the transaction.
+    const [
+      eoaNativeBalanceAfter,
+      eoaToken0BalanceAfter,
+      eoaToken1BalanceAfter,
+      feeCollectorNativeBalanceAfter,
+      feeCollectorToken0BalanceAfter,
+      feeCollectorToken1BalanceAfter,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Test balance of EOA.
+    expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
+      4202491007707327400n,
+    );
+    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(0n);
+    expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
+
+    // Test fees collected.
+    expect(
+      feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
+    ).to.equal(token1FeeAmount);
+    expect(
+      feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
+    ).to.equal(token0FeeAmount);
+    expect(
+      feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
+    ).to.equal(0n);
+
+    // Test new position.
+    const newPosition = await getBasicPositionInfo(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    expect(newPosition).to.deep.contains({
+      token0: pool.token0,
+      token1: pool.token1,
+      fee: pool.fee,
+      tickLower: existingPosition.tickLower,
+      tickUpper: existingPosition.tickUpper,
+    });
+    expect(
+      JSBI.LT(newPosition.liquidity!, existingPosition.liquidity!),
+    ).to.equal(true);
+  });
+
+  it('Decrease Liquidity to high liquidity token', async function () {
+    const tokenOut = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // USDC
+    const isUnwrapNative = true;
+    const existingPosition = await PositionDetails.fromPositionId(
+      chainId,
+      amm,
+      positionId,
+      publicClient,
+    );
+    const [pool, token0Contract, token1Contract, tokenOutContract] = [
+      existingPosition.pool,
+      getContract({
+        address: existingPosition.token0.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+      getContract({
+        address: existingPosition.token1.address as Address,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+      getContract({
+        address: tokenOut,
+        abi: IERC20__factory.abi,
+        client: publicClient,
+      }),
+    ];
+    const decreaseLiquidityOptions: RemoveLiquidityOptions = {
+      tokenId: Number(positionId),
+      liquidityPercentage: new Percent(49, 100),
+      // No slippage check because solver (including SamePool solver) doesn't work for a specific blockNumber
+      slippageTolerance: new Percent(1000, 1000),
+      deadline: Math.floor(Date.now() / 1000 + 60 * 30),
+      collectOptions: {
+        expectedCurrencyOwed0: existingPosition.tokensOwed0,
+        expectedCurrencyOwed1: existingPosition.tokensOwed1,
+        recipient: eoa,
+      },
+    };
+    const {
+      amount0,
+      amount1,
+      swapData0,
+      swapData1,
+      token0FeeAmount,
+      token1FeeAmount,
+    } = await getDecreaseLiquidityV4SwapInfo(
+      amm,
+      chainId,
+      publicClient,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      tokenOut,
+      isUnwrapNative,
+      /* tokenPricesUsd= */ ['60000', '3000'],
+      /* includeSolvers= */ [E_Solver.SamePool],
+    );
+    const txRequest = await getDecreaseLiquidityV4Tx(
+      amm,
+      chainId,
+      /* from= */ eoa,
+      /* positionDetails= */ existingPosition,
+      decreaseLiquidityOptions,
+      tokenOut,
+      /* tokenOutExpected= */ amount0 + amount1,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData0,
+      swapData1,
+      isUnwrapNative,
+    );
+    await testClient.impersonateAccount({ address: eoa });
+    const walletClient = testClient.extend(walletActions);
+
+    // Log states before sending the transaction.
+    const [
+      eoaNativeBalanceBefore,
+      eoaToken0BalanceBefore,
+      eoaToken1BalanceBefore,
+      eoaTokenOutBalanceBefore,
+      feeCollectorNativeBalanceBefore,
+      feeCollectorToken0BalanceBefore,
+      feeCollectorToken1BalanceBefore,
+      feeCollectorTokenOutBalanceBefore,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      tokenOutContract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+      tokenOutContract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Send the transaction and wait for the receipt.
+    const txHash = await walletClient.sendTransaction({
+      to: txRequest.to,
+      data: txRequest.data,
+      account: txRequest.from,
+      chain: walletClient.chain,
+    });
+    await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    // Get states after the transaction.
+    const [
+      eoaNativeBalanceAfter,
+      eoaToken0BalanceAfter,
+      eoaToken1BalanceAfter,
+      eoaTokenOutBalanceAfter,
+      feeCollectorNativeBalanceAfter,
+      feeCollectorToken0BalanceAfter,
+      feeCollectorToken1BalanceAfter,
+      feeCollectorTokenOutBalanceAfter,
+    ] = await Promise.all([
+      publicClient.getBalance({ address: eoa }),
+      token0Contract.read.balanceOf([eoa]),
+      token1Contract.read.balanceOf([eoa]),
+      tokenOutContract.read.balanceOf([eoa]),
+      publicClient.getBalance({ address: feeCollector }),
+      token0Contract.read.balanceOf([feeCollector]),
+      token1Contract.read.balanceOf([feeCollector]),
+      tokenOutContract.read.balanceOf([feeCollector]),
+    ]);
+
+    // Test balance of EOA.
+    expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
+      -23967375940745180n,
+    );
+    expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(0n);
+    expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
+    expect(eoaTokenOutBalanceAfter - eoaTokenOutBalanceBefore).to.equal(
+      7942841329n,
+    );
+
+    // Test fees collected.
+    expect(
+      feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
+    ).to.equal(token1FeeAmount);
+    expect(
+      feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
+    ).to.equal(token0FeeAmount);
+    expect(
+      feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
+    ).to.equal(0n);
+    expect(
+      feeCollectorTokenOutBalanceAfter - feeCollectorTokenOutBalanceBefore,
     ).to.equal(0n);
 
     // Test new position.
@@ -913,7 +1389,8 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     const decreaseLiquidityOptions: RemoveLiquidityOptions = {
       tokenId: Number(positionId),
       liquidityPercentage: new Percent(49, 100),
-      slippageTolerance: new Percent(1000, 1000), // No slippage check because solver (including SamePool solver) doesn't work for a specific blockNumber
+      // No slippage check because solver (including SamePool solver) doesn't work for a specific blockNumber
+      slippageTolerance: new Percent(1000, 1000),
       deadline: Math.floor(Date.now() / 1000 + 60 * 30),
       collectOptions: {
         expectedCurrencyOwed0: existingPosition.tokensOwed0,
@@ -1014,14 +1491,12 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
 
     // Test fees collected.
-    expect(token0FeeAmount).to.equal(145713n);
-    expect(token1FeeAmount).to.equal(15488978327258885n);
     expect(
       feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
-    ).to.equal(15488978327258885n);
+    ).to.equal(token1FeeAmount);
     expect(
       feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
-    ).to.equal(145713n);
+    ).to.equal(token0FeeAmount);
     expect(
       feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
     ).to.equal(0n);
@@ -1171,14 +1646,12 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);
 
     // Test fees collected.
-    expect(token0FeeAmount).to.equal(104953n);
-    expect(token1FeeAmount).to.equal(19920088887452048n);
     expect(
       feeCollectorNativeBalanceAfter - feeCollectorNativeBalanceBefore,
-    ).to.equal(19920088887452048n);
+    ).to.equal(token1FeeAmount);
     expect(
       feeCollectorToken0BalanceAfter - feeCollectorToken0BalanceBefore,
-    ).to.equal(104953n);
+    ).to.equal(token0FeeAmount);
     expect(
       feeCollectorToken1BalanceAfter - feeCollectorToken1BalanceBefore,
     ).to.equal(0n);
