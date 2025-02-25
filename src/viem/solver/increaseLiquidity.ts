@@ -341,7 +341,7 @@ export async function increaseLiquidityFromTokenIn(
       includeSolvers,
     ),
   ]);
-  const [solver, swapData, swapRoute, solver1, swapData1, swapRoute1] = [
+  const [solver0, swapData0, swapRoute0, solver1, swapData1, swapRoute1] = [
     token0SolverResult.solver,
     token0SolverResult.swapData,
     token0SolverResult.swapRoute,
@@ -356,7 +356,7 @@ export async function increaseLiquidityFromTokenIn(
     .div(10 ** tokenIn.decimals);
   getLogger().info('SDK.increaseLiquidityFromTokenIn.fees ', {
     solvers: includeSolvers,
-    solver0: solver,
+    solver0,
     solver1,
     amm,
     chainId,
@@ -390,7 +390,7 @@ export async function increaseLiquidityFromTokenIn(
     increaseParams,
     tokenIn.address as Address,
     /* tokenInFeeAmount= */ token2ToToken0FeeAmount + token2ToToken1FeeAmount,
-    /* swapData0= */ swapData,
+    swapData0,
     swapData1,
     blockNumber,
   );
@@ -423,7 +423,7 @@ export async function increaseLiquidityFromTokenIn(
       return 0n;
     }
   };
-  const gasFeeEstimation = await estimateGas(swapData, swapData1);
+  const gasFeeEstimation = await estimateGas(swapData0, swapData1);
 
   const [swap0Token0, swap0Token1, swap0deltaAmount0] =
     token0.address < tokenIn.address
@@ -434,21 +434,21 @@ export async function increaseLiquidityFromTokenIn(
       ? [token1.address, tokenIn.address, token1SolverResult.tokenOutAmount]
       : [tokenIn.address, token1.address, -tokenInAmountToSwapToToken1];
   return {
-    solver,
-    solver1: solver1,
+    solver0,
+    solver1,
     // Use amounts for increaseLiquidityParams' amountsDesired in automan.
     amount0: tokenInAmountToSwapToToken0,
     amount1: tokenInAmountToSwapToToken1,
     // Use liquidity for compute incremental position, then mintAmountsWithSlippage() for increaseLiquidityParams' amountsMin in automan.
     liquidity,
-    swapData,
+    swapData0,
     swapData1,
     gasFeeEstimation,
-    swapRoute: getSwapRoute(
+    swapRoute0: getSwapRoute(
       /* token0= */ swap0Token0 as Address,
       /* token1= */ swap0Token1 as Address,
       /* deltaAmount0= */ swap0deltaAmount0,
-      swapRoute,
+      swapRoute0,
     ),
     swapRoute1: getSwapRoute(
       /* token0= */ swap1Token0 as Address,

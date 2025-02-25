@@ -61,17 +61,24 @@ export type SwapPath = {
 };
 
 export type SolverResult = {
+  // Need 3 solvers/swapData/swapPaths for rebalance while collecting fees to wallet as tokenOut.
+  // solver for swapping between token0 and token1 to the correct ratio for rebalancing to new position,
+  // solver0 for swapping token0Owed to tokenOut, and solver1 for swapping token1Owed to tokenOut.
   solver: E_Solver;
-  solver1?: E_Solver; // For zap to/from tokenC
+  solver0?: E_Solver;
+  solver1?: E_Solver;
   amount0: bigint;
   amount1: bigint;
   liquidity: bigint;
   swapData: Hex;
-  swapData1?: Hex; // For zap to/from tokenC
+  swapData0?: Hex;
+  swapData1?: Hex;
   swapRoute?: SwapRoute;
-  swapRoute1?: SwapRoute; // For zap to/from tokenC
+  swapRoute0?: SwapRoute;
+  swapRoute1?: SwapRoute;
   swapPath?: SwapPath;
-  swapPath1?: SwapPath; // For zap to/from tokenC
+  swapPath0?: SwapPath;
+  swapPath1?: SwapPath;
   priceImpact?: Big;
   priceImpact1?: Big;
   token0FeeAmount?: bigint;

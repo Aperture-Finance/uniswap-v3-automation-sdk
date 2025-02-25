@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getLogger } from '@/index';
+import { ApertureSupportedChainId, ZERO_ADDRESS, getLogger } from '@/index';
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
@@ -60,7 +60,7 @@ export async function decreaseLiquidityV4(
     amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
       ? positionDetails.pool.tickSpacing
       : positionDetails.pool.fee;
-  const [positionInitialAmount0, positionInitialAmount1] =
+  const [decrementalPositionInitialAmount0, decrementalPositionInitialAmount1] =
     await simulateDecreaseLiquidityV4(
       amm,
       chainId,
@@ -74,28 +74,35 @@ export async function decreaseLiquidityV4(
       blockNumber,
     );
   // There's reinvest fees (fees on the position's collectedFees) and swap fees.
+  console.log(
+    `tommzhao positionDetails.tokensOwed0.numerator.toString()=${positionDetails.tokensOwed0.numerator.toString()}, getFeeReinvestRatio(feeOrTickSpacing)=${getFeeReinvestRatio(feeOrTickSpacing)}, decrementalPositionInitialAmount0.toString()=${decrementalPositionInitialAmount0.toString()}, FEE_ZAP_RATIO=${FEE_ZAP_RATIO}`,
+  );
   const token0FeeAmount = BigInt(
-    Big(positionDetails.tokensOwed0.quotient.toString())
+    Big(positionDetails.tokensOwed0.numerator.toString())
       .mul(getFeeReinvestRatio(feeOrTickSpacing))
       .add(
         Big(
-          token0.address === tokenOut ? '0' : positionInitialAmount0.toString(),
+          tokenOut === ZERO_ADDRESS || tokenOut === token0.address
+            ? '0'
+            : decrementalPositionInitialAmount0.toString(),
         ).mul(FEE_ZAP_RATIO),
       )
       .toFixed(0),
   );
   const token1FeeAmount = BigInt(
-    Big(positionDetails.tokensOwed1.quotient.toString())
+    Big(positionDetails.tokensOwed1.numerator.toString())
       .mul(getFeeReinvestRatio(feeOrTickSpacing))
       .add(
         Big(
-          token1.address === tokenOut ? '0' : positionInitialAmount1.toString(),
+          tokenOut === ZERO_ADDRESS || tokenOut === token1.address
+            ? '0'
+            : decrementalPositionInitialAmount1.toString(),
         ).mul(FEE_ZAP_RATIO),
       )
       .toFixed(0),
   );
-  const token0SwapIn = positionInitialAmount0 - token0FeeAmount;
-  const token1SwapIn = positionInitialAmount1 - token1FeeAmount;
+  const token0SwapIn = decrementalPositionInitialAmount0 - token0FeeAmount;
+  const token1SwapIn = decrementalPositionInitialAmount1 - token1FeeAmount;
 
   const slippage = // numerator/denominator is more accurate than toSignificant()/100.
     Number(decreaseLiquidityOptions.slippageTolerance.numerator) /
@@ -124,7 +131,7 @@ export async function decreaseLiquidityV4(
       includeSolvers,
     ),
   ]);
-  const [solver, swapData, swapRoute, solver1, swapData1, swapRoute1] = [
+  const [solver0, swapData0, swapRoute0, solver1, swapData1, swapRoute1] = [
     token0SolverResult.solver,
     token0SolverResult.swapData,
     token0SolverResult.swapRoute,
@@ -144,16 +151,17 @@ export async function decreaseLiquidityV4(
     );
   getLogger().info('SDK.decreaseLiquidityV4.fees ', {
     solvers: includeSolvers,
-    solver0: solver,
+    solver0,
     solver1,
     amm,
     chainId,
     position: decreaseLiquidityOptions.tokenId,
+    slippage,
     feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    positionInitialAmount0,
-    positionInitialAmount1,
+    decrementalPositionInitialAmount0,
+    decrementalPositionInitialAmount1,
     token0FeeAmount,
     token1FeeAmount,
     tokenOut,
@@ -198,7 +206,7 @@ export async function decreaseLiquidityV4(
       return 0n;
     }
   };
-  const gasFeeEstimation = await estimateGas(swapData, swapData1);
+  const gasFeeEstimation = await estimateGas(swapData0, swapData1);
 
   const [swap0Token0, swap0Token1, swap0deltaAmount0] =
     token0.address < tokenOut
@@ -217,21 +225,20 @@ export async function decreaseLiquidityV4(
           token1SwapIn, // inaccurate, but correct sign, which is only thing that matters
         ];
   return {
-    solver,
+    solver0,
     solver1,
     // The sum of amounts is the expected tokenOutAmount.
     amount0: token0SolverResult.tokenOutAmount,
     amount1: token1SolverResult.tokenOutAmount,
-    // Use liquidity for compute decremental position, then mintAmountsWithSlippage() for decreaseLiquidityParams' amountsMin in automan.
     liquidity,
-    swapData,
+    swapData0,
     swapData1,
     gasFeeEstimation,
-    swapRoute: getSwapRoute(
+    swapRoute0: getSwapRoute(
       /* token0= */ swap0Token0,
       /* token1= */ swap0Token1,
       /* deltaAmount0= */ swap0deltaAmount0,
-      swapRoute,
+      swapRoute0,
     ),
     swapRoute1: getSwapRoute(
       /* token0= */ swap1Token0,

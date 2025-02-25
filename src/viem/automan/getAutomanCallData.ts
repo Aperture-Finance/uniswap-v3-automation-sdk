@@ -4,17 +4,18 @@ import {
   ISlipStreamAutomanV4__factory,
   ISlipStreamAutoman__factory,
   PermitInfo,
+  ZERO_ADDRESS,
 } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, encodeFunctionData, hexToSignature } from 'viem';
 
 import {
-  CollectConfigParams,
   DecreaseLiquidityParams,
   IncreaseLiquidityParams,
   PermitParams,
   SlipStreamMintParams,
   UniV3MintParams,
+  ZapOutParams,
 } from './types';
 
 export function getAutomanV4MintOptimalCalldata(
@@ -132,6 +133,7 @@ export function getAutomanDecreaseLiquidityCalldata(
 export function getAutomanV4DecreaseLiquidityCalldata(
   decreaseLiquidityParams: DecreaseLiquidityParams,
   tokenOut: Address,
+  tokenOutMin: bigint,
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData0: Hex = '0x',
@@ -139,10 +141,11 @@ export function getAutomanV4DecreaseLiquidityCalldata(
   isUnwrapNative = true,
   permitInfo?: PermitInfo,
 ): Hex {
-  const collectConfigParams: CollectConfigParams = {
+  const zapOutParams: ZapOutParams = {
     token0FeeAmount,
     token1FeeAmount,
     tokenOut,
+    tokenOutMin,
     swapData0,
     swapData1,
     isUnwrapNative,
@@ -150,7 +153,7 @@ export function getAutomanV4DecreaseLiquidityCalldata(
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: AutomanV4__factory.abi,
-      args: [decreaseLiquidityParams, collectConfigParams] as const,
+      args: [decreaseLiquidityParams, zapOutParams] as const,
       functionName: 'decreaseLiquidity',
     });
   }
@@ -163,7 +166,7 @@ export function getAutomanV4DecreaseLiquidityCalldata(
   };
   return encodeFunctionData({
     abi: AutomanV4__factory.abi,
-    args: [decreaseLiquidityParams, collectConfigParams, permitParams] as const,
+    args: [decreaseLiquidityParams, zapOutParams, permitParams] as const,
     functionName: 'decreaseLiquidity',
   });
 }
@@ -242,10 +245,11 @@ export function getAutomanV4RebalanceCalldata(
   swapData: Hex = '0x',
   permitInfo?: PermitInfo,
 ): Hex {
-  const collectConfigParams: CollectConfigParams = {
+  const zapOutParams: ZapOutParams = {
     token0FeeAmount,
     token1FeeAmount,
-    tokenOut: '0x',
+    tokenOut: ZERO_ADDRESS,
+    tokenOutMin: BigInt(0),
     swapData0: '0x',
     swapData1: '0x',
     isUnwrapNative: true,
@@ -259,7 +263,7 @@ export function getAutomanV4RebalanceCalldata(
           tokenId,
           swapData,
           /* isCollect= */ false,
-          collectConfigParams,
+          zapOutParams,
         ] as const,
         functionName: 'rebalance',
       });
@@ -271,7 +275,7 @@ export function getAutomanV4RebalanceCalldata(
         tokenId,
         swapData,
         /* isCollect= */ false,
-        collectConfigParams,
+        zapOutParams,
       ] as const,
       functionName: 'rebalance',
     });
@@ -291,7 +295,7 @@ export function getAutomanV4RebalanceCalldata(
         tokenId,
         swapData,
         /* isCollect= */ false,
-        collectConfigParams,
+        zapOutParams,
         permitParams,
       ] as const,
       functionName: 'rebalance',
@@ -304,7 +308,7 @@ export function getAutomanV4RebalanceCalldata(
       tokenId,
       swapData,
       /* isCollect= */ false,
-      collectConfigParams,
+      zapOutParams,
       permitParams,
     ] as const,
     functionName: 'rebalance',

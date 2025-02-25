@@ -66,19 +66,21 @@ export declare namespace IUniswapV3NonfungiblePositionManager {
 }
 
 export declare namespace IAutomanCommon {
-  export type CollectConfigStruct = {
+  export type ZapOutParamsStruct = {
     token0FeeAmount: BigNumberish;
     token1FeeAmount: BigNumberish;
     tokenOut: string;
+    tokenOutMin: BigNumberish;
     swapData0: BytesLike;
     swapData1: BytesLike;
     isUnwrapNative: boolean;
   };
 
-  export type CollectConfigStructOutput = [
+  export type ZapOutParamsStructOutput = [
     BigNumber,
     BigNumber,
     string,
+    BigNumber,
     string,
     string,
     boolean
@@ -86,6 +88,7 @@ export declare namespace IAutomanCommon {
     token0FeeAmount: BigNumber;
     token1FeeAmount: BigNumber;
     tokenOut: string;
+    tokenOutMin: BigNumber;
     swapData0: string;
     swapData1: string;
     isUnwrapNative: boolean;
@@ -108,26 +111,20 @@ export declare namespace IAutomanCommon {
 
 export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
   functions: {
-    "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))": FunctionFragment;
     "mintFromTokenIn((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256)": FunctionFragment;
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))": FunctionFragment;
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "mint"
       | "mintFromTokenIn"
       | "mintOptimal"
-      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
-      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"
+      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
+      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"
   ): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "mint",
-    values: [IUniswapV3NonfungiblePositionManager.MintParamsStruct]
-  ): string;
   encodeFunctionData(
     functionFragment: "mintFromTokenIn",
     values: [
@@ -148,28 +145,27 @@ export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     values: [
       IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       BigNumberish,
       BytesLike,
       boolean,
-      IAutomanCommon.CollectConfigStruct,
+      IAutomanCommon.ZapOutParamsStruct,
       IAutomanCommon.PermitStruct
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))",
     values: [
       IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       BigNumberish,
       BytesLike,
       boolean,
-      IAutomanCommon.CollectConfigStruct
+      IAutomanCommon.ZapOutParamsStruct
     ]
   ): string;
 
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mintFromTokenIn",
     data: BytesLike
@@ -179,11 +175,11 @@ export interface IAutomanUniV3MintRebalanceInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))",
     data: BytesLike
   ): Result;
 
@@ -217,11 +213,6 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -239,30 +230,25 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
-
-  mint(
-    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
 
   mintFromTokenIn(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
@@ -281,38 +267,26 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenId: BigNumberish,
     swapData: BytesLike,
     isCollect: boolean,
-    collectConfig: IAutomanCommon.CollectConfigStruct,
+    zapOutParams: IAutomanCommon.ZapOutParamsStruct,
     permit: IAutomanCommon.PermitStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenId: BigNumberish,
     swapData: BytesLike,
     isCollect: boolean,
-    collectConfig: IAutomanCommon.CollectConfigStruct,
+    zapOutParams: IAutomanCommon.ZapOutParamsStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber] & {
-        tokenId: BigNumber;
-        liquidity: BigNumber;
-        amount0: BigNumber;
-        amount1: BigNumber;
-      }
-    >;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -344,12 +318,12 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       }
     >;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: CallOverrides
     ): Promise<
@@ -361,12 +335,12 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       }
     >;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -381,11 +355,6 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
   filters: {};
 
   estimateGas: {
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -403,32 +372,27 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -446,22 +410,22 @@ export interface IAutomanUniV3MintRebalance extends BaseContract {
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };

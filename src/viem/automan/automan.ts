@@ -2,6 +2,7 @@ import {
   ApertureSupportedChainId,
   AutomanV4__factory,
   Automan__factory,
+  ZERO_ADDRESS,
   getAMMInfo,
 } from '@/index';
 import {
@@ -619,6 +620,7 @@ export async function estimateDecreaseLiquidityV4Gas(
       owner,
       decreaseLiquidityParams,
       tokenOut,
+      /* tokenOutMin= */ BigInt(0), // 0 for estimating gas.
       token0FeeAmount,
       token1FeeAmount,
       swapData0,
@@ -638,6 +640,7 @@ export async function requestDecreaseLiquidityV4<M extends keyof RpcReturnType>(
   owner: Address,
   decreaseLiquidityParams: DecreaseLiquidityParams,
   tokenOut: Address,
+  tokenOutMin: bigint,
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData0: Hex = '0x',
@@ -649,6 +652,7 @@ export async function requestDecreaseLiquidityV4<M extends keyof RpcReturnType>(
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     tokenOut,
+    tokenOutMin,
     token0FeeAmount,
     token1FeeAmount,
     swapData0,
@@ -754,7 +758,8 @@ export async function simulateDecreaseLiquidityV4(
 ): Promise<DecreaseLiquidityReturnType> {
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
-    /* tokenOut= */ '0x0000000000000000000000000000000000000000',
+    /* tokenOut= */ ZERO_ADDRESS,
+    /* tokenOutMin= */ BigInt(0),
     token0FeeAmount,
     token1FeeAmount,
     /* swapData0= */ '0x',

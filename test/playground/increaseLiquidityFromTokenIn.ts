@@ -48,9 +48,9 @@ async function main() {
     /* tokenInPriceUsd= */ '95000',
   );
   const {
-    solver,
+    solver0,
     solver1,
-    swapData,
+    swapData0,
     swapData1,
     amount0,
     amount1,
@@ -69,13 +69,13 @@ async function main() {
       /* tokenInAmountToSwapToToken0= */ amount0,
       /* tokenInAmountToSwapToToken1= */ amount1,
       /* tokenInFeeAmount= */ (token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n),
-      /* swapData0= */ swapData,
+      swapData0 ?? '0x',
       swapData1 ?? '0x',
       liquidity,
     )
   ).tx;
   console.log(
-    `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount0=${amount1}, tokenInFeeAmount=${(token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n)}, swapData=${swapData}, swapData1=${swapData1}, txRequest=${JSON.stringify(txRequest)}`,
+    `solver0=${solver0}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount0=${amount1}, tokenInFeeAmount=${(token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n)}, swapData0=${swapData0}, swapData1=${swapData1}, txRequest=${JSON.stringify(txRequest)}`,
   );
   process.exit(0);
 }

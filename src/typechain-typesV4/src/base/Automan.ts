@@ -77,19 +77,21 @@ export declare namespace ICommonNonfungiblePositionManager {
 }
 
 export declare namespace IAutomanCommon {
-  export type CollectConfigStruct = {
+  export type ZapOutParamsStruct = {
     token0FeeAmount: BigNumberish;
     token1FeeAmount: BigNumberish;
     tokenOut: string;
+    tokenOutMin: BigNumberish;
     swapData0: BytesLike;
     swapData1: BytesLike;
     isUnwrapNative: boolean;
   };
 
-  export type CollectConfigStructOutput = [
+  export type ZapOutParamsStructOutput = [
     BigNumber,
     BigNumber,
     string,
+    BigNumber,
     string,
     string,
     boolean
@@ -97,6 +99,7 @@ export declare namespace IAutomanCommon {
     token0FeeAmount: BigNumber;
     token1FeeAmount: BigNumber;
     tokenOut: string;
+    tokenOutMin: BigNumber;
     swapData0: string;
     swapData1: string;
     isUnwrapNative: boolean;
@@ -172,22 +175,20 @@ export declare namespace IUniswapV3NonfungiblePositionManager {
 export interface AutomanInterface extends utils.Interface {
   functions: {
     "WETH9()": FunctionFragment;
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))": FunctionFragment;
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))": FunctionFragment;
     "feeConfig()": FunctionFragment;
     "getOptimalSwap(address,int24,int24,uint256,uint256)": FunctionFragment;
-    "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))": FunctionFragment;
     "increaseLiquidityFromTokenIn((uint256,uint256,uint256,uint256,uint256,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "increaseLiquidityOptimal((uint256,uint256,uint256,uint256,uint256,uint256),bytes,uint256,uint256)": FunctionFragment;
     "isAllowListedRouter(address)": FunctionFragment;
     "isController(address)": FunctionFragment;
-    "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))": FunctionFragment;
     "mintFromTokenIn((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),address,uint256,bytes,bytes)": FunctionFragment;
     "mintOptimal((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),bytes,uint256,uint256)": FunctionFragment;
     "npm()": FunctionFragment;
     "owner()": FunctionFragment;
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))": FunctionFragment;
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))": FunctionFragment;
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))": FunctionFragment;
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)": FunctionFragment;
     "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -200,22 +201,20 @@ export interface AutomanInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "WETH9"
-      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
-      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"
+      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
+      | "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))"
       | "feeConfig"
       | "getOptimalSwap"
-      | "increaseLiquidity"
       | "increaseLiquidityFromTokenIn"
       | "increaseLiquidityOptimal"
       | "isAllowListedRouter"
       | "isController"
-      | "mint"
       | "mintFromTokenIn"
       | "mintOptimal"
       | "npm"
       | "owner"
-      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
-      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"
+      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"
+      | "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes)"
       | "reinvest((uint256,uint256,uint256,uint256,uint256,uint256),uint256,uint256,bytes,(uint256,uint8,bytes32,bytes32))"
       | "renounceOwnership"
@@ -227,28 +226,24 @@ export interface AutomanInterface extends utils.Interface {
 
   encodeFunctionData(functionFragment: "WETH9", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      IAutomanCommon.CollectConfigStruct,
+      IAutomanCommon.ZapOutParamsStruct,
       IAutomanCommon.PermitStruct
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))",
     values: [
       ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      IAutomanCommon.CollectConfigStruct
+      IAutomanCommon.ZapOutParamsStruct
     ]
   ): string;
   encodeFunctionData(functionFragment: "feeConfig", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getOptimalSwap",
     values: [string, BigNumberish, BigNumberish, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "increaseLiquidity",
-    values: [ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "increaseLiquidityFromTokenIn",
@@ -278,10 +273,6 @@ export interface AutomanInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "mint",
-    values: [IUniswapV3NonfungiblePositionManager.MintParamsStruct]
-  ): string;
-  encodeFunctionData(
     functionFragment: "mintFromTokenIn",
     values: [
       IUniswapV3NonfungiblePositionManager.MintParamsStruct,
@@ -303,24 +294,24 @@ export interface AutomanInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "npm", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     values: [
       IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       BigNumberish,
       BytesLike,
       boolean,
-      IAutomanCommon.CollectConfigStruct,
+      IAutomanCommon.ZapOutParamsStruct,
       IAutomanCommon.PermitStruct
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))",
     values: [
       IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       BigNumberish,
       BytesLike,
       boolean,
-      IAutomanCommon.CollectConfigStruct
+      IAutomanCommon.ZapOutParamsStruct
     ]
   ): string;
   encodeFunctionData(
@@ -365,20 +356,16 @@ export interface AutomanInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "WETH9", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))",
+    functionFragment: "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "feeConfig", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getOptimalSwap",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "increaseLiquidity",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -397,7 +384,6 @@ export interface AutomanInterface extends utils.Interface {
     functionFragment: "isController",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mintFromTokenIn",
     data: BytesLike
@@ -409,11 +395,11 @@ export interface AutomanInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "npm", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))",
+    functionFragment: "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -598,16 +584,16 @@ export interface Automan extends BaseContract {
   functions: {
     WETH9(overrides?: CallOverrides): Promise<[string]>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -633,11 +619,6 @@ export interface Automan extends BaseContract {
       }
     >;
 
-    increaseLiquidity(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     increaseLiquidityFromTokenIn(
       params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
       tokenIn: string,
@@ -662,11 +643,6 @@ export interface Automan extends BaseContract {
 
     isController(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -688,22 +664,22 @@ export interface Automan extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -753,16 +729,16 @@ export interface Automan extends BaseContract {
 
   WETH9(overrides?: CallOverrides): Promise<string>;
 
-  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    collectConfig: IAutomanCommon.CollectConfigStruct,
+    zapOutParams: IAutomanCommon.ZapOutParamsStruct,
     permit: IAutomanCommon.PermitStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+  "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))"(
     params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-    collectConfig: IAutomanCommon.CollectConfigStruct,
+    zapOutParams: IAutomanCommon.ZapOutParamsStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -788,11 +764,6 @@ export interface Automan extends BaseContract {
     }
   >;
 
-  increaseLiquidity(
-    params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   increaseLiquidityFromTokenIn(
     params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
     tokenIn: string,
@@ -817,11 +788,6 @@ export interface Automan extends BaseContract {
 
   isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-  mint(
-    params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-    overrides?: PayableOverrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   mintFromTokenIn(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenIn: string,
@@ -843,22 +809,22 @@ export interface Automan extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenId: BigNumberish,
     swapData: BytesLike,
     isCollect: boolean,
-    collectConfig: IAutomanCommon.CollectConfigStruct,
+    zapOutParams: IAutomanCommon.ZapOutParamsStruct,
     permit: IAutomanCommon.PermitStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+  "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
     params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
     tokenId: BigNumberish,
     swapData: BytesLike,
     isCollect: boolean,
-    collectConfig: IAutomanCommon.CollectConfigStruct,
+    zapOutParams: IAutomanCommon.ZapOutParamsStruct,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -908,18 +874,18 @@ export interface Automan extends BaseContract {
   callStatic: {
     WETH9(overrides?: CallOverrides): Promise<string>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
     >;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { amount0: BigNumber; amount1: BigNumber }
@@ -944,17 +910,6 @@ export interface Automan extends BaseContract {
         amountOut: BigNumber;
         zeroForOne: boolean;
         sqrtPriceX96: BigNumber;
-      }
-    >;
-
-    increaseLiquidity(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber] & {
-        liquidity: BigNumber;
-        amount0: BigNumber;
-        amount1: BigNumber;
       }
     >;
 
@@ -994,18 +949,6 @@ export interface Automan extends BaseContract {
 
     isController(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber] & {
-        tokenId: BigNumber;
-        liquidity: BigNumber;
-        amount0: BigNumber;
-        amount1: BigNumber;
-      }
-    >;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -1041,12 +984,12 @@ export interface Automan extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: CallOverrides
     ): Promise<
@@ -1058,12 +1001,12 @@ export interface Automan extends BaseContract {
       }
     >;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber, BigNumber, BigNumber] & {
@@ -1197,16 +1140,16 @@ export interface Automan extends BaseContract {
   estimateGas: {
     WETH9(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1219,11 +1162,6 @@ export interface Automan extends BaseContract {
       amount0Desired: BigNumberish,
       amount1Desired: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    increaseLiquidity(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     increaseLiquidityFromTokenIn(
@@ -1250,11 +1188,6 @@ export interface Automan extends BaseContract {
 
     isController(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<BigNumber>;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -1276,22 +1209,22 @@ export interface Automan extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1342,16 +1275,16 @@ export interface Automan extends BaseContract {
   populateTransaction: {
     WETH9(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,bytes,bytes,bool))"(
+    "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256),(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: ICommonNonfungiblePositionManager.DecreaseLiquidityParamsStruct,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1364,11 +1297,6 @@ export interface Automan extends BaseContract {
       amount0Desired: BigNumberish,
       amount1Desired: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    increaseLiquidity(
-      params: ICommonNonfungiblePositionManager.IncreaseLiquidityParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     increaseLiquidityFromTokenIn(
@@ -1398,11 +1326,6 @@ export interface Automan extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    mint(
-      params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
-      overrides?: PayableOverrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     mintFromTokenIn(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenIn: string,
@@ -1424,22 +1347,22 @@ export interface Automan extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool),(uint256,uint8,bytes32,bytes32))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       permit: IAutomanCommon.PermitStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,bytes,bytes,bool))"(
+    "rebalance((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256),uint256,bytes,bool,(uint256,uint256,address,uint256,bytes,bytes,bool))"(
       params: IUniswapV3NonfungiblePositionManager.MintParamsStruct,
       tokenId: BigNumberish,
       swapData: BytesLike,
       isCollect: boolean,
-      collectConfig: IAutomanCommon.CollectConfigStruct,
+      zapOutParams: IAutomanCommon.ZapOutParamsStruct,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

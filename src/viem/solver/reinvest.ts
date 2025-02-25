@@ -263,7 +263,7 @@ export async function reinvestBackend(
             .mul(tokenPricesUsd[1]),
         );
 
-      getLogger().info('SDK.reinvestBackend.round2.fees ', {
+      getLogger().info('SDK.Solver.reinvestBackend.round2.fees ', {
         solver,
         amm,
         chainId,
@@ -366,12 +366,12 @@ export async function reinvestBackend(
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.reinvest.Error', {
+        getLogger().error('SDK.Solver.reinvestBackend.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        getLogger().warn('SDK.Solver.reinvest.Warn', {
+        getLogger().warn('SDK.Solver.reinvestBackend.Warn', {
           solver,
           warn: JSON.stringify((e as Error).message),
         });

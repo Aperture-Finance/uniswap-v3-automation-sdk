@@ -45,7 +45,7 @@ export type GetAutomanReturnTypes<
 // AutomanV1 often has the same params/return types.
 
 /* IAutomanCommon */
-export type CollectConfigParams = GetAbiFunctionParamsTypes<
+export type ZapOutParams = GetAbiFunctionParamsTypes<
   typeof AutomanV4__factory.abi,
   'decreaseLiquidity'
 >[1];

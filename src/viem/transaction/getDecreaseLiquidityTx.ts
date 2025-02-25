@@ -1,9 +1,15 @@
-import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  PermitInfo,
+  ZERO_ADDRESS,
+  getAMMInfo,
+} from '@/index';
 import {
   Position,
   RemoveLiquidityOptions,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 import { Address, Hex, TransactionRequest } from 'viem';
 
 import {
@@ -36,6 +42,7 @@ export async function getDecreaseLiquidityV4Tx(
   positionDetails: PositionDetails,
   decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   tokenOut: Address,
+  tokenOutExpected: bigint,
   token0FeeAmount: bigint = 0n,
   token1FeeAmount: bigint = 0n,
   swapData0: Hex = '0x',
@@ -62,13 +69,21 @@ export async function getDecreaseLiquidityV4Tx(
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
     liquidity,
-    amount0Min: BigInt(amount0.toString()),
-    amount1Min: BigInt(amount1.toString()),
+    amount0Min: tokenOut === ZERO_ADDRESS ? BigInt(amount0.toString()) : 0n,
+    amount1Min: tokenOut === ZERO_ADDRESS ? BigInt(amount1.toString()) : 0n,
     deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
+  const tokenOutSlippage = BigInt(
+    Big(tokenOutExpected.toString())
+      .mul(decreaseLiquidityOptions.slippageTolerance.numerator.toString())
+      .div(decreaseLiquidityOptions.slippageTolerance.denominator.toString())
+      .toFixed(0),
+  );
+  const tokenOutMin = tokenOutExpected - tokenOutSlippage;
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     tokenOut,
+    tokenOut === ZERO_ADDRESS ? 0n : tokenOutMin,
     token0FeeAmount,
     token1FeeAmount,
     swapData0,

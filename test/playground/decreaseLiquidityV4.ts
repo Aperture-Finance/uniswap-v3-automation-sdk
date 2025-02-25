@@ -4,11 +4,13 @@
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import { Address } from 'viem';
 
 import {
   ApertureSupportedChainId,
   ConsoleLogger,
   IOCKEY_LOGGER,
+  ZERO_ADDRESS,
   ioc,
 } from '../../src';
 import {
@@ -19,14 +21,13 @@ import {
   getPublicClient,
 } from '../../src/viem';
 
-async function main() {
+async function testDecreaseLiquidityV4(tokenOut: Address) {
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
   const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
   const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const client = getPublicClient(chainId);
   const from = '0x1fFd5d818187917E0043522C3bE583A393c2BbF7';
   const tokenId = 4105824;
-  const tokenOut = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
   const isUnwrapNative = true;
   const positionDetails = await PositionDetails.fromPositionId(
     chainId,
@@ -58,12 +59,13 @@ async function main() {
     DEFAULT_SOLVERS,
   );
   const {
-    solver,
+    solver0,
     solver1,
     swapData,
     swapData1,
     amount0,
     amount1,
+    liquidity,
     token0FeeAmount,
     token1FeeAmount,
   } = swapInfo;
@@ -74,6 +76,7 @@ async function main() {
     positionDetails,
     decreaseLiquidityOptions,
     tokenOut,
+    /* tokenOutExpected= */ amount0 + amount1,
     token0FeeAmount,
     token1FeeAmount,
     /* swapData1= */ swapData,
@@ -81,8 +84,15 @@ async function main() {
     isUnwrapNative,
   );
   console.log(
-    `solver=${solver}, solver1=${solver1}, liquidity: ${swapInfo.liquidity}, amount0=${amount0}, amount1=${amount1}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
+    `solver=${solver0}, solver1=${solver1}, liquidityPercentage=${Number(decreaseLiquidityOptions.liquidityPercentage.numerator) / Number(decreaseLiquidityOptions.liquidityPercentage.denominator)}, liquidity: ${liquidity}, amount0=${amount0}, amount1=${amount1}, tokenOutExpected=${amount0 + amount1}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
   );
+}
+
+async function main() {
+  await testDecreaseLiquidityV4(ZERO_ADDRESS); // To same tokens
+  await testDecreaseLiquidityV4('0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'); // To WETH
+  await testDecreaseLiquidityV4('0xaf88d065e77c8cC2239327C5EDb3A432268e5831'); // To token0=USDC
+  await testDecreaseLiquidityV4('0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1'); // To token1=DAI
   process.exit(0);
 }
 
