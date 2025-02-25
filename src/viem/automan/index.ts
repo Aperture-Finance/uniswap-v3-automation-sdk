@@ -6,4 +6,4 @@ export * from './getMintSwapInfo';
 export * from './getRebalanceSwapInfo';
 export * from './getReinvestSwapInfo';
 export * from './types';
-export * from './getAutomanCalldata';
+export * from './getAutomanCalldata1';
