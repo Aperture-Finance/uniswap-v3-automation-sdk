@@ -1,3 +1,3 @@
-export * from './getMMVaultCalldata1';
+export * from './getMMVaultCalldata';
 export * from './mmvault';
 export * from './types';
