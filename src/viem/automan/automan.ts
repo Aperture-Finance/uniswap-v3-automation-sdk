@@ -42,7 +42,7 @@ import {
   getAutomanV4MintOptimalCalldata,
   getAutomanV4RebalanceCalldata,
   getAutomanV4ReinvestCalldata,
-} from './getAutomanCalldata1';
+} from './getAutomanCalldata';
 import { getFromAddress } from './internal';
 import {
   DecreaseLiquidityParams,
