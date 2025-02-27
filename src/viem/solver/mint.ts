@@ -618,13 +618,13 @@ export async function mintOptimalV3(
     .mul(tokenInPrice);
 
   getLogger().info('SDK.mintOptimalV3.Fees ', {
-    amm: amm,
-    chainId: chainId,
+    amm,
+    chainId,
     totalMintOptimalFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
+    token0FeeAmount,
+    token1FeeAmount,
     amount0Desired: mintParams.amount0Desired.toString(),
     amount1Desired: mintParams.amount1Desired.toString(),
     zeroForOne,

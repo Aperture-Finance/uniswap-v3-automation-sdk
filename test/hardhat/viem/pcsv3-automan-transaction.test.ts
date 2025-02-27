@@ -210,7 +210,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         slippage: 0.05,
         type: ActionTypeEnum.enum.Reinvest,
       },
-      chainId: chainId,
+      chainId,
       amm: AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
       condition: {
         feeToPrincipalRatioThreshold: 0.1,

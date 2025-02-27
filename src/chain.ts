@@ -15,6 +15,7 @@ import {
 } from 'viem/chains';
 
 import { ApertureSupportedChainId } from './interfaces';
+import { NULL_ADDRESS } from './constants';
 
 export interface ChainSpecificRoutingAPIInfo {
   url: string;
@@ -473,7 +474,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
         ),
-        apertureAutomanV3: getAddress('NULL_ADDRESS'),
+        apertureAutomanV3: getAddress(NULL_ADDRESS),
       },
     },
     wrappedNativeCurrency: new Token(
