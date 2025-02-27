@@ -209,7 +209,7 @@ export async function reinvestBackend(
       const slippage =
         Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           fromAddress,
@@ -279,7 +279,7 @@ export async function reinvestBackend(
       });
 
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           fromAddress,
@@ -506,7 +506,7 @@ export async function reinvestV3(
       const slippage =
         Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           fromAddress,

@@ -74,8 +74,28 @@ const _abi = [
         name: "params",
         type: "tuple",
       },
+      {
+        internalType: "address",
+        name: "tokenIn",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenInFeeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "swapData0",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "swapData1",
+        type: "bytes",
+      },
     ],
-    name: "mint",
+    name: "mintFromTokenIn",
     outputs: [
       {
         internalType: "uint256",
@@ -272,135 +292,88 @@ const _abi = [
         type: "tuple",
       },
       {
-        internalType: "address",
-        name: "tokenIn",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenInFeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "swapData0",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "swapData1",
-        type: "bytes",
-      },
-    ],
-    name: "mintWithTokenIn",
-    outputs: [
-      {
         internalType: "uint256",
         name: "tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint128",
-        name: "liquidity",
-        type: "uint128",
-      },
-      {
-        internalType: "uint256",
-        name: "amount0",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount1",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "token0",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "token1",
-            type: "address",
-          },
-          {
-            internalType: "uint24",
-            name: "fee",
-            type: "uint24",
-          },
-          {
-            internalType: "int24",
-            name: "tickLower",
-            type: "int24",
-          },
-          {
-            internalType: "int24",
-            name: "tickUpper",
-            type: "int24",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Desired",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Desired",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount0Min",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "amount1Min",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "deadline",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct IUniswapV3NonfungiblePositionManager.MintParams",
-        name: "params",
-        type: "tuple",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
         type: "uint256",
       },
       {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
+      },
+      {
+        internalType: "bool",
+        name: "isCollect",
+        type: "bool",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "token0FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "token1FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenOutMin",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData0",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData1",
+            type: "bytes",
+          },
+          {
+            internalType: "bool",
+            name: "isUnwrapNative",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IAutomanCommon.ZapOutParams",
+        name: "zapOutParams",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "deadline",
+            type: "uint256",
+          },
+          {
+            internalType: "uint8",
+            name: "v",
+            type: "uint8",
+          },
+          {
+            internalType: "bytes32",
+            name: "r",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "s",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IAutomanCommon.Permit",
+        name: "permit",
+        type: "tuple",
       },
     ],
     name: "rebalance",
@@ -499,39 +472,56 @@ const _abi = [
         type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "token0FeeAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "token1FeeAmount",
-        type: "uint256",
-      },
-      {
         internalType: "bytes",
         name: "swapData",
         type: "bytes",
       },
       {
-        internalType: "uint256",
-        name: "permitDeadline",
-        type: "uint256",
+        internalType: "bool",
+        name: "isCollect",
+        type: "bool",
       },
       {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
+        components: [
+          {
+            internalType: "uint256",
+            name: "token0FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "token1FeeAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenOut",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenOutMin",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData0",
+            type: "bytes",
+          },
+          {
+            internalType: "bytes",
+            name: "swapData1",
+            type: "bytes",
+          },
+          {
+            internalType: "bool",
+            name: "isUnwrapNative",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IAutomanCommon.ZapOutParams",
+        name: "zapOutParams",
+        type: "tuple",
       },
     ],
     name: "rebalance",

@@ -41,7 +41,7 @@ import {
   getAutomanV3RebalanceCalldata,
   getAutomanV3ReinvestCalldata,
   getAutomanV3RemoveLiquidityCalldata,
-} from './getAutomanCallData';
+} from './getAutomanCallData2';
 import { getFromAddress } from './internal';
 import {
   IncreaseLiquidityParams,
