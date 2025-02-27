@@ -14,8 +14,8 @@ import {
   scroll,
 } from 'viem/chains';
 
-import { ApertureSupportedChainId } from './interfaces';
 import { NULL_ADDRESS } from './constants';
+import { ApertureSupportedChainId } from './interfaces';
 
 export interface ChainSpecificRoutingAPIInfo {
   url: string;
