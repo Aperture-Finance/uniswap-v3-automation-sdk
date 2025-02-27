@@ -66,25 +66,30 @@ export function getAutomanV3MintOptimalCalldata(
 }
 
 export function getAutomanIncreaseLiquidityOptimalCallData(
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
 ): Hex {
   return encodeFunctionData({
     abi: Automan__factory.abi,
-    args: [increaseParams, swapData] as const,
+    args: [increaseLiquidityParams, swapData] as const,
     functionName: 'increaseLiquidityOptimal',
   });
 }
 
 export function getAutomanV3IncreaseLiquidityOptimalCallData(
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
 ): Hex {
   return encodeFunctionData({
     abi: AutomanV3__factory.abi,
-    args: [increaseParams, swapData, token0FeeAmount, token1FeeAmount] as const,
+    args: [
+      increaseLiquidityParams,
+      swapData,
+      token0FeeAmount,
+      token1FeeAmount,
+    ] as const,
     functionName: 'increaseLiquidityOptimal',
   });
 }
@@ -98,7 +103,7 @@ export function getAutomanDecreaseLiquidityCalldata(
   feeBips = BigInt(0),
   permitInfo?: PermitInfo,
 ): Hex {
-  const params: DecreaseLiquidityParams = {
+  const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId,
     liquidity,
     amount0Min,
@@ -108,7 +113,7 @@ export function getAutomanDecreaseLiquidityCalldata(
   if (permitInfo === undefined) {
     return encodeFunctionData({
       abi: Automan__factory.abi,
-      args: [params, feeBips] as const,
+      args: [decreaseLiquidityParams, feeBips] as const,
       functionName: 'decreaseLiquidity',
     });
   }
@@ -116,7 +121,7 @@ export function getAutomanDecreaseLiquidityCalldata(
   return encodeFunctionData({
     abi: Automan__factory.abi,
     args: [
-      params,
+      decreaseLiquidityParams,
       feeBips,
       BigInt(permitInfo.deadline),
       Number(v),
@@ -238,8 +243,8 @@ export function getAutomanV3RebalanceCalldata(
   tokenId: bigint,
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
-  permitInfo?: PermitInfo,
   swapData: Hex = '0x',
+  permitInfo?: PermitInfo,
 ): Hex {
   if (permitInfo === undefined) {
     if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {

@@ -60,7 +60,7 @@ describe('Viem - Currency tests', function () {
     });
 
     it('handles invalid token address gracefully', async function () {
-      const invalidAddress = '0x0000000000000000000000000000000000000000';
+      const invalidAddress = 'NULL_ADDRESS';
       const token = await getToken(
         invalidAddress,
         chainId,
@@ -118,7 +118,7 @@ describe('Viem - Currency tests', function () {
     });
 
     it('Handles errors gracefully when fetching invalid tokens', async function () {
-      const invalidAddress = '0x0000000000000000000000000000000000000000';
+      const invalidAddress = 'NULL_ADDRESS';
       const tokens = await getBulkTokens(
         [invalidAddress, WETH_ADDRESS],
         chainId,

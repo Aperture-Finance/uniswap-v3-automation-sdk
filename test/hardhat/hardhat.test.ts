@@ -70,6 +70,7 @@ import {
 } from '../../src';
 import {
   E_Solver,
+  IncreaseLiquidityParams,
   PositionDetails,
   computeOperatorApprovalSlot,
   estimateRebalanceGas,
@@ -306,17 +307,17 @@ describe('State overrides tests', function () {
       [WETH_ADDRESS]: {
         stateDiff: {
           '0x5408245386fab212e3c3357882670a5f5af556f7edf543831e2995afd71f4348':
-            '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+            'NULL_ADDRESS000000000de0b6b3a7640000',
           '0x746950bb1accd12acebc948663f14ea555a83343e6f94af3b6143301c7cadd30':
-            '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+            'NULL_ADDRESS000000000de0b6b3a7640000',
         },
       },
       [WBTC_ADDRESS]: {
         stateDiff: {
           '0x45746063dcd859f1d120c6388dbc814c95df435a74a62b64d984ad16fe434fff':
-            '0x0000000000000000000000000000000000000000000000000000000005f5e100',
+            'NULL_ADDRESS000000000000000005f5e100',
           '0x71f8d5def281e31983e4625bff84022ae0c3d962552b2a6a1798de60e3860703':
-            '0x0000000000000000000000000000000000000000000000000000000005f5e100',
+            'NULL_ADDRESS000000000000000005f5e100',
         },
       },
     });
@@ -413,7 +414,7 @@ describe('State overrides tests', function () {
       publicClient,
       blockNumber,
     );
-    const increaseParams = {
+    const increaseLiquidityParams: IncreaseLiquidityParams = {
       tokenId: positionId,
       amount0Desired,
       amount1Desired,
@@ -428,7 +429,7 @@ describe('State overrides tests', function () {
       publicClient,
       eoa as Address,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       undefined,
       blockNumber,
     );

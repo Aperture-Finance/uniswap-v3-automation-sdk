@@ -18,7 +18,7 @@ import { E_Solver } from '../solver';
  * @param amm The Automated Market Maker.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fromAddress The address to increase liquidity from.
+ * @param from The address to increase liquidity from.
  * @param publicClient Viem public client.
  * @param position The current position to simulate the call from.
  * @param blockNumber Optional. The block number to simulate the call from.
@@ -29,7 +29,7 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  fromAddress: Address,
+  from: Address,
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
   position?: Position,
@@ -52,9 +52,9 @@ export async function getIncreaseLiquidityOptimalSwapInfo(
     increaseOptions,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
-    fromAddress,
-    blockNumber,
+    from,
     includeSolvers,
+    blockNumber,
   );
 }
 
@@ -64,7 +64,7 @@ export async function getIncreaseLiquidityOptimalSwapInfoV3(
   amm: AutomatedMarketMakerEnum,
   token0Amount: CurrencyAmount<Currency>,
   token1Amount: CurrencyAmount<Currency>,
-  fromAddress: Address,
+  from: Address,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
@@ -88,9 +88,9 @@ export async function getIncreaseLiquidityOptimalSwapInfoV3(
     increaseOptions,
     token0Amount as CurrencyAmount<Token>,
     token1Amount as CurrencyAmount<Token>,
-    fromAddress,
+    from,
     tokenPricesUsd,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }

@@ -12,6 +12,7 @@ import {
   WRAPPED_NATIVE_CURRENCY,
 } from '../../../src';
 import {
+  DEFAULT_SOLVERS,
   E_Solver,
   PositionDetails,
   checkTokenLiquidityAgainstChainNativeCurrency,
@@ -310,8 +311,8 @@ describe('Viem - Routing tests', function () {
         token1Amount,
         eoa,
         /* usePool= */ true, // don't use 1inch in unit test
-        blockNumber,
         /* includeSwapInfo= */ true,
+        blockNumber,
       );
 
     const _total = Number(
@@ -381,8 +382,8 @@ describe('Viem - Routing tests', function () {
       0.1,
       publicClient,
       true, // don't use 1inch in unit test
-      blockNumber,
       /* includeSwapInfo= */ true,
+      blockNumber,
     );
     const _total = Number(
       pool.token0Price
@@ -446,6 +447,7 @@ describe('Viem - Routing tests', function () {
       eoa,
       0.01,
       publicClient,
+      DEFAULT_SOLVERS,
       blockNumber,
     );
 
@@ -525,6 +527,7 @@ describe('Viem - Routing tests', function () {
       eoa,
       0.1,
       publicClient,
+      DEFAULT_SOLVERS,
       blockNumber,
     );
 

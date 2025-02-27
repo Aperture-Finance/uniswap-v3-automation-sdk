@@ -5,6 +5,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
+  IncreaseLiquidityParams,
   getAutomanIncreaseLiquidityOptimalCallData,
   getAutomanV3IncreaseLiquidityOptimalCallData,
 } from '../automan';
@@ -74,17 +75,17 @@ export async function getIncreaseLiquidityOptimalTx(
   const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
     increaseOptions.slippageTolerance,
   );
-  const increaseParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: BigInt(amount0.toString()),
     amount1Min: BigInt(amount1.toString()),
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const data = getAutomanIncreaseLiquidityOptimalCallData(
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
   );
 
@@ -154,17 +155,17 @@ export async function getIncreaseLiquidityOptimalV3Tx(
   const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
     increaseOptions.slippageTolerance,
   );
-  const increaseParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
     amount0Min: BigInt(amount0.toString()),
     amount1Min: BigInt(amount1.toString()),
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const data = getAutomanV3IncreaseLiquidityOptimalCallData(
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,
