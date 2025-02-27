@@ -354,8 +354,7 @@ export async function solveExactInput(
       try {
         return {
           solver,
-          // Although it's mintOptimal, it's the same swapData and swapRoute.
-          ...(await getSolver(solver).mintOptimal({
+          ...(await getSolver(solver).solve({
             amm,
             chainId,
             from,

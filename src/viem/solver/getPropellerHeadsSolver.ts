@@ -16,7 +16,7 @@ const APPROVE_TARGET = '0x14f2b6ca0324cd2B013aD02a7D85541d215e2906';
 
 export const getPropellerHeadsSolver = (): ISolver => {
   return {
-    mintOptimal: async (props) => {
+    solve: async (props) => {
       const {
         chainId,
         amm,

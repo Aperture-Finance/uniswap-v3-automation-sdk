@@ -329,7 +329,7 @@ export async function rebalanceOptimalV2(
 
     try {
       if (poolAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           from,
@@ -646,7 +646,7 @@ export async function rebalanceBackend(
 
     try {
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           from,
@@ -714,7 +714,7 @@ export async function rebalanceBackend(
       });
 
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           from,
@@ -1008,7 +1008,7 @@ export async function rebalanceV4(
 
     try {
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           from,

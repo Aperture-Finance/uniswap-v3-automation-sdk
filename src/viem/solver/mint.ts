@@ -183,7 +183,7 @@ export async function mintOptimalV4(
 
     try {
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).mintOptimal({
+        ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
           from,

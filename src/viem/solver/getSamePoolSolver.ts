@@ -10,7 +10,7 @@ import { ISolver } from './types';
 
 export const getSamePoolSolver = (): ISolver => {
   return {
-    mintOptimal: async (props) => {
+    solve: async (props) => {
       const {
         amm,
         chainId,
