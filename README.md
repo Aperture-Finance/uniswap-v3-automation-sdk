@@ -98,6 +98,7 @@ success Unregistered "@aperture_finance/uniswap-v3-automation-sdk".
 
 - **V2**: Custom Solver
 - **V3**: Migrate from feeBips to feeAmount
+- **V4**: Advanced automan features: zapIn/zapOut using tokenC, collect upon rebalance
 
 ## Contributing
 

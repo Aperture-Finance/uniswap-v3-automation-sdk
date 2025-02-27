@@ -42,7 +42,7 @@ export async function get1InchApproveTarget(
 
 export const get1InchSolver = (): ISolver => {
   return {
-    mintOptimal: async (props) => {
+    solve: async (props) => {
       const {
         chainId,
         amm,

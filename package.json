@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.14.9solverToAmta",
+  "version": "3.14.10",
   "description": "SDK for Aperture's CLMM automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc --build && tsc-alias",
     "clean": "tsc --build --clean",
+    "compile": "tsc --build && tsc-alias",
     "test": "yarn test:jest && yarn test:hardhat",
     "test:jest": "jest",
     "test:hardhat": "npx hardhat test",
