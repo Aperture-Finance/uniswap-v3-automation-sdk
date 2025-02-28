@@ -70,6 +70,7 @@ export async function rebalanceOptimalV2(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
+  const tokenId = BigInt(positionDetails.tokenId);
   const token0 = positionDetails.token0.address as Address;
   const token1 = positionDetails.token1.address as Address;
 
@@ -95,7 +96,7 @@ export async function rebalanceOptimalV2(
       publicClient,
       from,
       positionDetails.owner,
-      BigInt(positionDetails.tokenId),
+      tokenId,
       /*amount0Min =*/ undefined,
       /*amount1Min =*/ undefined,
       feeBips,
@@ -301,7 +302,7 @@ export async function rebalanceOptimalV2(
           from,
           positionDetails.owner,
           mintParams,
-          BigInt(positionDetails.tokenId),
+          tokenId,
           feeBips,
           swapData,
           blockNumber,
@@ -422,7 +423,7 @@ export async function rebalanceBackend(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
-  const nftId = BigInt(positionDetails.tokenId);
+  const tokenId = BigInt(positionDetails.tokenId);
   const token0 = positionDetails.token0;
   const token1 = positionDetails.token1;
   const feeOrTickSpacing =
@@ -437,7 +438,7 @@ export async function rebalanceBackend(
     chainId,
     amm,
     from,
-    nftId,
+    tokenId,
     newTickLower,
     newTickUpper,
     slippage,
@@ -450,7 +451,7 @@ export async function rebalanceBackend(
     publicClient,
     from,
     positionDetails.owner,
-    nftId,
+    tokenId,
     /* amount0Min= */ undefined,
     /* amount1Min= */ undefined,
     /* feeBips= */ 0n,
@@ -556,8 +557,8 @@ export async function rebalanceBackend(
           tickSpacing: feeOrTickSpacing,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
-          amount0Desired: 0n, // Not used in Automan.
-          amount1Desired: 0n, // Not used in Automan.
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
           amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
@@ -570,8 +571,8 @@ export async function rebalanceBackend(
           fee: feeOrTickSpacing,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
-          amount0Desired: 0n, // Not used in Automan.
-          amount1Desired: 0n, // Not used in Automan.
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
           amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
@@ -589,7 +590,7 @@ export async function rebalanceBackend(
         from,
         positionDetails.owner,
         mintParams,
-        nftId,
+        tokenId,
         feeBips,
         swapData,
         blockNumber,
@@ -615,7 +616,7 @@ export async function rebalanceBackend(
         data: getAutomanRebalanceCalldata(
           amm,
           mintParams,
-          nftId,
+          tokenId,
           feeBips,
           swapData,
           /* permitInfo= */ undefined,
@@ -739,7 +740,7 @@ export async function rebalanceBackend(
         from,
         positionDetails.owner,
         mintParams,
-        nftId,
+        tokenId,
         totalFeePips,
         swapData,
         blockNumber,
@@ -811,7 +812,7 @@ export async function rebalanceV4(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
-  const nftId = BigInt(positionDetails.tokenId);
+  const tokenId = BigInt(positionDetails.tokenId);
   const token0 = positionDetails.token0;
   const token1 = positionDetails.token1;
   const feeOrTickSpacing =
@@ -825,7 +826,7 @@ export async function rebalanceV4(
   const logdata = {
     chainId,
     amm,
-    nftId,
+    tokenId,
     newTickLower,
     newTickUpper,
     from,
@@ -840,7 +841,7 @@ export async function rebalanceV4(
     from,
     positionDetails.owner,
     /* decreaseLiquidityParams= */ {
-      tokenId: nftId,
+      tokenId,
       liquidity: BigInt(positionDetails.liquidity),
       amount0Min: 0n,
       amount1Min: 0n,
@@ -946,8 +947,8 @@ export async function rebalanceV4(
           tickSpacing: feeOrTickSpacing,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
-          amount0Desired: 0n, // Not used in Automan.
-          amount1Desired: 0n, // Not used in Automan.
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
           amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
@@ -960,8 +961,8 @@ export async function rebalanceV4(
           fee: feeOrTickSpacing,
           tickLower: newTickLower,
           tickUpper: newTickUpper,
-          amount0Desired: 0n, // Not used in Automan.
-          amount1Desired: 0n, // Not used in Automan.
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
           amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
@@ -979,7 +980,7 @@ export async function rebalanceV4(
           from,
           positionDetails.owner,
           mintParams,
-          nftId,
+          tokenId,
           token0FeeAmount,
           token1FeeAmount,
           swapData,
@@ -1033,7 +1034,7 @@ export async function rebalanceV4(
         from,
         positionDetails.owner,
         mintParams,
-        nftId,
+        tokenId,
         token0FeeAmount,
         token1FeeAmount,
         swapData,

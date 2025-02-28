@@ -294,6 +294,7 @@ export async function reinvestBackend(
           zeroForOne,
         }));
       } else {
+        // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
         swapData = '0x';
         swapRoute = undefined;
       }
@@ -400,7 +401,7 @@ export async function reinvestV4(
     tokenId,
     amount0Desired: BigInt(positionDetails.tokensOwed0.quotient.toString()),
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
     deadline: BigInt(increaseOptions.deadline.toString()),
   };

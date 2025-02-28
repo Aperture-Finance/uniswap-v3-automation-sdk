@@ -49,8 +49,8 @@ export async function getMintOptimalSwapInfoV4(
     slippage,
     tokenPricesUsd,
     publicClient,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }
 

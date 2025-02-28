@@ -5,6 +5,7 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
+  IncreaseLiquidityParams,
   getAutomanIncreaseLiquidityFromTokenInCalldata,
   getAutomanV4IncreaseLiquidityOptimalCalldata,
 } from '../automan';
@@ -79,7 +80,7 @@ export async function getIncreaseLiquidityOptimalV4Tx(
   const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
     increaseOptions.slippageTolerance,
   );
-  const increaseParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
@@ -89,7 +90,7 @@ export async function getIncreaseLiquidityOptimalV4Tx(
   };
 
   const data = getAutomanV4IncreaseLiquidityOptimalCalldata(
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,

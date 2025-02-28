@@ -1,7 +1,7 @@
 import hre from 'hardhat';
 import { PublicClient, TestClient } from 'viem';
 
-import { ApertureSupportedChainId, ZERO_ADDRESS } from '../../../src';
+import { ApertureSupportedChainId, NULL_ADDRESS } from '../../../src';
 import { getBulkTokens, getToken } from '../../../src/viem';
 import { WBTC_ADDRESS, WETH_ADDRESS, expect, resetFork } from '../common';
 
@@ -60,7 +60,7 @@ describe('Viem - Currency tests', function () {
     });
 
     it('handles invalid token address gracefully', async function () {
-      const invalidAddress = ZERO_ADDRESS;
+      const invalidAddress = NULL_ADDRESS;
       const token = await getToken(
         invalidAddress,
         chainId,
@@ -118,7 +118,7 @@ describe('Viem - Currency tests', function () {
     });
 
     it('Handles errors gracefully when fetching invalid tokens', async function () {
-      const invalidAddress = ZERO_ADDRESS;
+      const invalidAddress = NULL_ADDRESS;
       const tokens = await getBulkTokens(
         [invalidAddress, WETH_ADDRESS],
         chainId,

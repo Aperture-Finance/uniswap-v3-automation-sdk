@@ -60,7 +60,7 @@ export async function increaseLiquidityOptimalV4(
     throw new Error('token0 must be sorted before token1');
   }
 
-  const increaseParams: IncreaseLiquidityParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
@@ -88,8 +88,8 @@ export async function increaseLiquidityOptimalV4(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    increaseParams.amount0Desired,
-    increaseParams.amount1Desired,
+    increaseLiquidityParams.amount0Desired,
+    increaseLiquidityParams.amount1Desired,
     blockNumber,
   );
   const swapFeeAmount = BigInt(
@@ -105,8 +105,8 @@ export async function increaseLiquidityOptimalV4(
   const feeUSD = new Big(swapFeeAmount.toString())
     .div(10 ** tokenInDecimals)
     .mul(tokenInPrice);
-  // No need to subtract fees from increaseParams.amount0Desired
-  // and increaseParams.amount1Desired because that's done in automan.
+  // No need to subtract fees from increaseLiquidityParams.amount0Desired
+  // and increaseLiquidityParams.amount1Desired because that's done in automan.
   getLogger().info('SDK.increaseLiquidityOptimalV4.fees ', {
     amm,
     chainId,
@@ -114,10 +114,10 @@ export async function increaseLiquidityOptimalV4(
     feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
-    amount0Desired: increaseParams.amount0Desired.toString(),
-    amount1Desired: increaseParams.amount1Desired.toString(),
+    token0FeeAmount,
+    token1FeeAmount,
+    amount0Desired: increaseLiquidityParams.amount0Desired.toString(),
+    amount1Desired: increaseLiquidityParams.amount1Desired.toString(),
     zeroForOne,
     poolAmountIn: poolAmountIn.toString(), // before fees
     swapAmountIn: swapAmountIn.toString(), // after fees
@@ -133,7 +133,7 @@ export async function increaseLiquidityOptimalV4(
           publicClient,
           from,
           position,
-          increaseParams,
+          increaseLiquidityParams,
           swapData,
           token0FeeAmount,
           token1FeeAmount,
@@ -145,7 +145,7 @@ export async function increaseLiquidityOptimalV4(
       getLogger().error('SDK.increaseLiquidityOptimalV4.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
-        increaseParams,
+        increaseLiquidityParams,
       });
       return 0n;
     }
@@ -155,8 +155,8 @@ export async function increaseLiquidityOptimalV4(
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
     let liquidity: bigint = 0n;
-    let amount0: bigint = increaseParams.amount0Desired;
-    let amount1: bigint = increaseParams.amount1Desired;
+    let amount0: bigint = increaseLiquidityParams.amount0Desired;
+    let amount1: bigint = increaseLiquidityParams.amount1Desired;
     let gasFeeEstimation: bigint = 0n;
 
     try {
@@ -185,7 +185,7 @@ export async function increaseLiquidityOptimalV4(
         publicClient,
         from,
         position,
-        increaseParams,
+        increaseLiquidityParams,
         swapData,
         token0FeeAmount,
         token1FeeAmount,
@@ -203,14 +203,14 @@ export async function increaseLiquidityOptimalV4(
         swapRoute: getSwapRoute(
           token0,
           token1,
-          amount0 - increaseParams.amount0Desired,
+          amount0 - increaseLiquidityParams.amount0Desired,
           swapRoute,
         ),
         swapPath: getSwapPath(
           token0,
           token1,
-          increaseParams.amount0Desired,
-          increaseParams.amount1Desired,
+          increaseLiquidityParams.amount0Desired,
+          increaseLiquidityParams.amount1Desired,
           amount0,
           amount1,
           slippage,
@@ -218,8 +218,8 @@ export async function increaseLiquidityOptimalV4(
         feeUSD: feeUSD.toFixed(),
         priceImpact: calcPriceImpact(
           position.pool,
-          increaseParams.amount0Desired,
-          increaseParams.amount1Desired,
+          increaseLiquidityParams.amount0Desired,
+          increaseLiquidityParams.amount1Desired,
           amount0,
           amount1,
         ),
@@ -374,7 +374,7 @@ export async function increaseLiquidityFromTokenIn(
     token1FromTokenIn: token1SolverResult.tokenOutAmount,
   });
   // amountsDesired = The amount of tokenIn to swap due to stack too deep compiler error.
-  const increaseParams: IncreaseLiquidityParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: tokenInAmountToSwapToToken0,
     amount1Desired: tokenInAmountToSwapToToken1,
@@ -387,7 +387,7 @@ export async function increaseLiquidityFromTokenIn(
     chainId,
     publicClient,
     from,
-    increaseParams,
+    increaseLiquidityParams,
     tokenIn.address as Address,
     /* tokenInFeeAmount= */ token2ToToken0FeeAmount + token2ToToken1FeeAmount,
     swapData0,
@@ -403,7 +403,7 @@ export async function increaseLiquidityFromTokenIn(
           chainId,
           publicClient,
           from,
-          increaseParams,
+          increaseLiquidityParams,
           /* tokenIn= */ tokenIn.address as Address,
           /* tokenInFeeAmount= */ token2ToToken0FeeAmount +
             token2ToToken1FeeAmount,
@@ -416,7 +416,7 @@ export async function increaseLiquidityFromTokenIn(
     } catch (e) {
       getLogger().error('SDK.increaseLiquidityFromTokenIn.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
-        increaseParams,
+        increaseLiquidityParams,
         swapData0,
         swapData1,
       });

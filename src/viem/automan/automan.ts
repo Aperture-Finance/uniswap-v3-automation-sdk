@@ -365,7 +365,7 @@ export async function estimateMintFromTokenInGas(
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param position The current position to simulate the call from.
- * @param increaseParams The increase liquidity parameters.
+ * @param increaseLiquidityParams The increase liquidity parameters.
  * @param swapData The swap data if using a router.
  * @param blockNumber Optional block number to query.
  * @returns {tokenId, liquidity, amount0, amount1}
@@ -376,7 +376,7 @@ export async function simulateIncreaseLiquidityOptimalV4(
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
@@ -389,7 +389,7 @@ export async function simulateIncreaseLiquidityOptimalV4(
     publicClient,
     from,
     position,
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,
@@ -408,7 +408,7 @@ export async function estimateIncreaseLiquidityOptimalV4Gas(
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
@@ -422,7 +422,7 @@ export async function estimateIncreaseLiquidityOptimalV4Gas(
       publicClient,
       from,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       swapData,
       token0FeeAmount,
       token1FeeAmount,
@@ -440,7 +440,7 @@ export async function requestIncreaseLiquidityOptimalV4<
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),

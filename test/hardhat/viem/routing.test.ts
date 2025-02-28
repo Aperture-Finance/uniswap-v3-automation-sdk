@@ -16,6 +16,7 @@ import {
   ioc,
 } from '../../../src';
 import {
+  DEFAULT_SOLVERS,
   E_Solver,
   PositionDetails,
   checkTokenLiquidityAgainstChainNativeCurrency,
@@ -391,8 +392,8 @@ describe('Viem - Routing tests', function () {
       0.1,
       publicClient,
       true, // don't use 1inch in unit test
-      blockNumber,
       /* includeSwapInfo= */ true,
+      blockNumber,
     );
     const _total = Number(
       pool.token0Price
@@ -456,6 +457,7 @@ describe('Viem - Routing tests', function () {
       eoa,
       0.01,
       publicClient,
+      DEFAULT_SOLVERS,
       blockNumber,
     );
 
@@ -536,6 +538,7 @@ describe('Viem - Routing tests', function () {
       0.1,
       ['60000', '3000'],
       publicClient,
+      DEFAULT_SOLVERS,
       blockNumber,
     );
 

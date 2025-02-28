@@ -60,8 +60,8 @@ export async function mintOptimalV4(
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -137,8 +137,8 @@ export async function mintOptimalV4(
     feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
+    token0FeeAmount,
+    token1FeeAmount,
     amount0Desired: mintParams.amount0Desired.toString(),
     amount1Desired: mintParams.amount1Desired.toString(),
     zeroForOne,
