@@ -85,7 +85,7 @@ export async function getSamePoolToAmount(
       account: swapRouter,
     });
     return BigInt(simulationResults.result ?? '0');
-  } catch (e) {
+  } catch {
     // SamePool may be spammy to log errors because using feeOrTickSpacing of token0/token1 for token0/token2.
     // Catch all errors. Don't throw errors since SamePool is the fallback.
     // Should at least return solverResult of 0n instead of no results.
