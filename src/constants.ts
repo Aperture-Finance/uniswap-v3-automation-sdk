@@ -1,3 +1,5 @@
+import { Address } from 'viem';
+
 export const HOUR_IN_SECS = 60 * 60; // 60 minutes of 60 seconds each.
 export const DAY_IN_SECS = 24 * HOUR_IN_SECS;
 export const AUTOMATION_EXPIRATION_IN_DAYS = 90; // For frontend.
@@ -8,3 +10,5 @@ export const AUTOMATION_SLACK_IN_SECS = Number(
   process.env.AUTOMATION_SLACK_IN_SECS || 1 * DAY_IN_SECS,
 );
 export const GAS_LIMIT_L2_MULTIPLIER = 150; // 150% of estimated gas limit.
+export const NULL_ADDRESS: Address =
+  '0x0000000000000000000000000000000000000000';

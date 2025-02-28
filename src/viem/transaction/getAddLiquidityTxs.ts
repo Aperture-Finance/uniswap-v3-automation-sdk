@@ -189,7 +189,7 @@ export async function getAddLiquidityTx(
   increaseLiquidityOptions: IncreaseOptions,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  fromAddress: Address,
+  from: Address,
   client: PublicClient,
   liquidityToAdd: string,
   position?: Position,
@@ -217,6 +217,6 @@ export async function getAddLiquidityTx(
     getAMMInfo(chainId, amm)!,
     calldata,
     value,
-    fromAddress,
+    from,
   );
 }

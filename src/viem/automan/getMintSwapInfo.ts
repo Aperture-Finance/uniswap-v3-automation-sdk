@@ -26,7 +26,7 @@ export async function getMintOptimalSwapInfo(
   feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
@@ -40,11 +40,11 @@ export async function getMintOptimalSwapInfo(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    fromAddress,
+    from,
     slippage,
     publicClient,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }
 
@@ -56,7 +56,7 @@ export async function getMintOptimalSwapInfoV3(
   feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
@@ -71,11 +71,11 @@ export async function getMintOptimalSwapInfoV3(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    fromAddress,
+    from,
     slippage,
     tokenPricesUsd,
     publicClient,
-    blockNumber,
     includeSolvers,
+    blockNumber,
   );
 }

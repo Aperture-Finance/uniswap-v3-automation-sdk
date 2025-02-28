@@ -48,7 +48,7 @@ import { SolverResult, SwapRoute } from './types';
  * @param newTickLower The new lower tick.
  * @param newTickUpper The new upper tick.
  * @param feeBips The fee Aperture charge for the transaction.
- * @param fromAddress The address to rebalance from.
+ * @param from The address to rebalance from.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param blockNumber Optional. The block number to use for the simulation.
@@ -61,7 +61,7 @@ export async function rebalanceOptimalV2(
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
@@ -69,6 +69,7 @@ export async function rebalanceOptimalV2(
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   feesOn = true,
 ): Promise<SolverResult[]> {
+  const tokenId = BigInt(positionDetails.tokenId);
   const token0 = positionDetails.token0.address as Address;
   const token1 = positionDetails.token1.address as Address;
 
@@ -78,7 +79,7 @@ export async function rebalanceOptimalV2(
     position: positionDetails.tokenId,
     newTickLower,
     newTickUpper,
-    fromAddress,
+    from,
     slippage,
     tokenPricesUsd,
   };
@@ -92,9 +93,9 @@ export async function rebalanceOptimalV2(
       chainId,
       amm,
       publicClient,
-      fromAddress,
+      from,
       positionDetails.owner,
-      BigInt(positionDetails.tokenId),
+      tokenId,
       /*amount0Min =*/ undefined,
       /*amount1Min =*/ undefined,
       feeBips,
@@ -205,7 +206,7 @@ export async function rebalanceOptimalV2(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
     getLogger().info('SDK.rebalanceOptimalV2.Fees', {
-      totalRebalanceFeeUsd: feeUSD.toString(),
+      feeUSD: feeUSD.toString(),
       token0FeeAmount: token0FeeAmount.toString(),
       token1FeeAmount: token1FeeAmount.toString(),
       feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
@@ -269,10 +270,10 @@ export async function rebalanceOptimalV2(
           tickUpper: newTickUpper,
           amount0Desired: receive0,
           amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -283,10 +284,10 @@ export async function rebalanceOptimalV2(
           tickUpper: newTickUpper,
           amount0Desired: receive0,
           amount1Desired: receive1,
-          amount0Min: 0n, // Setting this to zero for tx simulation.
-          amount1Min: 0n, // Setting this to zero for tx simulation.
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   const estimateGas = async (swapData: Hex) => {
@@ -297,10 +298,10 @@ export async function rebalanceOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           mintParams,
-          BigInt(positionDetails.tokenId),
+          tokenId,
           feeBips,
           swapData,
           blockNumber,
@@ -331,7 +332,7 @@ export async function rebalanceOptimalV2(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing:
@@ -348,10 +349,10 @@ export async function rebalanceOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           mintParams,
-          BigInt(positionDetails.tokenId),
+          tokenId,
           feeBips,
           swapData,
           blockNumber,
@@ -407,7 +408,7 @@ export async function rebalanceBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
@@ -431,7 +432,7 @@ export async function rebalanceBackend(
   const logdata = {
     chainId,
     amm,
-    fromAddress,
+    from,
     tokenId,
     newTickLower,
     newTickUpper,
@@ -443,7 +444,7 @@ export async function rebalanceBackend(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails.owner,
     tokenId,
     /* amount0Min= */ undefined,
@@ -533,31 +534,45 @@ export async function rebalanceBackend(
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     nativeToUsd,
-    token0FeeAmount: token0FeeAmount,
-    token1FeeAmount: token1FeeAmount,
+    token0FeeAmount,
+    token1FeeAmount,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
     positionRawNative: positionRawNative.toString(), // without feesCollected of the position
-    feeBips: feeBips,
+    feeBips,
   });
 
-  const mintParams: SlipStreamMintParams | UniV3MintParams = {
-    token0: token0.address as Address,
-    token1: token1.address as Address,
-    ...(amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-      ? { tickSpacing: feeOrTickSpacing, sqrtPriceX96: 0n }
-      : { fee: feeOrTickSpacing }),
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: 0n, // Not used in Automan.
-    amount1Desired: 0n, // Not used in Automan.
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          tickSpacing: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          fee: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+        };
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
     // Pass errors without (try-)catch, because failing to estimate gas will fail to reimburse relayer for gas.
@@ -567,7 +582,7 @@ export async function rebalanceBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
         tokenId,
@@ -591,7 +606,7 @@ export async function rebalanceBackend(
     // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
     const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
       {
-        from: fromAddress,
+        from,
         to: getAMMInfo(chainId, amm)!.apertureAutoman,
         data: getAutomanRebalanceCalldata(
           amm,
@@ -630,7 +645,7 @@ export async function rebalanceBackend(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -683,7 +698,7 @@ export async function rebalanceBackend(
       getLogger().info('SDK.rebalanceBackend.round2.fees ', {
         solver,
         ...logdata,
-        totalRebalanceFeeUsd: feeUSD.toString(),
+        feeUSD: feeUSD.toString(),
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
@@ -698,7 +713,7 @@ export async function rebalanceBackend(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -709,6 +724,7 @@ export async function rebalanceBackend(
           zeroForOne,
         }));
       } else {
+        // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
         swapData = '0x';
         swapRoute = undefined;
       }
@@ -716,10 +732,10 @@ export async function rebalanceBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
-        BigInt(positionDetails.tokenId),
+        tokenId,
         totalFeePips,
         swapData,
         blockNumber,
@@ -779,7 +795,7 @@ export async function rebalanceV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
@@ -805,7 +821,7 @@ export async function rebalanceV3(
     tokenId,
     newTickLower,
     newTickUpper,
-    fromAddress,
+    from,
     slippage,
     tokenPricesUsd,
   };
@@ -814,9 +830,9 @@ export async function rebalanceV3(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     positionDetails.owner,
-    BigInt(positionDetails.tokenId),
+    tokenId,
     /* amount0Min= */ 0n,
     /* amount1Min= */ 0n,
     /* token0FeeAmount= */ 0n,
@@ -901,30 +917,44 @@ export async function rebalanceV3(
     tokensOwed1: positionDetails.tokensOwed1.quotient.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount,
-    token1FeeAmount: token1FeeAmount,
+    token0FeeAmount,
+    token1FeeAmount,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
-    feeBips: feeBips,
+    feeBips,
   });
 
-  const mintParams: SlipStreamMintParams | UniV3MintParams = {
-    token0: token0.address as Address,
-    token1: token1.address as Address,
-    ...(amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
-      ? { tickSpacing: feeOrTickSpacing, sqrtPriceX96: 0n }
-      : { fee: feeOrTickSpacing }),
-    tickLower: newTickLower,
-    tickUpper: newTickUpper,
-    amount0Desired: 0n, // Not used in Automan.
-    amount1Desired: 0n, // Not used in Automan.
-    amount0Min: 0n, // Setting this to zero for tx simulation.
-    amount1Min: 0n, // Setting this to zero for tx simulation.
-    recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
-  };
+  const mintParams: SlipStreamMintParams | UniV3MintParams =
+    amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
+      ? {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          tickSpacing: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+          sqrtPriceX96: 0n,
+        }
+      : {
+          token0: token0.address as Address,
+          token1: token1.address as Address,
+          fee: feeOrTickSpacing,
+          tickLower: newTickLower,
+          tickUpper: newTickUpper,
+          amount0Desired: 0n, // amountsDesired not used in Automan.
+          amount1Desired: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
+          amount1Min: 0n,
+          recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
+        };
 
   const estimateGas = async (swapData: Hex) => {
     try {
@@ -934,10 +964,10 @@ export async function rebalanceV3(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           mintParams,
-          BigInt(positionDetails.tokenId),
+          tokenId,
           token0FeeAmount,
           token1FeeAmount,
           swapData,
@@ -969,7 +999,7 @@ export async function rebalanceV3(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing:
@@ -987,10 +1017,10 @@ export async function rebalanceV3(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         mintParams,
-        BigInt(positionDetails.tokenId),
+        tokenId,
         token0FeeAmount,
         token1FeeAmount,
         swapData,

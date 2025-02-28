@@ -20,7 +20,7 @@ export interface SolvedSwapInfo {
 export interface SolverProps {
   chainId: ApertureSupportedChainId;
   amm: AutomatedMarketMakerEnum;
-  fromAddress: Address;
+  from: Address;
   token0: Address;
   token1: Address;
   feeOrTickSpacing: number;
@@ -71,5 +71,5 @@ export type SolverResult = {
   feeBips?: bigint;
   feeUSD?: string;
   gasFeeEstimation?: bigint;
-  gasUnits?: bigint; // Used for backend to populate tx.gasLimit.
+  gasUnits?: bigint; // For backend to populate tx.gasLimit.
 };

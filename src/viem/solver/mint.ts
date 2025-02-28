@@ -48,7 +48,7 @@ import {
  * @param fee The pool fee tier.
  * @param tickLower The lower tick of the range.
  * @param tickUpper The upper tick of the range.
- * @param fromAddress The address to mint from.
+ * @param from The address to mint from.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param usePool Whether to use the pool or the aggregator for the swap.
@@ -61,12 +61,12 @@ export async function mintOptimal(
   feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   publicClient: PublicClient,
   usePool = false,
-  blockNumber?: bigint,
   includeSwapInfo?: boolean,
+  blockNumber?: bigint,
 ): Promise<SolverResult> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -81,10 +81,10 @@ export async function mintOptimal(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
-          recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          recipient: from,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -95,10 +95,10 @@ export async function mintOptimal(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
-          recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          recipient: from,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   const getEstimate = async () => {
@@ -107,7 +107,7 @@ export async function mintOptimal(
       chainId,
       amm,
       publicClient,
-      fromAddress,
+      from,
       mintParams,
       blockNumber,
     );
@@ -118,14 +118,7 @@ export async function mintOptimal(
 
     const [poolEstimate, routerEstimate] = await Promise.all([
       poolPromise,
-      mintOptimalRouter(
-        chainId,
-        amm,
-        publicClient,
-        fromAddress,
-        mintParams,
-        slippage,
-      ),
+      mintOptimalRouter(chainId, amm, publicClient, from, mintParams, slippage),
     ]);
     // use the same pool if the quote isn't better
     if (poolEstimate.liquidity > routerEstimate.liquidity) {
@@ -177,7 +170,7 @@ async function mintOptimalPool(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   mintParams: SlipStreamMintParams | UniV3MintParams,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
@@ -185,7 +178,7 @@ async function mintOptimalPool(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     mintParams,
     /* swapData= */ undefined,
     /* blockNumber= */ blockNumber,
@@ -225,7 +218,7 @@ async function mintOptimalRouter(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
 ): Promise<SolverResult> {
@@ -235,14 +228,14 @@ async function mintOptimalRouter(
     publicClient,
     mintParams,
     slippage,
-    /* blockNumber= */ undefined,
     /* includeRoute= */ true,
+    /* blockNumber= */ undefined,
   );
   const [, liquidity, amount0, amount1] = await simulateMintOptimal(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     mintParams,
     swapData,
     undefined,
@@ -263,8 +256,8 @@ async function getMintOptimalSwapData(
   publicClient: PublicClient,
   mintParams: SlipStreamMintParams | UniV3MintParams,
   slippage: number,
-  blockNumber?: bigint,
   includeRoute?: boolean,
+  blockNumber?: bigint,
 ): Promise<{
   solver: E_Solver;
   swapData: Hex;
@@ -351,7 +344,7 @@ async function getMintOptimalSwapData(
  * @param fee The pool fee tier.
  * @param tickLower The lower tick of the range.
  * @param tickUpper The upper tick of the range.
- * @param fromAddress The address to mint from.
+ * @param from The address to mint from.
  * @param slippage The slippage tolerance.
  * @param publicClient Viem public client.
  * @param blockNumber Optional. The block number to use for the simulation.
@@ -365,11 +358,11 @@ export async function mintOptimalV2(
   feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   publicClient: PublicClient,
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -377,6 +370,7 @@ export async function mintOptimalV2(
   if (!blockNumber) {
     blockNumber = await publicClient.getBlockNumber();
   }
+
   const token0 = token0Amount.currency.address as Address;
   const token1 = token1Amount.currency.address as Address;
   const mintParams: SlipStreamMintParams | UniV3MintParams =
@@ -389,10 +383,10 @@ export async function mintOptimalV2(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
-          recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          recipient: from,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -403,10 +397,10 @@ export async function mintOptimalV2(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
-          recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          recipient: from,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmount(
@@ -431,7 +425,7 @@ export async function mintOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           mintParams,
           swapData,
           blockNumber,
@@ -461,7 +455,7 @@ export async function mintOptimalV2(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing,
@@ -475,7 +469,7 @@ export async function mintOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           mintParams,
           swapData,
           blockNumber,
@@ -548,12 +542,12 @@ export async function mintOptimalV3(
   feeOrTickSpacing: number,
   tickLower: number,
   tickUpper: number,
-  fromAddress: Address,
+  from: Address,
   slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
@@ -574,10 +568,10 @@ export async function mintOptimalV3(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
-          recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          recipient: from,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
           sqrtPriceX96: 0n,
         }
       : {
@@ -588,10 +582,10 @@ export async function mintOptimalV3(
           tickUpper,
           amount0Desired: BigInt(token0Amount.quotient.toString()),
           amount1Desired: BigInt(token1Amount.quotient.toString()),
-          amount0Min: 0n,
+          amount0Min: 0n, // 0 for simulation and estimating gas.
           amount1Min: 0n,
-          recipient: fromAddress,
-          deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+          recipient: from,
+          deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
 
   // Subtract fees from poolAmountIn before passing to solver
@@ -624,13 +618,13 @@ export async function mintOptimalV3(
     .mul(tokenInPrice);
 
   getLogger().info('SDK.mintOptimalV3.Fees ', {
-    amm: amm,
-    chainId: chainId,
+    amm,
+    chainId,
     totalMintOptimalFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
+    token0FeeAmount,
+    token1FeeAmount,
     amount0Desired: mintParams.amount0Desired.toString(),
     amount1Desired: mintParams.amount1Desired.toString(),
     zeroForOne,
@@ -646,7 +640,7 @@ export async function mintOptimalV3(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           mintParams,
           swapData,
           token0FeeAmount,
@@ -678,7 +672,7 @@ export async function mintOptimalV3(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing,
@@ -692,7 +686,7 @@ export async function mintOptimalV3(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           mintParams,
           swapData,
           token0FeeAmount,

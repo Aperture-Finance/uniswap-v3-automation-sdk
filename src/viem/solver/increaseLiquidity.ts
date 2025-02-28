@@ -46,7 +46,7 @@ import { SolverResult } from './types';
  * @param increaseOptions Increase liquidity options.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fromAddress The address to increase liquidity from.
+ * @param from The address to increase liquidity from.
  * @param usePool Whether to use the pool or the aggregator for the swap.
  * @param blockNumber Optional. The block number to simulate the call from.
  * @param includeSwapInfo Optional. If set to true, the swap path and price impact will be included in the result.
@@ -59,21 +59,21 @@ export async function increaseLiquidityOptimal(
   increaseOptions: IncreaseOptions,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
-  fromAddress: Address,
+  from: Address,
   usePool = false,
-  blockNumber?: bigint,
   includeSwapInfo?: boolean,
+  blockNumber?: bigint,
 ): Promise<SolverResult> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
-  const increaseParams: IncreaseLiquidityParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const getEstimate = async () => {
@@ -83,9 +83,9 @@ export async function increaseLiquidityOptimal(
       chainId,
       amm,
       publicClient,
-      fromAddress,
+      from,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       blockNumber,
     );
 
@@ -99,9 +99,9 @@ export async function increaseLiquidityOptimal(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         position,
-        increaseParams,
+        increaseLiquidityParams,
         Number(increaseOptions.slippageTolerance.toSignificant()),
       ),
     ]);
@@ -118,8 +118,8 @@ export async function increaseLiquidityOptimal(
   if (includeSwapInfo) {
     ret.priceImpact = calcPriceImpact(
       position.pool,
-      increaseParams.amount0Desired,
-      increaseParams.amount1Desired,
+      increaseLiquidityParams.amount0Desired,
+      increaseLiquidityParams.amount1Desired,
       ret.amount0,
       ret.amount1,
     );
@@ -144,25 +144,27 @@ async function increaseLiquidityOptimalPool(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
   const [liquidity, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     position,
-    increaseParams,
+    increaseLiquidityParams,
     /* swapData= */ undefined,
     blockNumber,
   );
   let swapRoute: SwapRoute = [];
-  if (increaseParams.amount0Desired.toString() !== amount0.toString()) {
+  if (
+    increaseLiquidityParams.amount0Desired.toString() !== amount0.toString()
+  ) {
     const [fromTokenAddress, toTokenAddress] = new Big(
-      increaseParams.amount0Desired.toString(),
+      increaseLiquidityParams.amount0Desired.toString(),
     ).gt(amount0.toString())
       ? [position.pool.token0.address, position.pool.token1.address]
       : [position.pool.token1.address, position.pool.token0.address];
@@ -194,9 +196,9 @@ async function increaseLiquidityOptimalRouter(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   slippage: number,
   blockNumber?: bigint,
 ): Promise<SolverResult> {
@@ -206,7 +208,7 @@ async function increaseLiquidityOptimalRouter(
       amm,
       publicClient,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       slippage,
       /* includeRoute= */ true,
     );
@@ -214,9 +216,9 @@ async function increaseLiquidityOptimalRouter(
     chainId,
     amm,
     publicClient,
-    fromAddress,
+    from,
     position,
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     blockNumber,
   );
@@ -235,7 +237,7 @@ async function getIncreaseLiquidityOptimalSwapData(
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   slippage: number,
   includeRoute?: boolean,
 ): Promise<{
@@ -260,8 +262,8 @@ async function getIncreaseLiquidityOptimalSwapData(
         : position.pool.fee,
       position.tickLower,
       position.tickUpper,
-      increaseParams.amount0Desired,
-      increaseParams.amount1Desired,
+      increaseLiquidityParams.amount0Desired,
+      increaseLiquidityParams.amount1Desired,
     );
 
     const approveTarget = await (isOkx
@@ -334,7 +336,7 @@ async function getIncreaseLiquidityOptimalSwapData(
  * @param increaseOptions Increase liquidity options.
  * @param token0Amount The token0 amount.
  * @param token1Amount The token1 amount.
- * @param fromAddress The address to increase liquidity from.
+ * @param from The address to increase liquidity from.
  * @param blockNumber Optional. The block number to simulate the call from.
  * @param includeSolvers Optional. The solvers to include.
  */
@@ -346,21 +348,21 @@ export async function increaseLiquidityOptimalV2(
   increaseOptions: IncreaseOptions,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
-  fromAddress: Address,
-  blockNumber?: bigint,
+  from: Address,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
 
-  const increaseParams: IncreaseLiquidityParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const token0 = position.pool.token0.address as Address;
@@ -380,8 +382,8 @@ export async function increaseLiquidityOptimalV2(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    increaseParams.amount0Desired,
-    increaseParams.amount1Desired,
+    increaseLiquidityParams.amount0Desired,
+    increaseLiquidityParams.amount1Desired,
     blockNumber,
   );
 
@@ -393,9 +395,9 @@ export async function increaseLiquidityOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           position,
-          increaseParams,
+          increaseLiquidityParams,
           swapData,
           blockNumber,
         ),
@@ -405,7 +407,7 @@ export async function increaseLiquidityOptimalV2(
       getLogger().error('SDK.increaseLiquidityOptimalV2.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
-        increaseParams,
+        increaseLiquidityParams,
       });
       return 0n;
     }
@@ -415,18 +417,19 @@ export async function increaseLiquidityOptimalV2(
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
     let liquidity: bigint = 0n;
-    let amount0: bigint = increaseParams.amount0Desired;
-    let amount1: bigint = increaseParams.amount1Desired;
+    let amount0: bigint = increaseLiquidityParams.amount0Desired;
+    let amount1: bigint = increaseLiquidityParams.amount1Desired;
     let gasFeeEstimation: bigint = 0n;
 
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+        Number(increaseOptions.slippageTolerance.numerator) /
+        Number(increaseOptions.slippageTolerance.denominator);
       if (poolAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing,
@@ -440,9 +443,9 @@ export async function increaseLiquidityOptimalV2(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           position,
-          increaseParams,
+          increaseLiquidityParams,
           swapData,
           blockNumber,
         );
@@ -459,21 +462,21 @@ export async function increaseLiquidityOptimalV2(
         swapRoute: getSwapRoute(
           token0,
           token1,
-          amount0 - increaseParams.amount0Desired,
+          amount0 - increaseLiquidityParams.amount0Desired,
           swapRoute,
         ),
         priceImpact: calcPriceImpact(
           position.pool,
-          increaseParams.amount0Desired,
-          increaseParams.amount1Desired,
+          increaseLiquidityParams.amount0Desired,
+          increaseLiquidityParams.amount1Desired,
           amount0,
           amount1,
         ),
         swapPath: getSwapPath(
           token0,
           token1,
-          increaseParams.amount0Desired,
-          increaseParams.amount1Desired,
+          increaseLiquidityParams.amount0Desired,
+          increaseLiquidityParams.amount1Desired,
           amount0,
           amount1,
           slippage,
@@ -504,22 +507,22 @@ export async function increaseLiquidityOptimalV3(
   increaseOptions: IncreaseOptions,
   token0Amount: CurrencyAmount<Token>,
   token1Amount: CurrencyAmount<Token>,
-  fromAddress: Address,
+  from: Address,
   tokenPricesUsd: [string, string],
-  blockNumber?: bigint,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+  blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   if (!token0Amount.currency.sortsBefore(token1Amount.currency)) {
     throw new Error('token0 must be sorted before token1');
   }
 
-  const increaseParams: IncreaseLiquidityParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: BigInt(token0Amount.quotient.toString()),
     amount1Desired: BigInt(token1Amount.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
   };
 
   const token0 = position.pool.token0.address as Address;
@@ -541,8 +544,8 @@ export async function increaseLiquidityOptimalV3(
     feeOrTickSpacing,
     tickLower,
     tickUpper,
-    increaseParams.amount0Desired,
-    increaseParams.amount1Desired,
+    increaseLiquidityParams.amount0Desired,
+    increaseLiquidityParams.amount1Desired,
     blockNumber,
   );
   const swapFeeAmount = BigInt(
@@ -558,8 +561,8 @@ export async function increaseLiquidityOptimalV3(
   const feeUSD = new Big(swapFeeAmount.toString())
     .div(10 ** tokenInDecimals)
     .mul(tokenInPrice);
-  // No need to subtract fees from increaseParams.amount0Desired
-  // and increaseParams.amount1Desired because that's done in automan.
+  // No need to subtract fees from increaseLiquidityParams.amount0Desired
+  // and increaseLiquidityParams.amount1Desired because that's done in automan.
   getLogger().info('SDK.increaseLiquidityOptimalV3.fees ', {
     amm,
     chainId,
@@ -567,10 +570,10 @@ export async function increaseLiquidityOptimalV3(
     totalIncreaseLiquidityOptimalFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount: token0FeeAmount.toString(),
-    token1FeeAmount: token1FeeAmount.toString(),
-    amount0Desired: increaseParams.amount0Desired.toString(),
-    amount1Desired: increaseParams.amount1Desired.toString(),
+    token0FeeAmount,
+    token1FeeAmount,
+    amount0Desired: increaseLiquidityParams.amount0Desired.toString(),
+    amount1Desired: increaseLiquidityParams.amount1Desired.toString(),
     zeroForOne,
     poolAmountIn: poolAmountIn.toString(), // before fees
     swapAmountIn: swapAmountIn.toString(), // after fees
@@ -584,9 +587,9 @@ export async function increaseLiquidityOptimalV3(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           position,
-          increaseParams,
+          increaseLiquidityParams,
           swapData,
           token0FeeAmount,
           token1FeeAmount,
@@ -598,7 +601,7 @@ export async function increaseLiquidityOptimalV3(
       getLogger().error('SDK.increaseLiquidityOptimalV3.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
-        increaseParams,
+        increaseLiquidityParams,
       });
       return 0n;
     }
@@ -608,18 +611,19 @@ export async function increaseLiquidityOptimalV3(
     let swapData: Hex = '0x';
     let swapRoute: SwapRoute | undefined = undefined;
     let liquidity: bigint = 0n;
-    let amount0: bigint = increaseParams.amount0Desired;
-    let amount1: bigint = increaseParams.amount1Desired;
+    let amount0: bigint = increaseLiquidityParams.amount0Desired;
+    let amount1: bigint = increaseLiquidityParams.amount1Desired;
     let gasFeeEstimation: bigint = 0n;
 
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+        Number(increaseOptions.slippageTolerance.numerator) /
+        Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0,
           token1,
           feeOrTickSpacing,
@@ -634,9 +638,9 @@ export async function increaseLiquidityOptimalV3(
             chainId,
             amm,
             publicClient,
-            fromAddress,
+            from,
             position,
-            increaseParams,
+            increaseLiquidityParams,
             swapData,
             token0FeeAmount,
             token1FeeAmount,
@@ -655,14 +659,14 @@ export async function increaseLiquidityOptimalV3(
         swapRoute: getSwapRoute(
           token0,
           token1,
-          amount0 - increaseParams.amount0Desired,
+          amount0 - increaseLiquidityParams.amount0Desired,
           swapRoute,
         ),
         swapPath: getSwapPath(
           token0,
           token1,
-          increaseParams.amount0Desired,
-          increaseParams.amount1Desired,
+          increaseLiquidityParams.amount0Desired,
+          increaseLiquidityParams.amount1Desired,
           amount0,
           amount1,
           slippage,
@@ -670,8 +674,8 @@ export async function increaseLiquidityOptimalV3(
         feeUSD: feeUSD.toFixed(),
         priceImpact: calcPriceImpact(
           position.pool,
-          increaseParams.amount0Desired,
-          increaseParams.amount1Desired,
+          increaseLiquidityParams.amount0Desired,
+          increaseLiquidityParams.amount1Desired,
           amount0,
           amount1,
         ),

@@ -39,7 +39,7 @@ export async function reinvestBackend(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
@@ -52,9 +52,9 @@ export async function reinvestBackend(
     tokenId,
     amount0Desired: BigInt(positionDetails.tokensOwed0.quotient.toString()),
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(increaseOptions.deadline.toString()),
   };
   const token0 = positionDetails.pool.token0;
   const token1 = positionDetails.pool.token1;
@@ -150,7 +150,7 @@ export async function reinvestBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         increaseLiquidityParams,
         feeBips,
@@ -173,7 +173,7 @@ export async function reinvestBackend(
     // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
     const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
       {
-        from: fromAddress,
+        from,
         to: getAMMInfo(chainId, amm)!.apertureAutoman,
         data: getAutomanReinvestCalldata(
           increaseLiquidityParams,
@@ -206,13 +206,14 @@ export async function reinvestBackend(
     let gasInRawNative: bigint = 0n;
 
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+        Number(increaseOptions.slippageTolerance.numerator) /
+        Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -267,7 +268,7 @@ export async function reinvestBackend(
         amm,
         chainId,
         tokenId,
-        totalReinvestFeeUsd: feeUSD.toString(),
+        feeUSD: feeUSD.toString(),
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
@@ -282,7 +283,7 @@ export async function reinvestBackend(
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -293,6 +294,7 @@ export async function reinvestBackend(
           zeroForOne,
         }));
       } else {
+        // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
         swapData = '0x';
         swapRoute = undefined;
       }
@@ -311,7 +313,7 @@ export async function reinvestBackend(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         increaseLiquidityParams,
         totalFeePips,
@@ -384,7 +386,7 @@ export async function reinvestV3(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
-  fromAddress: Address,
+  from: Address,
   positionDetails: PositionDetails,
   increaseOptions: IncreaseOptions,
   tokenPricesUsd: [string, string],
@@ -396,9 +398,9 @@ export async function reinvestV3(
     tokenId,
     amount0Desired: BigInt(positionDetails.tokensOwed0.quotient.toString()),
     amount1Desired: BigInt(positionDetails.tokensOwed1.quotient.toString()),
-    amount0Min: 0n,
+    amount0Min: 0n, // 0 for simulation and estimating gas.
     amount1Min: 0n,
-    deadline: BigInt(Math.floor(Date.now() / 1000 + 86400)),
+    deadline: BigInt(increaseOptions.deadline.toString()),
   };
   const token0 = positionDetails.pool.token0;
   const token1 = positionDetails.pool.token1;
@@ -454,7 +456,7 @@ export async function reinvestV3(
     amm,
     chainId,
     tokenId,
-    totalReinvestFeeUsd: feeUSD.toString(),
+    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     token0FeeAmount,
@@ -474,7 +476,7 @@ export async function reinvestV3(
           chainId,
           amm,
           publicClient,
-          fromAddress,
+          from,
           positionDetails.owner,
           increaseLiquidityParams,
           token0FeeAmount,
@@ -503,13 +505,14 @@ export async function reinvestV3(
     let gasFeeEstimation: bigint = 0n;
 
     try {
-      const slippage =
-        Number(increaseOptions.slippageTolerance.toSignificant()) / 100;
+      const slippage = // numerator/denominator is more accurate than toSignificant()/100.
+        Number(increaseOptions.slippageTolerance.numerator) /
+        Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
         ({ swapData, swapRoute } = await getSolver(solver).solve({
           chainId,
           amm,
-          fromAddress,
+          from,
           token0: token0.address as Address,
           token1: token1.address as Address,
           feeOrTickSpacing,
@@ -524,7 +527,7 @@ export async function reinvestV3(
         chainId,
         amm,
         publicClient,
-        fromAddress,
+        from,
         positionDetails.owner,
         increaseLiquidityParams,
         token0FeeAmount,

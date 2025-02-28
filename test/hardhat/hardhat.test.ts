@@ -70,6 +70,7 @@ import {
 } from '../../src';
 import {
   E_Solver,
+  IncreaseLiquidityParams,
   PositionDetails,
   computeOperatorApprovalSlot,
   estimateRebalanceGas,
@@ -413,7 +414,7 @@ describe('State overrides tests', function () {
       publicClient,
       blockNumber,
     );
-    const increaseParams = {
+    const increaseLiquidityParams: IncreaseLiquidityParams = {
       tokenId: positionId,
       amount0Desired,
       amount1Desired,
@@ -428,7 +429,7 @@ describe('State overrides tests', function () {
       publicClient,
       eoa as Address,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       undefined,
       blockNumber,
     );

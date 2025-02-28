@@ -150,7 +150,6 @@ export async function simulateMintOptimal(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
-  checkTicks(amm, mintParams);
   const returnData = await requestMintOptimal(
     'eth_call',
     chainId,
@@ -179,7 +178,6 @@ export async function simulateMintOptimalV3(
   token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<MintReturnType> {
-  checkTicks(amm, mintParams);
   const returnData = await requestMintOptimalV3(
     'eth_call',
     chainId,
@@ -354,7 +352,7 @@ export async function requestMintOptimalV3<M extends keyof RpcReturnType>(
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param position The current position to simulate the call from.
- * @param increaseParams The increase liquidity parameters.
+ * @param increaseLiquidityParams The increase liquidity parameters.
  * @param swapData The swap data if using a router.
  * @param blockNumber Optional block number to query.
  * @returns {tokenId, liquidity, amount0, amount1}
@@ -365,7 +363,7 @@ export async function simulateIncreaseLiquidityOptimal(
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<IncreaseLiquidityReturnType> {
@@ -376,7 +374,7 @@ export async function simulateIncreaseLiquidityOptimal(
     publicClient,
     from,
     position,
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     blockNumber,
   );
@@ -393,7 +391,7 @@ export async function simulateIncreaseLiquidityOptimalV3(
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
@@ -406,7 +404,7 @@ export async function simulateIncreaseLiquidityOptimalV3(
     publicClient,
     from,
     position,
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,
@@ -425,7 +423,7 @@ export async function estimateIncreaseLiquidityOptimalGas(
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<bigint> {
@@ -437,7 +435,7 @@ export async function estimateIncreaseLiquidityOptimalGas(
       publicClient,
       from,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       swapData,
       blockNumber,
     ),
@@ -450,7 +448,7 @@ export async function estimateIncreaseLiquidityOptimalV3Gas(
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
@@ -464,7 +462,7 @@ export async function estimateIncreaseLiquidityOptimalV3Gas(
       publicClient,
       from,
       position,
-      increaseParams,
+      increaseLiquidityParams,
       swapData,
       token0FeeAmount,
       token1FeeAmount,
@@ -482,12 +480,12 @@ export async function requestIncreaseLiquidityOptimal<
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanIncreaseLiquidityOptimalCallData(
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
   );
   const { apertureAutoman } = getAMMInfo(chainId, amm)!;
@@ -497,14 +495,14 @@ export async function requestIncreaseLiquidityOptimal<
       position.pool.token0.address as Address,
       from,
       apertureAutoman,
-      increaseParams.amount0Desired,
+      increaseLiquidityParams.amount0Desired,
       publicClient,
     ),
     getERC20Overrides(
       position.pool.token1.address as Address,
       from,
       apertureAutoman,
-      increaseParams.amount1Desired,
+      increaseLiquidityParams.amount1Desired,
       publicClient,
     ),
   ]);
@@ -534,14 +532,14 @@ export async function requestIncreaseLiquidityOptimalV3<
   publicClient: PublicClient,
   from: Address,
   position: Position,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanV3IncreaseLiquidityOptimalCallData(
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,
@@ -553,14 +551,14 @@ export async function requestIncreaseLiquidityOptimalV3<
       position.pool.token0.address as Address,
       from,
       apertureAutomanV3,
-      increaseParams.amount0Desired,
+      increaseLiquidityParams.amount0Desired,
       publicClient,
     ),
     getERC20Overrides(
       position.pool.token1.address as Address,
       from,
       apertureAutomanV3,
-      increaseParams.amount1Desired,
+      increaseLiquidityParams.amount1Desired,
       publicClient,
     ),
   ]);
@@ -749,8 +747,8 @@ export async function requestRebalanceV3<M extends keyof RpcReturnType>(
     tokenId,
     token0FeeAmount,
     token1FeeAmount,
-    /* permitInfo= */ undefined,
     swapData,
+    /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
   const overrides = {
