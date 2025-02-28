@@ -1,7 +1,7 @@
 import {
   ApertureSupportedChainId,
+  NULL_ADDRESS,
   PermitInfo,
-  ZERO_ADDRESS,
   getAMMInfo,
 } from '@/index';
 import {
@@ -69,8 +69,8 @@ export async function getDecreaseLiquidityV4Tx(
   const decreaseLiquidityParams: DecreaseLiquidityParams = {
     tokenId: BigInt(decreaseLiquidityOptions.tokenId.toString()),
     liquidity,
-    amount0Min: tokenOut === ZERO_ADDRESS ? BigInt(amount0.toString()) : 0n,
-    amount1Min: tokenOut === ZERO_ADDRESS ? BigInt(amount1.toString()) : 0n,
+    amount0Min: tokenOut === NULL_ADDRESS ? BigInt(amount0.toString()) : 0n,
+    amount1Min: tokenOut === NULL_ADDRESS ? BigInt(amount1.toString()) : 0n,
     deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
   const tokenOutSlippage = BigInt(
@@ -83,7 +83,7 @@ export async function getDecreaseLiquidityV4Tx(
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     tokenOut,
-    tokenOut === ZERO_ADDRESS ? 0n : tokenOutMin,
+    tokenOut === NULL_ADDRESS ? 0n : tokenOutMin,
     token0FeeAmount,
     token1FeeAmount,
     swapData0,

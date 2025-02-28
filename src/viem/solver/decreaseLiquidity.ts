@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, ZERO_ADDRESS, getLogger } from '@/index';
+import { ApertureSupportedChainId, NULL_ADDRESS, getLogger } from '@/index';
 import { RemoveLiquidityOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import Big from 'big.js';
@@ -79,7 +79,7 @@ export async function decreaseLiquidityV4(
       .mul(getFeeReinvestRatio(feeOrTickSpacing))
       .add(
         Big(
-          tokenOut === ZERO_ADDRESS || tokenOut === token0.address
+          tokenOut === NULL_ADDRESS || tokenOut === token0.address
             ? '0'
             : decrementalPositionInitialAmount0.toString(),
         ).mul(FEE_ZAP_RATIO),
@@ -91,7 +91,7 @@ export async function decreaseLiquidityV4(
       .mul(getFeeReinvestRatio(feeOrTickSpacing))
       .add(
         Big(
-          tokenOut === ZERO_ADDRESS || tokenOut === token1.address
+          tokenOut === NULL_ADDRESS || tokenOut === token1.address
             ? '0'
             : decrementalPositionInitialAmount1.toString(),
         ).mul(FEE_ZAP_RATIO),

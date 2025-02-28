@@ -3,8 +3,8 @@ import {
   Automan__factory,
   ISlipStreamAutomanV4__factory,
   ISlipStreamAutoman__factory,
+  NULL_ADDRESS,
   PermitInfo,
-  ZERO_ADDRESS,
 } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, Hex, encodeFunctionData, hexToSignature } from 'viem';
@@ -70,20 +70,25 @@ export function getAutomanMintFromTokenInCalldata(
 }
 
 export function getAutomanV4IncreaseLiquidityOptimalCalldata(
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   swapData: Hex = '0x',
   token0FeeAmount = BigInt(0),
   token1FeeAmount = BigInt(0),
 ): Hex {
   return encodeFunctionData({
     abi: AutomanV4__factory.abi,
-    args: [increaseParams, swapData, token0FeeAmount, token1FeeAmount] as const,
+    args: [
+      increaseLiquidityParams,
+      swapData,
+      token0FeeAmount,
+      token1FeeAmount,
+    ] as const,
     functionName: 'increaseLiquidityOptimal',
   });
 }
 
 export function getAutomanIncreaseLiquidityFromTokenInCalldata(
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   tokenIn: Address,
   tokenInFeeAmount = BigInt(0),
   swapData0: Hex = '0x',
@@ -92,7 +97,7 @@ export function getAutomanIncreaseLiquidityFromTokenInCalldata(
   return encodeFunctionData({
     abi: AutomanV4__factory.abi,
     args: [
-      increaseParams,
+      increaseLiquidityParams,
       tokenIn,
       tokenInFeeAmount,
       swapData0,
@@ -248,7 +253,7 @@ export function getAutomanV4RebalanceCalldata(
   const zapOutParams: ZapOutParams = {
     token0FeeAmount,
     token1FeeAmount,
-    tokenOut: ZERO_ADDRESS,
+    tokenOut: NULL_ADDRESS,
     tokenOutMin: BigInt(0),
     swapData0: '0x',
     swapData1: '0x',

@@ -2,7 +2,7 @@ import {
   ApertureSupportedChainId,
   AutomanV4__factory,
   Automan__factory,
-  ZERO_ADDRESS,
+  NULL_ADDRESS,
   getAMMInfo,
 } from '@/index';
 import {
@@ -447,7 +447,7 @@ export async function requestIncreaseLiquidityOptimalV4<
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanV4IncreaseLiquidityOptimalCalldata(
-    increaseParams,
+    increaseLiquidityParams,
     swapData,
     token0FeeAmount,
     token1FeeAmount,
@@ -459,14 +459,14 @@ export async function requestIncreaseLiquidityOptimalV4<
       position.pool.token0.address as Address,
       from,
       apertureAutomanV4,
-      increaseParams.amount0Desired,
+      increaseLiquidityParams.amount0Desired,
       publicClient,
     ),
     getERC20Overrides(
       position.pool.token1.address as Address,
       from,
       apertureAutomanV4,
-      increaseParams.amount1Desired,
+      increaseLiquidityParams.amount1Desired,
       publicClient,
     ),
   ]);
@@ -495,7 +495,7 @@ export async function requestIncreaseLiquidityFromTokenIn<
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   tokenIn: Address,
   tokenInFeeAmount: bigint,
   swapData0: Hex = '0x',
@@ -503,7 +503,7 @@ export async function requestIncreaseLiquidityFromTokenIn<
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   const data = getAutomanIncreaseLiquidityFromTokenInCalldata(
-    increaseParams,
+    increaseLiquidityParams,
     tokenIn,
     tokenInFeeAmount,
     swapData0,
@@ -514,8 +514,8 @@ export async function requestIncreaseLiquidityFromTokenIn<
     tokenIn,
     from,
     apertureAutomanV4,
-    increaseParams.amount0Desired +
-      increaseParams.amount1Desired +
+    increaseLiquidityParams.amount0Desired +
+      increaseLiquidityParams.amount1Desired +
       tokenInFeeAmount,
     publicClient,
   );
@@ -539,7 +539,7 @@ export async function simulateIncreaseLiquidityFromTokenIn(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   tokenIn: Address,
   tokenInFeeAmount: bigint,
   swapData0: Hex = '0x',
@@ -552,7 +552,7 @@ export async function simulateIncreaseLiquidityFromTokenIn(
     chainId,
     publicClient,
     from,
-    increaseParams,
+    increaseLiquidityParams,
     tokenIn,
     tokenInFeeAmount,
     swapData0,
@@ -571,7 +571,7 @@ export async function estimateIncreaseLiquidityFromTokenInGas(
   chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
-  increaseParams: IncreaseLiquidityParams,
+  increaseLiquidityParams: IncreaseLiquidityParams,
   tokenIn: Address,
   tokenInFeeAmount: bigint,
   swapData0: Hex = '0x',
@@ -585,7 +585,7 @@ export async function estimateIncreaseLiquidityFromTokenInGas(
       chainId,
       publicClient,
       from,
-      increaseParams,
+      increaseLiquidityParams,
       tokenIn,
       tokenInFeeAmount,
       swapData0,
@@ -758,7 +758,7 @@ export async function simulateDecreaseLiquidityV4(
 ): Promise<DecreaseLiquidityReturnType> {
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
-    /* tokenOut= */ ZERO_ADDRESS,
+    /* tokenOut= */ NULL_ADDRESS,
     /* tokenOutMin= */ BigInt(0),
     token0FeeAmount,
     token1FeeAmount,

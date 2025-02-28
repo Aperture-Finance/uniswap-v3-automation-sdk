@@ -27,10 +27,10 @@ import {
   ICommonNonfungiblePositionManager__factory,
   IERC20__factory,
   IOCKEY_LOGGER,
+  NULL_ADDRESS,
   UniV3AutomanV4,
   UniV3AutomanV4__factory,
   UniV3OptimalSwapRouter__factory,
-  ZERO_ADDRESS,
   getAMMInfo,
   getChainInfo,
   ioc,
@@ -732,7 +732,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
   });
 
   it('Decrease Liquidity to same tokens', async function () {
-    const tokenOut = ZERO_ADDRESS;
+    const tokenOut = NULL_ADDRESS;
     const isUnwrapNative = true;
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,

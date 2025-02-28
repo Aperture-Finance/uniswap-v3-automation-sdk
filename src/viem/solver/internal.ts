@@ -1,7 +1,7 @@
 import {
   AutomanV4__factory,
   Automan__factory,
-  ZERO_ADDRESS,
+  NULL_ADDRESS,
   fractionToBig,
   getLogger,
 } from '@/index';
@@ -338,7 +338,7 @@ export async function solveExactInput(
     Hex,
     SwapRoute | undefined,
   ] = [E_Solver.SamePool, 0n, '0x' as Hex, undefined];
-  if (tokenOut === ZERO_ADDRESS || tokenOut === tokenIn || amountIn <= 0n) {
+  if (tokenOut === NULL_ADDRESS || tokenOut === tokenIn || amountIn <= 0n) {
     return {
       solver,
       tokenOutAmount: amountIn,

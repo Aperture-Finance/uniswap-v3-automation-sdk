@@ -10,7 +10,7 @@ import {
   ApertureSupportedChainId,
   ConsoleLogger,
   IOCKEY_LOGGER,
-  ZERO_ADDRESS,
+  NULL_ADDRESS,
   ioc,
 } from '../../src';
 import {
@@ -89,7 +89,7 @@ async function testDecreaseLiquidityV4(tokenOut: Address) {
 }
 
 async function main() {
-  await testDecreaseLiquidityV4(ZERO_ADDRESS); // To same tokens
+  await testDecreaseLiquidityV4(NULL_ADDRESS); // To same tokens
   await testDecreaseLiquidityV4('0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'); // To WETH
   await testDecreaseLiquidityV4('0xaf88d065e77c8cC2239327C5EDb3A432268e5831'); // To token0=USDC
   await testDecreaseLiquidityV4('0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1'); // To token1=DAI

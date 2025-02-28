@@ -149,7 +149,7 @@ export async function getIncreaseLiquidityFromTokenInTx(
   const { amount0, amount1 } = incrementalPosition.mintAmountsWithSlippage(
     increaseOptions.slippageTolerance,
   );
-  const increaseParams = {
+  const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: tokenInAmountToSwapToToken0,
     amount1Desired: tokenInAmountToSwapToToken1,
@@ -158,7 +158,7 @@ export async function getIncreaseLiquidityFromTokenInTx(
     deadline: BigInt(increaseOptions.deadline.toString()),
   };
   const data = getAutomanIncreaseLiquidityFromTokenInCalldata(
-    increaseParams,
+    increaseLiquidityParams,
     /* tokenIn= */ (tokenIn.isNative
       ? getNativeCurrency(chainId).wrapped.address
       : tokenIn.address) as Address,
