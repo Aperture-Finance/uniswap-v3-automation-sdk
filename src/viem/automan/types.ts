@@ -15,12 +15,11 @@ import {
 import { GetAbiFunctionParamsTypes } from '../generics';
 
 export type AutomanActionName =
+  // Basic actions for params and return types.
+  // mint and mintOptimal has same return type, so don't need both.
   | 'mint'
-  | 'mintOptimal'
   | 'increaseLiquidity'
-  | 'increaseLiquidityOptimal'
   | 'decreaseLiquidity'
-  | 'decreaseLiquiditySingle'
   | 'reinvest'
   | 'rebalance'
   | 'removeLiquidity';

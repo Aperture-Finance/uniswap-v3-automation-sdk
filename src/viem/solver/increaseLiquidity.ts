@@ -110,7 +110,7 @@ export async function increaseLiquidityOptimalV4(
   getLogger().info('SDK.increaseLiquidityOptimalV4.fees ', {
     amm,
     chainId,
-    nftId: increaseOptions.tokenId,
+    tokenId: increaseOptions.tokenId,
     feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
@@ -362,12 +362,12 @@ export async function increaseLiquidityFromTokenIn(
     chainId,
     feeUSD: feeUSD.toString(),
     ratioToSwapToToken1: ratioToSwapToToken1.toString(),
-    // Token0 Swap
+    // Token2 to Token0 Swap
     token2ToToken0FeeAmount,
     tokenInAmountToSwapToToken0,
     token0SolverResults: token0SolverResult.solverResults,
     token0FromTokenIn: token0SolverResult.tokenOutAmount,
-    // Token1 Swap
+    // Token2 to Token1 Swap
     token2ToToken1FeeAmount,
     tokenInAmountToSwapToToken1,
     token1SolverResults: token1SolverResult.solverResults,

@@ -77,7 +77,7 @@ export async function rebalanceOptimalV2(
   const logdata = {
     chainId,
     amm,
-    nftId: positionDetails.tokenId,
+    tokenId: positionDetails.tokenId,
     newTickLower,
     newTickUpper,
     from,
