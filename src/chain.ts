@@ -366,7 +366,7 @@ const CHAIN_ID_TO_INFO: {
           '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
         apertureAutomanV4: getAddress(
-          '0x00000063e8cA29E95233D00DAF1A51588b9911c4',
+          '0x0000009a3aC2622C05b52D9B7211F01779540184',
         ),
       },
     },
