@@ -150,7 +150,7 @@ async function rebalanceV4() {
       token0FeeAmount ?? 0n,
       token1FeeAmount ?? 0n,
       tokenOut,
-      /* tokenOutExpected= */ amountOut ?? 0n,
+      /* amountOutExpected= */ amountOut ?? 0n,
       /* swapData0= */ '0x',
       /* swapData1= */ '0x',
       isUnwrapNative,

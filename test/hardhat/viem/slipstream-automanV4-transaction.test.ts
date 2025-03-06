@@ -278,7 +278,7 @@ describe('SlipStreamAutomanV4 transaction tests', function () {
       token0FeeAmount,
       token1FeeAmount,
       tokenOut,
-      /* tokenOutExpected= */ amountOut,
+      /* amountOutExpected= */ amountOut,
       swapData0 ?? '0x',
       swapData1 ?? '0x',
       isUnwrapNative,

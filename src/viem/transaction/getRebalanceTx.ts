@@ -138,7 +138,7 @@ export async function getRebalanceV4Tx(
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   tokenOut: Address,
-  tokenOutExpected: bigint,
+  amountOutExpected: bigint,
   swapData0: Hex,
   swapData1: Hex,
   isUnwrapNative: boolean,
@@ -187,9 +187,9 @@ export async function getRebalanceV4Tx(
           deadline: deadlineEpochSeconds,
         };
   const tokenOutSlippage = BigInt(
-    Big(tokenOutExpected.toString()).mul(slippage).toFixed(0),
+    Big(amountOutExpected.toString()).mul(slippage).toFixed(0),
   );
-  const tokenOutMin = tokenOutExpected - tokenOutSlippage;
+  const tokenOutMin = amountOutExpected - tokenOutSlippage;
   const zapOutParams: ZapOutParams = {
     token0FeeAmount,
     token1FeeAmount,

@@ -77,7 +77,7 @@ async function testDecreaseLiquidityV4(tokenOut: Address) {
     positionDetails,
     decreaseLiquidityOptions,
     tokenOut,
-    /* tokenOutExpected= */ amountOut ?? 0n,
+    /* amountOutExpected= */ amountOut ?? 0n,
     token0FeeAmount,
     token1FeeAmount,
     /* swapData1= */ swapData,
@@ -85,7 +85,7 @@ async function testDecreaseLiquidityV4(tokenOut: Address) {
     isUnwrapNative,
   );
   console.log(
-    `solver=${solver0}, solver1=${solver1}, liquidityPercentage=${Number(decreaseLiquidityOptions.liquidityPercentage.numerator) / Number(decreaseLiquidityOptions.liquidityPercentage.denominator)}, liquidity: ${liquidity}, amount0=${amount0}, amount1=${amount1}, tokenOutExpected=${amount0 + amount1}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
+    `solver=${solver0}, solver1=${solver1}, liquidityPercentage=${Number(decreaseLiquidityOptions.liquidityPercentage.numerator) / Number(decreaseLiquidityOptions.liquidityPercentage.denominator)}, liquidity: ${liquidity}, amount0=${amount0}, amount1=${amount1}, amountOutExpected=${amount0 + amount1}, to=${txRequest.to}, from=${txRequest.from}, data=${txRequest.data}`,
   );
 }
 

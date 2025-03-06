@@ -55,8 +55,8 @@ async function mainBackend4105824() {
       increaseOptions,
       feeBips!,
       swapData,
-      amount0,
-      amount1,
+      /* amount0Expected= */ amount0,
+      /* amount1Expected= */ amount1,
     );
     console.log(
       `solver=${solver}, liquidity: ${liquidity}, txRequest=${JSON.stringify(txRequest)}`,
@@ -103,8 +103,8 @@ async function mainBackend1014481() {
       increaseOptions,
       feeBips!,
       swapData,
-      amount0,
-      amount1,
+      /* amount0Expected= */ amount0,
+      /* amount1Expected= */ amount1,
     );
     console.log(
       `solver=${solver}, liquidity: ${liquidity}, txRequest=${JSON.stringify(txRequest)}`,
