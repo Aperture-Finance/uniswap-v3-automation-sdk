@@ -790,7 +790,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* positionDetails= */ existingPosition,
       decreaseLiquidityOptions,
       tokenOut,
-      /* tokenOutExpected= */ amount0 + amount1,
+      /* amountOutExpected= */ amount0 + amount1,
       token0FeeAmount,
       token1FeeAmount,
       swapData0,
@@ -947,7 +947,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* positionDetails= */ existingPosition,
       decreaseLiquidityOptions,
       tokenOut,
-      /* tokenOutExpected= */ amount0 + amount1,
+      /* amountOutExpected= */ amount0 + amount1,
       token0FeeAmount,
       token1FeeAmount,
       swapData0,
@@ -1101,7 +1101,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* positionDetails= */ existingPosition,
       decreaseLiquidityOptions,
       tokenOut,
-      /* tokenOutExpected= */ amount0 + amount1,
+      /* amountOutExpected= */ amount0 + amount1,
       token0FeeAmount,
       token1FeeAmount,
       swapData0,
@@ -1258,7 +1258,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* positionDetails= */ existingPosition,
       decreaseLiquidityOptions,
       tokenOut,
-      /* tokenOutExpected= */ amount0 + amount1,
+      /* amountOutExpected= */ amount0 + amount1,
       token0FeeAmount,
       token1FeeAmount,
       swapData0,
@@ -1428,7 +1428,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* tokenOut= */ (zeroForOne
         ? pool.token1.address
         : pool.token0.address) as Address,
-      /* tokenOutExpected= */ amount0 + amount1,
+      /* amountOutExpected= */ amount0 + amount1,
       token0FeeAmount,
       token1FeeAmount,
       swapData0,
@@ -1583,7 +1583,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       /* tokenOut= */ (zeroForOne
         ? pool.token1.address
         : pool.token0.address) as Address,
-      /* tokenOutExpected= */ amount0 + amount1,
+      /* amountOutExpected= */ amount0 + amount1,
       token0FeeAmount,
       token1FeeAmount,
       swapData0,

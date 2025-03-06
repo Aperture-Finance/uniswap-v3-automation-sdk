@@ -227,6 +227,8 @@ export async function decreaseLiquidityV4(
     // The sum of amounts is the expected tokenOutAmount.
     amount0: token0SolverResult.tokenOutAmount,
     amount1: token1SolverResult.tokenOutAmount,
+    amountOut:
+      token0SolverResult.tokenOutAmount + token1SolverResult.tokenOutAmount,
     liquidity,
     swapData0,
     swapData1,

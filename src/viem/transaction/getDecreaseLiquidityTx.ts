@@ -26,7 +26,7 @@ import { PositionDetails } from '../position';
  * @param positionDetails Uniswap SDK PositionDetails for the specified position.
  * @param decreaseLiquidityOptions Remove liquidity options. RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
  * @param tokenOut The token to swap collected tokens to.
- * @param tokenOutMin Min amount of tokenOut to receive for slippage check.
+ * @param amountOutExpected The expected amount of tokenOut to receive before slippage check, equals to (amountOut ?? 0n) from getDecreaseLiquidityV4SwapInfo().
  * @param token0FeeAmount Fee amount for token0.
  * @param token1FeeAmount Fee amount for token1.
  * @param swapData0 Swap data for swapping token0 to tokenOut.
@@ -42,7 +42,7 @@ export async function getDecreaseLiquidityV4Tx(
   positionDetails: PositionDetails,
   decreaseLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
   tokenOut: Address,
-  tokenOutExpected: bigint,
+  amountOutExpected: bigint,
   token0FeeAmount: bigint = 0n,
   token1FeeAmount: bigint = 0n,
   swapData0: Hex = '0x',
@@ -74,12 +74,12 @@ export async function getDecreaseLiquidityV4Tx(
     deadline: BigInt(decreaseLiquidityOptions.deadline.toString()),
   };
   const tokenOutSlippage = BigInt(
-    Big(tokenOutExpected.toString())
+    Big(amountOutExpected.toString())
       .mul(decreaseLiquidityOptions.slippageTolerance.numerator.toString())
       .div(decreaseLiquidityOptions.slippageTolerance.denominator.toString())
       .toFixed(0),
   );
-  const tokenOutMin = tokenOutExpected - tokenOutSlippage;
+  const tokenOutMin = amountOutExpected - tokenOutSlippage;
   const data = getAutomanV4DecreaseLiquidityCalldata(
     decreaseLiquidityParams,
     tokenOut,
