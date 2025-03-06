@@ -880,9 +880,6 @@ export async function rebalanceV4(
     receive1,
     blockNumber,
   );
-  console.log(
-    `tommyzhao poolAmountIn=${poolAmountIn}, zeroForOne=${zeroForOne}, receive0=${receive0}, receive1=${receive1}, token0FeesCollected=${token0FeesCollected}, token1FeesCollected=${token1FeesCollected}`,
-  );
 
   // rebalanceFees =
   // swapFees + reinvestFees + flatFees
@@ -936,9 +933,6 @@ export async function rebalanceV4(
   );
   const swapAmountIn =
     poolAmountIn - (zeroForOne ? token0FeeAmount : token1FeeAmount);
-  console.log(
-    `tommyzhao poolAmountIn=${poolAmountIn}, zeroForOne=${zeroForOne}, token0FeeAmount=${token0FeeAmount}, token1FeeAmount=${token1FeeAmount}, swapAmountIn=${swapAmountIn}`,
-  );
 
   getLogger().info('SDK.rebalanceV4.Fees', {
     ...logdata,
