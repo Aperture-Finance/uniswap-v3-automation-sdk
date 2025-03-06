@@ -345,7 +345,7 @@ export async function rebalanceOptimalV2(
           slippage,
           poolAmountIn,
           zeroForOne,
-          isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
+          isUseOptimalSwapRouter: true, // true because rebalanceOptimalV2 uses automanV1, which still uses an optimalSwapRouter.
         }));
       }
       [, liquidity, amount0, amount1] = await simulateRebalance(
