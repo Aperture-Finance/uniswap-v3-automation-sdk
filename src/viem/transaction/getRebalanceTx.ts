@@ -8,7 +8,7 @@ import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanRebalanceCalldata,
-  getAutomanV3RebalanceCalldata,
+  getAutomanV4RebalanceCalldata,
 } from '../automan';
 import { PositionDetails } from '../position';
 import { SimulatedAmounts } from './types';
@@ -120,7 +120,7 @@ export async function getRebalanceTx(
 
 // Same as getRebalanceTx, but with feeAmounts instead of feeBips.
 // Do not use, but implemented to make it easier to migrate to future versions.
-export async function getRebalanceV3Tx(
+export async function getRebalanceV4Tx(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   ownerAddress: Address,
@@ -191,8 +191,8 @@ export async function getRebalanceV3Tx(
   return {
     tx: {
       from: ownerAddress,
-      to: getAMMInfo(chainId, amm)!.apertureAutomanV3,
-      data: getAutomanV3RebalanceCalldata(
+      to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
+      data: getAutomanV4RebalanceCalldata(
         amm,
         mintParams,
         existingPositionId,
