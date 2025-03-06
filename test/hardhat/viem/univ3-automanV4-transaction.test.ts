@@ -230,35 +230,59 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       positionId,
       publicClient,
     );
-    const { swapData, liquidity } = (
+    const [
+      newPositionTickLower,
+      newPositionTickUpper,
+      slippage,
+      isCollect,
+      tokenOut,
+      isUnwrapNative,
+    ] = [240000, 300000, 0.01, false, NULL_ADDRESS, true];
+    const {
+      swapData,
+      liquidity,
+      token0FeeAmount,
+      token1FeeAmount,
+      amountOut,
+      swapData0,
+      swapData1,
+    } = (
       await getRebalanceSwapInfoV4(
-        chainId,
         amm,
+        chainId,
         publicClient,
         eoa,
         existingPosition,
-        /* newPositionTickLower= */ 240000,
-        /* newPositionTickUpper= */ 300000,
-        /* slippage= */ 0.01,
+        newPositionTickLower,
+        newPositionTickUpper,
+        slippage,
+        isCollect,
+        tokenOut,
+        isUnwrapNative,
         /* tokenPricesUsd= */ ['60000', '3000'],
         [E_Solver.SamePool],
       )
     )[0];
     const { tx: txRequest } = await getRebalanceV4Tx(
-      chainId,
       amm,
+      chainId,
       eoa,
       positionId,
-      /* newPositionTickLower= */ 240000,
-      /* newPositionTickUpper= */ 300000,
-      /* slippageTolerance= */ new Percent(1, 100),
-      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
-      publicClient,
-      swapData,
-      liquidity,
-      /* token0FeeAmount= */ 0n,
-      /* token1FeeAmount= */ 0n,
       existingPosition.position,
+      liquidity,
+      newPositionTickLower,
+      newPositionTickUpper,
+      slippage,
+      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
+      swapData,
+      isCollect,
+      token0FeeAmount,
+      token1FeeAmount,
+      tokenOut,
+      /* amountOutExpected= */ amountOut,
+      swapData0 ?? '0x',
+      swapData1 ?? '0x',
+      isUnwrapNative,
     );
     // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
@@ -286,7 +310,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
       tickSpacing: existingPosition.pool.tickSpacing,
-      liquidity: '13291498909567',
+      liquidity: '13237684752880',
       tickLower: 240000,
       tickUpper: 300000,
     });
@@ -321,7 +345,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
       positionId,
       /* newPositionTickLower= */ 240000,
       /* newPositionTickUpper= */ 300000,
-      /* slippageTolerance= */ new Percent(1, 100),
+      /* slippage= */ new Percent(1, 100),
       /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
       swapData,
@@ -1640,7 +1664,7 @@ describe('Viem - UniV3AutomanV4 transaction tests', function () {
 
     // Test balance of EOA.
     expect(eoaNativeBalanceAfter - eoaNativeBalanceBefore).to.equal(
-      -19248356964649790n, // negative because of gasFees
+      -19247743567324070n, // negative because of gasFees
     );
     expect(eoaToken0BalanceAfter - eoaToken0BalanceBefore).to.equal(27621381n);
     expect(eoaToken1BalanceAfter - eoaToken1BalanceBefore).to.equal(0n);

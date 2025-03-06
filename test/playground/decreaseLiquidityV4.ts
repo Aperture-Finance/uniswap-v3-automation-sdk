@@ -63,6 +63,8 @@ async function testDecreaseLiquidityV4(tokenOut: Address) {
     solver1,
     swapData,
     swapData1,
+    amount0,
+    amount1,
     amountOut,
     liquidity,
     token0FeeAmount,

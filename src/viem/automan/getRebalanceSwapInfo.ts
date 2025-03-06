@@ -21,7 +21,7 @@ import { Address, PublicClient } from 'viem';
  * @param existingPositionId Existing position token id.
  * @param newPositionTickLower The lower tick of the new position.
  * @param newPositionTickUpper The upper tick of the new position.
- * @param slippageTolerance How much the amount of either token0 or token1 in the new position is allowed to change unfavorably.
+ * @param slippage How much the amount of either token0 or token1 in the new position is allowed to change unfavorably.
  * @param tokenPrices The prices of the two tokens in the pool.
  * @param publicClient Viem public client.
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
@@ -35,7 +35,7 @@ export async function getRebalanceSwapInfo(
   existingPositionId: bigint,
   newPositionTickLower: number,
   newPositionTickUpper: number,
-  slippageTolerance: number,
+  slippage: number,
   tokenPricesUsd: [string, string],
   publicClient: PublicClient,
   includeSolvers?: E_Solver[],
@@ -60,7 +60,7 @@ export async function getRebalanceSwapInfo(
     newPositionTickLower,
     newPositionTickUpper,
     from,
-    slippageTolerance,
+    slippage,
     tokenPricesUsd,
     publicClient,
     blockNumber,
@@ -119,27 +119,33 @@ export async function getRebalanceSwapInfoBackend(
 // Same as getRebalanceSwapInfo, except return the fees as token0FeeAmount and token1FeeAmount instead of feeBips
 // Frontend don't have to use, but implemented to make it easier to migrate to future versions.
 export async function getRebalanceSwapInfoV4(
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
   positionDetails: PositionDetails,
   newPositionTickLower: number,
   newPositionTickUpper: number,
   slippage: number,
+  isCollect: boolean,
+  tokenOut: Address,
+  isUnwrapNative: boolean,
   tokenPricesUsd: [string, string],
   includeSolvers?: E_Solver[],
   blockNumber?: bigint,
 ): Promise<SolverResult[]> {
   return rebalanceV4(
-    chainId,
     amm,
+    chainId,
     publicClient,
     from,
     positionDetails,
     newPositionTickLower,
     newPositionTickUpper,
     slippage,
+    isCollect,
+    tokenOut,
+    isUnwrapNative,
     tokenPricesUsd,
     includeSolvers,
     blockNumber,
