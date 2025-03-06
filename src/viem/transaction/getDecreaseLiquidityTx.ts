@@ -26,7 +26,7 @@ import { PositionDetails } from '../position';
  * @param positionDetails Uniswap SDK PositionDetails for the specified position.
  * @param decreaseLiquidityOptions Remove liquidity options. RemoveLiquidityOptions can be used for decreasing liquidity (<100%).
  * @param tokenOut The token to swap collected tokens to.
- * @param tokenOutMin Min amount of tokenOut to receive for slippage check.
+ * @param tokenOutExpected The expected amount of tokenOut to receive before slippage check, equals to (amountOut ?? 0n) from getDecreaseLiquidityV4SwapInfo().
  * @param token0FeeAmount Fee amount for token0.
  * @param token1FeeAmount Fee amount for token1.
  * @param swapData0 Swap data for swapping token0 to tokenOut.

@@ -54,6 +54,7 @@ import {
   ReinvestReturnType,
   SlipStreamMintParams,
   UniV3MintParams,
+  ZapOutParams,
 } from './types';
 
 export function getAutomanContract(
@@ -827,16 +828,16 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
 
 export async function requestRebalanceV4<M extends keyof RpcReturnType>(
   method: M,
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
   swapData: Hex = '0x',
+  isCollect: boolean,
+  zapOutParams: ZapOutParams,
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
   checkTicks(amm, mintParams);
@@ -844,9 +845,9 @@ export async function requestRebalanceV4<M extends keyof RpcReturnType>(
     amm,
     mintParams,
     tokenId,
-    token0FeeAmount,
-    token1FeeAmount,
     swapData,
+    isCollect,
+    zapOutParams,
     /* permitInfo= */ undefined,
   );
   from = getFromAddress(from);
@@ -914,8 +915,8 @@ export async function simulateRebalance(
 
 /**
  * Simulate a `rebalance` call.
- * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
+ * @param chainId The chain ID.
  * @param publicClient Viem public client.
  * @param from The address to simulate the call from.
  * @param owner The owner of the position to rebalance.
@@ -927,30 +928,30 @@ export async function simulateRebalance(
  * @param blockNumber Optional block number to query.
  */
 export async function simulateRebalanceV4(
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
-  swapData: Hex = '0x',
+  swapData: Hex,
+  isCollect: boolean,
+  zapOutParams: ZapOutParams,
   blockNumber?: bigint,
 ): Promise<RebalanceReturnType> {
   const data = await requestRebalanceV4(
     'eth_call',
-    chainId,
     amm,
+    chainId,
     publicClient,
     from,
     owner,
     mintParams,
     tokenId,
-    token0FeeAmount,
-    token1FeeAmount,
     swapData,
+    isCollect,
+    zapOutParams,
     blockNumber,
   );
   return decodeFunctionResult({
@@ -990,31 +991,31 @@ export async function estimateRebalanceGas(
 }
 
 export async function estimateRebalanceV4Gas(
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address | undefined,
   owner: Address,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
-  swapData: Hex = '0x',
+  swapData: Hex,
+  isCollect: boolean,
+  zapOutParams: ZapOutParams,
   blockNumber?: bigint,
 ): Promise<bigint> {
   return hexToBigInt(
     await requestRebalanceV4(
       'eth_estimateGas',
-      chainId,
       amm,
+      chainId,
       publicClient,
       from,
       owner,
       mintParams,
       tokenId,
-      token0FeeAmount,
-      token1FeeAmount,
       swapData,
+      isCollect,
+      zapOutParams,
       blockNumber,
     ),
   );

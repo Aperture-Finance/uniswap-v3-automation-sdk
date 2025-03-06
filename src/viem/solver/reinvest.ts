@@ -539,19 +539,11 @@ export async function reinvestV4(
         blockNumber,
       );
       gasFeeEstimation = await estimateGas(swapData);
-      const amount0OutAfterSlippage =
-        (amount0 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
-      const amount1OutAfterSlippage =
-        (amount1 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
 
       return {
         solver,
-        amount0: amount0OutAfterSlippage,
-        amount1: amount1OutAfterSlippage,
+        amount0,
+        amount1,
         liquidity,
         swapData,
         gasFeeEstimation,

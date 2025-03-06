@@ -69,6 +69,7 @@ export type SolverResult = {
   solver1?: E_Solver;
   amount0: bigint;
   amount1: bigint;
+  amountOut?: bigint; // Used for zapOut to token2.
   liquidity: bigint;
   swapData: Hex;
   swapData0?: Hex;

@@ -138,6 +138,11 @@ export async function getMintOptimalV4Tx(
   };
 }
 
+/**
+ * @param tokenInAmountToSwapToToken0 equals amount0 from getIncreaseLiquidityFromTokenInSwapInfo().
+ * @param tokenInAmountToSwapToToken1 equals amount1 from getIncreaseLiquidityFromTokenInSwapInfo().
+ * @param tokenInFeeAmount equals (token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n) from getIncreaseLiquidityFromTokenInSwapInfo().
+ */
 export async function getMintFromTokenInTx(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,

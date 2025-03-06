@@ -24,6 +24,7 @@ import {
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
   IOCKEY_LOGGER,
+  NULL_ADDRESS,
   PCSV3AutomanV4,
   PCSV3AutomanV4__factory,
   UniV3OptimalSwapRouter__factory,
@@ -231,35 +232,59 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       positionId,
       publicClient,
     );
-    const { swapData, liquidity } = (
+    const [
+      newPositionTickLower,
+      newPositionTickUpper,
+      slippage,
+      isCollect,
+      tokenOut,
+      isUnwrapNative,
+    ] = [240000, 300000, 0.01, false, NULL_ADDRESS, true];
+    const {
+      swapData,
+      liquidity,
+      token0FeeAmount,
+      token1FeeAmount,
+      amountOut,
+      swapData0,
+      swapData1,
+    } = (
       await getRebalanceSwapInfoV4(
-        chainId,
         amm,
+        chainId,
         publicClient,
         eoa,
         existingPosition,
-        /* newPositionTickLower= */ 240000,
-        /* newPositionTickUpper= */ 300000,
-        /* slippageTolerance= */ 0.01,
+        newPositionTickLower,
+        newPositionTickUpper,
+        slippage,
+        isCollect,
+        tokenOut,
+        isUnwrapNative,
         /* tokenPricesUsd= */ ['1', '700'], // BSC-USD / WBNB
         [E_Solver.SamePool],
       )
     )[0];
     const { tx: txRequest } = await getRebalanceV4Tx(
-      chainId,
       amm,
+      chainId,
       eoa,
       positionId,
-      /* newPositionTickLower= */ 240000,
-      /* newPositionTickUpper= */ 300000,
-      /* slippageTolerance= */ new Percent(1, 100),
-      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
-      publicClient,
-      swapData,
-      liquidity,
-      /* token0FeeAmount= */ 0n,
-      /* token1FeeAmount= */ 0n,
       existingPosition.position,
+      liquidity,
+      newPositionTickLower,
+      newPositionTickUpper,
+      slippage,
+      /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
+      swapData,
+      isCollect,
+      token0FeeAmount,
+      token1FeeAmount,
+      tokenOut,
+      /* tokenOutExpected= */ amountOut,
+      swapData0 ?? '0x',
+      swapData1 ?? '0x',
+      isUnwrapNative,
     );
     // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
@@ -287,7 +312,7 @@ describe('Viem - PCSV3AutomanV4 transaction tests', function () {
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
       tickSpacing: 10,
-      liquidity: '15250213564999769681912914',
+      liquidity: '15215846387057462262267689',
       tickLower: 240000,
       tickUpper: 300000,
     });

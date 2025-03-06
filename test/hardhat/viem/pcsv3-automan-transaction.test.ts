@@ -237,7 +237,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         positionId,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
-        /* slippageTolerance= */ 0.01,
+        /* slippage= */ 0.01,
         /* tokenPricesUsd= */ ['1', '700'], // BSC-USD / WBNB
         publicClient,
         [E_Solver.SamePool],
@@ -253,7 +253,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       positionId,
       /* newPositionTickLower= */ 240000,
       /* newPositionTickUpper= */ 300000,
-      /* slippageTolerance= */ new Percent(1, 100),
+      /* slippage= */ new Percent(1, 100),
       /* deadlineEpochSeconds= */ BigInt(Math.floor(Date.now() / 1000)),
       publicClient,
       swapData,

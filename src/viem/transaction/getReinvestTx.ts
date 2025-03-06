@@ -29,10 +29,20 @@ export async function getReinvestTx(
   increaseOptions: IncreaseOptions,
   feeBips: bigint,
   swapData: Hex,
-  amount0Min: bigint,
-  amount1Min: bigint,
+  amount0: bigint,
+  amount1: bigint,
   permitInfo?: PermitInfo,
 ): Promise<TransactionRequest> {
+  const [amount0Slippage, amount1Slippage] = [
+    (amount0 * BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
+      BigInt(increaseOptions.slippageTolerance.denominator.toString()),
+    (amount1 * BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
+      BigInt(increaseOptions.slippageTolerance.denominator.toString()),
+  ];
+  const [amount0Min, amount1Min] = [
+    amount0 - amount0Slippage,
+    amount1 - amount1Slippage,
+  ];
   const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: 0n, // Not used.
@@ -63,10 +73,20 @@ export async function getReinvestV4Tx(
   token0FeeAmount: bigint,
   token1FeeAmount: bigint,
   swapData: Hex,
-  amount0Min: bigint,
-  amount1Min: bigint,
+  amount0: bigint,
+  amount1: bigint,
   permitInfo?: PermitInfo,
 ): Promise<TransactionRequest> {
+  const [amount0Slippage, amount1Slippage] = [
+    (amount0 * BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
+      BigInt(increaseOptions.slippageTolerance.denominator.toString()),
+    (amount1 * BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
+      BigInt(increaseOptions.slippageTolerance.denominator.toString()),
+  ];
+  const [amount0Min, amount1Min] = [
+    amount0 - amount0Slippage,
+    amount1 - amount1Slippage,
+  ];
   const increaseLiquidityParams: IncreaseLiquidityParams = {
     tokenId: BigInt(increaseOptions.tokenId.toString()),
     amount0Desired: 0n, // Not used.
