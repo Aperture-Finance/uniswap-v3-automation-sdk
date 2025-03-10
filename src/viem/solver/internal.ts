@@ -47,7 +47,7 @@ export const calcPriceImpact = (
     exchangePrice.eq(0) || currentPoolPrice.eq(0)
       ? exchangePrice
       : // Can be positive if the received value exceeds the paid value.
-        new Big(1).minus(new Big(exchangePrice).div(currentPoolPrice))
+        new Big(exchangePrice).div(currentPoolPrice).minus(1)
   ).toString(); // Return as string to be consistent with okx dex aggregator.
 };
 
