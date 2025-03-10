@@ -3,7 +3,6 @@ import {
   Automan__factory,
   ISlipStreamAutomanV4__factory,
   ISlipStreamAutoman__factory,
-  NULL_ADDRESS,
   PermitInfo,
 } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -245,20 +244,11 @@ export function getAutomanV4RebalanceCalldata(
   amm: AutomatedMarketMakerEnum,
   mintParams: UniV3MintParams | SlipStreamMintParams,
   tokenId: bigint,
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
-  swapData: Hex = '0x',
+  swapData: Hex,
+  isCollect: boolean,
+  zapOutParams: ZapOutParams,
   permitInfo?: PermitInfo,
 ): Hex {
-  const zapOutParams: ZapOutParams = {
-    token0FeeAmount,
-    token1FeeAmount,
-    tokenOut: NULL_ADDRESS,
-    tokenOutMin: BigInt(0),
-    swapData0: '0x',
-    swapData1: '0x',
-    isUnwrapNative: true,
-  };
   if (permitInfo === undefined) {
     if (amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM) {
       return encodeFunctionData({
@@ -267,7 +257,7 @@ export function getAutomanV4RebalanceCalldata(
           mintParams as SlipStreamMintParams,
           tokenId,
           swapData,
-          /* isCollect= */ false,
+          isCollect,
           zapOutParams,
         ] as const,
         functionName: 'rebalance',
@@ -279,7 +269,7 @@ export function getAutomanV4RebalanceCalldata(
         mintParams as UniV3MintParams,
         tokenId,
         swapData,
-        /* isCollect= */ false,
+        isCollect,
         zapOutParams,
       ] as const,
       functionName: 'rebalance',
@@ -299,7 +289,7 @@ export function getAutomanV4RebalanceCalldata(
         mintParams as SlipStreamMintParams,
         tokenId,
         swapData,
-        /* isCollect= */ false,
+        isCollect,
         zapOutParams,
         permitParams,
       ] as const,
@@ -312,7 +302,7 @@ export function getAutomanV4RebalanceCalldata(
       mintParams as UniV3MintParams,
       tokenId,
       swapData,
-      /* isCollect= */ false,
+      isCollect,
       zapOutParams,
       permitParams,
     ] as const,
