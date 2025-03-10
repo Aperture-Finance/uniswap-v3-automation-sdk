@@ -1,7 +1,7 @@
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { NonfungiblePositionManager } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { PublicClient, TransactionRequest } from 'viem';
+import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
   BasicPositionInfo,
@@ -26,7 +26,7 @@ import {
  */
 export async function getCollectTx(
   positionId: bigint,
-  recipient: string,
+  recipient: Address,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
@@ -61,7 +61,7 @@ export async function getCollectTx(
 
   return getTxToNonfungiblePositionManager(
     getAMMInfo(chainId, amm)!,
-    calldata,
+    calldata as Hex,
     value,
     recipient,
   );

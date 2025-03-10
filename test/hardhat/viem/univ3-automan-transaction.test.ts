@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/univ3-automan-transaction.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -32,10 +33,8 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfo,
-  getIncreaseLiquidityOptimalTx,
-  getMintOptimalSwapInfo,
-  getMintOptimalTx,
+  getMintOptimalSwapInfoV4,
+  getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
   getRebalanceSwapInfo,
@@ -61,10 +60,10 @@ describe('Viem - UniV3Automan transaction tests', function () {
   const blockNumber = 17188000n;
   let automanContract: UniV3Automan;
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+  const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
   beforeEach(async function () {
@@ -86,7 +85,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
     );
     await automanContract.deployed();
     await automanContract.setFeeConfig({
-      feeCollector: WHALE_ADDRESS,
+      feeCollector,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
@@ -387,7 +386,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         amm,
         token0Amount,
@@ -397,11 +396,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
         tickUpper,
         eoa,
         /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.OneInch],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalTx(
+    const { tx: txRequest } = await getMintOptimalV4Tx(
       chainId,
       amm,
       token0Amount,
@@ -449,7 +449,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
     });
   });
 
-  it('Optimal mint without 1inch', async function () {
+  // Test deprecated and moved to univ3-automanV4-transaction.test.ts.
+  it.skip('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -483,7 +484,7 @@ describe('Viem - UniV3Automan transaction tests', function () {
       getAMMInfo(chainId, amm)!.apertureAutoman,
     );
     const { swapData, liquidity } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         amm,
         token0Amount,
@@ -493,11 +494,12 @@ describe('Viem - UniV3Automan transaction tests', function () {
         tickUpper,
         eoa,
         /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimalTx(
+    const { tx: txRequest } = await getMintOptimalV4Tx(
       chainId,
       amm,
       token0Amount,
@@ -635,7 +637,8 @@ describe('Viem - UniV3Automan transaction tests', function () {
     ).to.equal(true);
   });
 
-  it('Increase liquidity optimal without 1inch', async function () {
+  // Test deprecated and moved to univ3-automanV4-transaction.test.ts.
+  it.skip('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
