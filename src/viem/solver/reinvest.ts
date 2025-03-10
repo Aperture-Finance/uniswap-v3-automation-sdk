@@ -26,13 +26,10 @@ import { PositionDetails } from '../position';
 import { estimateTotalGasCostForOptimismLikeL2Tx } from '../public_client';
 import {
   buildOptimalSolutions,
-  calcPriceImpact,
   getOptimalSwapAmount,
   getOptimalSwapAmountV4,
-  getSwapPath,
-  getSwapRoute,
 } from './internal';
-import { SolverResult } from './types';
+import { SolverResult, SwapPath } from './types';
 
 // Used for backend.
 export async function reinvestBackend(
@@ -126,20 +123,21 @@ export async function reinvestBackend(
     amm,
     chainId,
     tokenId,
-    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     nativeToUsd,
-    token0FeeAmount,
-    token1FeeAmount,
+    includeSolvers,
     amount0Desired: increaseLiquidityParams.amount0Desired,
     amount1Desired: increaseLiquidityParams.amount1Desired,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
+    token0FeeAmount,
+    token1FeeAmount,
     positionUsd: positionUsd.toString(), // without feesCollected of the position
     positionRawNative: positionRawNative.toString(), // without feesCollected of the position
     feeBips,
+    feeUSD: feeUSD.toFixed(),
   });
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
@@ -197,8 +195,12 @@ export async function reinvestBackend(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
@@ -210,7 +212,9 @@ export async function reinvestBackend(
         Number(increaseOptions.slippageTolerance.numerator) /
         Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -264,23 +268,25 @@ export async function reinvestBackend(
         );
 
       getLogger().info('SDK.Solver.reinvestBackend.round2.fees ', {
-        solver,
         amm,
         chainId,
         tokenId,
-        feeUSD: feeUSD.toString(),
+        solver,
+        gasUnits,
+        gasInRawNative,
+        gasDeductionPips, // just gasReimbursementFees
+        feeBips, // just apertureFees
+        totalFeePips,
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
-        aptrFeeBips: feeBips,
-        gasUnits,
-        gasInRawNative,
-        gasDeductionPips,
-        totalFeePips,
+        feeUSD: feeUSD.toFixed(),
       });
 
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -294,9 +300,13 @@ export async function reinvestBackend(
           zeroForOne,
         }));
       } else {
-        // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
-        swapData = '0x';
-        swapRoute = undefined;
+        // Clear prior swap info if no swapAmountIn after accounting for gas reimbursements.
+        [swapData, swapPath, swapRoute, priceImpact] = [
+          '0x',
+          undefined,
+          undefined,
+          undefined,
+        ];
       }
       // Check fees offline to save a simulation request, because AutomanV1 will otherwise revert.
       if (token0FeeAmount > increaseLiquidityParams.amount0Desired) {
@@ -321,49 +331,21 @@ export async function reinvestBackend(
         blockNumber,
       );
 
-      const amount0OutAfterSlippage =
-        (amount0 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
-      const amount1OutAfterSlippage =
-        (amount1 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
-
       return {
         solver,
-        amount0: amount0OutAfterSlippage,
-        amount1: amount1OutAfterSlippage,
+        amount0,
+        amount1,
         liquidity,
-        swapData,
         gasUnits,
         gasFeeEstimation: gasInRawNative,
-        swapRoute: getSwapRoute(
-          token0.address as Address,
-          token1.address as Address,
-          amount0 - increaseLiquidityParams.amount0Desired,
-          swapRoute,
-        ),
-        swapPath: getSwapPath(
-          token0.address as Address,
-          token1.address as Address,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-          slippage,
-        ),
-        feeUSD: feeUSD.toFixed(),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-        ),
-        feeBips: totalFeePips,
         token0FeeAmount,
         token1FeeAmount,
+        feeUSD: feeUSD.toFixed(),
+        feeBips: totalFeePips,
+        swapData,
+        swapPath,
+        swapRoute,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
@@ -459,16 +441,17 @@ export async function reinvestV4(
     amm,
     chainId,
     tokenId,
-    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount,
-    token1FeeAmount,
+    includeSolvers,
     amount0Desired: increaseLiquidityParams.amount0Desired,
     amount1Desired: increaseLiquidityParams.amount1Desired,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after fees
+    token0FeeAmount,
+    token1FeeAmount,
+    feeUSD: feeUSD.toFixed(),
   });
 
   const estimateGas = async (swapData: Hex) => {
@@ -500,8 +483,12 @@ export async function reinvestV4(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
@@ -512,7 +499,9 @@ export async function reinvestV4(
         Number(increaseOptions.slippageTolerance.numerator) /
         Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -546,33 +535,14 @@ export async function reinvestV4(
         amount0,
         amount1,
         liquidity,
-        swapData,
         gasFeeEstimation,
-        swapRoute: getSwapRoute(
-          token0.address as Address,
-          token1.address as Address,
-          amount0 - increaseLiquidityParams.amount0Desired,
-          swapRoute,
-        ),
-        swapPath: getSwapPath(
-          token0.address as Address,
-          token1.address as Address,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-          slippage,
-        ),
         feeUSD: feeUSD.toFixed(),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-        ),
         token0FeeAmount,
         token1FeeAmount,
+        swapData,
+        swapPath,
+        swapRoute,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {

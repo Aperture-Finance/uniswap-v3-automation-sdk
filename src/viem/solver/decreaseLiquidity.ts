@@ -13,7 +13,7 @@ import {
   simulateDecreaseLiquidityV4,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { getSwapRoute, solveExactInput } from './internal';
+import { solveExactInput } from './internal';
 import { SolverResult } from './types';
 
 /**
@@ -128,13 +128,28 @@ export async function decreaseLiquidityV4(
       includeSolvers,
     ),
   ]);
-  const [solver0, swapData0, swapRoute0, solver1, swapData1, swapRoute1] = [
+  const [
+    solver0,
+    swapData0,
+    swapPath0,
+    swapRoute0,
+    priceImpact0,
+    solver1,
+    swapData1,
+    swapPath1,
+    swapRoute1,
+    priceImpact1,
+  ] = [
     token0SolverResult.solver,
     token0SolverResult.swapData,
+    token0SolverResult.swapPath,
     token0SolverResult.swapRoute,
+    token0SolverResult.priceImpact,
     token1SolverResult.solver,
     token1SolverResult.swapData,
+    token1SolverResult.swapPath,
     token1SolverResult.swapRoute,
+    token1SolverResult.priceImpact,
   ];
   const tokenOutAmount =
     token0SolverResult.tokenOutAmount + token1SolverResult.tokenOutAmount;
@@ -147,29 +162,31 @@ export async function decreaseLiquidityV4(
         .mul(tokenPricesUsd[1]),
     );
   getLogger().info('SDK.decreaseLiquidityV4.fees ', {
-    solvers: includeSolvers,
-    solver0,
-    solver1,
     amm,
     chainId,
-    position: decreaseLiquidityOptions.tokenId,
-    slippage,
-    feeUSD: feeUSD.toString(),
+    tokenId: decreaseLiquidityOptions.tokenId,
+    tokenOut,
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    decrementalPositionInitialAmount0,
-    decrementalPositionInitialAmount1,
-    token0FeeAmount,
-    token1FeeAmount,
-    tokenOut,
-    tokenOutAmount,
+    includeSolvers,
     liquidity,
+    slippage,
+    feeUSD: feeUSD.toFixed(),
+    // token0 to token2 swap.
+    solver0,
+    decrementalPositionInitialAmount0,
+    token0FeeAmount,
     token0SwapIn,
     tokenOutFromToken0: token0SolverResult.tokenOutAmount,
+    token0SolverResults: token0SolverResult.solverResults,
+    // token1 to token2 swap.
+    solver1,
+    decrementalPositionInitialAmount1,
+    token1FeeAmount,
     token1SwapIn,
     tokenOutFromToken1: token1SolverResult.tokenOutAmount,
-    token0SolverResults: token0SolverResult.solverResults,
     token1SolverResults: token1SolverResult.solverResults,
+    tokenOutAmount,
   });
 
   const estimateGas = async (swapData0: Hex, swapData1: Hex) => {
@@ -205,48 +222,28 @@ export async function decreaseLiquidityV4(
   };
   const gasFeeEstimation = await estimateGas(swapData0, swapData1);
 
-  const [swap0Token0, swap0Token1, swap0deltaAmount0] =
-    token0.address < tokenOut
-      ? [token0.address as Address, tokenOut, -token0SwapIn]
-      : [
-          tokenOut,
-          token0.address as Address,
-          token0SwapIn, // inaccurate, but correct sign, which is only thing that matters
-        ];
-  const [swap1Token0, swap1Token1, swap1deltaAmount0] =
-    token1.address < tokenOut
-      ? [token1.address as Address, tokenOut, -token1SwapIn]
-      : [
-          tokenOut,
-          token1.address as Address,
-          token1SwapIn, // inaccurate, but correct sign, which is only thing that matters
-        ];
   return {
-    solver0,
-    solver1,
     // The sum of amounts is the expected tokenOutAmount.
     amount0: token0SolverResult.tokenOutAmount,
     amount1: token1SolverResult.tokenOutAmount,
     amountOut:
       token0SolverResult.tokenOutAmount + token1SolverResult.tokenOutAmount,
     liquidity,
-    swapData0,
-    swapData1,
     gasFeeEstimation,
-    swapRoute0: getSwapRoute(
-      /* token0= */ swap0Token0,
-      /* token1= */ swap0Token1,
-      /* deltaAmount0= */ swap0deltaAmount0,
-      swapRoute0,
-    ),
-    swapRoute1: getSwapRoute(
-      /* token0= */ swap1Token0,
-      /* token1= */ swap1Token1,
-      /* deltaAmount0= */ swap1deltaAmount0,
-      swapRoute1,
-    ),
     feeUSD: feeUSD.toFixed(),
     token0FeeAmount,
     token1FeeAmount,
+    // token0 to token2 swap
+    solver0,
+    swapData0,
+    swapPath0,
+    swapRoute0,
+    priceImpact0,
+    // token1 to token2 swap
+    solver1,
+    swapData1,
+    swapPath1,
+    swapRoute1,
+    priceImpact1,
   } as SolverResult;
 }
