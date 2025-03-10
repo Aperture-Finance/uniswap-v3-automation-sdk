@@ -1045,6 +1045,8 @@ describe('Viem - Automan transaction tests', function () {
     });
   });
 
+  // Test case expected to fail when automanV4 not deployed yet
+  // or when hardhat test blockNumber is before automanV4 deployment.
   it('mintOptimalV4 no need swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
@@ -1155,6 +1157,8 @@ describe('Viem - Automan transaction tests', function () {
     expect(swapPath.tokenOut).to.equal(WETH_ADDRESS);
   });
 
+  // Test case expected to fail when automanV4 not deployed yet
+  // or when hardhat test blockNumber is before automanV4 deployment.
   it('Increase liquidity optimal no need swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
