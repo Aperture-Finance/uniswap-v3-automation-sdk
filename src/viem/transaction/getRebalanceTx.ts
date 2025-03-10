@@ -2,11 +2,13 @@ import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
 import { ADDRESS_ZERO, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
+import Big from 'big.js';
 import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
   SlipStreamMintParams,
   UniV3MintParams,
+  ZapOutParams,
   getAutomanRebalanceCalldata,
   getAutomanV4RebalanceCalldata,
 } from '../automan';
@@ -121,34 +123,30 @@ export async function getRebalanceTx(
 // Same as getRebalanceTx, but with feeAmounts instead of feeBips.
 // Do not use, but implemented to make it easier to migrate to future versions.
 export async function getRebalanceV4Tx(
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
-  ownerAddress: Address,
+  chainId: ApertureSupportedChainId,
+  owner: Address,
   existingPositionId: bigint,
+  position: Position,
+  liquidity: bigint,
   newPositionTickLower: number,
   newPositionTickUpper: number,
-  slippageTolerance: Percent,
+  slippage: number,
   deadlineEpochSeconds: bigint,
-  publicClient: PublicClient,
   swapData: Hex,
-  liquidity: bigint,
-  token0FeeAmount: bigint = 0n,
-  token1FeeAmount: bigint = 0n,
-  position?: Position,
+  isCollect: boolean,
+  token0FeeAmount: bigint,
+  token1FeeAmount: bigint,
+  tokenOut: Address,
+  amountOutExpected: bigint,
+  swapData0: Hex,
+  swapData1: Hex,
+  isUnwrapNative: boolean,
   permitInfo?: PermitInfo,
 ): Promise<{
   tx: TransactionRequest;
   amounts: SimulatedAmounts;
 }> {
-  if (position === undefined) {
-    ({ position } = await PositionDetails.fromPositionId(
-      chainId,
-      amm,
-      existingPositionId,
-      publicClient,
-    ));
-  }
-
   const newPosition = new Position({
     pool: position.pool,
     liquidity: liquidity.toString(),
@@ -156,8 +154,9 @@ export async function getRebalanceV4Tx(
     tickUpper: newPositionTickUpper,
   });
   const { amount0: amount0Min, amount1: amount1Min } =
-    newPosition.mintAmountsWithSlippage(slippageTolerance);
-
+    newPosition.mintAmountsWithSlippage(
+      new Percent(Math.floor(slippage * 1e6), 1e6),
+    );
   const mintParams: SlipStreamMintParams | UniV3MintParams =
     amm === AutomatedMarketMakerEnum.enum.SLIPSTREAM
       ? {
@@ -187,18 +186,31 @@ export async function getRebalanceV4Tx(
           recipient: ADDRESS_ZERO, // Param value ignored by Automan.
           deadline: deadlineEpochSeconds,
         };
+  const tokenOutSlippage = BigInt(
+    Big(amountOutExpected.toString()).mul(slippage).toFixed(0),
+  );
+  const tokenOutMin = amountOutExpected - tokenOutSlippage;
+  const zapOutParams: ZapOutParams = {
+    token0FeeAmount,
+    token1FeeAmount,
+    tokenOut,
+    tokenOutMin,
+    swapData0,
+    swapData1,
+    isUnwrapNative,
+  };
 
   return {
     tx: {
-      from: ownerAddress,
+      from: owner,
       to: getAMMInfo(chainId, amm)!.apertureAutomanV4,
       data: getAutomanV4RebalanceCalldata(
         amm,
         mintParams,
         existingPositionId,
-        token0FeeAmount,
-        token1FeeAmount,
         swapData,
+        isCollect,
+        zapOutParams,
         permitInfo,
       ),
     },

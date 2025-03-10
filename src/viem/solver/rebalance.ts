@@ -1,6 +1,7 @@
 import {
   ApertureSupportedChainId,
   GAS_LIMIT_L2_MULTIPLIER,
+  NULL_ADDRESS,
   getAMMInfo,
   getChainInfo,
   getLogger,
@@ -13,6 +14,7 @@ import { DEFAULT_SOLVERS, E_Solver, getSolver } from '.';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
+  ZapOutParams,
   estimateRebalanceGas,
   estimateRebalanceV4Gas,
   getAutomanRebalanceCalldata,
@@ -34,6 +36,7 @@ import {
   buildOptimalSolutions,
   getOptimalSwapAmount,
   getOptimalSwapAmountV4,
+  solveExactInput,
 } from './internal';
 import { SolverResult, SwapPath, SwapRoute } from './types';
 
@@ -786,14 +789,17 @@ export async function rebalanceBackend(
 // Same as rebalanceOptimalV2, but with feeAmounts instead of feeBips.
 // Frontend don't have to use, but implemented to make it easier to migrate to future versions.
 export async function rebalanceV4(
-  chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
   publicClient: PublicClient,
   from: Address,
   positionDetails: PositionDetails,
   newTickLower: number,
   newTickUpper: number,
   slippage: number,
+  isCollect: boolean,
+  tokenOut: Address,
+  isUnwrapNative: boolean,
   tokenPricesUsd: [string, string],
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
   blockNumber?: bigint,
@@ -820,7 +826,11 @@ export async function rebalanceV4(
     tokenPricesUsd,
   };
 
-  const [receive0, receive1] = await simulateDecreaseLiquidityV4(
+  const [token0FeesCollected, token1FeesCollected] = [
+    BigInt(positionDetails.tokensOwed0.numerator.toString()),
+    BigInt(positionDetails.tokensOwed1.numerator.toString()),
+  ];
+  let [receive0, receive1] = await simulateDecreaseLiquidityV4(
     amm,
     chainId,
     publicClient,
@@ -838,6 +848,10 @@ export async function rebalanceV4(
     /* isUnwrapNative= */ true,
     blockNumber,
   );
+  if (isCollect) {
+    receive0 -= token0FeesCollected;
+    receive1 -= token1FeesCollected;
+  }
 
   const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV4(
     chainId,
@@ -865,12 +879,12 @@ export async function rebalanceV4(
     .div(10 ** tokenInDecimals)
     .mul(tokenInUsd);
   const reinvestToken0FeeAmount = BigInt(
-    new Big(positionDetails.tokensOwed0.quotient.toString())
+    new Big(positionDetails.tokensOwed0.numerator.toString())
       .mul(getFeeReinvestRatio(positionDetails.fee))
       .toFixed(0),
   );
   const reinvestToken1FeeAmount = BigInt(
-    new Big(positionDetails.tokensOwed0.quotient.toString())
+    new Big(positionDetails.tokensOwed1.numerator.toString())
       .mul(getFeeReinvestRatio(positionDetails.fee))
       .toFixed(0),
   );
@@ -958,22 +972,118 @@ export async function rebalanceV4(
           recipient: positionDetails.owner, // Param value ignored by Automan for rebalance.
           deadline: BigInt(Math.floor(Date.now() / 1000 + 24 * 60 * 60)),
         };
-
+  let [
+    solver0,
+    solver1,
+    swapData0,
+    swapData1,
+    swapPath0,
+    swapPath1,
+    swapRoute0,
+    swapRoute1,
+    priceImpact0,
+    priceImpact1,
+    amountOut,
+  ]: [
+    E_Solver | undefined,
+    E_Solver | undefined,
+    Hex,
+    Hex,
+    SwapPath | undefined,
+    SwapPath | undefined,
+    SwapRoute | undefined,
+    SwapRoute | undefined,
+    string | undefined,
+    string | undefined,
+    bigint,
+  ] = [
+    undefined,
+    undefined,
+    '0x',
+    '0x',
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    0n,
+  ];
+  if (isCollect && tokenOut !== NULL_ADDRESS) {
+    const [token0SolverResult, token1SolverResult] = await Promise.all([
+      solveExactInput(
+        amm,
+        chainId,
+        from,
+        /* tokenIn= */ token0.address as Address,
+        tokenOut,
+        feeOrTickSpacing,
+        token0FeesCollected,
+        slippage,
+        includeSolvers,
+      ),
+      solveExactInput(
+        amm,
+        chainId,
+        from,
+        /* tokenIn= */ token1.address as Address,
+        tokenOut,
+        feeOrTickSpacing,
+        token1FeesCollected,
+        slippage,
+        includeSolvers,
+      ),
+    ]);
+    [
+      solver0,
+      solver1,
+      swapData0,
+      swapData1,
+      swapPath0,
+      swapPath1,
+      swapRoute0,
+      swapRoute1,
+      priceImpact0,
+      priceImpact1,
+      amountOut,
+    ] = [
+      token0SolverResult.solver,
+      token1SolverResult.solver,
+      token0SolverResult.swapData,
+      token1SolverResult.swapData,
+      token0SolverResult.swapPath,
+      token1SolverResult.swapPath,
+      token0SolverResult.swapRoute,
+      token1SolverResult.swapRoute,
+      token0SolverResult.priceImpact,
+      token1SolverResult.priceImpact,
+      token0SolverResult.tokenOutAmount + token1SolverResult.tokenOutAmount,
+    ];
+  }
+  const zapOutParams: ZapOutParams = {
+    token0FeeAmount,
+    token1FeeAmount,
+    tokenOut,
+    tokenOutMin: 0n, // 0 for simulation and estimating gas.
+    swapData0,
+    swapData1,
+    isUnwrapNative,
+  };
   const estimateGas = async (swapData: Hex) => {
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
         estimateRebalanceV4Gas(
-          chainId,
           amm,
+          chainId,
           publicClient,
           from,
           positionDetails.owner,
           mintParams,
           tokenId,
-          token0FeeAmount,
-          token1FeeAmount,
           swapData,
+          isCollect,
+          zapOutParams,
           blockNumber,
         ),
       ]);
@@ -1024,33 +1134,44 @@ export async function rebalanceV4(
         }));
       }
       [, liquidity, amount0, amount1] = await simulateRebalanceV4(
-        chainId,
         amm,
+        chainId,
         publicClient,
         from,
         positionDetails.owner,
         mintParams,
         tokenId,
-        token0FeeAmount,
-        token1FeeAmount,
         swapData,
+        isCollect,
+        zapOutParams,
         blockNumber,
       );
       gasFeeEstimation = await estimateGas(swapData);
 
       return {
         solver,
+        solver0,
+        solver1,
         amount0,
         amount1,
+        amountOut,
         liquidity,
         gasFeeEstimation,
         feeUSD: feeUSD.toFixed(),
         token0FeeAmount,
         token1FeeAmount,
         swapData,
+        swapData0,
+        swapData1,
         swapRoute,
+        swapRoute0,
+        swapRoute1,
         swapPath,
+        swapPath0,
+        swapPath1,
         priceImpact,
+        priceImpact0,
+        priceImpact1,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
