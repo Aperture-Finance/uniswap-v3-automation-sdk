@@ -4,7 +4,7 @@ import { Address, Hex } from 'viem';
 
 type SelectedProtocol = {
   name: string;
-  part: number;
+  part: number; // Sum of parts can be > 100 when specifying routes from tokenA -> tokenB -> tokenC.
   fromTokenAddress: string;
   toTokenAddress: string;
 };
@@ -14,7 +14,9 @@ export type SwapRoute = Array<Array<Array<SelectedProtocol>>>;
 export interface SolvedSwapInfo {
   toAmount: bigint;
   swapData: Hex;
+  swapPath?: SwapPath;
   swapRoute?: SwapRoute;
+  priceImpact?: string; // Can be positive if the received value exceeds the paid value.
 }
 
 export interface SolverProps {
@@ -61,9 +63,10 @@ export type SwapPath = {
 };
 
 export type SolverResult = {
-  // Need 3 solvers/swapData/swapPaths for rebalance while collecting fees to wallet as tokenOut.
-  // solver for swapping between token0 and token1 to the correct ratio for rebalancing to new position,
-  // solver0 for swapping token0Owed to tokenOut, and solver1 for swapping token1Owed to tokenOut.
+  // Need 3 swaps for rebalance while collecting fees to wallet as tokenOut.
+  // Each swap includes a solvers, swapData, swapPath, and priceImpact.
+  // swap (without numeric suffix) for swapping between token0 and token1 to the correct ratio for rebalancing to new position,
+  // swap0 for swapping token0Owed to tokenOut, and swap1 for swapping token1Owed to tokenOut.
   solver: E_Solver;
   solver0?: E_Solver;
   solver1?: E_Solver;
@@ -80,8 +83,9 @@ export type SolverResult = {
   swapPath?: SwapPath;
   swapPath0?: SwapPath;
   swapPath1?: SwapPath;
-  priceImpact?: Big;
-  priceImpact1?: Big;
+  priceImpact?: string;
+  priceImpact0?: string;
+  priceImpact1?: string;
   token0FeeAmount?: bigint;
   token1FeeAmount?: bigint;
   feeBips?: bigint;

@@ -2,10 +2,12 @@ import { SlipStreamSwapRouterAbi } from '@/abis/SlipStreamSwapRouter';
 import { UniV3SwapRouter02Abi } from '@/abis/UniV3SwapRouter02';
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address } from 'viem';
+import { Address, PublicClient } from 'viem';
 
 import { getERC20Overrides, getStateOverride } from '../overrides';
+import { getPool } from '../pool';
 import { getPublicClient } from '../public_client';
+import { calcPriceImpact, getSwapPath, getSwapRoute } from './internal';
 import { ISolver } from './types';
 
 export const getSamePoolSolver = (): ISolver => {
@@ -17,20 +19,50 @@ export const getSamePoolSolver = (): ISolver => {
         token0,
         token1,
         feeOrTickSpacing,
+        slippage,
         poolAmountIn,
         zeroForOne,
       } = props;
-      const toAmount: bigint = await getSamePoolToAmount(
-        amm,
-        chainId,
-        /* tokenIn= */ zeroForOne ? token0 : token1,
-        /* tokenOut= */ zeroForOne ? token1 : token0,
-        feeOrTickSpacing,
-        poolAmountIn,
-      );
+      const publicClient = getPublicClient(chainId);
+      const [toAmount, pool] = await Promise.all([
+        getSamePoolToAmount(
+          amm,
+          chainId,
+          publicClient,
+          /* tokenIn= */ zeroForOne ? token0 : token1,
+          /* tokenOut= */ zeroForOne ? token1 : token0,
+          feeOrTickSpacing,
+          poolAmountIn,
+        ),
+        getPool(token0, token1, feeOrTickSpacing, chainId, amm, publicClient),
+      ]);
+      const [amount0Init, amount1Init, amount0Final, amount1Final] = zeroForOne
+        ? [poolAmountIn, 0n, 0n, toAmount]
+        : [0n, poolAmountIn, toAmount, 0n];
       return {
         toAmount,
         swapData: '0x',
+        swapPath: getSwapPath(
+          token0,
+          token1,
+          /* initToken0Amount= */ amount0Init,
+          /* initToken1Amount= */ amount1Init,
+          /* finalToken0Amount= */ amount0Final,
+          /* finalToken1Amount= */ amount1Final,
+          slippage,
+        ),
+        swapRoute: getSwapRoute(
+          token0,
+          token1,
+          /* deltaAmount0= */ amount0Final - amount0Init,
+        ),
+        priceImpact: calcPriceImpact(
+          pool,
+          /* initAmount0= */ amount0Init,
+          /* initAmount1= */ amount1Init,
+          /* finalAmount0= */ amount0Final,
+          /* finalAmount1= */ amount1Final,
+        ),
       };
     },
   };
@@ -39,6 +71,7 @@ export const getSamePoolSolver = (): ISolver => {
 export async function getSamePoolToAmount(
   amm: AutomatedMarketMakerEnum,
   chainId: ApertureSupportedChainId,
+  publicClient: PublicClient,
   tokenIn: Address,
   tokenOut: Address,
   feeOrTickSpacing: number,
@@ -48,7 +81,6 @@ export async function getSamePoolToAmount(
     if (amountIn <= 0n) {
       throw new Error('amountIn should greater than 0');
     }
-    const publicClient = getPublicClient(chainId);
     const { swapRouter } = getAMMInfo(chainId, amm)!;
     const stateOverride = getStateOverride(
       await getERC20Overrides(
