@@ -77,7 +77,7 @@ async function main() {
       /* tokenInAmountToSwapToToken0= */ amount0,
       /* tokenInAmountToSwapToToken1= */ amount1,
       /* tokenInFeeAmount= */ (token0FeeAmount ?? 0n) + (token1FeeAmount ?? 0n),
-      swapData0,
+      swapData0 ?? '0x',
       swapData1 ?? '0x',
       liquidity,
       slippage,

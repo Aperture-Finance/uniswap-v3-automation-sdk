@@ -32,13 +32,10 @@ import { PositionDetails } from '../position';
 import { estimateTotalGasCostForOptimismLikeL2Tx } from '../public_client';
 import {
   buildOptimalSolutions,
-  calcPriceImpact,
   getOptimalSwapAmount,
   getOptimalSwapAmountV4,
-  getSwapPath,
-  getSwapRoute,
 } from './internal';
-import { SolverResult, SwapRoute } from './types';
+import { SolverResult, SwapPath, SwapRoute } from './types';
 
 /**
  * Get the optimal amount of liquidity to rebalance for a given position.
@@ -83,6 +80,7 @@ export async function rebalanceOptimalV2(
     from,
     slippage,
     tokenPricesUsd,
+    includeSolvers,
   };
 
   if (tokenPricesUsd[0] === '0' || tokenPricesUsd[1] === '0') {
@@ -207,41 +205,48 @@ export async function rebalanceOptimalV2(
       feeUSD.div(positionUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
     getLogger().info('SDK.rebalanceOptimalV2.Fees', {
-      feeUSD: feeUSD.toString(),
-      token0FeeAmount: token0FeeAmount.toString(),
-      token1FeeAmount: token1FeeAmount.toString(),
+      ...logdata,
+      zeroForOne,
+      poolAmountIn,
+      tokenInPrice,
+      token0Usd: token0Usd.toFixed(),
+      token1Usd: token1Usd.toFixed(),
+      positionUsd: positionUsd.toFixed(), // without feesCollected of the position
+      token0Price: tokenPricesUsd[0],
+      token1Price: tokenPricesUsd[1],
+      // Swap fees
+      tokenInSwapFeeAmount: tokenInSwapFeeAmount.toFixed(),
+      token0SwapFeeAmount: token0SwapFeeAmount.toFixed(),
+      token1SwapFeeAmount: token1SwapFeeAmount.toFixed(),
       feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
         .div(10 ** decimals)
         .mul(tokenInPrice)
         .mul(FEE_REBALANCE_SWAP_RATIO)
-        .toString(),
-      tokenInSwapFeeAmount: tokenInSwapFeeAmount.toString(),
-      token0SwapFeeAmount: token0SwapFeeAmount.toString(),
-      token1SwapFeeAmount: token1SwapFeeAmount.toString(),
+        .toFixed(),
+      // Reinvest fees
+      tokensOwed0: positionDetails.tokensOwed0.numerator.toString(),
+      tokensOwed1: positionDetails.tokensOwed1.numerator.toString(),
+      collectableTokenInUsd: collectableTokenInUsd.toFixed(),
+      token0ReinvestFeeAmount: token0ReinvestFeeAmount.toFixed(),
+      token1ReinvestFeeAmount: token1ReinvestFeeAmount.toFixed(),
       feeOnRebalanceReinvestUsd: collectableTokenInUsd
         .mul(getFeeReinvestRatio(positionDetails.fee))
-        .toString(),
-      token0ReinvestFeeAmount: token0ReinvestFeeAmount.toString(),
-      token1ReinvestFeeAmount: token1ReinvestFeeAmount.toString(),
-      rebalanceFlatFeePips,
+        .toFixed(),
+      // Flat fees
+      token0RebalanceFlatFeeAmount: token0RebalanceFlatFeeAmount.toFixed(),
+      token1RebalanceFlatFeeAmount: token1RebalanceFlatFeeAmount.toFixed(),
       feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
-      token0RebalanceFlatFeeAmount: token0RebalanceFlatFeeAmount.toString(),
-      token1RebalanceFlatFeeAmount: token1RebalanceFlatFeeAmount.toString(),
+      rebalanceFlatFeePips,
+      // Total fees
+      token0FeeAmount: token0FeeAmount.toFixed(),
+      token1FeeAmount: token1FeeAmount.toFixed(),
+      feeUSD: feeUSD.toFixed(),
       feeBips,
-      poolAmountIn,
-      tokenInPrice,
-      collectableTokenInUsd: collectableTokenInUsd.toString(),
-      token0Price: tokenPricesUsd[0],
-      token1Price: tokenPricesUsd[1],
-      token0Usd: token0Usd.toString(),
-      token1Usd: token1Usd.toString(),
-      positionUsd: positionUsd.toString(),
-      ...logdata,
     });
 
     return {
       feeBips,
-      feeUSD: feeUSD.toFixed(5),
+      feeUSD: feeUSD.toFixed(),
     };
   };
 
@@ -321,8 +326,12 @@ export async function rebalanceOptimalV2(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = mintParams.amount0Desired;
     let amount1: bigint = mintParams.amount1Desired;
@@ -330,7 +339,9 @@ export async function rebalanceOptimalV2(
 
     try {
       if (poolAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -367,27 +378,13 @@ export async function rebalanceOptimalV2(
         amount0,
         amount1,
         liquidity,
-        swapData,
-        feeBips,
-        feeUSD,
         gasFeeEstimation,
-        swapRoute: getSwapRoute(token0, token1, amount0 - receive0, swapRoute),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-        ),
-        swapPath: getSwapPath(
-          token0,
-          token1,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-          slippage,
-        ),
+        feeUSD,
+        feeBips,
+        swapData,
+        swapRoute,
+        swapPath,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
@@ -530,22 +527,21 @@ export async function rebalanceBackend(
 
   getLogger().info('SDK.rebalanceBackend.round1.fees ', {
     ...logdata,
-    feeUSD: feeUSD.toString(),
-    swapFeesUsd: swapFeesUsd.toString(),
-    reinvestFeeUSD: reinvestFeeUSD.toString(),
-    flatFeeUsd,
-    tokensOwed0: positionDetails.tokensOwed0.quotient.toString(),
-    tokensOwed1: positionDetails.tokensOwed1.quotient.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    nativeToUsd,
-    token0FeeAmount,
-    token1FeeAmount,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
-    positionUsd: positionUsd.toString(), // without feesCollected of the position
-    positionRawNative: positionRawNative.toString(), // without feesCollected of the position
+    positionUsd: positionUsd.toFixed(), // without feesCollected of the position
+    positionRawNative: positionRawNative.toFixed(), // without feesCollected of the position
+    nativeToUsd,
+    swapFeesUsd: swapFeesUsd.toFixed(),
+    reinvestFeeUSD: reinvestFeeUSD.toFixed(),
+    flatFeeUsd,
+    // Total round1 (without gas reimbursement) fees
+    token0FeeAmount,
+    token1FeeAmount,
+    feeUSD: feeUSD.toFixed(),
     feeBips,
   });
 
@@ -637,8 +633,12 @@ export async function rebalanceBackend(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
@@ -647,7 +647,9 @@ export async function rebalanceBackend(
 
     try {
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -701,21 +703,24 @@ export async function rebalanceBackend(
         );
 
       getLogger().info('SDK.rebalanceBackend.round2.fees ', {
-        solver,
         ...logdata,
-        feeUSD: feeUSD.toString(),
-        token0FeeAmount,
-        token1FeeAmount,
-        swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
-        aptrFeeBips: feeBips,
+        solver,
         gasUnits,
         gasInRawNative,
         gasDeductionPips,
+        feeBips, // just apertureFees without gasReimbursementFees
+        // Total fees
+        token0FeeAmount,
+        token1FeeAmount,
+        swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
+        feeUSD: feeUSD.toFixed(),
         totalFeePips,
       });
 
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -750,33 +755,14 @@ export async function rebalanceBackend(
         amount0,
         amount1,
         liquidity,
-        swapData,
-        feeBips: totalFeePips,
-        feeUSD: feeUSD.toString(),
         gasUnits,
         gasFeeEstimation: gasInRawNative,
-        swapRoute: getSwapRoute(
-          token0.address as Address,
-          token1.address as Address,
-          amount0 - receive0,
-          swapRoute,
-        ),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-        ),
-        swapPath: getSwapPath(
-          token0.address as Address,
-          token1.address as Address,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-          slippage,
-        ),
+        feeUSD: feeUSD.toFixed(),
+        feeBips: totalFeePips,
+        swapData,
+        swapRoute,
+        swapPath,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
@@ -922,20 +908,24 @@ export async function rebalanceV4(
 
   getLogger().info('SDK.rebalanceV4.Fees', {
     ...logdata,
-    feeUSD: feeUSD.toString(),
-    swapFeesUsd: swapFeesUsd.toString(),
-    reinvestFeeUSD: reinvestFeeUSD.toString(),
-    flatFeeUsd,
-    tokensOwed0: positionDetails.tokensOwed0.quotient.toString(),
-    tokensOwed1: positionDetails.tokensOwed1.quotient.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount,
-    token1FeeAmount,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
     positionUsd: positionUsd.toString(), // without feesCollected of the position
+    // Swap fees
+    swapFeesUsd: swapFeesUsd.toString(),
+    // Reinvest fees
+    tokensOwed0: positionDetails.tokensOwed0.quotient.toString(),
+    tokensOwed1: positionDetails.tokensOwed1.quotient.toString(),
+    reinvestFeeUSD: reinvestFeeUSD.toString(),
+    // Flat fees
+    flatFeeUsd,
+    // Total fees
+    feeUSD: feeUSD.toFixed(),
+    token0FeeAmount,
+    token1FeeAmount,
     feeBips,
   });
 
@@ -1000,8 +990,12 @@ export async function rebalanceV4(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
@@ -1009,7 +1003,9 @@ export async function rebalanceV4(
 
     try {
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -1047,33 +1043,14 @@ export async function rebalanceV4(
         amount0,
         amount1,
         liquidity,
-        swapData,
+        gasFeeEstimation,
+        feeUSD: feeUSD.toFixed(),
         token0FeeAmount,
         token1FeeAmount,
-        feeUSD: feeUSD.toString(),
-        gasFeeEstimation,
-        swapRoute: getSwapRoute(
-          token0.address as Address,
-          token1.address as Address,
-          BigInt(amount0 - receive0),
-          swapRoute,
-        ),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-        ),
-        swapPath: getSwapPath(
-          token0.address as Address,
-          token1.address as Address,
-          receive0,
-          receive1,
-          amount0,
-          amount1,
-          slippage,
-        ),
+        swapData,
+        swapRoute,
+        swapPath,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {

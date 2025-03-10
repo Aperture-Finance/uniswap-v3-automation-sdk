@@ -21,13 +21,10 @@ import {
 } from '../automan';
 import {
   buildOptimalSolutions,
-  calcPriceImpact,
   getOptimalSwapAmountV4,
-  getSwapPath,
-  getSwapRoute,
   solveExactInput,
 } from './internal';
-import { SolverResult } from './types';
+import { SolverResult, SwapPath } from './types';
 
 /**
  * Get the optimal amount of liquidity to increase for a given pool and token amounts.
@@ -111,16 +108,17 @@ export async function increaseLiquidityOptimalV4(
     amm,
     chainId,
     tokenId: increaseOptions.tokenId,
-    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
+    includeSolvers,
+    amount0Desired: increaseLiquidityParams.amount0Desired,
+    amount1Desired: increaseLiquidityParams.amount1Desired,
+    zeroForOne,
+    poolAmountIn: poolAmountIn, // before fees
+    swapAmountIn: swapAmountIn, // after fees
+    feeUSD: feeUSD.toFixed(),
     token0FeeAmount,
     token1FeeAmount,
-    amount0Desired: increaseLiquidityParams.amount0Desired.toString(),
-    amount1Desired: increaseLiquidityParams.amount1Desired.toString(),
-    zeroForOne,
-    poolAmountIn: poolAmountIn.toString(), // before fees
-    swapAmountIn: swapAmountIn.toString(), // after fees
   });
 
   const estimateGas = async (swapData: Hex) => {
@@ -152,8 +150,12 @@ export async function increaseLiquidityOptimalV4(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = increaseLiquidityParams.amount0Desired;
     let amount1: bigint = increaseLiquidityParams.amount1Desired;
@@ -164,7 +166,9 @@ export async function increaseLiquidityOptimalV4(
         Number(increaseOptions.slippageTolerance.numerator) /
         Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -198,33 +202,14 @@ export async function increaseLiquidityOptimalV4(
         amount0,
         amount1,
         liquidity,
-        swapData,
         gasFeeEstimation,
-        swapRoute: getSwapRoute(
-          token0,
-          token1,
-          amount0 - increaseLiquidityParams.amount0Desired,
-          swapRoute,
-        ),
-        swapPath: getSwapPath(
-          token0,
-          token1,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-          slippage,
-        ),
         feeUSD: feeUSD.toFixed(),
-        priceImpact: calcPriceImpact(
-          position.pool,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-        ),
         token0FeeAmount,
         token1FeeAmount,
+        swapData,
+        swapPath,
+        swapRoute,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
@@ -341,13 +326,28 @@ export async function increaseLiquidityFromTokenIn(
       includeSolvers,
     ),
   ]);
-  const [solver0, swapData0, swapRoute0, solver1, swapData1, swapRoute1] = [
+  const [
+    solver0,
+    swapData0,
+    swapPath0,
+    swapRoute0,
+    priceImpact0,
+    solver1,
+    swapData1,
+    swapPath1,
+    swapRoute1,
+    priceImpact1,
+  ] = [
     token0SolverResult.solver,
     token0SolverResult.swapData,
+    token0SolverResult.swapPath,
     token0SolverResult.swapRoute,
+    token0SolverResult.priceImpact,
     token1SolverResult.solver,
     token1SolverResult.swapData,
+    token1SolverResult.swapPath,
     token1SolverResult.swapRoute,
+    token1SolverResult.priceImpact,
   ];
   const feeUSD = Big(
     (token2ToToken0FeeAmount + token2ToToken1FeeAmount).toString(),
@@ -355,19 +355,21 @@ export async function increaseLiquidityFromTokenIn(
     .mul(tokenInPriceUsd)
     .div(10 ** tokenIn.decimals);
   getLogger().info('SDK.increaseLiquidityFromTokenIn.fees ', {
-    solvers: includeSolvers,
-    solver0,
-    solver1,
     amm,
     chainId,
-    feeUSD: feeUSD.toString(),
-    ratioToSwapToToken1: ratioToSwapToToken1.toString(),
-    // Token2 to Token0 Swap
+    tokenId: increaseOptions.tokenId,
+    tokenInPriceUsd,
+    includeSolvers,
+    ratioToSwapToToken1: ratioToSwapToToken1.toFixed(),
+    feeUSD: feeUSD.toFixed(),
+    // token2 to token0 Swap
+    solver0,
     token2ToToken0FeeAmount,
     tokenInAmountToSwapToToken0,
     token0SolverResults: token0SolverResult.solverResults,
     token0FromTokenIn: token0SolverResult.tokenOutAmount,
-    // Token2 to Token1 Swap
+    // token2 to token1 Swap
+    solver1,
     token2ToToken1FeeAmount,
     tokenInAmountToSwapToToken1,
     token1SolverResults: token1SolverResult.solverResults,
@@ -425,39 +427,27 @@ export async function increaseLiquidityFromTokenIn(
   };
   const gasFeeEstimation = await estimateGas(swapData0, swapData1);
 
-  const [swap0Token0, swap0Token1, swap0deltaAmount0] =
-    token0.address < tokenIn.address
-      ? [token0.address, tokenIn.address, token0SolverResult.tokenOutAmount]
-      : [tokenIn.address, token0.address, -tokenInAmountToSwapToToken0];
-  const [swap1Token0, swap1Token1, swap1deltaAmount0] =
-    token1.address < tokenIn.address
-      ? [token1.address, tokenIn.address, token1SolverResult.tokenOutAmount]
-      : [tokenIn.address, token1.address, -tokenInAmountToSwapToToken1];
   return {
-    solver0,
-    solver1,
     // Use amounts for increaseLiquidityParams' amountsDesired in automan.
     amount0: tokenInAmountToSwapToToken0,
     amount1: tokenInAmountToSwapToToken1,
     // Use liquidity for compute incremental position, then mintAmountsWithSlippage() for increaseLiquidityParams' amountsMin in automan.
     liquidity,
-    swapData0,
-    swapData1,
     gasFeeEstimation,
-    swapRoute0: getSwapRoute(
-      /* token0= */ swap0Token0 as Address,
-      /* token1= */ swap0Token1 as Address,
-      /* deltaAmount0= */ swap0deltaAmount0,
-      swapRoute0,
-    ),
-    swapRoute1: getSwapRoute(
-      /* token0= */ swap1Token0 as Address,
-      /* token1= */ swap1Token1 as Address,
-      /* deltaAmount0= */ swap1deltaAmount0,
-      swapRoute1,
-    ),
     feeUSD: feeUSD.toFixed(),
     token0FeeAmount: token2ToToken0FeeAmount,
     token1FeeAmount: token2ToToken1FeeAmount,
+    // token2 to token0 swap
+    solver0,
+    swapData0,
+    swapPath0,
+    swapRoute0,
+    priceImpact0,
+    // token2 to token01swap
+    solver1,
+    swapData1,
+    swapPath1,
+    swapRoute1,
+    priceImpact1,
   } as SolverResult;
 }
