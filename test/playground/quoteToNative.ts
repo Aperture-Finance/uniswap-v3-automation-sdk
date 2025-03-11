@@ -1,6 +1,5 @@
 // ts-node test/playground/quoteToNative.ts
 import { ApertureSupportedChainId } from '../../src';
-import { BASE_VIRTUAL_ADDRESS } from '../../src/viem';
 import { fetchQuoteToNativeCurrency } from '../../src/viem/routing';
 
 async function main() {
@@ -8,7 +7,7 @@ async function main() {
   const rawNativeCurrencyAmount = BigInt(1e17);
   const rawTokenAmount = await fetchQuoteToNativeCurrency(
     chainId,
-    BASE_VIRTUAL_ADDRESS,
+    '0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b', // BASE_VIRTUAL_ADDRESS
     rawNativeCurrencyAmount,
   );
   console.log(rawTokenAmount);
