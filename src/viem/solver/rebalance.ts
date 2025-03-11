@@ -484,7 +484,7 @@ export async function rebalanceBackend(
       .toFixed(0),
   );
   const reinvestToken1FeeAmount = BigInt(
-    new Big(positionDetails.tokensOwed0.quotient.toString())
+    new Big(positionDetails.tokensOwed1.quotient.toString())
       .mul(getFeeReinvestRatio(positionDetails.fee))
       .toFixed(0),
   );

@@ -172,15 +172,18 @@ export async function getOkxQuote(
   dst: string,
   amount: string,
 ): Promise<{
+  fromAmount: string;
   toAmount: string;
 }> {
   if (amount === '0') {
     throw new Error('amount should greater than 0');
   }
+  // Since liquidity might be 1-sided, swap back to somewhat use 2 exactInQuotes as 1 exactOutQuote
+  // 1st exactInQuote for swapping dst to src just to get an estimate on the amount of srcTokens needed
   const quoteParams = {
     chainId: chainId.toString(),
-    fromTokenAddress: src,
-    toTokenAddress: dst,
+    fromTokenAddress: dst,
+    toTokenAddress: src,
     amount,
   };
   try {
@@ -193,8 +196,25 @@ export async function getOkxQuote(
         `Error: No quote found with quoteParams=${JSON.stringify(quoteParams)}`,
       );
     }
+    // 2nd exactInQuote for swapping src to dst to output fromAmount and toAmount.
+    const quoteParams2 = {
+      chainId: chainId.toString(),
+      fromTokenAddress: src,
+      toTokenAddress: dst,
+      amount: quoteData[0].toTokenAmount,
+    };
+    const quoteData2 = (
+      await buildRequest('quote', new URLSearchParams(quoteParams2))
+    ).data.data;
+    if (quoteData2.length < 1) {
+      getLogger().warn('SDK.getOkxQuote2.NoQuoteFound', { quoteParams2 });
+      throw new Error(
+        `Error: No quote found with quoteParams2=${JSON.stringify(quoteParams2)}`,
+      );
+    }
     return {
-      toAmount: quoteData[0].toTokenAmount,
+      fromAmount: quoteParams2.amount,
+      toAmount: quoteData2[0].toTokenAmount,
     };
   } catch (e) {
     const msg = (e as Error).message;
