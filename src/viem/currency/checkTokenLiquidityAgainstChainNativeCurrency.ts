@@ -15,18 +15,24 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
   chainId: ApertureSupportedChainId,
   tokenAddress: string,
 ): Promise<string> {
+  console.log('tommyzhao 18');
   const wrappedNativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
+  console.log('tommyzhao 20');
   if (wrappedNativeCurrency.address === tokenAddress) return '1';
+  console.log('tommyzhao 22');
   const rawNativeCurrencyAmount =
     CHAIN_ID_TO_RAW_WRAPPED_NATIVE_CURRENCY_AMOUNT[chainId];
+    console.log('tommyzhao 25');
   const quoteToNativeCurrency = await fetchQuoteToNativeCurrency(
     chainId,
     tokenAddress,
     rawNativeCurrencyAmount,
   ).catch(() => undefined);
+  console.log('tommyzhao 31');
   if (quoteToNativeCurrency === undefined) {
     return '-1';
   }
+  console.log('tommyzhao 35');
   return new Big(quoteToNativeCurrency.fromAmount)
     .div(quoteToNativeCurrency.toAmount)
     .toString();
