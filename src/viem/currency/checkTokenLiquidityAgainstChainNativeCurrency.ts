@@ -32,7 +32,7 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
   if (quoteToNativeCurrency === undefined) {
     return '-1';
   }
-  console.log('tommyzhao 35');
+  console.log(`tommyzhao 35, quoteToNativeCurrency.fromAmount=${quoteToNativeCurrency.fromAmount}, quoteToNativeCurrency.toAmount=${quoteToNativeCurrency.toAmount}`);
   return new Big(quoteToNativeCurrency.fromAmount)
     .div(quoteToNativeCurrency.toAmount)
     .toString();
