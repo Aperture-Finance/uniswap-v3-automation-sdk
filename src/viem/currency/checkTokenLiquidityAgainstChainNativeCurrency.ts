@@ -24,7 +24,13 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
     tokenAddress,
     rawNativeCurrencyAmount,
   ).catch(() => undefined);
-  if (quoteToNativeCurrency === undefined) {
+  if (
+    quoteToNativeCurrency == null ||
+    quoteToNativeCurrency.fromAmount == null ||
+    // Avoid divide by 0.
+    quoteToNativeCurrency.toAmount == null ||
+    quoteToNativeCurrency.toAmount === '0'
+  ) {
     return '-1';
   }
   return new Big(quoteToNativeCurrency.fromAmount)
