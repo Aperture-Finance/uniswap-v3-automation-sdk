@@ -18,17 +18,17 @@ async function main() {
       BigInt(1e17).toString(),
     ),
   );
-  // const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
-  // const rawNativeCurrencyAmount = BigInt(1e17);
-  // const rawTokenAmount = await fetchQuoteToNativeCurrency(
-  //   chainId,
-  //   '0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b', // BASE_VIRTUAL_ADDRESS
-  //   rawNativeCurrencyAmount,
-  // );
-  // console.log(rawTokenAmount);
-  // // prints 228975534121854602648 as expected
-  // // Do rawNativeCurrencyAmount / rawTokenAmount * nativeToUsd to get the price of the token in USD
-  // // E.g. 1e17/228975534121854602648 * 3600 = $1.57
+  const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
+  const rawNativeCurrencyAmount = BigInt(1e17);
+  const rawTokenAmount = await fetchQuoteToNativeCurrency(
+    chainId,
+    '0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b', // BASE_VIRTUAL_ADDRESS
+    rawNativeCurrencyAmount,
+  );
+  console.log(rawTokenAmount);
+  // prints 228975534121854602648 as expected
+  // Do rawNativeCurrencyAmount / rawTokenAmount * nativeToUsd to get the price of the token in USD
+  // E.g. 1e17/228975534121854602648 * 3600 = $1.57
 }
 
 main();

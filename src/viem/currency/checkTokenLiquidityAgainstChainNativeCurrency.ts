@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo, getLogger } from '@/index';
+import { ApertureSupportedChainId, getChainInfo } from '@/index';
 import Big from 'big.js';
 
 import { fetchQuoteToNativeCurrency } from '../routing';
@@ -19,12 +19,6 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
   if (wrappedNativeCurrency.address === tokenAddress) return '1';
   const rawNativeCurrencyAmount =
     CHAIN_ID_TO_RAW_WRAPPED_NATIVE_CURRENCY_AMOUNT[chainId];
-  getLogger().info(
-    `tommyzhao23 chainId=${chainId}, tokenAddress=${tokenAddress} prefetched price`,
-    {
-      rawNativeCurrencyAmount,
-    },
-  );
   const quoteToNativeCurrency = await fetchQuoteToNativeCurrency(
     chainId,
     tokenAddress,
@@ -33,13 +27,6 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
   if (quoteToNativeCurrency === undefined) {
     return '-1';
   }
-  getLogger().info(
-    `tommyzhao chainId=${chainId}, tokenAddress=${tokenAddress} fetched price`,
-    {
-      rawNativeCurrencyAmount,
-      ...quoteToNativeCurrency,
-    },
-  );
   return new Big(quoteToNativeCurrency.fromAmount)
     .div(quoteToNativeCurrency.toAmount)
     .toString();

@@ -186,7 +186,6 @@ export async function getOkxQuote(
     toTokenAddress: src,
     amount,
   };
-  console.log(`tommyzhao quote1=${JSON.stringify(quoteParams)}`);
   try {
     const quoteData = (
       await buildRequest('quote', new URLSearchParams(quoteParams))
@@ -204,7 +203,6 @@ export async function getOkxQuote(
       toTokenAddress: dst,
       amount: quoteData[0].toTokenAmount,
     };
-    console.log(`tommyzhao quote2=${JSON.stringify(quoteParams2)}`);
     const quoteData2 = (
       await buildRequest('quote', new URLSearchParams(quoteParams2))
     ).data.data;

@@ -21,11 +21,5 @@ export async function checkAutomationSupportForPool(
       tokenB.address,
     ),
   ]);
-  console.log(
-    `tommyzhao checkTokenLiquidityAgainstChainNativeCurrency tokenA.chainId=${tokenA.chainId} tokenA.address=${tokenA.address} quoteA=${quoteA}`,
-  );
-  console.log(
-    `tommyzhao checkTokenLiquidityAgainstChainNativeCurrency tokenB.chainId=${tokenB.chainId} tokenB.address=${tokenB.address} quoteB=${quoteB}`,
-  );
   return quoteA !== '-1' && quoteB !== '-1';
 }
