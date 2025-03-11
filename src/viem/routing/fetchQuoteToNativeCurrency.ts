@@ -103,10 +103,12 @@ export async function fetchQuoteToNativeCurrency(
     );
 
     return (
+      // OKX quote doesn't have an option to swap exactOut,
+      // so we swap the native currency to the token instead.
       await getOkxQuote(
         chainId,
-        tokenAddress,
-        wrappedNativeCurrency.address,
+        /* src= */ wrappedNativeCurrency.address,
+        /* dst= */ tokenAddress,
         nativeCurrencyExactOutRawAmount.toString(),
       )
     ).toAmount;
