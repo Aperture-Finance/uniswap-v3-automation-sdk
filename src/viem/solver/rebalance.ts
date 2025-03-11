@@ -484,7 +484,7 @@ export async function rebalanceBackend(
       .toFixed(0),
   );
   const reinvestToken1FeeAmount = BigInt(
-    new Big(positionDetails.tokensOwed0.quotient.toString())
+    new Big(positionDetails.tokensOwed1.quotient.toString())
       .mul(getFeeReinvestRatio(positionDetails.fee))
       .toFixed(0),
   );
@@ -527,6 +527,12 @@ export async function rebalanceBackend(
     ...logdata,
     rebalanceFeeUsd: feeUSD.toString(),
     swapFeesUsd: swapFeesUsd.toString(),
+    reinvestToken0FeeAmount,
+    reinvestToken1FeeAmount,
+    t0q: positionDetails.tokensOwed0.quotient.toString(),
+    t1q: positionDetails.tokensOwed1.quotient.toString(),
+    t0n: positionDetails.tokensOwed0.numerator.toString(),
+    t1n: positionDetails.tokensOwed1.numerator.toString(),
     reinvestFeeUSD: reinvestFeeUSD.toString(),
     flatFeeUsd,
     tokensOwed0: positionDetails.tokensOwed0.quotient.toString(),
