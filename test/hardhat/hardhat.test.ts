@@ -86,8 +86,6 @@ import {
   getPublicClient,
   getRebalanceSwapInfo,
   getRebalanceTx,
-  getSlipStreamPools,
-  getSlipStreamStakePositions,
   getToken,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
@@ -687,52 +685,6 @@ describe('Price to tick conversion', function () {
   it('Human price to closest tick', function () {
     const tick = humanPriceToClosestTick(token0, token1, maxPrice.toFixed());
     expect(tick).to.equal(TickMath.MAX_TICK - 1);
-  });
-});
-
-describe('Slipstream pool tests', function () {
-  it('getSlipStreamBasePools', async () => {
-    const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 17514450n;
-    const pools = await getSlipStreamPools(client, chainId, blockNumber);
-    expect(Object.keys(pools).length).to.be.equal(107);
-  });
-  it('getSlipStreamOptimismPools', async () => {
-    const chainId = ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 126807301n;
-    const pools = await getSlipStreamPools(client, chainId, blockNumber);
-    expect(Object.keys(pools).length).to.be.equal(54);
-  });
-});
-
-describe('Slipstream stake position tests', function () {
-  it('getSlipStreamBaseStakePositions', async () => {
-    const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 19669550n;
-    const stakedPositions = await getSlipStreamStakePositions(
-      '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
-      chainId,
-      client,
-      undefined,
-      blockNumber,
-    );
-    expect(stakedPositions.length).to.be.equal(1);
-  });
-  it('getSlipStreamOptimismStakePositions', async () => {
-    const chainId = ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 126810142n;
-    const stakedPositions = await getSlipStreamStakePositions(
-      '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
-      chainId,
-      client,
-      undefined,
-      blockNumber,
-    );
-    expect(stakedPositions.length).to.be.equal(1);
   });
 });
 

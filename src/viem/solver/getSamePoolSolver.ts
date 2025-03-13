@@ -2,7 +2,7 @@ import { SlipStreamSwapRouterAbi } from '@/abis/SlipStreamSwapRouter';
 import { UniV3SwapRouter02Abi } from '@/abis/UniV3SwapRouter02';
 import { ApertureSupportedChainId, getAMMInfo } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address } from 'viem';
+import { Address, PublicClient } from 'viem';
 
 import { getERC20Overrides, getStateOverride } from '../overrides';
 import { getPublicClient } from '../public_client';
@@ -19,6 +19,7 @@ export const getSamePoolSolver = (): ISolver => {
         feeOrTickSpacing,
         poolAmountIn,
         zeroForOne,
+        client,
       } = props;
       const toAmount: bigint = await getSamePoolToAmount(
         amm,
@@ -27,6 +28,7 @@ export const getSamePoolSolver = (): ISolver => {
         /* tokenOut= */ zeroForOne ? token1 : token0,
         feeOrTickSpacing,
         poolAmountIn,
+        client,
       );
       return {
         toAmount,
@@ -43,12 +45,13 @@ export async function getSamePoolToAmount(
   tokenOut: Address,
   feeOrTickSpacing: number,
   amountIn: bigint,
+  client?: PublicClient,
 ): Promise<bigint> {
   try {
     if (amountIn <= 0n) {
       throw new Error('amountIn should greater than 0');
     }
-    const publicClient = getPublicClient(chainId);
+    const publicClient = client ?? getPublicClient(chainId);
     const { swapRouter } = getAMMInfo(chainId, amm)!;
     const stateOverride = getStateOverride(
       await getERC20Overrides(

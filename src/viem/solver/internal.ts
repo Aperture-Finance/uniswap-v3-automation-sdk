@@ -318,3 +318,11 @@ export function getFeeOrTickSpacingFromMintParams(
   }
   return (mintParams as UniV3MintParams).fee;
 }
+
+export const isOptimismLikeChain = (chainId: ApertureSupportedChainId) => {
+  return [
+    ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
+    ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
+  ].includes(chainId);
+};

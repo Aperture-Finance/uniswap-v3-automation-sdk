@@ -37,6 +37,7 @@ import {
   getOptimalSwapAmountV3,
   getSwapPath,
   getSwapRoute,
+  isOptimismLikeChain,
 } from './internal';
 import { SolverResult, SwapRoute } from './types';
 
@@ -575,60 +576,65 @@ export async function rebalanceBackend(
         };
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
-    // Pass errors without (try-)catch, because failing to estimate gas will fail to reimburse relayer for gas.
-    const [gasPriceInWei, gasUnits] = await Promise.all([
-      publicClient.getGasPrice(),
-      estimateRebalanceGas(
-        chainId,
-        amm,
-        publicClient,
-        from,
-        positionDetails.owner,
-        mintParams,
-        tokenId,
-        feeBips,
-        swapData,
-        blockNumber,
-      ),
-    ]);
-    if (
-      ![
-        ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
-        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-        ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
-      ].includes(chainId)
-    ) {
-      return {
-        gasUnits,
-        gasInRawNative: gasPriceInWei * gasUnits,
-      };
-    }
-    // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
-    const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
-      {
-        from,
-        to: getAMMInfo(chainId, amm)!.apertureAutoman,
-        data: getAutomanRebalanceCalldata(
+    try {
+      const [gasPriceInWei, gasUnits] = await Promise.all([
+        publicClient.getGasPrice(),
+        estimateRebalanceGas(
+          chainId,
           amm,
+          publicClient,
+          from,
+          positionDetails.owner,
           mintParams,
           tokenId,
           feeBips,
           swapData,
-          /* permitInfo= */ undefined,
+          blockNumber,
         ),
-      },
-      chainId,
-      publicClient,
-    );
-    // Scale the estimated gas by 1.5 as L1 gas could be at most 50% higher than the estimated gas.
-    // We apply the scaling factor to the L2 gas portion as well because I find the estimated gas price is often lower than the actual price.
-    // See https://community.optimism.io/docs/developers/build/transaction-fees/#the-l1-data-fee.
-    return {
-      gasUnits,
-      gasInRawNative:
-        (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
-        100n,
-    };
+      ]);
+      if (!isOptimismLikeChain(chainId)) {
+        return {
+          gasUnits,
+          gasInRawNative: gasPriceInWei * gasUnits,
+        };
+      }
+      // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
+      const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
+        {
+          from,
+          to: getAMMInfo(chainId, amm)!.apertureAutoman,
+          data: getAutomanRebalanceCalldata(
+            amm,
+            mintParams,
+            tokenId,
+            feeBips,
+            swapData,
+            /* permitInfo= */ undefined,
+          ),
+        },
+        chainId,
+        publicClient,
+      );
+      // Scale the estimated gas by 1.5 as L1 gas could be at most 50% higher than the estimated gas.
+      // We apply the scaling factor to the L2 gas portion as well because I find the estimated gas price is often lower than the actual price.
+      // See https://community.optimism.io/docs/developers/build/transaction-fees/#the-l1-data-fee.
+      return {
+        gasUnits,
+        gasInRawNative:
+          (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
+          100n,
+      };
+    } catch (e) {
+      getLogger().error(
+        'SDK.Solver.rebalanceBackend.estimateGasInRawNaive.Error',
+        {
+          error: JSON.stringify((e as Error).message),
+        },
+      );
+
+      // Throw errors, because failing to estimate gas will fail to reimburse relayer for gas.
+      throw e;
+    }
   };
 
   const solve = async (solver: E_Solver) => {
@@ -654,9 +660,22 @@ export async function rebalanceBackend(
           slippage,
           poolAmountIn: swapAmountIn,
           zeroForOne,
+          client: publicClient,
         }));
+
+        getLogger().info('SDK.rebalanceBackend.round1.swapData', {
+          solver,
+          swapData,
+        });
       }
+
       ({ gasUnits, gasInRawNative } = await estimateGasInRawNaive(swapData));
+      getLogger().info('SDK.rebalanceBackend.round1.gas', {
+        solver,
+        gasUnits,
+        gasInRawNative,
+      });
+
       // Ethereum L1: 25% gas deduction boost.
       // L2s and all other L1s: 50% gas deduction boost.
       const gasBoostMultiplier =
@@ -722,12 +741,14 @@ export async function rebalanceBackend(
           slippage,
           poolAmountIn: swapAmountIn,
           zeroForOne,
+          client: publicClient,
         }));
       } else {
         // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
         swapData = '0x';
         swapRoute = undefined;
       }
+
       [, liquidity, amount0, amount1] = await simulateRebalance(
         chainId,
         amm,

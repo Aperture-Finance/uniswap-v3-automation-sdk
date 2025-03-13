@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex } from 'viem';
+import { Address, Hex, PublicClient } from 'viem';
 
 type SelectedProtocol = {
   name: string;
@@ -29,6 +29,7 @@ export interface SolverProps {
   slippage: number; // 0.01 = 1%
   poolAmountIn: bigint;
   zeroForOne: boolean;
+  client?: PublicClient;
 }
 
 export interface ISolver {
