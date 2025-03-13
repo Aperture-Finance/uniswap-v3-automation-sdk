@@ -86,7 +86,6 @@ import {
   getPublicClient,
   getRebalanceSwapInfo,
   getRebalanceTx,
-  getSlipStreamStakePositions,
   getToken,
   simulateIncreaseLiquidityOptimal,
   simulateMintOptimal,
