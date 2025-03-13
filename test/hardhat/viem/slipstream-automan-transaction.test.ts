@@ -28,6 +28,7 @@ import {
   SlipStreamAutoman__factory,
   SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
+  getChainInfo,
   ioc,
 } from '../../../src';
 import {
@@ -67,7 +68,7 @@ describe('SlipStreamAutoman transaction tests', function () {
   let impersonatedOwnerClient: WalletClient;
   const nonForkClient = createPublicClient({
     chain: base,
-    transport: http('https://base-rpc.publicnode.com'),
+    transport: http(getChainInfo(chainId).rpc_url),
   });
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
