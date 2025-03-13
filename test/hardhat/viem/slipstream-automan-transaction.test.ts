@@ -15,12 +15,10 @@ import {
   PublicClient,
   TestClient,
   WalletClient,
-  createPublicClient,
-  http,
   parseEther,
   walletActions,
 } from 'viem';
-import { base, mainnet } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
 import {
   ActionTypeEnum,
@@ -33,7 +31,6 @@ import {
   SlipStreamAutoman__factory,
   SlipStreamOptimalSwapRouter__factory,
   getAMMInfo,
-  getChainInfo,
   ioc,
 } from '../../../src';
 import {
@@ -52,7 +49,12 @@ import {
   getRebalanceTx,
   getReinvestTx,
 } from '../../../src/viem';
-import { expect, hardhatForkProvider, resetFork } from '../common';
+import {
+  expect,
+  getApiClient,
+  hardhatForkProvider,
+  resetFork,
+} from '../common';
 
 // TODO: Unify test cases for all AMMs (UniV3, PCSV3 and SlipStream).
 
@@ -76,10 +78,7 @@ describe('SlipStreamAutoman transaction tests', () => {
   let testClient: TestClient;
   let publicClient: PublicClient;
   let impersonatedOwnerClient: WalletClient;
-  const nonForkClient = createPublicClient({
-    chain: base,
-    transport: http(getChainInfo(chainId).rpc_url),
-  });
+  const nonForkClient = getApiClient(chainId);
 
   // Register logger
   ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
