@@ -2,6 +2,7 @@ import {
   ApertureSupportedChainId,
   ChainSpecificRoutingAPIInfo,
   getChainInfo,
+  getLogger,
 } from '@/index';
 import axios from 'axios';
 
@@ -99,10 +100,12 @@ export async function fetchQuoteToNativeCurrency(
       ).quote,
     };
   } catch (e) {
-    console.debug(
-      'fail to fetchQuoteToNativeCurrency from routing api, trying to get from okx',
-      tokenAddress,
-      wrappedNativeCurrency.address,
+    getLogger().warn(
+      'fail to fetchQuoteToNativeCurrency from routing api, try to get from okx instead',
+      {
+        tokenAddress,
+        native: wrappedNativeCurrency.address,
+      },
     );
 
     return await getOkxQuote(
