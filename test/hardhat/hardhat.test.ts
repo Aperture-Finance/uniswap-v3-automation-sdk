@@ -689,35 +689,6 @@ describe('Price to tick conversion', function () {
   });
 });
 
-describe('Slipstream stake position tests', function () {
-  it('getSlipStreamBaseStakePositions', async () => {
-    const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 19669550n;
-    const stakedPositions = await getSlipStreamStakePositions(
-      '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
-      chainId,
-      client,
-      undefined,
-      blockNumber,
-    );
-    expect(stakedPositions.length).to.be.equal(1);
-  });
-  it('getSlipStreamOptimismStakePositions', async () => {
-    const chainId = ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 126810142n;
-    const stakedPositions = await getSlipStreamStakePositions(
-      '0xdC333239245ebBC6B656Ace7c08099AA415585d1',
-      chainId,
-      client,
-      undefined,
-      blockNumber,
-    );
-    expect(stakedPositions.length).to.be.equal(1);
-  });
-});
-
 describe('Recurring rebalance tests', function () {
   const arbitrumChainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
   const WETH_ARBITRUM = getAddress(

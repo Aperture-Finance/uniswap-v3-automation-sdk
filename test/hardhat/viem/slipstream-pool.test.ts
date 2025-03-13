@@ -12,11 +12,11 @@ import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { config as dotenvConfig } from 'dotenv';
-import { createPublicClient, http } from 'viem';
 
 import { ApertureSupportedChainId } from '../../../src';
-import { getAMMInfo, getChainInfo, getRpcEndpoint } from '../../../src/chain';
+import { getAMMInfo } from '../../../src/chain';
 import { SlipStreamPool, getSlipStreamPools } from '../../../src/viem';
+import { getApiClient } from '../common';
 
 dotenvConfig();
 
@@ -70,12 +70,7 @@ describe('SlipStream Pool Tests', function () {
 
       // Fetch pools once before all tests in this describe block
       before(async () => {
-        // Use Alchemy endpoint via getRpcEndpoint for better reliability
-        const rpcUrl = getRpcEndpoint(chainId);
-        const client = createPublicClient({
-          chain: getChainInfo(chainId).chain,
-          transport: http(rpcUrl),
-        });
+        const client = getApiClient(chainId);
         pools = await getSlipStreamPools(client, chainId, blockNumber);
       });
 
@@ -127,12 +122,7 @@ describe('SlipStream Pool Tests', function () {
       const invalidChainId = 999999 as unknown as ApertureSupportedChainId;
       const validChainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
 
-      // Use Alchemy endpoint via getRpcEndpoint for better reliability
-      const rpcUrl = getRpcEndpoint(validChainId);
-      const client = createPublicClient({
-        chain: getChainInfo(validChainId).chain,
-        transport: http(rpcUrl),
-      });
+      const client = getApiClient(validChainId);
 
       try {
         await getSlipStreamPools(client, invalidChainId);
