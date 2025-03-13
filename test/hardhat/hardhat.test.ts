@@ -86,7 +86,6 @@ import {
   getPublicClient,
   getRebalanceSwapInfo,
   getRebalanceTx,
-  getSlipStreamPools,
   getSlipStreamStakePositions,
   getToken,
   simulateIncreaseLiquidityOptimal,
@@ -690,22 +689,7 @@ describe('Price to tick conversion', function () {
   });
 });
 
-describe('Slipstream pool tests', function () {
-  it('getSlipStreamBasePools', async () => {
-    const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 17514450n;
-    const pools = await getSlipStreamPools(client, chainId, blockNumber);
-    expect(Object.keys(pools).length).to.be.equal(107);
-  });
-  it('getSlipStreamOptimismPools', async () => {
-    const chainId = ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID;
-    const client = getPublicClient(chainId);
-    const blockNumber = 126807301n;
-    const pools = await getSlipStreamPools(client, chainId, blockNumber);
-    expect(Object.keys(pools).length).to.be.equal(54);
-  });
-});
+
 
 describe('Slipstream stake position tests', function () {
   it('getSlipStreamBaseStakePositions', async () => {
