@@ -577,7 +577,6 @@ export async function rebalanceBackend(
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
     try {
-      // Pass errors without (try-)catch, because failing to estimate gas will fail to reimburse relayer for gas.
       const [gasPriceInWei, gasUnits] = await Promise.all([
         publicClient.getGasPrice(),
         estimateRebalanceGas(
@@ -633,6 +632,7 @@ export async function rebalanceBackend(
         },
       );
 
+      // Throw errors, because failing to estimate gas will fail to reimburse relayer for gas.
       throw e;
     }
   };
