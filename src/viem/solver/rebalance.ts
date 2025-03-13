@@ -37,6 +37,7 @@ import {
   getOptimalSwapAmountV3,
   getSwapPath,
   getSwapRoute,
+  isOptimismLikeChain,
 } from './internal';
 import { SolverResult, SwapRoute } from './types';
 
@@ -591,13 +592,7 @@ export async function rebalanceBackend(
         blockNumber,
       ),
     ]);
-    if (
-      ![
-        ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
-        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-        ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
-      ].includes(chainId)
-    ) {
+    if (!isOptimismLikeChain(chainId)) {
       return {
         gasUnits,
         gasInRawNative: gasPriceInWei * gasUnits,
@@ -654,8 +649,10 @@ export async function rebalanceBackend(
           slippage,
           poolAmountIn: swapAmountIn,
           zeroForOne,
+          client: publicClient,
         }));
       }
+
       ({ gasUnits, gasInRawNative } = await estimateGasInRawNaive(swapData));
       // Ethereum L1: 25% gas deduction boost.
       // L2s and all other L1s: 50% gas deduction boost.
@@ -722,12 +719,14 @@ export async function rebalanceBackend(
           slippage,
           poolAmountIn: swapAmountIn,
           zeroForOne,
+          client: publicClient,
         }));
       } else {
         // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
         swapData = '0x';
         swapRoute = undefined;
       }
+
       [, liquidity, amount0, amount1] = await simulateRebalance(
         chainId,
         amm,
