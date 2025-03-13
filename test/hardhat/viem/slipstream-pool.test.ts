@@ -7,7 +7,6 @@
  * To run these tests:
  * yarn test:hardhat test/hardhat/viem/slipstream-pool.test.ts
  */
-
 import '@nomicfoundation/hardhat-viem';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import chai from 'chai';

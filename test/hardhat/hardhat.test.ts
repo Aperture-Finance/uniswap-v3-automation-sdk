@@ -689,8 +689,6 @@ describe('Price to tick conversion', function () {
   });
 });
 
-
-
 describe('Slipstream stake position tests', function () {
   it('getSlipStreamBaseStakePositions', async () => {
     const chainId = ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID;
