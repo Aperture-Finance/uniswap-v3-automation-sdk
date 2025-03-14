@@ -83,18 +83,21 @@ export async function fetchQuoteToNativeCurrency(
   chainId: ApertureSupportedChainId,
   tokenAddress: string,
   nativeCurrencyExactOutRawAmount: bigint,
-): Promise<string> {
+): Promise<{ fromAmount: string; toAmount: string }> {
   const wrappedNativeCurrency = getChainInfo(chainId).wrappedNativeCurrency;
   try {
-    return (
-      await fetchQuoteFromRoutingApi(
-        chainId,
-        tokenAddress,
-        wrappedNativeCurrency.address,
-        nativeCurrencyExactOutRawAmount,
-        'exactOut',
-      )
-    ).quote;
+    return {
+      fromAmount: nativeCurrencyExactOutRawAmount.toString(),
+      toAmount: (
+        await fetchQuoteFromRoutingApi(
+          chainId,
+          tokenAddress,
+          wrappedNativeCurrency.address,
+          nativeCurrencyExactOutRawAmount,
+          'exactOut',
+        )
+      ).quote,
+    };
   } catch (e) {
     console.debug(
       'fail to fetchQuoteToNativeCurrency from routing api, trying to get from okx',
@@ -102,13 +105,11 @@ export async function fetchQuoteToNativeCurrency(
       wrappedNativeCurrency.address,
     );
 
-    return (
-      await getOkxQuote(
-        chainId,
-        tokenAddress,
-        wrappedNativeCurrency.address,
-        nativeCurrencyExactOutRawAmount.toString(),
-      )
-    ).toAmount;
+    return await getOkxQuote(
+      chainId,
+      /* src= */ tokenAddress,
+      /* dst= */ wrappedNativeCurrency.address,
+      nativeCurrencyExactOutRawAmount.toString(),
+    );
   }
 }
