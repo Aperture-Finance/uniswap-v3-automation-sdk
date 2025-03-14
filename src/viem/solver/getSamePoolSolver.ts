@@ -22,8 +22,9 @@ export const getSamePoolSolver = (): ISolver => {
         slippage,
         poolAmountIn,
         zeroForOne,
+        client,
       } = props;
-      const publicClient = getPublicClient(chainId);
+      const publicClient = client ?? getPublicClient(chainId);
       const [toAmount, pool] = await Promise.all([
         getSamePoolToAmount(
           amm,
@@ -76,11 +77,13 @@ export async function getSamePoolToAmount(
   tokenOut: Address,
   feeOrTickSpacing: number,
   amountIn: bigint,
+  client?: PublicClient,
 ): Promise<bigint> {
   try {
     if (amountIn <= 0n) {
       throw new Error('amountIn should greater than 0');
     }
+    const publicClient = client ?? getPublicClient(chainId);
     const { swapRouter } = getAMMInfo(chainId, amm)!;
     const stateOverride = getStateOverride(
       await getERC20Overrides(

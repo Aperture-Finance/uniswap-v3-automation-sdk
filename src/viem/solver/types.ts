@@ -1,6 +1,6 @@
 import { ApertureSupportedChainId } from '@/index';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex } from 'viem';
+import { Address, Hex, PublicClient } from 'viem';
 
 type SelectedProtocol = {
   name: string;
@@ -34,6 +34,7 @@ export interface SolverProps {
   // optional and assume true by default as implemented in automanV1,
   // but set to false in automanV4+ (optimalSwapRouter is merged into automanV4).
   isUseOptimalSwapRouter?: boolean;
+  client?: PublicClient;
 }
 
 export interface ISolver {

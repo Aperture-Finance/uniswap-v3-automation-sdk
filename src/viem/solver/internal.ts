@@ -1,11 +1,12 @@
 import {
+  ApertureSupportedChainId,
   AutomanV4__factory,
   Automan__factory,
   NULL_ADDRESS,
+  computePoolAddress,
   fractionToBig,
   getLogger,
 } from '@/index';
-import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -26,8 +27,7 @@ import {
   getAutomanContract,
   getAutomanV4Contract,
 } from '../automan';
-import { DEFAULT_SOLVERS, SwapPath } from './types';
-import { SolverResult } from './types';
+import { DEFAULT_SOLVERS, SolverResult, SwapPath } from './types';
 
 export const calcPriceImpact = (
   pool: Pool,
@@ -426,3 +426,11 @@ export async function solveExactInput(
           ),
   };
 }
+
+export const isOptimismLikeChain = (chainId: ApertureSupportedChainId) => {
+  return [
+    ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
+    ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+    ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
+  ].includes(chainId);
+};
