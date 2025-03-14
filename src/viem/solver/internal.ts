@@ -43,10 +43,12 @@ export const calcPriceImpact = (
       : new Big(finalAmount1.toString())
           .minus(initAmount1.toString())
           .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
-
-  return exchangePrice.eq(0)
-    ? exchangePrice
-    : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+  return (
+    exchangePrice.eq(0) || currentPoolPrice.eq(0)
+      ? exchangePrice
+      : // Can be positive if the received value exceeds the paid value.
+        new Big(exchangePrice).div(currentPoolPrice).minus(1)
+  ).toString(); // Return as string to be consistent with okx dex aggregator.
 };
 
 export const getSwapPath = (
@@ -332,19 +334,23 @@ export async function solveExactInput(
   slippage: number,
   includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
 ) {
-  let [solver, tokenOutAmount, swapData, swapRoute]: [
+  let [solver, tokenOutAmount, swapData, swapPath, swapRoute, priceImpact]: [
     E_Solver,
     bigint,
     Hex,
+    SwapPath | undefined,
     SwapRoute | undefined,
-  ] = [E_Solver.SamePool, 0n, '0x' as Hex, undefined];
+    string | undefined,
+  ] = [E_Solver.SamePool, 0n, '0x' as Hex, undefined, undefined, undefined];
   if (tokenOut === NULL_ADDRESS || tokenOut === tokenIn || amountIn <= 0n) {
     return {
       solver,
       tokenOutAmount: amountIn,
       swapData,
+      swapPath,
       swapRoute,
       solverResults: [],
+      priceImpact,
     };
   }
   const [token0, token1, zeroForOne] =
@@ -393,11 +399,13 @@ export async function solveExactInput(
   );
   for (const solverResult of solverResults) {
     if (solverResult != null && solverResult.toAmount > tokenOutAmount) {
-      [solver, tokenOutAmount, swapData, swapRoute] = [
+      [solver, tokenOutAmount, swapData, swapPath, swapRoute, priceImpact] = [
         solverResult.solver,
         solverResult.toAmount,
         solverResult.swapData,
+        solverResult.swapPath,
         solverResult.swapRoute,
+        solverResult.priceImpact,
       ];
     }
   }
@@ -405,7 +413,9 @@ export async function solveExactInput(
     solver,
     tokenOutAmount,
     swapData,
+    swapPath,
     swapRoute,
+    priceImpact,
     solverResults:
       solverResults == null
         ? null
