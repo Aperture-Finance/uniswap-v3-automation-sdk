@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfo, getLogger } from '@/index';
 import Big from 'big.js';
 
 import { fetchQuoteToNativeCurrency } from '../routing';
@@ -24,6 +24,14 @@ export async function checkTokenLiquidityAgainstChainNativeCurrency(
     tokenAddress,
     rawNativeCurrencyAmount,
   ).catch(() => undefined);
+
+  getLogger().info('SDK.checkTokenLiquidityAgainstChainNativeCurrency', {
+    chainId,
+    tokenAddress,
+    rawNativeCurrencyAmount,
+    quoteToNativeCurrency,
+  });
+
   if (
     quoteToNativeCurrency == null ||
     quoteToNativeCurrency.fromAmount == null ||

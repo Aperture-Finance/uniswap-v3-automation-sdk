@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/routing.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
@@ -18,6 +19,7 @@ import {
   DEFAULT_SOLVERS,
   E_Solver,
   PositionDetails,
+  checkAutomationSupportForPool,
   checkTokenLiquidityAgainstChainNativeCurrency,
   fetchQuoteFromRoutingApi,
   fetchQuoteFromSpecifiedRoutingApiInfo,
@@ -645,5 +647,43 @@ describe('Viem - Routing tests', function () {
         BNX.address,
       ),
     ).to.not.equal('-1');
+  });
+
+  it('Test automation eligiblity - Base', async function () {
+    const client = getApiClient(ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID);
+
+    const blockNumber = 27564008n;
+
+    console.log(`blockNumber: ${blockNumber}`);
+
+    const cbBTC = await getToken(
+      '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf',
+      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+      client,
+      blockNumber,
+    );
+
+    const USDC = await getToken(
+      '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+      ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+      client,
+      blockNumber,
+    );
+
+    expect(
+      await checkTokenLiquidityAgainstChainNativeCurrency(
+        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+        cbBTC.address,
+      ),
+    ).to.not.equal('-1');
+
+    expect(
+      await checkTokenLiquidityAgainstChainNativeCurrency(
+        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
+        USDC.address,
+      ),
+    ).to.not.equal('-1');
+
+    expect(await checkAutomationSupportForPool(cbBTC, USDC)).to.equal(true);
   });
 });
