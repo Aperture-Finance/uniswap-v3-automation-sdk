@@ -101,11 +101,11 @@ export async function fetchQuoteToNativeCurrency(
     };
   } catch (e) {
     getLogger().warn(
-      'fail to fetchQuoteToNativeCurrency from routing api, try to get from okx instead',
+      'SDK.fetchQuoteToNativeCurrency.fetchQuoteFromRoutingApi.warning',
       {
+        error: (e as Error).message,
         tokenAddress,
         native: wrappedNativeCurrency.address,
-        error: (e as Error).message,
       },
     );
 
