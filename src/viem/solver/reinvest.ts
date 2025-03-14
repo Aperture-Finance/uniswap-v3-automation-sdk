@@ -31,6 +31,7 @@ import {
   getOptimalSwapAmountV3,
   getSwapPath,
   getSwapRoute,
+  isOptimismLikeChain,
 } from './internal';
 import { SolverResult } from './types';
 
@@ -158,13 +159,7 @@ export async function reinvestBackend(
         blockNumber,
       ),
     ]);
-    if (
-      ![
-        ApertureSupportedChainId.OPTIMISM_MAINNET_CHAIN_ID,
-        ApertureSupportedChainId.BASE_MAINNET_CHAIN_ID,
-        ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID,
-      ].includes(chainId)
-    ) {
+    if (!isOptimismLikeChain(chainId)) {
       return {
         gasUnits,
         gasInRawNative: gasPriceInWei * gasUnits,
