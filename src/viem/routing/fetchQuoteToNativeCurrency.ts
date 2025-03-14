@@ -105,6 +105,7 @@ export async function fetchQuoteToNativeCurrency(
       {
         tokenAddress,
         native: wrappedNativeCurrency.address,
+        error: (e as Error).message,
       },
     );
 
