@@ -64,7 +64,7 @@ export interface AmmInfo {
   optimalSwapRouter?: Address;
   // Aperture's Automan contract address.
   apertureAutoman: Address;
-  apertureAutomanV3: Address;
+  apertureAutomanV4: Address;
   // The subgraph URL for the AMM. Currently unset for all AMMs as there are no public, free endpoints.
   subgraph_url?: string;
 }
@@ -110,7 +110,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
       },
@@ -127,7 +127,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
         ),
       },
@@ -163,8 +163,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000Ede6d8D217c60f93191C060747324bca',
         ),
-        apertureAutomanV3: getAddress(
-          '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
+        apertureAutomanV4: getAddress(
+          '0x00000026A498E96660Eb413833e800D8579479D4',
         ),
       },
     },
@@ -199,7 +199,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
       },
@@ -235,7 +235,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000002F4Dd78bA85fE4B662983816c9Ae95F',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000070ee937917c1d9bD91729ce1Dd9A77d8e3',
         ),
       },
@@ -256,7 +256,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000A117EDD4AA34C39f87eFa66A521c590DA1',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x0000003d82D9fb11e644B84195218DfD3aeC3f73',
         ),
       },
@@ -292,7 +292,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000000580f20d53f6d2eC56d12A5Fa75Ac8cF',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x000000E2F3Dd82130669b730Bdf170D12DF35233',
         ),
       },
@@ -309,7 +309,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000EEd287174A06550eabE6A00074255CaB34',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000076a5FEfF94a54834fe1b2803a6Da672e03',
         ),
       },
@@ -345,7 +345,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000EDb4489cB49FE07246f39345c9f838cD',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x000000C51119E2bDE2419C5e6fD273a81B79A8E3',
         ),
       },
@@ -365,8 +365,8 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000C733A397F38271c2Eb4CA56193b769Cb',
         ),
-        apertureAutomanV3: getAddress(
-          '0x000000ca99cf8E1E53B4b7999180Db3e1D032333',
+        apertureAutomanV4: getAddress(
+          '0x0000009a3aC2622C05b52D9B7211F01779540184',
         ),
       },
     },
@@ -402,7 +402,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000035daa51254bEc3dE4FC1Cd277b35705',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000075Cd3dAd5805699d0E1C5734e27B3264e3',
         ),
       },
@@ -438,7 +438,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x0000000004276d0052eFdBA3E65a6f87fd55C5B7',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x000000bf0E089A0991baB3CD0E111213c71a5aD3',
         ),
       },
@@ -475,7 +475,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x00000000c04A561724F4Ea1181cA6E2E74E70FC1',
         ),
-        apertureAutomanV3: getAddress(NULL_ADDRESS),
+        apertureAutomanV4: getAddress(NULL_ADDRESS),
       },
     },
     wrappedNativeCurrency: new Token(
@@ -508,7 +508,7 @@ const CHAIN_ID_TO_INFO: {
         apertureAutoman: getAddress(
           '0x000000001e433b4a86F252B54D2151Aa21ABB1C2',
         ),
-        apertureAutomanV3: getAddress(
+        apertureAutomanV4: getAddress(
           '0x00000027bC53f021F3564180f347425eDAA20883',
         ),
       },

@@ -1,3 +1,4 @@
+// yarn test:hardhat test/hardhat/viem/routing.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
@@ -26,9 +27,8 @@ import {
   getPublicClient,
   getRebalancedPosition,
   getToken,
-  increaseLiquidityOptimal,
-  mintOptimal,
-  mintOptimalV2,
+  increaseLiquidityOptimalV4,
+  mintOptimalV4,
   rebalanceOptimalV2,
 } from '../../../src/viem';
 import {
@@ -44,6 +44,8 @@ import {
 ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
 
 describe('Viem - Routing tests', function () {
+  ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
+
   // rebalanceOptimal is deprecated now, use rebalanceOptimalV2 instead
   it.skip('Test rebalanceOptimal', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
@@ -280,11 +282,12 @@ describe('Viem - Routing tests', function () {
     }
   });
 
-  it('Test increaseLiquidityOptimal with pool', async function () {
+  it('Test increaseLiquidityOptimalV4 with pool', async function () {
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getApiClient(chainId);
-    const blockNumber = 19866218n;
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
 
     const { position, pool } = await PositionDetails.fromPositionId(
       chainId,
@@ -303,8 +306,8 @@ describe('Viem - Routing tests', function () {
       '1000000000000000000',
     );
 
-    const { amount0, amount1, priceImpact, swapPath } =
-      await increaseLiquidityOptimal(
+    const { amount0, amount1, priceImpact, swapPath } = (
+      await increaseLiquidityOptimalV4(
         chainId,
         amm,
         publicClient,
@@ -317,10 +320,11 @@ describe('Viem - Routing tests', function () {
         token0Amount,
         token1Amount,
         eoa,
-        /* usePool= */ true, // don't use 1inch in unit test
-        /* includeSwapInfo= */ true,
+        /* tokenPricesUsd= */ ['60000', '3000'],
+        /* includeSolvers= */ [E_Solver.SamePool], // don't use 1inch in unit test
         blockNumber,
-      );
+      )
+    )[0];
 
     const _total = Number(
       pool.token0Price
@@ -334,13 +338,16 @@ describe('Viem - Routing tests', function () {
 
     expect(_total).to.be.closeTo(total, total * 0.03);
 
-    expect(Number(priceImpact!.toString())).to.be.closeTo(0.2224, 0.01);
+    expect(Number(priceImpact!.toString())).to.be.closeTo(
+      0.36468586252015095,
+      0.01,
+    );
 
     expect(swapPath!.tokenIn).to.equal(pool.token0.address);
     expect(swapPath!.tokenOut).to.equal(pool.token1.address);
   });
 
-  // mintOptimal is deprecated now, use mintOptimalV2 instead
+  // mintOptimal is deprecated now, use mintOptimalV4 instead
   it.skip('Test mintOptimal', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
@@ -411,7 +418,7 @@ describe('Viem - Routing tests', function () {
   });
 
   // can pass when run alone, but fail when run with other tests, skip it currently
-  it.skip('Test mintOptimalV2 in mainnet', async function () {
+  it.skip('Test mintOptimalV4 in mainnet', async function () {
     const tokenId = 4n;
     const chainId = ApertureSupportedChainId.ETHEREUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
@@ -443,7 +450,7 @@ describe('Viem - Routing tests', function () {
     );
     const fee = FeeAmount.MEDIUM;
 
-    const resultV2 = await mintOptimalV2(
+    const resultV2 = await mintOptimalV4(
       chainId,
       amm,
       token0Amount,
@@ -486,7 +493,7 @@ describe('Viem - Routing tests', function () {
     }
   });
 
-  it('Test mintOptimalV2 in arbitrum', async function () {
+  it('Test mintOptimalV4 in arbitrum', async function () {
     const chainId = ApertureSupportedChainId.ARBITRUM_MAINNET_CHAIN_ID;
     const amm = AutomatedMarketMakerEnum.enum.UNISWAP_V3;
     const publicClient = getApiClient(chainId);
@@ -523,7 +530,7 @@ describe('Viem - Routing tests', function () {
       pool.tickCurrent + 10 * pool.tickSpacing,
       pool.tickSpacing,
     );
-    const resultV2 = await mintOptimalV2(
+    const resultV4 = await mintOptimalV4(
       chainId,
       amm,
       token0Amount,
@@ -533,12 +540,13 @@ describe('Viem - Routing tests', function () {
       tickUpper,
       eoa,
       0.1,
+      ['60000', '3000'],
       publicClient,
       DEFAULT_SOLVERS,
       blockNumber,
     );
 
-    expect(resultV2.map((r) => r.solver)).to.be.not.include(E_Solver.PH); // should not include PH
+    expect(resultV4.map((r) => r.solver)).to.be.not.include(E_Solver.PH); // should not include PH
   });
 
   it('Fetch quote swapping 1 ETH for USDC on mainnet', async function () {

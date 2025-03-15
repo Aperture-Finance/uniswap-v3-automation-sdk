@@ -20,7 +20,7 @@ import {
 } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import JSBI from 'jsbi';
-import { Address, PublicClient, TransactionRequest } from 'viem';
+import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import { getNativeCurrency } from '../currency';
 import { getPool } from '../pool';
@@ -117,7 +117,7 @@ export async function getCreatePositionTxForLimitOrder(
 
   return getTxToNonfungiblePositionManager(
     getAMMInfo(chainId, amm)!,
-    calldata,
+    calldata as Hex,
     value,
     recipient,
   );
@@ -167,9 +167,9 @@ export async function getCreatePositionTx(
 
   return getTxToNonfungiblePositionManager(
     getAMMInfo(chainId, amm)!,
-    calldata,
+    calldata as Hex,
     value,
-    options.recipient,
+    options.recipient as Address,
   );
 }
 
@@ -215,7 +215,7 @@ export async function getAddLiquidityTx(
   );
   return getTxToNonfungiblePositionManager(
     getAMMInfo(chainId, amm)!,
-    calldata,
+    calldata as Hex,
     value,
     from,
   );

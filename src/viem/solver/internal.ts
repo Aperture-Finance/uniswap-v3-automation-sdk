@@ -1,10 +1,12 @@
 import {
-  AutomanV3__factory,
+  ApertureSupportedChainId,
+  AutomanV4__factory,
   Automan__factory,
+  NULL_ADDRESS,
+  computePoolAddress,
   fractionToBig,
   getLogger,
 } from '@/index';
-import { ApertureSupportedChainId, computePoolAddress } from '@/index';
 import { Pool, Position } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Token } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -12,20 +14,20 @@ import Big from 'big.js';
 import {
   Address,
   GetContractReturnType,
+  Hex,
   PublicClient,
   WalletClient,
 } from 'viem';
 
-import { E_Solver, SwapRoute } from '.';
+import { E_Solver, SwapRoute, getSolver } from '.';
 import { getPool } from '..';
 import {
   SlipStreamMintParams,
   UniV3MintParams,
   getAutomanContract,
-  getAutomanV3Contract,
+  getAutomanV4Contract,
 } from '../automan';
-import { SwapPath } from './types';
-import { SolverResult } from './types';
+import { DEFAULT_SOLVERS, SolverResult, SwapPath } from './types';
 
 export const calcPriceImpact = (
   pool: Pool,
@@ -41,10 +43,12 @@ export const calcPriceImpact = (
       : new Big(finalAmount1.toString())
           .minus(initAmount1.toString())
           .div(new Big(initAmount0.toString()).minus(finalAmount0.toString()));
-
-  return exchangePrice.eq(0)
-    ? exchangePrice
-    : new Big(exchangePrice).div(currentPoolPrice).minus(1).abs();
+  return (
+    exchangePrice.eq(0) || currentPoolPrice.eq(0)
+      ? exchangePrice
+      : // Can be positive if the received value exceeds the paid value.
+        new Big(exchangePrice).div(currentPoolPrice).minus(1)
+  ).toString(); // Return as string to be consistent with okx dex aggregator.
 };
 
 export const getSwapPath = (
@@ -128,7 +132,7 @@ export const _getOptimalSwapAmount = async (
         PublicClient | WalletClient
       >
     | GetContractReturnType<
-        typeof AutomanV3__factory.abi,
+        typeof AutomanV4__factory.abi,
         PublicClient | WalletClient
       >,
   chainId: ApertureSupportedChainId,
@@ -241,7 +245,7 @@ export const getOptimalSwapAmount = async (
   );
 };
 
-export const getOptimalSwapAmountV3 = async (
+export const getOptimalSwapAmountV4 = async (
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -255,7 +259,7 @@ export const getOptimalSwapAmountV3 = async (
   blockNumber?: bigint,
 ) => {
   return _getOptimalSwapAmount(
-    getAutomanV3Contract,
+    getAutomanV4Contract,
     chainId,
     amm,
     publicClient,
@@ -317,6 +321,110 @@ export function getFeeOrTickSpacingFromMintParams(
     return (mintParams as SlipStreamMintParams).tickSpacing;
   }
   return (mintParams as UniV3MintParams).fee;
+}
+
+export async function solveExactInput(
+  amm: AutomatedMarketMakerEnum,
+  chainId: ApertureSupportedChainId,
+  from: Address,
+  tokenIn: Address,
+  tokenOut: Address,
+  feeOrTickSpacing: number,
+  amountIn: bigint,
+  slippage: number,
+  includeSolvers: E_Solver[] = DEFAULT_SOLVERS,
+) {
+  let [solver, tokenOutAmount, swapData, swapPath, swapRoute, priceImpact]: [
+    E_Solver,
+    bigint,
+    Hex,
+    SwapPath | undefined,
+    SwapRoute | undefined,
+    string | undefined,
+  ] = [E_Solver.SamePool, 0n, '0x' as Hex, undefined, undefined, undefined];
+  if (tokenOut === NULL_ADDRESS || tokenOut === tokenIn || amountIn <= 0n) {
+    return {
+      solver,
+      tokenOutAmount: amountIn,
+      swapData,
+      swapPath,
+      swapRoute,
+      solverResults: [],
+      priceImpact,
+    };
+  }
+  const [token0, token1, zeroForOne] =
+    tokenIn < tokenOut ? [tokenIn, tokenOut, true] : [tokenOut, tokenIn, false];
+  const solverResults = await Promise.all(
+    includeSolvers.map(async (solver) => {
+      try {
+        return {
+          solver,
+          ...(await getSolver(solver).solve({
+            amm,
+            chainId,
+            from,
+            token0,
+            token1,
+            feeOrTickSpacing,
+            tickLower: 0, // Ticks not used in _routerSwapFromTokenInV4.
+            tickUpper: 0,
+            slippage,
+            poolAmountIn: amountIn,
+            zeroForOne,
+            isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
+          })),
+        };
+      } catch (e) {
+        if (!(e as Error)?.message.startsWith('Expected')) {
+          getLogger().error(
+            `SDK.Solver.solveExactInput.tokenIn=${tokenIn}.tokenOut=${tokenOut}.Error`,
+            {
+              solver,
+              error: JSON.stringify((e as Error).message),
+            },
+          );
+        } else {
+          getLogger().warn(
+            `SDK.Solver.solveExactInput.tokenIn=${tokenIn}.tokenOut=${tokenOut}.Warn`,
+            {
+              solver,
+              warn: JSON.stringify((e as Error).message),
+            },
+          );
+        }
+        return null;
+      }
+    }),
+  );
+  for (const solverResult of solverResults) {
+    if (solverResult != null && solverResult.toAmount > tokenOutAmount) {
+      [solver, tokenOutAmount, swapData, swapPath, swapRoute, priceImpact] = [
+        solverResult.solver,
+        solverResult.toAmount,
+        solverResult.swapData,
+        solverResult.swapPath,
+        solverResult.swapRoute,
+        solverResult.priceImpact,
+      ];
+    }
+  }
+  return {
+    solver,
+    tokenOutAmount,
+    swapData,
+    swapPath,
+    swapRoute,
+    priceImpact,
+    solverResults:
+      solverResults == null
+        ? null
+        : solverResults.map((result) =>
+            result == null
+              ? null
+              : { solver: result.solver, toAmount: result.toAmount },
+          ),
+  };
 }
 
 export const isOptimismLikeChain = (chainId: ApertureSupportedChainId) => {
