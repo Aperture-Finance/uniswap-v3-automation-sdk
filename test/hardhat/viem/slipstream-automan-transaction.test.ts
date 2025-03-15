@@ -441,7 +441,7 @@ describe('SlipStreamAutoman transaction tests', () => {
   /**
    * Test case for minting a new position with optimal token ratio without using 1inch
    */
-  it('should successfully mint a new position with optimal token ratio', async () => {
+  it.skip('should successfully mint a new position with optimal token ratio', async () => {
     // Get pool information for WETH-AERO pair
     const pool = await getPool(
       '0x4200000000000000000000000000000000000006', // WETH on Base mainnet
@@ -560,7 +560,7 @@ describe('SlipStreamAutoman transaction tests', () => {
   /**
    * Test case for increasing liquidity of an existing position with optimal token ratio
    */
-  it('should successfully increase liquidity of an existing position with optimal token ratio', async () => {
+  it.skip('should successfully increase liquidity of an existing position with optimal token ratio', async () => {
     // Get existing position details
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,

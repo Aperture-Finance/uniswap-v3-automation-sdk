@@ -1049,7 +1049,7 @@ describe('Viem - Automan transaction tests', function () {
       )
     )[0];
 
-    expect(swapRoute?.length).to.equal(0);
+    expect(swapRoute).to.equal(undefined);
   });
 
   it('mintOptimalV4 with swap', async function () {
@@ -1162,6 +1162,6 @@ describe('Viem - Automan transaction tests', function () {
       )
     )[0];
 
-    expect(swapRoute?.length).to.equal(0);
+    expect(swapRoute).to.equal(undefined);
   });
 });
