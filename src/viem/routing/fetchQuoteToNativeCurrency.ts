@@ -6,7 +6,7 @@ import {
 } from '@/index';
 import axios from 'axios';
 
-import { getOkxQuote } from '../solver';
+import { get1InchQuote, getOkxQuote } from '../solver';
 import {
   RoutingApiQuoteResponse,
   UnifiedRoutingApiClassicQuoteRequestBody,
@@ -100,19 +100,30 @@ export async function fetchQuoteToNativeCurrency(
       ).quote,
     };
   } catch (e) {
-    getLogger().warn(
-      'fail to fetchQuoteToNativeCurrency from routing api, try to get from okx instead',
-      {
-        tokenAddress,
-        native: wrappedNativeCurrency.address,
-      },
-    );
+    getLogger().warn('SDK.fetchQuoteToNativeCurrency.failFetchFromRouting', {
+      message: (e as Error).message,
+      tokenAddress,
+      native: wrappedNativeCurrency.address,
+    });
 
-    return await getOkxQuote(
-      chainId,
-      /* src= */ tokenAddress,
-      /* dst= */ wrappedNativeCurrency.address,
-      nativeCurrencyExactOutRawAmount.toString(),
-    );
+    const disableOKX = true;
+
+    if (disableOKX) {
+      const quote = await get1InchQuote(
+        chainId,
+        wrappedNativeCurrency.address,
+        tokenAddress,
+        nativeCurrencyExactOutRawAmount.toString(),
+      );
+      return quote;
+    } else {
+      // TODO: if we want to use OKX, just switch the src token and dst token and revert previous change in getOkxQuote
+      return await getOkxQuote(
+        chainId,
+        /* src= */ tokenAddress,
+        /* dst= */ wrappedNativeCurrency.address,
+        nativeCurrencyExactOutRawAmount.toString(),
+      );
+    }
   }
 }

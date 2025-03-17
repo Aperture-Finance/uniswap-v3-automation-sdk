@@ -14,7 +14,7 @@ const headers = {
 
 export async function buildRequest(
   chainId: ApertureSupportedChainId,
-  methodName: string,
+  methodName: 'swap' | 'quote' | 'approve/spender',
   params: object,
 ) {
   return limiter.schedule(() =>
@@ -61,7 +61,7 @@ export const get1InchSolver = (): ISolver => {
         throw new Error('Chain or AMM not supported');
       }
 
-      const { toAmount, tx, protocols } = await get1InchQuote(
+      const { toAmount, tx, protocols } = await get1InchSwap(
         chainId,
         zeroForOne ? token0 : token1,
         zeroForOne ? token1 : token0,
@@ -102,7 +102,7 @@ export const get1InchSolver = (): ISolver => {
  * @param from Address of a seller, make sure that this address has approved to spend src in needed amount
  * @param slippage Limit of price slippage you are willing to accept in percentage
  */
-export async function get1InchQuote(
+export async function get1InchSwap(
   chainId: ApertureSupportedChainId,
   src: string,
   dst: string,
@@ -110,7 +110,6 @@ export async function get1InchQuote(
   from: string,
   slippage: number,
   includeProtocols?: boolean,
-  methodName: string = 'swap',
 ): Promise<{
   toAmount: string;
   tx: {
@@ -138,7 +137,34 @@ export async function get1InchQuote(
   };
   try {
     return (
-      await buildRequest(chainId, methodName, new URLSearchParams(swapParams))
+      await buildRequest(chainId, 'swap', new URLSearchParams(swapParams))
+    ).data;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
+
+export async function get1InchQuote(
+  chainId: ApertureSupportedChainId,
+  src: string,
+  dst: string,
+  amount: string,
+): Promise<{
+  fromAmount: string;
+  toAmount: string;
+}> {
+  if (amount === '0') {
+    throw new Error('amount should greater than 0');
+  }
+  const swapParams = {
+    src,
+    dst,
+    amount,
+  };
+  try {
+    return (
+      await buildRequest(chainId, 'quote', new URLSearchParams(swapParams))
     ).data;
   } catch (e) {
     console.error(e);

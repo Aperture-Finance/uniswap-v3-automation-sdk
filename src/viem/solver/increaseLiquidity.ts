@@ -9,7 +9,7 @@ import {
   DEFAULT_SOLVERS,
   E_Solver,
   SwapRoute,
-  get1InchQuote,
+  get1InchSwap,
   getIsOkx,
   getOkxSwap,
   getSolver,
@@ -288,7 +288,7 @@ async function getIncreaseLiquidityOptimalSwapData(
           ammInfo.optimalSwapRouter!,
           slippage,
         )
-      : get1InchQuote(
+      : get1InchSwap(
           chainId,
           zeroForOne
             ? position.pool.token0.address

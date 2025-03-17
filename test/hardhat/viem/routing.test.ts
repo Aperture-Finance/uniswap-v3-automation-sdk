@@ -1,3 +1,6 @@
+/**
+ * yarn test:hardhat test/hardhat/viem/routing.test.ts
+ */
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import '@nomicfoundation/hardhat-viem';
 import { Percent } from '@uniswap/sdk-core';
