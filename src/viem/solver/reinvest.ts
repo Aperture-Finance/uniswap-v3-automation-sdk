@@ -23,7 +23,7 @@ import {
   simulateReinvestV3,
 } from '../automan';
 import { PositionDetails } from '../position';
-import { estimateTotalGasCostForOptimismLikeL2Tx } from '../public_client';
+import { estimateL1GasCost } from '../public_client';
 import {
   buildOptimalSolutions,
   calcPriceImpact,
@@ -159,14 +159,16 @@ export async function reinvestBackend(
         blockNumber,
       ),
     ]);
+
+    const gasInRawNative = gasPriceInWei * gasUnits;
     if (!isOptimismLikeChain(chainId)) {
       return {
         gasUnits,
-        gasInRawNative: gasPriceInWei * gasUnits,
+        gasInRawNative,
       };
     }
     // Optimism-like chains (Optimism, Base, and Scroll) charge additional gas for rollup to L1, so we query the gas oracle contract to estimate the L1 gas cost in addition to the regular L2 gas cost.
-    const estimatedTotalGas = await estimateTotalGasCostForOptimismLikeL2Tx(
+    const estimatedL1GasCost = await estimateL1GasCost(
       {
         from,
         to: getAMMInfo(chainId, amm)!.apertureAutoman,
@@ -180,14 +182,14 @@ export async function reinvestBackend(
       chainId,
       publicClient,
     );
+
+    const totalGasCost = estimatedL1GasCost + gasInRawNative;
     // Scale the estimated gas by 1.5 as L1 gas could be at most 50% higher than the estimated gas.
     // We apply the scaling factor to the L2 gas portion as well because I find the estimated gas price is often lower than the actual price.
     // See https://community.optimism.io/docs/developers/build/transaction-fees/#the-l1-data-fee.
     return {
       gasUnits,
-      gasInRawNative:
-        (estimatedTotalGas.totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) /
-        100n,
+      gasInRawNative: (totalGasCost * BigInt(GAS_LIMIT_L2_MULTIPLIER)) / 100n,
     };
   };
 
