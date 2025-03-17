@@ -1,13 +1,98 @@
-import { ApertureSupportedChainId, PermitInfo, getAMMInfo } from '@/index';
+import {
+  ApertureSupportedChainId,
+  PermitInfo,
+  getAMMInfo,
+  getLogger,
+} from '@/index';
 import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
+import { Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { Address, Hex, TransactionRequest } from 'viem';
+import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import {
   IncreaseLiquidityParams,
   getAutomanReinvestCalldata,
   getAutomanV3ReinvestCalldata,
+  getAutomanV3ReinvestOldCalldata,
 } from '../automan';
+import { getFeeReinvestFeeAmount } from '../automan/getFees';
+import { PositionDetails } from '../position';
+import { getAmountsWithSlippage } from './transaction';
+import { SimulatedAmounts } from './types';
+
+export async function getReinvestV3TxOld(
+  chainId: ApertureSupportedChainId,
+  amm: AutomatedMarketMakerEnum,
+  ownerAddress: Address,
+  positionId: bigint,
+  slippageTolerance: Percent,
+  deadlineEpochSeconds: bigint,
+  client: PublicClient,
+  permitInfo?: PermitInfo,
+): Promise<{
+  tx: TransactionRequest;
+  amounts: SimulatedAmounts;
+}> {
+  const positionDetails = await PositionDetails.fromPositionId(
+    chainId,
+    amm,
+    positionId,
+    client,
+  );
+  const { pool, tickLower, tickUpper, position } = positionDetails;
+  const { apertureAutomanV3 } = getAMMInfo(chainId, amm)!;
+
+  const { token0FeeAmount, token1FeeAmount } =
+    getFeeReinvestFeeAmount(positionDetails);
+  getLogger().info('SDK.getReinvestV3Tx.Fees', {
+    ownerAddress,
+    amm,
+    chainId,
+    positionId,
+    collectableToken0: positionDetails.tokensOwed0.toSignificant(),
+    collectableToken1: positionDetails.tokensOwed1.toSignificant(),
+    positionToken0: position.amount0.toSignificant(),
+    positionToken1: position.amount1.toSignificant(),
+    token0FeeAmount,
+    token1FeeAmount,
+  });
+  const data = getAutomanV3ReinvestOldCalldata(
+    positionId,
+    deadlineEpochSeconds,
+    0n /*amount0Min*/, // Setting this to zero for tx simulation.
+    0n /*amount1Min*/, // Setting this to zero for tx simulation.
+    token0FeeAmount,
+    token1FeeAmount,
+    permitInfo,
+  );
+  const amounts = await getAmountsWithSlippage(
+    pool,
+    tickLower,
+    tickUpper,
+    apertureAutomanV3,
+    ownerAddress,
+    'reinvest',
+    data,
+    slippageTolerance,
+    client,
+  );
+  return {
+    tx: {
+      from: ownerAddress,
+      to: apertureAutomanV3,
+      data: getAutomanV3ReinvestOldCalldata(
+        positionId,
+        deadlineEpochSeconds,
+        BigInt(amounts.amount0Min),
+        BigInt(amounts.amount1Min),
+        token0FeeAmount,
+        token1FeeAmount,
+        permitInfo,
+      ),
+    },
+    amounts,
+  };
+}
 
 /**
  * Generates an unsigned tx that collects fees and reinvests into the specified position.

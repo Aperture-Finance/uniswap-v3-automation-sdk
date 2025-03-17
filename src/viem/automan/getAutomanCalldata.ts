@@ -336,6 +336,48 @@ export function getAutomanReinvestCalldata(
   });
 }
 
+export function getAutomanV3ReinvestOldCalldata(
+  tokenId: bigint,
+  deadline: bigint,
+  amount0Min = BigInt(0),
+  amount1Min = BigInt(0),
+  token0FeeAmount = BigInt(0),
+  token1FeeAmount = BigInt(0),
+  permitInfo?: PermitInfo,
+  swapData: Hex = '0x',
+): Hex {
+  const params: IncreaseLiquidityParams = {
+    tokenId,
+    amount0Desired: BigInt(0), // Param value ignored by Automan.
+    amount1Desired: BigInt(0), // Param value ignored by Automan.
+    amount0Min,
+    amount1Min,
+    deadline,
+  };
+  if (permitInfo === undefined) {
+    return encodeFunctionData({
+      abi: AutomanV3__factory.abi,
+      args: [params, token0FeeAmount, token1FeeAmount, swapData] as const,
+      functionName: 'reinvest',
+    });
+  }
+  const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
+  return encodeFunctionData({
+    abi: AutomanV3__factory.abi,
+    args: [
+      params,
+      token0FeeAmount,
+      token1FeeAmount,
+      swapData,
+      BigInt(permitInfo.deadline),
+      Number(v),
+      r,
+      s,
+    ] as const,
+    functionName: 'reinvest',
+  });
+}
+
 export function getAutomanV3ReinvestCalldata(
   increaseLiquidityParams: IncreaseLiquidityParams,
   token0FeeAmount = BigInt(0),
