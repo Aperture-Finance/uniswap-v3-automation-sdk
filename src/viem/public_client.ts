@@ -1,4 +1,4 @@
-import { ApertureSupportedChainId, getChainInfo } from '@/index';
+import { ApertureSupportedChainId, getChainInfo, getLogger } from '@/index';
 import { providers } from 'ethers';
 import {
   PublicClient,
@@ -122,6 +122,9 @@ export async function estimateTotalGasCostForOptimismLikeL2Tx(
     }),
     client.getGasPrice(),
     client.estimateGas({
+      /** ISSUE: sometimes might got out of gas error for rebalance, https://dashboard.tenderly.co/shared/simulation/f4009def-59e4-4fca-bd28-737bc9a27b8b
+       * Guessing might relate to overrides
+       * */
       ...tx,
       account: tx.from,
     }),
@@ -133,6 +136,54 @@ export async function estimateTotalGasCostForOptimismLikeL2Tx(
     l2GasAmount,
   };
 }
+
+export const estimateL1GasCost = async (
+  tx: TransactionRequest,
+  chainId: ApertureSupportedChainId,
+  client: PublicClient,
+) => {
+  try {
+    // The following three chains are known to be supported:
+    // 1. SCROLL_MAINNET_CHAIN_ID (534352);
+    // 2. OPTIMISM_MAINNET_CHAIN_ID (10);
+    // 3. BASE_MAINNET_CHAIN_ID (8453).
+    const ovmGasPriceOracleAddress =
+      chainId === ApertureSupportedChainId.SCROLL_MAINNET_CHAIN_ID
+        ? '0x5300000000000000000000000000000000000002'
+        : '0x420000000000000000000000000000000000000F';
+
+    const serializableTx: TransactionSerializable = {
+      data: tx.data,
+      to: tx.to,
+      value: tx.value,
+      type: 'legacy',
+      nonce: await getNonceForTx(client, tx),
+    };
+
+    const l1GasCost = await client.readContract({
+      address: ovmGasPriceOracleAddress,
+      abi: [
+        {
+          inputs: [{ internalType: 'bytes', name: '_data', type: 'bytes' }],
+          name: 'getL1Fee',
+          outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+          stateMutability: 'view',
+          type: 'function',
+        },
+      ],
+      functionName: 'getL1Fee',
+      args: [serializeTransaction(serializableTx)],
+    });
+
+    return l1GasCost;
+  } catch (e) {
+    getLogger().error('SDK.estimateL1GasCost.Error', {
+      detail: (e as Error).message,
+    });
+
+    throw e;
+  }
+};
 
 const getNonceForTx = async (
   client: PublicClient,
