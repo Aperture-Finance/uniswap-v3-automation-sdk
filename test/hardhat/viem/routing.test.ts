@@ -631,7 +631,7 @@ describe('Viem - Routing tests', function () {
     // expect(await checkAutomationSupportForPool(SHIBe, WAVAX)).to.equal(true);
   });
 
-  it.only('Test automation eligiblity - BSC', async function () {
+  it('Test automation eligiblity - BSC', async function () {
     const client = getPublicClient(
       ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID,
     );
