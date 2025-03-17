@@ -100,13 +100,11 @@ export async function fetchQuoteToNativeCurrency(
       ).quote,
     };
   } catch (e) {
-    getLogger().warn(
-      'fail to fetchQuoteToNativeCurrency from routing api, try to get from okx instead',
-      {
-        tokenAddress,
-        native: wrappedNativeCurrency.address,
-      },
-    );
+    getLogger().warn('SDK.fetchQuoteToNativeCurrency.failFetchFromRouting', {
+      message: (e as Error).message,
+      tokenAddress,
+      native: wrappedNativeCurrency.address,
+    });
 
     const disableOKX = true;
 
