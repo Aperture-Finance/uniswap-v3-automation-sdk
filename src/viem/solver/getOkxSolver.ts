@@ -154,7 +154,10 @@ export async function getOkxSwap(
       tx: swapData[0].tx,
     };
   } catch (e) {
-    console.error(e);
+    getLogger().warn('SDK.getOkxSwap.Error', {
+      detail: (e as Error).message,
+    });
+
     throw e;
   }
 }
