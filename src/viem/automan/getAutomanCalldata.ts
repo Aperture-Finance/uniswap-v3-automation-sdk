@@ -336,13 +336,12 @@ export function getAutomanReinvestCalldata(
   });
 }
 
-export function getAutomanV3ReinvestOldCalldata(
+export function getAutomanReinvestNoNeedSwapCalldata(
   tokenId: bigint,
   deadline: bigint,
   amount0Min = BigInt(0),
   amount1Min = BigInt(0),
-  token0FeeAmount = BigInt(0),
-  token1FeeAmount = BigInt(0),
+  feeBips = BigInt(0),
   permitInfo?: PermitInfo,
   swapData: Hex = '0x',
 ): Hex {
@@ -356,18 +355,17 @@ export function getAutomanV3ReinvestOldCalldata(
   };
   if (permitInfo === undefined) {
     return encodeFunctionData({
-      abi: AutomanV3__factory.abi,
-      args: [params, token0FeeAmount, token1FeeAmount, swapData] as const,
+      abi: Automan__factory.abi,
+      args: [params, feeBips, swapData] as const,
       functionName: 'reinvest',
     });
   }
   const { v, r, s } = hexToSignature(permitInfo.signature as Hex);
   return encodeFunctionData({
-    abi: AutomanV3__factory.abi,
+    abi: Automan__factory.abi,
     args: [
       params,
-      token0FeeAmount,
-      token1FeeAmount,
+      feeBips,
       swapData,
       BigInt(permitInfo.deadline),
       Number(v),
