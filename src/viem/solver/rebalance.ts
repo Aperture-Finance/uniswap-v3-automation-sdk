@@ -670,6 +670,7 @@ export async function rebalanceBackend(
       }
 
       ({ gasUnits, gasInRawNative } = await estimateGasInRawNaive(swapData));
+
       getLogger().info('SDK.rebalanceBackend.round1.gas', {
         solver,
         gasUnits,
