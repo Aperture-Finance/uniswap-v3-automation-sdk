@@ -9,7 +9,7 @@ import {
   E_Solver,
   SolverResult,
   SwapRoute,
-  get1InchQuote,
+  get1InchSwap,
   getIsOkx,
   getOkxSwap,
   getSolver,
@@ -291,7 +291,7 @@ async function getMintOptimalSwapData(
           ammInfo.optimalSwapRouter!,
           slippage,
         )
-      : get1InchQuote(
+      : get1InchSwap(
           chainId,
           zeroForOne ? mintParams.token0 : mintParams.token1,
           zeroForOne ? mintParams.token1 : mintParams.token0,
