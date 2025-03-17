@@ -150,7 +150,10 @@ export async function get1InchQuote(
   src: string,
   dst: string,
   amount: string,
-) {
+): Promise<{
+  fromAmount: string;
+  toAmount: string;
+}> {
   if (amount === '0') {
     throw new Error('amount should greater than 0');
   }

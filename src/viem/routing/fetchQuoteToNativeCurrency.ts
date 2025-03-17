@@ -6,7 +6,7 @@ import {
 } from '@/index';
 import axios from 'axios';
 
-import { getOkxQuote } from '../solver';
+import { get1InchQuote, getOkxQuote } from '../solver';
 import {
   RoutingApiQuoteResponse,
   UnifiedRoutingApiClassicQuoteRequestBody,
@@ -108,11 +108,24 @@ export async function fetchQuoteToNativeCurrency(
       },
     );
 
-    return await getOkxQuote(
-      chainId,
-      /* src= */ tokenAddress,
-      /* dst= */ wrappedNativeCurrency.address,
-      nativeCurrencyExactOutRawAmount.toString(),
-    );
+    const disableOKX = true;
+
+    if (disableOKX) {
+      const quote = await get1InchQuote(
+        chainId,
+        tokenAddress,
+        wrappedNativeCurrency.address,
+        nativeCurrencyExactOutRawAmount.toString(),
+      );
+
+      return quote;
+    } else {
+      return await getOkxQuote(
+        chainId,
+        /* src= */ tokenAddress,
+        /* dst= */ wrappedNativeCurrency.address,
+        nativeCurrencyExactOutRawAmount.toString(),
+      );
+    }
   }
 }
