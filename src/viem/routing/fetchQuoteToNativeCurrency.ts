@@ -113,13 +113,13 @@ export async function fetchQuoteToNativeCurrency(
     if (disableOKX) {
       const quote = await get1InchQuote(
         chainId,
-        tokenAddress,
         wrappedNativeCurrency.address,
+        tokenAddress,
         nativeCurrencyExactOutRawAmount.toString(),
       );
-
       return quote;
     } else {
+      // TODO: if we want to use OKX, just switch the src token and dst token and revert previous change in getOkxQuote
       return await getOkxQuote(
         chainId,
         /* src= */ tokenAddress,
