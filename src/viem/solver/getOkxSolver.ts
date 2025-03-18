@@ -194,7 +194,10 @@ export async function getOkxSwap(
       priceImpact: swapData[0].routerResult.priceImpactPercentage,
     };
   } catch (e) {
-    console.error(e);
+    getLogger().warn('SDK.getOkxSwap.Error', {
+      detail: (e as Error).message,
+    });
+
     throw e;
   }
 }
