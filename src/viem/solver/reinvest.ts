@@ -16,24 +16,21 @@ import {
   IncreaseLiquidityParams,
   MAX_FEE_PIPS,
   estimateReinvestGas,
-  estimateReinvestV3Gas,
+  estimateReinvestV4Gas,
   getAutomanReinvestCalldata,
   getFeeReinvestRatio,
   simulateReinvest,
-  simulateReinvestV3,
+  simulateReinvestV4,
 } from '../automan';
 import { PositionDetails } from '../position';
 import { estimateL1GasCost } from '../public_client';
 import {
   buildOptimalSolutions,
-  calcPriceImpact,
   getOptimalSwapAmount,
-  getOptimalSwapAmountV3,
-  getSwapPath,
-  getSwapRoute,
+  getOptimalSwapAmountV4,
   isOptimismLikeChain,
 } from './internal';
-import { SolverResult } from './types';
+import { SolverResult, SwapPath } from './types';
 
 // Used for backend.
 export async function reinvestBackend(
@@ -127,20 +124,21 @@ export async function reinvestBackend(
     amm,
     chainId,
     tokenId,
-    reinvestFeeUsd: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
     nativeToUsd,
-    token0FeeAmount,
-    token1FeeAmount,
+    includeSolvers,
     amount0Desired: increaseLiquidityParams.amount0Desired,
     amount1Desired: increaseLiquidityParams.amount1Desired,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after apertureFees, but before gasReimbursementFees
+    token0FeeAmount,
+    token1FeeAmount,
     positionUsd: positionUsd.toString(), // without feesCollected of the position
     positionRawNative: positionRawNative.toString(), // without feesCollected of the position
     feeBips,
+    feeUSD: feeUSD.toFixed(),
   });
 
   const estimateGasInRawNaive = async (swapData: Hex) => {
@@ -194,8 +192,12 @@ export async function reinvestBackend(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
@@ -207,7 +209,9 @@ export async function reinvestBackend(
         Number(increaseOptions.slippageTolerance.numerator) /
         Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -260,24 +264,26 @@ export async function reinvestBackend(
             .mul(tokenPricesUsd[1]),
         );
 
-      getLogger().info('SDK.reinvestBackend.round2.fees ', {
-        solver,
+      getLogger().info('SDK.Solver.reinvestBackend.round2.fees ', {
         amm,
         chainId,
         tokenId,
-        feeUSD: feeUSD.toString(),
+        solver,
+        gasUnits,
+        gasInRawNative,
+        gasDeductionPips, // just gasReimbursementFees
+        feeBips, // just apertureFees
+        totalFeePips,
         token0FeeAmount,
         token1FeeAmount,
         swapAmountIn, // after fees (both apertureFees and gasReimbursementFees)
-        aptrFeeBips: feeBips,
-        gasUnits,
-        gasInRawNative,
-        gasDeductionPips,
-        totalFeePips,
+        feeUSD: feeUSD.toFixed(),
       });
 
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -291,9 +297,13 @@ export async function reinvestBackend(
           zeroForOne,
         }));
       } else {
-        // Clear prior swapData and swapRoute if no swapAmountIn after accounting for gas reimbursements.
-        swapData = '0x';
-        swapRoute = undefined;
+        // Clear prior swap info if no swapAmountIn after accounting for gas reimbursements.
+        [swapData, swapPath, swapRoute, priceImpact] = [
+          '0x',
+          undefined,
+          undefined,
+          undefined,
+        ];
       }
       // Check fees offline to save a simulation request, because AutomanV1 will otherwise revert.
       if (token0FeeAmount > increaseLiquidityParams.amount0Desired) {
@@ -318,58 +328,33 @@ export async function reinvestBackend(
         blockNumber,
       );
 
-      const amount0OutAfterSlippage =
-        (amount0 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
-      const amount1OutAfterSlippage =
-        (amount1 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
-
       return {
         solver,
-        amount0: amount0OutAfterSlippage,
-        amount1: amount1OutAfterSlippage,
+        amount0,
+        amount1,
         liquidity,
-        swapData,
         gasUnits,
         gasFeeEstimation: gasInRawNative,
-        swapRoute: getSwapRoute(
-          token0.address as Address,
-          token1.address as Address,
-          amount0 - increaseLiquidityParams.amount0Desired,
-          swapRoute,
-        ),
-        swapPath: getSwapPath(
-          token0.address as Address,
-          token1.address as Address,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-          slippage,
-        ),
-        feeUSD: feeUSD.toFixed(),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-        ),
-        feeBips: totalFeePips,
         token0FeeAmount,
         token1FeeAmount,
+        feeUSD: feeUSD.toFixed(),
+        feeBips: totalFeePips,
+        swapData,
+        swapPath,
+        swapRoute,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.reinvest.Error', {
+        getLogger().error('SDK.Solver.reinvestBackend.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.reinvest.Warning', solver);
+        getLogger().warn('SDK.Solver.reinvestBackend.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }
@@ -379,7 +364,7 @@ export async function reinvestBackend(
 }
 
 // Used for frontend.
-export async function reinvestV3(
+export async function reinvestV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -409,7 +394,7 @@ export async function reinvestV3(
 
   // Subtract fees from poolAmountIn before passing to solver
   // to prevent ERC20 Error: transfer amount exceeds balance.
-  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV3(
+  const { poolAmountIn, zeroForOne } = await getOptimalSwapAmountV4(
     chainId,
     amm,
     publicClient,
@@ -449,27 +434,28 @@ export async function reinvestV3(
         .mul(tokenPricesUsd[1]),
     );
 
-  getLogger().info('SDK.reinvestV3.fees ', {
+  getLogger().info('SDK.reinvestV4.fees ', {
     amm,
     chainId,
     tokenId,
-    feeUSD: feeUSD.toString(),
     token0PricesUsd: tokenPricesUsd[0],
     token1PricesUsd: tokenPricesUsd[1],
-    token0FeeAmount,
-    token1FeeAmount,
+    includeSolvers,
     amount0Desired: increaseLiquidityParams.amount0Desired,
     amount1Desired: increaseLiquidityParams.amount1Desired,
     zeroForOne,
     poolAmountIn, // before fees
     swapAmountIn, // after fees
+    token0FeeAmount,
+    token1FeeAmount,
+    feeUSD: feeUSD.toFixed(),
   });
 
   const estimateGas = async (swapData: Hex) => {
     try {
       const [gasPrice, gasAmount] = await Promise.all([
         publicClient.getGasPrice(),
-        estimateReinvestV3Gas(
+        estimateReinvestV4Gas(
           chainId,
           amm,
           publicClient,
@@ -482,9 +468,9 @@ export async function reinvestV3(
           blockNumber,
         ),
       ]);
-      return gasPrice * gasAmount;
+      return BigInt(gasPrice * gasAmount);
     } catch (e) {
-      getLogger().error('SDK.reinvestV3.EstimateGas.Error', {
+      getLogger().error('SDK.reinvestV4.EstimateGas.Error', {
         error: JSON.stringify((e as Error).message),
         swapData,
         increaseLiquidityParams,
@@ -494,8 +480,12 @@ export async function reinvestV3(
   };
 
   const solve = async (solver: E_Solver) => {
-    let swapData: Hex = '0x';
-    let swapRoute: SwapRoute | undefined = undefined;
+    let [swapData, swapPath, swapRoute, priceImpact]: [
+      Hex,
+      SwapPath | undefined,
+      SwapRoute | undefined,
+      string | undefined,
+    ] = ['0x', undefined, undefined, undefined];
     let liquidity: bigint = 0n;
     let amount0: bigint = 0n;
     let amount1: bigint = 0n;
@@ -506,7 +496,9 @@ export async function reinvestV3(
         Number(increaseOptions.slippageTolerance.numerator) /
         Number(increaseOptions.slippageTolerance.denominator);
       if (swapAmountIn > 0n) {
-        ({ swapData, swapRoute } = await getSolver(solver).solve({
+        ({ swapData, swapPath, swapRoute, priceImpact } = await getSolver(
+          solver,
+        ).solve({
           chainId,
           amm,
           from,
@@ -518,9 +510,10 @@ export async function reinvestV3(
           slippage,
           poolAmountIn: swapAmountIn,
           zeroForOne,
+          isUseOptimalSwapRouter: false, // False because frontend uses the latest automan, which has the optimalSwapRouter merged into it.
         }));
       }
-      [liquidity, amount0, amount1] = await simulateReinvestV3(
+      [liquidity, amount0, amount1] = await simulateReinvestV4(
         chainId,
         amm,
         publicClient,
@@ -533,56 +526,32 @@ export async function reinvestV3(
         blockNumber,
       );
       gasFeeEstimation = await estimateGas(swapData);
-      const amount0OutAfterSlippage =
-        (amount0 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
-      const amount1OutAfterSlippage =
-        (amount1 *
-          BigInt(increaseOptions.slippageTolerance.numerator.toString())) /
-        BigInt(increaseOptions.slippageTolerance.denominator.toString());
 
       return {
         solver,
-        amount0: amount0OutAfterSlippage,
-        amount1: amount1OutAfterSlippage,
+        amount0,
+        amount1,
         liquidity,
-        swapData,
         gasFeeEstimation,
-        swapRoute: getSwapRoute(
-          token0.address as Address,
-          token1.address as Address,
-          amount0 - increaseLiquidityParams.amount0Desired,
-          swapRoute,
-        ),
-        swapPath: getSwapPath(
-          token0.address as Address,
-          token1.address as Address,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-          slippage,
-        ),
         feeUSD: feeUSD.toFixed(),
-        priceImpact: calcPriceImpact(
-          positionDetails.pool,
-          increaseLiquidityParams.amount0Desired,
-          increaseLiquidityParams.amount1Desired,
-          amount0,
-          amount1,
-        ),
         token0FeeAmount,
         token1FeeAmount,
+        swapData,
+        swapPath,
+        swapRoute,
+        priceImpact,
       } as SolverResult;
     } catch (e) {
       if (!(e as Error)?.message.startsWith('Expected')) {
-        getLogger().error('SDK.Solver.reinvestV3.Error', {
+        getLogger().error('SDK.Solver.reinvestV4.Error', {
           solver,
           error: JSON.stringify((e as Error).message),
         });
       } else {
-        console.warn('SDK.Solver.reinvestV3.Warning', solver);
+        getLogger().warn('SDK.Solver.reinvestV4.Warn', {
+          solver,
+          warn: JSON.stringify((e as Error).message),
+        });
       }
       return null;
     }

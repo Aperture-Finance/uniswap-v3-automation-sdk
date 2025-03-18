@@ -5,7 +5,7 @@ import {
   RemoveLiquidityOptions,
 } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
-import { PublicClient, TransactionRequest } from 'viem';
+import { Address, Hex, PublicClient, TransactionRequest } from 'viem';
 
 import { PositionDetails, viewCollectableTokenAmounts } from '../position';
 import {
@@ -26,7 +26,7 @@ import {
  */
 export async function getRemoveLiquidityTx(
   removeLiquidityOptions: Omit<RemoveLiquidityOptions, 'collectOptions'>,
-  recipient: string,
+  recipient: Address,
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   client: PublicClient,
@@ -77,7 +77,7 @@ export async function getRemoveLiquidityTx(
 
   return getTxToNonfungiblePositionManager(
     getAMMInfo(chainId, amm)!,
-    calldata,
+    calldata as Hex,
     value,
     recipient,
   );

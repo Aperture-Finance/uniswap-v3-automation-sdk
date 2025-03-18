@@ -4,7 +4,7 @@ import {
   PositionDetails,
   SolverResult,
   reinvestBackend,
-  reinvestV3,
+  reinvestV4,
 } from '@/viem';
 import { IncreaseOptions } from '@aperture_finance/uniswap-v3-sdk';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -63,7 +63,7 @@ export async function getReinvestSwapInfoBackend(
  * @param includeSolvers Optional. The solvers to include in the quote. If not provided, all solvers will be included.
  * @param blockNumber Optional. The block number to simulate the call from.
  */
-export async function getReinvestSwapInfoV3(
+export async function getReinvestSwapInfoV4(
   chainId: ApertureSupportedChainId,
   amm: AutomatedMarketMakerEnum,
   publicClient: PublicClient,
@@ -84,7 +84,7 @@ export async function getReinvestSwapInfoV3(
     );
   }
 
-  return reinvestV3(
+  return reinvestV4(
     chainId,
     amm,
     publicClient,

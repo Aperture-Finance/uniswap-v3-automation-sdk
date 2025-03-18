@@ -4,6 +4,7 @@ import { Address, Hex } from 'viem';
 
 import { encodeOptimalSwapData } from '../automan';
 import { limiter } from './common';
+import { getSwapPath } from './internal';
 import { ISolver } from './types';
 import { SwapRoute } from './types';
 
@@ -58,32 +59,44 @@ export const getOkxSolver = (): ISolver => {
         slippage,
         poolAmountIn,
         zeroForOne,
+        isUseOptimalSwapRouter,
       } = props;
 
-      const { optimalSwapRouter } = getAMMInfo(chainId, amm)!;
-      if (!optimalSwapRouter) {
+      const { optimalSwapRouter, apertureAutomanV4 } = getAMMInfo(
+        chainId,
+        amm,
+      )!;
+      const from =
+        isUseOptimalSwapRouter == null || isUseOptimalSwapRouter
+          ? optimalSwapRouter
+          : apertureAutomanV4;
+      if (!from) {
         throw new Error('Chain or AMM not supported');
       }
 
-      const { toAmount, tx, protocols } = await getOkxSwap(
-        chainId,
-        zeroForOne ? token0 : token1,
-        zeroForOne ? token1 : token0,
-        poolAmountIn.toString(),
-        optimalSwapRouter,
-        slippage,
-      );
-
-      const approveTarget = await getOkxApproveTarget(
-        chainId,
-        zeroForOne ? token0 : token1,
-        poolAmountIn.toString(),
-      );
+      const [{ toAmount, tx, swapRoute, priceImpact }, approveTarget] =
+        await Promise.all([
+          getOkxSwap(
+            chainId,
+            zeroForOne ? token0 : token1,
+            zeroForOne ? token1 : token0,
+            poolAmountIn.toString(),
+            from,
+            slippage,
+          ),
+          getOkxApproveTarget(
+            chainId,
+            zeroForOne ? token0 : token1,
+            poolAmountIn.toString(),
+          ),
+        ]);
+      const [amount0Init, amount1Init, amount0Final, amount1Final] = zeroForOne
+        ? [poolAmountIn, 0n, 0n, toAmount]
+        : [0n, poolAmountIn, toAmount, 0n];
       return {
-        toAmount: BigInt(toAmount),
+        toAmount,
         swapData: encodeOptimalSwapData(
-          chainId,
-          amm,
+          from,
           token0,
           token1,
           feeOrTickSpacing,
@@ -94,7 +107,17 @@ export const getOkxSolver = (): ISolver => {
           tx.to,
           tx.data,
         ),
-        swapRoute: protocols,
+        swapPath: getSwapPath(
+          token0,
+          token1,
+          /* initToken0Amount= */ amount0Init,
+          /* initToken1Amount= */ amount1Init,
+          /* finalToken0Amount= */ amount0Final,
+          /* finalToken1Amount= */ amount1Final,
+          slippage,
+        ),
+        swapRoute,
+        priceImpact,
       };
     },
   };
@@ -118,7 +141,7 @@ export async function getOkxSwap(
   from: string,
   slippage: number,
 ): Promise<{
-  toAmount: string;
+  toAmount: bigint;
   tx: {
     from: Address;
     to: Address;
@@ -127,7 +150,8 @@ export async function getOkxSwap(
     gas: string;
     gasPrice: string;
   };
-  protocols?: SwapRoute;
+  swapRoute: SwapRoute;
+  priceImpact: string;
 }> {
   if (amount === '0') {
     throw new Error('amount should greater than 0');
@@ -149,9 +173,25 @@ export async function getOkxSwap(
         `Error: No swap route found with swapParams=${JSON.stringify(swapParams)}`,
       );
     }
+    const selectedProtocols: SwapRoute[0][0] = [];
+    for (const dexRouter of swapData[0].routerResult.dexRouterList) {
+      const routerPercent = Number(dexRouter.routerPercent) / 100;
+      for (const subRouter of dexRouter.subRouterList) {
+        for (const protocol of subRouter.dexProtocol) {
+          selectedProtocols.push({
+            name: protocol.dexName,
+            part: Number(protocol.percent) * routerPercent,
+            fromTokenAddress: subRouter.fromToken.tokenContractAddress,
+            toTokenAddress: subRouter.toToken.tokenContractAddress,
+          });
+        }
+      }
+    }
     return {
-      toAmount: swapData[0].routerResult.toTokenAmount,
+      toAmount: BigInt(swapData[0].routerResult.toTokenAmount),
       tx: swapData[0].tx,
+      swapRoute: [[selectedProtocols]],
+      priceImpact: swapData[0].routerResult.priceImpactPercentage,
     };
   } catch (e) {
     getLogger().warn('SDK.getOkxSwap.Error', {

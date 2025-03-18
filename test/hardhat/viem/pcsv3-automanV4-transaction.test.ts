@@ -1,4 +1,4 @@
-// yarn test:hardhat test/hardhat/viem/pcsv3-automan-transaction.test.ts
+// yarn test:hardhat test/hardhat/viem/pcsv3-automanV4-transaction.test.ts
 import { FeeAmount, nearestUsableTick } from '@aperture_finance/uniswap-v3-sdk';
 import { CurrencyAmount, Percent } from '@uniswap/sdk-core';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
@@ -24,8 +24,8 @@ import {
   ConsoleLogger,
   ICommonNonfungiblePositionManager__factory,
   IOCKEY_LOGGER,
-  PCSV3Automan,
-  PCSV3Automan__factory,
+  PCSV3AutomanV4,
+  PCSV3AutomanV4__factory,
   UniV3OptimalSwapRouter__factory,
   getAMMInfo,
   ioc,
@@ -36,19 +36,20 @@ import {
   generateAutoCompoundRequestPayload,
   getBasicPositionInfo,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfo,
-  getIncreaseLiquidityOptimalTx,
-  getMintOptimalSwapInfo,
+  getIncreaseLiquidityOptimalSwapInfoV4,
+  getIncreaseLiquidityOptimalV4Tx,
+  getMintOptimalSwapInfoV4,
+  getMintOptimalV4Tx,
   getMintedPositionIdFromTxReceipt,
   getPool,
-  getRebalanceSwapInfo,
-  getRebalanceTx,
-  getReinvestTx,
+  getRebalanceSwapInfoV4,
+  getRebalanceV4Tx,
+  getReinvestV4Tx,
 } from '../../../src/viem';
 import { expect, hardhatForkProvider, resetFork } from '../common';
 
-// Tests for PCSV3Automan transactions on a forked BNB mainnet.
-describe('Viem - PCSV3Automan transaction tests', function () {
+// Tests for PCSV3AutomanV4 transactions on a forked BNB mainnet.
+describe('Viem - PCSV3AutomanV4 transaction tests', function () {
   const amm = AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3;
   const chainId = ApertureSupportedChainId.BNB_MAINNET_CHAIN_ID;
   const WHALE_ADDRESS = '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3';
@@ -59,8 +60,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
   const WETH_ADDRESS = '0x2170Ed0880ac9A755fd29B2688956BD959F933F8';
   const WBTC_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
 
-  let automanContract: PCSV3Automan;
-  const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
+  let automanV4Contract: PCSV3AutomanV4;
+  const automanV4Address = getAMMInfo(chainId, amm)!.apertureAutomanV4;
   const feeCollector = WHALE_ADDRESS;
   let testClient: TestClient;
   let publicClient: PublicClient;
@@ -81,39 +82,39 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     });
     impersonatedOwnerClient = testClient.extend(walletActions);
 
-    // Deploy Automan.
-    automanContract = await new PCSV3Automan__factory(
+    // Deploy AutomanV4.
+    automanV4Contract = await new PCSV3AutomanV4__factory(
       // TODO: migrate ethers
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(
       getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       /*owner=*/ WHALE_ADDRESS,
     );
-    await automanContract.deployed();
-    await automanContract.setFeeConfig({
+    await automanV4Contract.deployed();
+    await automanV4Contract.setFeeConfig({
       feeCollector,
       // Set the max fee deduction to 50%.
       feeLimitPips: BigInt('500000000000000000'),
     });
-    await automanContract.setControllers([WHALE_ADDRESS], [true]);
+    await automanV4Contract.setControllers([WHALE_ADDRESS], [true]);
     const router = await new UniV3OptimalSwapRouter__factory(
       await ethers.getImpersonatedSigner(WHALE_ADDRESS),
     ).deploy(getAMMInfo(chainId, amm)!.nonfungiblePositionManager);
     await router.deployed();
-    await automanContract.setSwapRouters([router.address], [true]);
+    await automanV4Contract.setAllowlistedRouters([router.address], [true]);
 
-    // Set Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman =
-      automanContract.address as `0x${string}`;
+    // Set AutomanV4 address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 =
+      automanV4Contract.address as `0x${string}`;
     getAMMInfo(chainId, amm)!.optimalSwapRouter =
       router.address as `0x${string}`;
 
-    // Owner of position id 528336 sets Automan as operator.
+    // Owner of position id 528336 sets AutomanV4 as operator.
     const { request } = await publicClient.simulateContract({
       abi: ICommonNonfungiblePositionManager__factory.abi,
       address: getAMMInfo(chainId, amm)!.nonfungiblePositionManager,
       functionName: 'setApprovalForAll',
-      args: [automanContract.address as Address, true] as const,
+      args: [automanV4Contract.address as Address, true] as const,
       account: eoa,
     });
 
@@ -126,8 +127,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
   });
 
   after(() => {
-    // Reset Automan address in CHAIN_ID_TO_INFO.
-    getAMMInfo(chainId, amm)!.apertureAutoman = automanAddress;
+    // Reset AutomanV4 address in CHAIN_ID_TO_INFO.
+    getAMMInfo(chainId, amm)!.apertureAutomanV4 = automanV4Address;
     testClient.stopImpersonatingAccount({
       address: eoa,
     });
@@ -167,7 +168,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     ).liquidity!;
     expect(liquidityBeforeReinvest.toString()).to.equal('17360687214921889114');
 
-    const txRequest = await getReinvestTx(
+    const txRequest = await getReinvestV4Tx(
       chainId,
       amm,
       eoa,
@@ -176,7 +177,8 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         slippageTolerance: new Percent(1, 100),
         deadline: Math.floor(Date.now() / 1000),
       },
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       /* swapData= */ '0x',
       /* amount0Min= */ 0n,
       /* amount1Min= */ 0n,
@@ -210,7 +212,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         slippage: 0.05,
         type: ActionTypeEnum.enum.Reinvest,
       },
-      chainId,
+      chainId: chainId,
       amm: AutomatedMarketMakerEnum.enum.PANCAKESWAP_V3,
       condition: {
         feeToPrincipalRatioThreshold: 0.1,
@@ -230,23 +232,20 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       publicClient,
     );
     const { swapData, liquidity } = (
-      await getRebalanceSwapInfo(
+      await getRebalanceSwapInfoV4(
         chainId,
         amm,
+        publicClient,
         eoa,
-        positionId,
+        existingPosition,
         /* newPositionTickLower= */ 240000,
         /* newPositionTickUpper= */ 300000,
         /* slippageTolerance= */ 0.01,
         /* tokenPricesUsd= */ ['1', '700'], // BSC-USD / WBNB
-        publicClient,
         [E_Solver.SamePool],
-        existingPosition,
-        undefined,
-        false,
       )
     )[0];
-    const { tx: txRequest } = await getRebalanceTx(
+    const { tx: txRequest } = await getRebalanceV4Tx(
       chainId,
       amm,
       eoa,
@@ -258,10 +257,11 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       publicClient,
       swapData,
       liquidity,
-      /* feeBips= */ 0n,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       existingPosition.position,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -293,8 +293,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     });
   });
 
-  // Test deprecated and moved to pcsv3-automanV4-transaction.test.ts.
-  it.skip('Optimal mint without 1inch', async function () {
+  it('Optimal mint without 1inch', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -317,7 +316,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const tickLower = nearestUsableTick(
       pool.tickCurrent - 1000,
@@ -328,7 +327,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       pool.tickSpacing,
     );
     const { swapData, liquidity } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         amm,
         token0Amount,
@@ -338,11 +337,12 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         tickUpper,
         eoa,
         /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['3000', '60000'],
         publicClient,
         [E_Solver.SamePool],
       )
     )[0];
-    const { tx: txRequest } = await getMintOptimal(
+    const { tx: txRequest } = await getMintOptimalV4Tx(
       chainId,
       amm,
       token0Amount,
@@ -357,7 +357,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       swapData,
       liquidity,
     );
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({
@@ -391,8 +391,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
     });
   });
 
-  // Test deprecated and moved to pcsv3-automanV4-transaction.test.ts.
-  it.skip('Increase liquidity optimal without 1inch', async function () {
+  it('Increase liquidity optimal without 1inch', async function () {
     const existingPosition = await PositionDetails.fromPositionId(
       chainId,
       amm,
@@ -414,10 +413,10 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, amm)!.apertureAutoman,
+      getAMMInfo(chainId, amm)!.apertureAutomanV4,
     );
     const { swapData, liquidity } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: Number(positionId),
           slippageTolerance: new Percent(5, 1000),
@@ -428,12 +427,13 @@ describe('Viem - PCSV3Automan transaction tests', function () {
         token0Amount,
         token1Amount,
         eoa,
+        /* tokenPricesUsd= */ ['1', '700'], // BSC-USD / WBNB
         publicClient,
         [E_Solver.SamePool],
         existingPosition.position,
       )
     )[0];
-    const { tx: txRequest } = await getIncreaseLiquidityOptimalTx(
+    const { tx: txRequest } = await getIncreaseLiquidityOptimalV4Tx(
       {
         tokenId: Number(positionId),
         slippageTolerance: new Percent(50, 100),
@@ -450,7 +450,7 @@ describe('Viem - PCSV3Automan transaction tests', function () {
       existingPosition.position,
     );
 
-    // Owner of position id 4 sets Automan as operator.
+    // Owner of position id 4 sets AutomanV4 as operator.
     await testClient.impersonateAccount({ address: eoa });
     const walletClient = testClient.extend(walletActions);
     const txHash = await walletClient.sendTransaction({

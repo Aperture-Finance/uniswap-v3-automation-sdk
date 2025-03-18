@@ -36,7 +36,9 @@ import { mainnet } from 'viem/chains';
 import {
   ActionTypeEnum,
   ApertureSupportedChainId,
+  ConsoleLogger,
   IERC20__factory,
+  IOCKEY_LOGGER,
   MAX_PRICE,
   MIN_PRICE,
   Q192,
@@ -60,6 +62,7 @@ import {
   getTokenPriceListFromCoingeckoWithAddresses,
   getTokenPriceListFromGeckoTerminalWithAddresses,
   humanPriceToClosestTick,
+  ioc,
   normalizeTicks,
   priceToClosestUsableTick,
   priceToSqrtRatioX96,
@@ -77,8 +80,8 @@ import {
   estimateReinvestGas,
   generateAccessList,
   getERC20Overrides,
-  getIncreaseLiquidityOptimalSwapInfo,
-  getMintOptimalSwapInfo,
+  getIncreaseLiquidityOptimalSwapInfoV4,
+  getMintOptimalSwapInfoV4,
   getMintedPositionIdFromTxReceipt,
   getNPM,
   getPool,
@@ -87,8 +90,8 @@ import {
   getRebalanceSwapInfo,
   getRebalanceTx,
   getToken,
-  simulateIncreaseLiquidityOptimal,
-  simulateMintOptimal,
+  simulateIncreaseLiquidityOptimalV4,
+  simulateMintOptimalV4,
   simulateRemoveLiquidity,
 } from '../../src/viem';
 import {
@@ -321,8 +324,9 @@ describe('State overrides tests', function () {
     });
   });
 
-  it('Test simulateMintOptimal', async function () {
-    const blockNumber = 17975698n;
+  it('Test simulateMintOptimalV4', async function () {
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
     const publicClient = getApiClient();
     const token0 = WBTC_ADDRESS;
     const token1 = WETH_ADDRESS;
@@ -358,18 +362,20 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const [, liquidity, amount0, amount1] = await simulateMintOptimal(
+    const [, liquidity, amount0, amount1] = await simulateMintOptimalV4(
       chainId,
       UNIV3_AMM,
       publicClient,
       eoa,
       mintParams,
-      undefined,
+      /* swapData= */ undefined,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       blockNumber,
     );
-    expect(liquidity.toString()).to.equal('716894157038546');
-    expect(amount0.toString()).to.equal('51320357');
-    expect(amount1.toString()).to.equal('8736560293857784398');
+    expect(liquidity.toString()).to.equal('930120410912217');
+    expect(amount0.toString()).to.equal('52799510');
+    expect(amount1.toString()).to.equal('14303795769964736798');
   });
 
   it('Test simulateRemoveLiquidity', async function () {
@@ -399,8 +405,9 @@ describe('State overrides tests', function () {
     expect(amount1.toString()).to.equal('3098315727923109118');
   });
 
-  it('Test simulateIncreaseLiquidityOptimal', async function () {
-    const blockNumber = 17975698n;
+  it('Test simulateIncreaseLiquidityOptimalV4', async function () {
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
     const positionId = 4n;
     const publicClient = getApiClient();
     const amount0Desired = 100000000n;
@@ -421,18 +428,20 @@ describe('State overrides tests', function () {
       deadline: BigInt(Math.floor(Date.now() / 1000 + 60 * 30)),
     };
 
-    const [, amount0, amount1] = await simulateIncreaseLiquidityOptimal(
+    const [, amount0, amount1] = await simulateIncreaseLiquidityOptimalV4(
       chainId,
       UNIV3_AMM,
       publicClient,
       eoa as Address,
       position,
       increaseLiquidityParams,
-      undefined,
+      /* swapData= */ undefined,
+      /* token0FeeAmount= */ 0n,
+      /* token1FeeAmount= */ 0n,
       blockNumber,
     );
-    expect(amount0.toString()).to.equal('61259538');
-    expect(amount1.toString()).to.equal('7156958298534991565');
+    expect(amount0.toString()).to.equal('10317345');
+    expect(amount1.toString()).to.equal('26271362832753520405');
   });
 });
 
@@ -816,9 +825,12 @@ describe('Viem - Automan transaction tests', function () {
   const automanAddress = getAMMInfo(chainId, amm)!.apertureAutoman;
 
   beforeEach(async function () {
+    ioc.registerSingleton(IOCKEY_LOGGER, ConsoleLogger);
     testClient = await hre.viem.getTestClient();
     publicClient = await hre.viem.getPublicClient();
-    await resetFork(testClient);
+    // blockNumber needs to be after automanV4 was deployed.
+    const blockNumber = 21500000n;
+    await resetFork(testClient, blockNumber);
 
     // Without this, Hardhat throws an InvalidInputError saying that WHALE_ADDRESS is an unknown account.
     // Likely a Hardhat bug.
@@ -979,13 +991,15 @@ describe('Viem - Automan transaction tests', function () {
       token0: existingPosition.pool.token0,
       token1: existingPosition.pool.token1,
       fee: existingPosition.pool.fee,
-      liquidity: '13324132541941',
+      liquidity: '12798820775744',
       tickLower: 240000,
       tickUpper: 300000,
     });
   });
 
-  it('Optimal mint no need swap', async function () {
+  // Test case expected to fail when automanV4 not deployed yet
+  // or when hardhat test blockNumber is before automanV4 deployment.
+  it('mintOptimalV4 no need swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1019,7 +1033,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapRoute } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         UNIV3_AMM,
         hypotheticalPosition.amount0,
@@ -1028,16 +1042,17 @@ describe('Viem - Automan transaction tests', function () {
         tickLower,
         tickUpper,
         eoa,
-        0.5,
+        /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
       )
     )[0];
 
-    expect(swapRoute?.length).to.equal(0);
+    expect(swapRoute).to.equal(undefined);
   });
 
-  it('Optimal mint with swap', async function () {
+  it('mintOptimalV4 with swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
       WETH_ADDRESS,
@@ -1070,11 +1085,11 @@ describe('Viem - Automan transaction tests', function () {
       BigInt(token0Amount.quotient.toString()),
       BigInt(token1Amount.quotient.toString()),
       eoa,
-      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutoman,
+      getAMMInfo(chainId, UNIV3_AMM)!.apertureAutomanV4,
     );
 
     const { swapPath, swapRoute } = (
-      await getMintOptimalSwapInfo(
+      await getMintOptimalSwapInfoV4(
         chainId,
         UNIV3_AMM,
         token0Amount,
@@ -1083,7 +1098,8 @@ describe('Viem - Automan transaction tests', function () {
         tickLower,
         tickUpper,
         eoa,
-        0.5,
+        /* slippage= */ 0.5,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
       )
@@ -1093,6 +1109,8 @@ describe('Viem - Automan transaction tests', function () {
     expect(swapPath.tokenOut).to.equal(WETH_ADDRESS);
   });
 
+  // Test case expected to fail when automanV4 not deployed yet
+  // or when hardhat test blockNumber is before automanV4 deployment.
   it('Increase liquidity optimal no need swap', async function () {
     const pool = await getPool(
       WBTC_ADDRESS,
@@ -1126,7 +1144,7 @@ describe('Viem - Automan transaction tests', function () {
     );
 
     const { swapRoute } = (
-      await getIncreaseLiquidityOptimalSwapInfo(
+      await getIncreaseLiquidityOptimalSwapInfoV4(
         {
           tokenId: positionId,
           slippageTolerance: new Percent(5, 1000),
@@ -1137,12 +1155,13 @@ describe('Viem - Automan transaction tests', function () {
         hypotheticalPosition.amount0,
         hypotheticalPosition.amount1,
         eoa as Address,
+        /* tokenPricesUsd= */ ['60000', '3000'],
         publicClient,
         [E_Solver.SamePool],
         hypotheticalPosition,
       )
     )[0];
 
-    expect(swapRoute?.length).to.equal(0);
+    expect(swapRoute).to.equal(undefined);
   });
 });

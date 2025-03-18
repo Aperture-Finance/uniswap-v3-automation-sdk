@@ -7,6 +7,7 @@ import { E_Solver, ISolver } from './types';
 export { getOkxQuote, getOkxSwap } from './getOkxSolver'; // TODO: remove when complete refactor
 export { get1InchSwap, get1InchQuote } from './get1InchSolver';
 
+export * from './decreaseLiquidity';
 export * from './increaseLiquidity';
 export * from './mint';
 export * from './rebalance';
