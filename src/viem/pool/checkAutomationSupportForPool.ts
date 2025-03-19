@@ -1,3 +1,4 @@
+import { getLogger } from '@/index';
 import { Token } from '@uniswap/sdk-core';
 
 import { checkTokenLiquidityAgainstChainNativeCurrency } from '../currency';
@@ -21,5 +22,13 @@ export async function checkAutomationSupportForPool(
       tokenB.address,
     ),
   ]);
+
+  getLogger().info('SDK.checkAutomationSupportForPool', {
+    tokenA: tokenA.address,
+    tokenB: tokenB.address,
+    quoteA,
+    quoteB,
+  });
+
   return quoteA !== '-1' && quoteB !== '-1';
 }

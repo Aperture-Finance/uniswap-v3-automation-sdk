@@ -40,6 +40,7 @@ import {
 } from './internal';
 
 /**
+ * should be deprecated
  * Get the optimal amount of liquidity to mint for a given pool and token amounts.
  * @param chainId The chain ID.
  * @param amm The Automated Market Maker.
