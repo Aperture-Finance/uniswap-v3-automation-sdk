@@ -3,6 +3,7 @@ import {
   AutomanV3__factory,
   Automan__factory,
   getAMMInfo,
+  getLogger,
 } from '@/index';
 import {
   FeeAmount,
@@ -699,31 +700,48 @@ export async function requestRebalance<M extends keyof RpcReturnType>(
   swapData: Hex = '0x',
   blockNumber?: bigint,
 ): Promise<RpcReturnType[M]> {
-  checkTicks(amm, mintParams);
-  const data = getAutomanRebalanceCalldata(
-    amm,
-    mintParams,
-    tokenId,
-    feeBips,
-    swapData,
-    /* permitInfo= */ undefined,
-  );
-  from = getFromAddress(from);
-  const overrides = {
-    ...getNPMApprovalOverrides(chainId, amm, owner),
-    ...getControllerOverrides(chainId, amm, from),
-  };
-  return tryRequestWithOverrides(
-    method,
-    {
+  try {
+    checkTicks(amm, mintParams);
+    const data = getAutomanRebalanceCalldata(
+      amm,
+      mintParams,
+      tokenId,
+      feeBips,
+      swapData,
+      /* permitInfo= */ undefined,
+    );
+    from = getFromAddress(from);
+    const overrides = {
+      ...getNPMApprovalOverrides(chainId, amm, owner),
+      ...getControllerOverrides(chainId, amm, from),
+    };
+    return tryRequestWithOverrides(
+      method,
+      {
+        from,
+        to: getAMMInfo(chainId, amm)!.apertureAutoman,
+        data,
+      },
+      publicClient,
+      overrides,
+      blockNumber,
+    );
+  } catch (e) {
+    console.error('SDK.requestRebalance.Error', e);
+    getLogger().error('SDK.requestRebalance.Error', {
+      error: JSON.stringify((e as Error).message),
+      stack: (e as Error).stack,
+      swapData,
+      mintParams,
+      tokenId,
+      feeBips,
       from,
-      to: getAMMInfo(chainId, amm)!.apertureAutoman,
-      data,
-    },
-    publicClient,
-    overrides,
-    blockNumber,
-  );
+      owner,
+      chainId,
+      amm,
+    });
+    throw e;
+  }
 }
 
 export async function requestRebalanceV3<M extends keyof RpcReturnType>(
