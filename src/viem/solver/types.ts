@@ -46,8 +46,8 @@ export enum E_Solver {
 export const DEFAULT_SOLVERS = [
   E_Solver.SamePool,
   // E_Solver.PH, // PH is deprecating their API.
-  // E_Solver.OKX, // OKX is suspending their API.
-  E_Solver.OneInch,
+  E_Solver.OKX, // OKX relaunched their API.
+  // E_Solver.OneInch,
 ]; // order matters because first one will be select if the liquidities are the same.
 
 export type SwapPath = {
