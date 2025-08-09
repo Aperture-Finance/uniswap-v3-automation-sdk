@@ -9,6 +9,10 @@ export const FEE_REBALANCE_USD = parseFloat(
   // Flat fee for rebalancing.
   process.env.FEE_REBALANCE_USD || '0.15',
 );
+export const FEE_REBALANCE_POSITION_RATIO = parseFloat(
+  // Fees on the entire position's value.
+  process.env.FEE_REBALANCE_POSITION_RATIO || '0.0015',
+);
 export const FEE_REBALANCE_SWAP_RATIO = parseFloat(
   // Fees on the swap amount for rebalancing.
   process.env.FEE_REBALANCE_SWAP_RATIO || '0.0015',

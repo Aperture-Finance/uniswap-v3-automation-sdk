@@ -50,7 +50,6 @@ export async function getToken(
     if (cachedToken) {
       // If we need full token info and cached token has it, return cached
       if (!showSymbolAndName || (cachedToken.symbol && cachedToken.name)) {
-        console.debug('getToken hit cache', tokenAddress);
         return cachedToken;
       }
     }
