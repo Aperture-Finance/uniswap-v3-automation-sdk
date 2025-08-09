@@ -170,7 +170,7 @@ export async function rebalanceOptimalV2(
     const feeUSD = positionUsd
       .mul(FEE_REBALANCE_POSITION_RATIO)
       .add(FEE_REBALANCE_USD);
-    // positionUsd includes feesCollected and so does feeBips
+    // Automan V1 contract deducts fees based on the position's principal token amounts.
     const feeBips = BigInt(
       feeUSD.div(positionPrincipalUsd).mul(MAX_FEE_PIPS).toFixed(0),
     );
