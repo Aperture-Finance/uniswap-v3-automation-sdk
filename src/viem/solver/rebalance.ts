@@ -22,6 +22,7 @@ import {
   simulateRemoveLiquidityV3,
 } from '../automan';
 import {
+  FEE_REBALANCE_POSITION_RATIO,
   FEE_REBALANCE_SWAP_RATIO,
   FEE_REBALANCE_USD,
   MAX_FEE_PIPS,
@@ -135,10 +136,6 @@ export async function rebalanceOptimalV2(
       positionDetails.tokensOwed1,
       tokenPricesUsd,
     );
-    const tokenInPrice = zeroForOne ? tokenPricesUsd[0] : tokenPricesUsd[1];
-    const decimals = zeroForOne
-      ? positionDetails.pool.token0.decimals
-      : positionDetails.pool.token1.decimals;
     const token0Usd = new Big(receive0.toString())
       .mul(tokenPricesUsd[0])
       .div(10 ** positionDetails.token0.decimals);
@@ -163,44 +160,9 @@ export async function rebalanceOptimalV2(
       };
     }
 
-    // swapTokenValue * FEE_REBALANCE_SWAP_RATIO + lpCollectedFees * getFeeReinvestRatio(pool.fee) + FEE_REBALANCE_USD
-    const tokenInSwapFeeAmount = new Big(poolAmountIn.toString()).mul(
-      FEE_REBALANCE_SWAP_RATIO,
-    );
-    const token0SwapFeeAmount = zeroForOne
-      ? tokenInSwapFeeAmount
-      : new Big('0');
-    const token1SwapFeeAmount = zeroForOne
-      ? new Big('0')
-      : tokenInSwapFeeAmount;
-    const token0ReinvestFeeAmount = new Big(
-      positionDetails.tokensOwed0.quotient.toString(),
-    ).mul(getFeeReinvestRatio(positionDetails.fee));
-    const token1ReinvestFeeAmount = new Big(
-      positionDetails.tokensOwed1.quotient.toString(),
-    ).mul(getFeeReinvestRatio(positionDetails.fee));
-    const rebalanceFlatFeePips = new Big(FEE_REBALANCE_USD)
-      .div(positionUsd)
-      .mul(MAX_FEE_PIPS)
-      .toFixed(0);
-    const token0RebalanceFlatFeeAmount = new Big(receive0.toString())
-      .mul(rebalanceFlatFeePips)
-      .div(MAX_FEE_PIPS);
-    const token1RebalanceFlatFeeAmount = new Big(receive1.toString())
-      .mul(rebalanceFlatFeePips)
-      .div(MAX_FEE_PIPS);
-    const token0FeeAmount = token0SwapFeeAmount
-      .add(token0ReinvestFeeAmount)
-      .add(token0RebalanceFlatFeeAmount);
-    const token1FeeAmount = token1SwapFeeAmount
-      .add(token1ReinvestFeeAmount)
-      .add(token1RebalanceFlatFeeAmount);
-
-    const feeUSD = new Big(poolAmountIn.toString())
-      .div(10 ** decimals)
-      .mul(tokenInPrice)
-      .mul(FEE_REBALANCE_SWAP_RATIO)
-      .add(collectableTokenInUsd.mul(getFeeReinvestRatio(positionDetails.fee)))
+    // positionUsd * FEE_REBALANCE_POSITION_RATIO + FEE_REBALANCE_USD.
+    const feeUSD = positionUsd
+      .mul(FEE_REBALANCE_POSITION_RATIO)
       .add(FEE_REBALANCE_USD);
     // positionUsd includes feesCollected and so does feeBips
     const feeBips = BigInt(
@@ -208,28 +170,12 @@ export async function rebalanceOptimalV2(
     );
     getLogger().info('SDK.rebalanceOptimalV2.Fees', {
       feeUSD: feeUSD.toString(),
-      token0FeeAmount: token0FeeAmount.toString(),
-      token1FeeAmount: token1FeeAmount.toString(),
-      feeOnRebalanceSwapUsd: new Big(poolAmountIn.toString())
-        .div(10 ** decimals)
-        .mul(tokenInPrice)
-        .mul(FEE_REBALANCE_SWAP_RATIO)
-        .toString(),
-      tokenInSwapFeeAmount: tokenInSwapFeeAmount.toString(),
-      token0SwapFeeAmount: token0SwapFeeAmount.toString(),
-      token1SwapFeeAmount: token1SwapFeeAmount.toString(),
       feeOnRebalanceReinvestUsd: collectableTokenInUsd
         .mul(getFeeReinvestRatio(positionDetails.fee))
         .toString(),
-      token0ReinvestFeeAmount: token0ReinvestFeeAmount.toString(),
-      token1ReinvestFeeAmount: token1ReinvestFeeAmount.toString(),
-      rebalanceFlatFeePips,
       feeOnRebalanceFlatUsd: FEE_REBALANCE_USD,
-      token0RebalanceFlatFeeAmount: token0RebalanceFlatFeeAmount.toString(),
-      token1RebalanceFlatFeeAmount: token1RebalanceFlatFeeAmount.toString(),
       feeBips,
       poolAmountIn,
-      tokenInPrice,
       collectableTokenInUsd: collectableTokenInUsd.toString(),
       token0Price: tokenPricesUsd[0],
       token1Price: tokenPricesUsd[1],
