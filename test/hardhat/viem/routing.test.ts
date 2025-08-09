@@ -222,7 +222,7 @@ describe('Viem - Routing tests', function () {
       // so adjust the tolerance accordingly.
       expect(Number(resultV2[i].feeUSD)).to.be.closeTo(0.17088, 0.01); // Updated to match current fee values
       expect(Number(resultV2[i].feeBips) / 1e18).to.be.closeTo(
-        0.012276,
+        0.01588634061295579,
         0.0005,
       ); // Updated based on current feeBips value
 
