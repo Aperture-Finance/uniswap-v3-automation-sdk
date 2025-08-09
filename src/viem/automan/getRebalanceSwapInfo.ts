@@ -5,7 +5,6 @@ import {
   SolverResult,
   rebalanceBackend,
   rebalanceOptimalV2,
-  rebalanceV3,
 } from '@/viem';
 import { AutomatedMarketMakerEnum } from 'aperture-lens/dist/src/viem';
 import { Address, PublicClient } from 'viem';
@@ -106,36 +105,6 @@ export async function getRebalanceSwapInfoBackend(
     slippage,
     tokenPricesUsd,
     nativeToUsd,
-    includeSolvers,
-    blockNumber,
-  );
-}
-
-// Same as getRebalanceSwapInfo, except return the fees as token0FeeAmount and token1FeeAmount instead of feeBips
-// Do not use, but implemented to make it easier to migrate to future versions.
-export async function getRebalanceSwapInfoV3(
-  chainId: ApertureSupportedChainId,
-  amm: AutomatedMarketMakerEnum,
-  publicClient: PublicClient,
-  from: Address,
-  positionDetails: PositionDetails,
-  newPositionTickLower: number,
-  newPositionTickUpper: number,
-  slippage: number,
-  tokenPricesUsd: [string, string],
-  includeSolvers?: E_Solver[],
-  blockNumber?: bigint,
-): Promise<SolverResult[]> {
-  return rebalanceV3(
-    chainId,
-    amm,
-    publicClient,
-    from,
-    positionDetails,
-    newPositionTickLower,
-    newPositionTickUpper,
-    slippage,
-    tokenPricesUsd,
     includeSolvers,
     blockNumber,
   );
