@@ -1,6 +1,6 @@
 {
   "name": "@aperture_finance/uniswap-v3-automation-sdk",
-  "version": "3.17.0-dev2",
+  "version": "3.19.0",
   "description": "SDK for Aperture's CLMM automation platform",
   "author": "Aperture Finance <engineering@aperture.finance>",
   "license": "MIT",
